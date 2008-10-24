@@ -1,0 +1,42 @@
+llesca1 versió 0.01
+====================
+
+Aquesta és una prova preliminar del projecte Sméagol que serveix
+com a demostració de com es comença un projecte senzill en Perl,
+com s'instal·la i com es pot verificar que funciona correctament.
+
+INSTAL·LACIÓ
+
+Per instal·lar aquesta prova executeu:
+
+   perl Makefile.PL
+   make
+   make test
+   make install
+
+DEPENDÈNCIES
+
+Aquesta prova depèn d'aquests altres mòduls:
+
+  +---------------------------+----------------------------+
+  | Mòdul                     | Paquet Debian/Ubuntu       |
+  +---------------------------+----------------------------+
+  | DateTime                  | libdatetime-perl           |
+  | DateTime::Span            | libdatetime-set-perl       |
+  | Set::Object               | libset-object-perl         |
+  | Test::More                | perl-modules               |
+  | XML::LibXML               | libxml-libxml-perl         |
+  | XML::Simple               | libxml-simple-perl         |
+  | YAML::Tiny                | libyaml-tiny-perl          |
+  | HTTP::Server::Simple::CGI | libhttp-server-simple-perl |
+  +---------------------------+----------------------------+
+
+COPYRIGHT AND LICENCE
+
+Copyright (C) 2008 by Alex Muntada <alexm@alexm.org>
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.8.8 or,
+at your option, any later version of Perl 5 you may have available.
+
+

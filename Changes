@@ -1,0 +1,6 @@
+Històric de revisions de la llesca1.
+
+0.01  Mon May 12 15:36:46 2008
+	- adaptació del codi original per donar-li forma general de mòdul
+      instal·lable, a la manera habitual de Perl.
+

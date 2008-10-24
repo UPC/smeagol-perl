@@ -1,0 +1,8 @@
+Changes
+Makefile.PL
+MANIFEST
+README
+t/llesca1.t
+lib/Agenda.pm
+lib/Booking.pm
+lib/Resource.pm

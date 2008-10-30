@@ -30,7 +30,7 @@ sub to_xml {
     my $self = shift;
 
     my $xml = "<agenda>";
-    for my $slot (@{ $self->elements }) {
+    for my $slot ( $self->elements ) {
         $xml .= $slot->to_xml();
     }
     $xml .= "</agenda>";

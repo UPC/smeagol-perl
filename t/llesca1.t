@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-use Test::More tests => 19;
+use Test::More tests => 20;
 
 use DateTime;
 
@@ -55,6 +55,10 @@ my $ag = Agenda->new();
 
 $ag->append($b1);
 ok( $ag->contains($b1), 'b1 in ag' );
+
+#to_xml agenda test
+ok($ag->to_xml() eq "<agenda><booking> <from>2008-04-14T17:00:00</from> <to>2008-04-14T18:59:00</to> </booking></agenda>", 'to_xml agenda');#
+
 
 $ag->append($b2);
 ok( $ag->size == 2 && $ag->contains($b2), 'b2 also in ag' );

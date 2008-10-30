@@ -1,6 +1,5 @@
 #!/usr/bin/perl
-
-use Test::More tests => 18;
+use Test::More tests => 19;
 
 use DateTime;
 
@@ -37,7 +36,10 @@ my $b4 = Booking->new(datetime(2008,4,14,15),
 # 16:00 - 16:29
 my $b5 = Booking->new(datetime(2008,4,14,16),
                       datetime(2008,4,14,16,29));
-	
+
+#to_xml booking test
+ok($b1->to_xml() eq "<booking> <from>2008-04-14T17:00:00</from> <to>2008-04-14T18:59:00</to> </booking>", 'to_xml booking'); 	
+
 # Booking Equality Tests
 ok( $b1 != $b2, 'b1 != b2' );
 

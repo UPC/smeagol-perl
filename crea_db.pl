@@ -2,14 +2,12 @@
 
 use warnings;
 use strict;
+
 use Agenda;
 use Booking;
 use Resource;
 
-
-use Data::Dumper;
-use Storable;
-
+use Storable qw(nstore retrieve);
 
 sub datetime {
     my ($year, $month, $day, $hour, $minute) = @_;
@@ -27,7 +25,7 @@ sub datetime {
 my $ag;
 
 if (-e 'foo.db') {
-    $ag = Storable::retrieve('foo.db');
+    $ag = retrieve('foo.db') or die;
     warn $ag->to_xml;
 
 }
@@ -58,8 +56,5 @@ else {
     
 }
 
+nstore($ag, 'foo.db') or die;
 print "bye!\n";
-
-END {
-    Storable::store $ag, 'foo.db';
-}

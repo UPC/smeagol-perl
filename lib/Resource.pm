@@ -4,11 +4,12 @@ use XML::Simple;
 
 sub new {
     my $class = shift;
-    my ($id, $desc) = @_;
+    my ($id, $desc, $gra) = @_;
 
     my $obj = {
         id => $id,
         desc => $desc,
+	gra => $gra,
     };
 
     bless $obj, $class;
@@ -25,7 +26,8 @@ sub from_xml {
     #my $doc = XMLin("<resource><id>aula</id><desc>Aula chachipiruli</desc></resource>");
     my $obj = {
         id => $doc->{id}, 
-        desc => $doc->{description}
+        desc => $doc->{description},
+	gra => $doc->{granularitat}
     };
 
     bless $obj, $class;

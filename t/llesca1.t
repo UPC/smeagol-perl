@@ -81,8 +81,10 @@ my $r = Resource->from_xml(
         <resource>
             <id>25</id>
             <description>aula chachipilongui</description>
+            <granularitat>reserves diaries</granularitat>
         </resource>");
 ok( $r->{id}   eq "25" && 
-    $r->{desc} eq "aula chachipilongui", 
+    $r->{desc} eq "aula chachipilongui" &&
+    $r->{gra}  eq "reserves diaries",
     'resource r created from XML string');
 

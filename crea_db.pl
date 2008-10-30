@@ -8,6 +8,7 @@ use Resource;
 
 
 use Data::Dumper;
+use Storable;
 
 
 sub datetime {
@@ -23,11 +24,12 @@ sub datetime {
 }
 
 
-my $dades;
+my $ag;
 
 if (-e 'foo.db') {
-    $dades = require 'foo.db';
-    warn Dumper $dades;
+    $ag = Storable::retrieve('foo.db');
+    warn $ag->to_xml;
+
 }
 else {
     # Create an agenda
@@ -41,7 +43,7 @@ else {
     my $b3 = Booking->new(datetime(2008,4,14,15),
                       datetime(2008,4,14,17,59));
 
-    my $ag = Agenda->new();
+    $ag = Agenda->new();
 
     $ag->append($b1);
     $ag->append($b2);
@@ -54,20 +56,10 @@ else {
             <description>aula chachipilongui</description>
         </resource>");
     
-
-
-    $dades = {
-        agend => $ag
-    };
 }
 
 print "bye!\n";
 
 END {
-    open my $out, ">", "foo.db" or die;
-    $Data::Dumper::Deepcopy = 1;
-    $Data::Dumper::Maxdepth = 5;
-
-    print $out Dumper($dades);
-    close $out;
+    Storable::store $ag, 'foo.db';
 }

@@ -23,14 +23,25 @@ sub from_xml {
     my $xml = shift;
 
     my $doc = XMLin($xml);
-    #my $doc = XMLin("<resource><id>aula</id><desc>Aula chachipiruli</desc></resource>");
     my $obj = {
         id => $doc->{id}, 
         desc => $doc->{description},
-	gra => $doc->{granularitat}
+	gra => $doc->{granularity}
     };
 
     bless $obj, $class;
+}
+
+sub to_xml {
+    my $self = shift;
+
+    my $xml = "<resource>";
+    $xml .= "<id>" . $self->{id} . "</id>";
+    $xml .= "<description>" . $self->{desc} . "</description>";
+    $xml .= "<granularity>" . $self->{gra} . "</granularity>";
+    $xml = "</resource>";
+
+    return $xml;
 }
 
 

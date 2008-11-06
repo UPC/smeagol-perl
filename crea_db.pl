@@ -52,6 +52,7 @@ else {
         <resource>
             <id>25</id>
             <description>aula chachipilongui</description>
+            <granularity>reserves diaries</granularity>
         </resource>");
     
 }

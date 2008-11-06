@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-use Test::More tests => 20;
+use Test::More tests => 21;
 
 use DateTime;
 
@@ -87,10 +87,14 @@ my $r = Resource->from_xml(
         <resource>
             <id>25</id>
             <description>aula chachipilongui</description>
-            <granularitat>reserves diaries</granularitat>
+            <granularity>reserves diaries</granularity>
         </resource>");
 ok( $r->{id}   eq "25" && 
     $r->{desc} eq "aula chachipilongui" &&
     $r->{gra}  eq "reserves diaries",
     'resource r created from XML string');
 
+# to_xml Resource test
+$r = Resource->new(25, 'aula chachipilongui', 'reserves diaries');
+ok( $r->to_xml() eq "<resource><id>25</id><description>aula chachipilongui</description><granularity>reserves diaries</granularity></resource>",
+    'to_xml resource' );

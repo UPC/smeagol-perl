@@ -39,7 +39,7 @@ sub to_xml {
     $xml .= "<id>" . $self->{id} . "</id>";
     $xml .= "<description>" . $self->{desc} . "</description>";
     $xml .= "<granularity>" . $self->{gra} . "</granularity>";
-    $xml = "</resource>";
+    $xml .= "</resource>";
 
     return $xml;
 }

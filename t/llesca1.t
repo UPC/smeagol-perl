@@ -1,10 +1,11 @@
 #!/usr/bin/perl
-use Test::More tests => 21;
+use Test::More tests => 26;
 
 use DateTime;
 
 use strict;
 use warnings;
+use Data::Dumper;
 
 BEGIN { use_ok($_) for qw(Booking Agenda Resource) };
 
@@ -98,3 +99,11 @@ ok( $r->{id}   eq "25" &&
 $r = Resource->new(25, 'aula chachipilongui', 'reserves diaries');
 ok( $r->to_xml() eq "<resource><id>25</id><description>aula chachipilongui</description><granularity>reserves diaries</granularity></resource>",
     'to_xml resource' );
+
+$r->{ag}->append($b1);
+ok( $r->{ag}->contains($b1), 'b1 in r->ag' );
+ok( !$r->{ag}->contains($b2), 'b2 not in r->ag' );
+ok( $r->to_xml() eq "<resource><id>25</id><description>aula chachipilongui</description><granularity>reserves diaries</granularity><agenda><booking> <from>2008-04-14T17:00:00</from> <to>2008-04-14T18:59:00</to> </booking></agenda></resource>",'to_xml resource with agenda and 1 booking' );
+$r->{ag}->append($b2);
+ok( $r->{ag}->contains($b2), 'b2 in r->ag' ); #25 test
+ok( $r->to_xml() eq "<resource><id>25</id><description>aula chachipilongui</description><granularity>reserves diaries</granularity><agenda><booking> <from>2008-04-14T19:00:00</from> <to>2008-04-14T19:59:00</to> </booking><booking> <from>2008-04-14T17:00:00</from> <to>2008-04-14T18:59:00</to> </booking></agenda></resource>",'to_xml resource with agenda and 2 bookings' );

@@ -32,9 +32,9 @@ sub from_xml {
     my $obj = {
         id => $doc->{id}, 
         desc => $doc->{description},
-	gra => $doc->{granularity}
+        gra => $doc->{granularity},
+        ag => Agenda->new(),
     };
-    $obj->{ag} =  Agenda->new();
 
     bless $obj, $class;
 }
@@ -46,7 +46,8 @@ sub to_xml {
     $xml .= "<id>" . $self->{id} . "</id>";
     $xml .= "<description>" . $self->{desc} . "</description>";
     $xml .= "<granularity>" . $self->{gra} . "</granularity>";
-    $xml .= $self->{ag}->to_xml() unless !defined $self->{ag}->elements();
+    $xml .= $self->{ag}->to_xml()
+        if defined $self->{ag} && defined $self->{ag}->elements();
     $xml .= "</resource>";
     return $xml;
 }

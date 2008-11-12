@@ -7,13 +7,16 @@ sub new {
     my $class = shift;
     my ($id, $desc, $gra) = @_;
 
+    # Load on runtime to get rid of cross-dependency between
+    # both Resoure and Agenda
+    require Agenda;
+
     my $obj = {
         id => $id,
         desc => $desc,
-	gra => $gra,
+        gra => $gra,
+        ag => Agenda->new(),
     };
-
-    $obj->{ag} = Agenda->new();
 
     bless $obj, $class;
 }

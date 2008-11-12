@@ -10,7 +10,6 @@ use Resource;
 use YAML::Tiny;
 
 my %resource_by;
-my $last_id;
 my $cgi;
 
 sub _reply {
@@ -34,28 +33,41 @@ sub _list_resources {
 }
 
 sub _create_resource {
-    my $params = shift;
+    my ($id, @args) = @_;
 
-    my $id = $params->{'id'};
-    $id = ++$last_id
+    $id = $cgi->param('id')
         unless defined $id;
+    my $desc = $cgi->param('desc');
+    my $gra  = $cgi->param('gra');
 
-    my $desc = $params->{'desc'};
-
-    if (exists $resource_by{$id}) {
+    if (defined $id && exists $resource_by{$id}) {
         _reply('403 Forbidden', 'text/plain', "Resource #$id already exists!");
     }
-    elsif (!defined $desc) {
-        _reply('400 Bad Request', 'text/plain', 'Missing description!');
+    elsif (!defined $id && !defined $desc && !defined $gra) {
+        my $resource = Resource->from_xml($cgi->param('POSTDATA'));
+        $resource_by{ $resource->{id} } = $resource;
+        _reply('201 Created', 'text/plain', "Resource #$resource->{id} created");
+    }
+    elsif (defined $id && defined $desc && defined $gra) {
+        my $resource = Resource->new($id, $desc, $gra);
+        $resource_by{ $resource->{id} } = $resource;
+        _reply('201 Created', 'text/plain', "Resource #$id created");
     }
     else {
-        $resource_by{$id} = Resource->new($id, $desc);
-        _reply('201 Created', 'text/plain', "Resource #$id created");
+        _reply('400 Bad Request', 'text/plain', 'Missing description!');
     }
 }
 
 sub _retrieve_resource {
-    _reply_default();
+    my ($id, @args) = @_;
+
+    if (!defined $id || !exists $resource_by{$id}) {
+        _reply('404 Not Found', 'text/plain',
+               "Resource does not exist!");
+    }
+    else {
+        _reply('200 OK', 'text/xml', $resource_by{$id}->to_xml());
+    }
 }
 
 sub _update_resource {
@@ -99,7 +111,7 @@ sub handle_request {
         _list_resources();
     }
     elsif ($main eq 'resource' and exists $crud_for{$method}) {
-        $crud_for{$method}->($cgi->Vars);
+        $crud_for{$method}->($id, @args);
     }
     else {
         # unknown request

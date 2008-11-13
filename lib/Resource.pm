@@ -42,7 +42,7 @@ sub from_xml {
 sub to_xml {
     my $self = shift;
 
-    my $xml = "<?xml-stylesheet type=\"application/html\" href=\"http://devel.cpl.upc.edu/recursos/browser/angel/xml/resource.xsl?rev=84&format=txt\"?>";
+    my $xml = "<?xml-stylesheet type=\"application/xml\" href=\"http://devel.cpl.upc.edu/recursos/export/HEAD/angel/xml/resource.xsl\"?>";
     $xml .= "<resource>";
     $xml .= "<id>" . $self->{id} . "</id>";
     $xml .= "<description>" . $self->{desc} . "</description>";

@@ -61,6 +61,13 @@ sub _create_resource {
 sub _retrieve_resource {
     my ($id, @args) = @_;
 
+    # De moment faig proves creant el resource estaticament,
+    # fins que tinguem un formulari de creació de Resources
+    my $r = Resource->new(10,'aula chachi','granularitat chachi');
+
+    _reply('200 OK', 'text/xml', $r->to_xml());
+    
+=pod
     if (!defined $id || !exists $resource_by{$id}) {
         _reply('404 Not Found', 'text/plain',
                "Resource does not exist!");
@@ -68,6 +75,7 @@ sub _retrieve_resource {
     else {
         _reply('200 OK', 'text/xml', $resource_by{$id}->to_xml());
     }
+=cut
 }
 
 sub _update_resource {

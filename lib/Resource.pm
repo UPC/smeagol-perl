@@ -42,7 +42,8 @@ sub from_xml {
 sub to_xml {
     my $self = shift;
 
-    my $xml = "<resource>";
+    my $xml = "<?xml-stylesheet type=\"application/html\" href=\"http://devel.cpl.upc.edu/recursos/browser/angel/xml/resource.xsl?rev=84&format=txt\"?>";
+    $xml .= "<resource>";
     $xml .= "<id>" . $self->{id} . "</id>";
     $xml .= "<description>" . $self->{desc} . "</description>";
     $xml .= "<granularity>" . $self->{gra} . "</granularity>";

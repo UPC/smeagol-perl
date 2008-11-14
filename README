@@ -29,6 +29,7 @@ Aquesta prova depèn d'aquests altres mòduls:
   | XML::Simple               | libxml-simple-perl         |
   | YAML::Tiny                | libyaml-tiny-perl          |
   | HTTP::Server::Simple::CGI | libhttp-server-simple-perl |
+  | Getopt::Long              | perl-base                  |
   +---------------------------+----------------------------+
 
 COPYRIGHT AND LICENCE

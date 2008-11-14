@@ -13,6 +13,7 @@ WriteMakefile(
         'XML::Simple'    => undef,
         'HTTP::Server::Simple::CGI' => undef,
         'YAML::Tiny'                => undef,
+        'Getopt::Long'   => undef
     },
     ($] >= 5.005 ?     ## Add these new keywords supported since 5.005
       (ABSTRACT       => 'Proves de la llesca1',

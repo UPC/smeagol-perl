@@ -47,7 +47,7 @@ sub to_xml {
     my $from = $self->start;
     my $to   = $self->end;
 
-    my $xml = "<booking> <from>$from</from> <to>$to</to> </booking>";
+    my $xml = "<booking><from>$from</from><to>$to</to></booking>";
 	return $xml;
 }
 

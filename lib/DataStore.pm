@@ -16,6 +16,7 @@ sub load {
     if(-e 'data.db'){
     	$data = retrieve('data.db') or die;
     }
+    return $data;
 }
 
 sub store {

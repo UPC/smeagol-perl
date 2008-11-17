@@ -1,21 +1,27 @@
 package DataStore;
-use Storable qw(nstore retrieve);
+use Storable;
 
 
 sub new {
     my $class = shift;
 
-    my $obj = $class->SUPER::new();
+    my $obj;
 
     bless $obj, $class;
 }
 
 sub load {
     my $self = shift;
-    $self = retrieve('data.db') or die;
+    my $data;
+    if(-e 'data.db'){
+    	$data = retrieve('data.db') or die;
+    }
 }
 
 sub store {
     my $self = shift;
-    nstore($self, 'data.db') or die;
+    my ($data) = @_;
+    nstore($data, 'data.db') or die;
 }
+
+1;

@@ -1,13 +1,11 @@
 package DataStore;
 use Storable;
+use Data::Dumper;
 
 
 sub new {
     my $class = shift;
-
-    my $obj;
-
-    bless $obj, $class;
+    return bless {}, $class;
 }
 
 sub load {
@@ -19,10 +17,9 @@ sub load {
     return $data;
 }
 
-sub store {
+sub save {
     my $self = shift;
-    my ($data) = @_;
-    nstore($data, 'data.db') or die;
+    nstore($self, 'data.db') or die;
 }
 
 1;

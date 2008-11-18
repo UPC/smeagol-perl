@@ -2,6 +2,7 @@
 package Resource;
 use XML::Simple;
 use Data::Dumper;
+use DataStore ();
 
 sub new {
     my $class = shift;
@@ -50,6 +51,11 @@ sub to_xml {
         if defined $self->{ag} && defined $self->{ag}->elements();
     $xml .= "</resource>";
     return $xml;
+}
+
+sub DESTROY {
+    my $self = shift;
+    DataStore->save();
 }
 
 1;

@@ -5,7 +5,13 @@ use Data::Dumper;
 
 sub new {
     my $class = shift;
-    return bless {}, $class;
+    return bless [], $class;
+}
+
+sub add {
+    my $self = shift;
+    my $data = @_;
+    push @$self, $data;
 }
 
 sub load {
@@ -19,7 +25,8 @@ sub load {
 
 sub save {
     my $self = shift;
-    nstore($self, 'data.db') or die;
+    my $dades = @_;
+    nstore($dades, 'data.db') or die;
 }
 
 1;

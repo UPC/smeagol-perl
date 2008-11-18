@@ -2,31 +2,24 @@ package DataStore;
 use Storable;
 use Data::Dumper;
 
-
-sub new {
-    my $class = shift;
-    return bless [], $class;
-}
+my @data;
 
 sub add {
     my $self = shift;
-    my $data = @_;
-    push @$self, $data;
+    push @data, @_ ;
 }
 
 sub load {
     my $self = shift;
-    my $data;
     if(-e 'data.db'){
-    	$data = retrieve('data.db') or die;
+    	@data = retrieve('data.db') or die;
     }
-    return $data;
+    return @data;
 }
 
 sub save {
     my $self = shift;
-    my $dades = @_;
-    nstore($dades, 'data.db') or die;
+    nstore(@data, 'data.db') or die;
 }
 
 1;

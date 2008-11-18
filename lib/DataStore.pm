@@ -1,5 +1,5 @@
 package DataStore;
-use Storable;
+use Storable qw(nstore retrieve);
 use Data::Dumper;
 
 my @data;
@@ -10,7 +10,6 @@ sub add {
 }
 
 sub load {
-    my $self = shift;
     if(-e 'data.db'){
     	@data = retrieve('data.db') or die;
     }
@@ -18,8 +17,7 @@ sub load {
 }
 
 sub save {
-    my $self = shift;
-    nstore(@data, 'data.db') or die;
+    nstore(\@data, 'data.db') or die;
 }
 
 1;

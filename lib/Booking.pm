@@ -91,19 +91,19 @@ sub from_xml {
 
     my $obj = $class->SUPER::from_datetimes(
           start=>      DateTime->new(
-                    year   => $b->from->year, 
-                    month  => $b->from->month, 
-                    day    => $b->from->day, 
-                    hour   => $b->from->hour, 
-                    minute => $b->from->minute, 
-                    second => $b->from->second), 
+                    year   => $b->{from}->{year}, 
+                    month  => $b->{from}->{month}, 
+                    day    => $b->{from}->{day}, 
+                    hour   => $b->{from}->{hour}, 
+                    minute => $b->{from}->{minute}, 
+                    second => $b->{from}->{second}), 
            end=>     DateTime->new(
-                    year   => $b->to->year, 
-                    month  => $b->to->month, 
-                    day    => $b->to->day, 
-                    hour   => $b->to->hour, 
-                    minute => $b->to->minute, 
-                    second => $b->to->second)
+                    year   => $b->{to}->{year}, 
+                    month  => $b->{to}->{month}, 
+                    day    => $b->{to}->{day}, 
+                    hour   => $b->{to}->{hour}, 
+                    minute => $b->{to}->{minute}, 
+                    second => $b->{to}->{second})
                 );
 
     bless $obj, $class;

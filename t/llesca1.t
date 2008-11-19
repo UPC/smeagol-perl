@@ -39,7 +39,10 @@ my $b5 = Booking->new(datetime(2008,4,14,16),
                       datetime(2008,4,14,16,29));
 
 #to_xml booking test
-ok($b1->to_xml() eq "<booking><from>2008-04-14T17:00:00</from><to>2008-04-14T18:59:00</to></booking>", 'to_xml booking'); 	
+ok($b1->to_xml() eq "<booking>".
+    "<from><year>2008</year><month>4</month><day>14</day><hour>17</hour><minute>0</minute><second>0</second></from>".
+    "<to><year>2008</year><month>4</month><day>14</day><hour>18</hour><minute>59</minute><second>0</second></to>".
+    "</booking>", 'to_xml booking'); 	
 
 # Booking Equality Tests
 ok( $b1 != $b2, 'b1 != b2' );
@@ -58,8 +61,10 @@ $ag->append($b1);
 ok( $ag->contains($b1), 'b1 in ag' );
 
 #to_xml agenda test
-ok($ag->to_xml() eq "<agenda><booking><from>2008-04-14T17:00:00</from><to>2008-04-14T18:59:00</to></booking></agenda>", 'to_xml agenda');#
-
+ok($ag->to_xml() eq "<agenda><booking>".
+    "<from><year>2008</year><month>4</month><day>14</day><hour>17</hour><minute>0</minute><second>0</second></from>".
+    "<to><year>2008</year><month>4</month><day>14</day><hour>18</hour><minute>59</minute><second>0</second></to>".
+    "</booking></agenda>", 'to_xml agenda');#
 
 $ag->append($b2);
 ok( $ag->size == 2 && $ag->contains($b2), 'b2 also in ag' );
@@ -97,13 +102,56 @@ ok( $r->{id}   eq "25" &&
 
 # to_xml Resource test
 $r = Resource->new(25, 'aula chachipilongui', 'reserves diaries');
-ok( $r->to_xml() eq '<resource><id>25</id><description>aula chachipilongui</description><granularity>reserves diaries</granularity></resource>',
-    'to_xml resource' );
+ok( $r->to_xml() eq '<resource>'.
+                    '<id>25</id>'.
+                    '<description>aula chachipilongui</description>'.
+                    '<granularity>reserves diaries</granularity>'.
+                    '</resource>', 'to_xml resource' );
 
 $r->{ag}->append($b1);
 ok( $r->{ag}->contains($b1), 'b1 in r->ag' );
 ok( !$r->{ag}->contains($b2), 'b2 not in r->ag' );
-ok( $r->to_xml() eq "<resource><id>25</id><description>aula chachipilongui</description><granularity>reserves diaries</granularity><agenda><booking><from>2008-04-14T17:00:00</from><to>2008-04-14T18:59:00</to></booking></agenda></resource>",'to_xml resource with agenda and 1 booking' );
+ok( $r->to_xml() eq "<resource><id>25</id><description>aula chachipilongui</description><granularity>reserves diaries</granularity><agenda><booking><from><year>2008</year><month>4</month><day>14</day><hour>17</hour><minute>0</minute><second>0</second></from><to><year>2008</year><month>4</month><day>14</day><hour>18</hour><minute>59</minute><second>0</second></to></booking></agenda></resource>",'to_xml resource with agenda and 1 booking' );
 $r->{ag}->append($b2);
 ok( $r->{ag}->contains($b2), 'b2 in r->ag' ); #25 test
-ok( $r->to_xml() eq "<resource><id>25</id><description>aula chachipilongui</description><granularity>reserves diaries</granularity><agenda><booking><from>2008-04-14T17:00:00</from><to>2008-04-14T18:59:00</to></booking><booking><from>2008-04-14T19:00:00</from><to>2008-04-14T19:59:00</to></booking></agenda></resource>",'to_xml resource with agenda and 2 bookings' );
+ok( $r->to_xml() eq 
+    "<resource>".
+    "<id>25</id>".
+    "<description>aula chachipilongui</description>".
+    "<granularity>reserves diaries</granularity>".
+    "<agenda>".
+        "<booking>".
+            "<from>".
+                "<year>2008</year>".
+                "<month>4</month>".
+                "<day>14</day>".
+                "<hour>17</hour>".
+                "<minute>0</minute>".
+                "<second>0</second>".
+            "</from>".
+            "<to>".
+                "<year>2008</year>".
+                "<month>4</month>".
+                "<day>14</day>".
+                "<hour>18</hour>".
+                "<minute>59</minute>".
+                "<second>0</second>".
+            "</to>".
+        "</booking>".
+        "<booking>".
+        "<from>".
+            "<year>2008</year>".
+            "<month>4</month>".
+            "<day>14</day>".
+            "<hour>19</hour>".
+            "<minute>0</minute>".
+            "<second>0</second>".
+        "</from>".
+        "<to>".
+            "<year>2008</year>".
+            "<month>4</month>".
+            "<day>14</day>".
+            "<hour>19</hour>".
+            "<minute>59</minute>".
+            "<second>0</second>".
+            "</to></booking></agenda></resource>",'to_xml resource with agenda and 2 bookings' );

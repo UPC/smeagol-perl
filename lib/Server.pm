@@ -75,7 +75,16 @@ sub _update_resource {
 }
 
 sub _delete_resource {
-    _reply_default();
+    my ($id, @args) = @_;
+
+    if (!defined $id || !exists $resource_by{$id}) {
+        _reply('404 Not Found', 'text/plain',
+               "Resource does not exist!");
+    }
+    else {
+        delete $resource_by{$id};
+        _reply('200 OK', 'text/plain', "Resource #$id deleted");
+    }
 }
 
 

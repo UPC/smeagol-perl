@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 8;
+use Test::More tests => 10;
 use LWP::UserAgent;
 use HTTP::Request;
 
@@ -59,6 +59,18 @@ my $resource_as_xml;
     my $ua  = LWP::UserAgent->new();
     my $res = $ua->get("$server/resource/2");
     ok($res->is_success && $res->content =~ /\Q$resource_as_xml/, $res->content);
+}
+
+# Testing resource removal
+{
+    my $req = HTTP::Request->new(DELETE => "$server/resource/1");
+    my $ua = LWP::UserAgent->new();
+    my $res = $ua->request($req);
+    ok($res->is_success, $res->content);
+
+    $res = $ua->get("$server/resource/1");
+    ok(!$res->is_success && $res->content =~ /Resource does not exist/,
+       $res->content);
 }
 
 END { kill 3, $pid; }

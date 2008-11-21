@@ -1,11 +1,12 @@
 #!/usr/bin/perl
 use Test::More tests => 9;
 
-use DateTime;
-
 use strict;
 use warnings;
-use Data::Dumper;
+
+use DateTime;
+use XML::Simple;
+use Data::Compare;
 
 BEGIN { use_ok($_) for qw(Booking) };
 
@@ -39,18 +40,49 @@ my $b5 = Booking->new(datetime(2008,4,14,16),
                       datetime(2008,4,14,16,29));
 
 #to_xml booking test
-ok($b1->to_xml() eq "<booking>".
-        "<from><year>2008</year><month>4</month><day>14</day><hour>17</hour><minute>0</minute><second>0</second></from>".
-        "<to><year>2008</year><month>4</month><day>14</day><hour>18</hour><minute>59</minute><second>0</second></to>".
-        "</booking>", 'to_xml booking');
+my $booking1_as_hash = {
+    from => {
+        year   => 2008,
+        month  => 4,
+        day    => 14,
+        hour   => 17,
+        minute => 0,
+        second => 0,
+    },
+    to   => {
+        year   => 2008,
+        month  => 4,
+        day    => 14,
+        hour   => 18,
+        minute => 59,
+        second => 0,
+    },
+};
+ok(Compare($booking1_as_hash, XMLin($b1->to_xml())), 'to_xml booking');
 
 # from_xml booking test
-my $b = Booking->from_xml(
-    "<booking>
-        <from><year>2008</year><month>4</month><day>14</day><hour>17</hour><minute>0</minute><second>0</second></from>
-        <to><year>2008</year><month>4</month><day>14</day><hour>18</hour><minute>59</minute><second>0</second></to>
-    </booking>");
-ok($b == $b1, 'from_xml booking');
+my $booking_as_xml = <<'EOF';
+<booking>
+    <from>
+        <year>2008</year>
+        <month>4</month>
+        <day>14</day>
+        <hour>17</hour>
+        <minute>0</minute>
+        <second>0</second>
+    </from>
+    <to>
+        <year>2008</year>
+        <month>4</month>
+        <day>14</day>
+        <hour>18</hour>
+        <minute>59</minute>
+        <second>0</second>
+    </to>
+</booking>
+EOF
+
+ok($b1 == Booking->from_xml($booking_as_xml), 'from_xml booking');
 
 # Booking Equality Tests
 ok( $b1 != $b2, 'b1 != b2' );

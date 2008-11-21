@@ -30,6 +30,7 @@ Aquesta prova depèn d'aquests altres mòduls:
   | YAML::Tiny                | libyaml-tiny-perl          |
   | HTTP::Server::Simple::CGI | libhttp-server-simple-perl |
   | Getopt::Long              | perl-base                  |
+  | Data::Compare             | libdata-compare-perl       |
   +---------------------------+----------------------------+
 
 COPYRIGHT AND LICENCE

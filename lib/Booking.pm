@@ -51,19 +51,19 @@ sub to_xml {
 
     my $xml =
         "<booking><from>".
-            "<year>".   $from->year   ."</year>".
-            "<month>".  $from->month  ."</month>".
-            "<day>".    $from->day    ."</day>".
-            "<hour>".   $from->hour   ."</hour>".
-            "<minute>". $from->minute ."</minute>".
-            "<second>". $from->second ."</second>".
-        "</from><to>".
-            "<year>".   $to->year     ."</year>".
-            "<month>".  $to->month    ."</month>".
-            "<day>".    $to->day      ."</day>".
-            "<hour>".   $to->hour     ."</hour>".
-            "<minute>". $to->minute   ."</minute>".
-            "<second>". $to->second   ."</second>".
+            "<year>"   .   $from->year  . "</year>".
+            "<month>"  .  $from->month  . "</month>".
+            "<day>"    .    $from->day  . "</day>".
+            "<hour>"   .   $from->hour  . "</hour>".
+            "<minute>" . $from->minute  . "</minute>".
+            "<second>" . $from->second  . "</second>".
+        "</from><to>"  .
+            "<year>"   .   $to->year    . "</year>".
+            "<month>"  .   $to->month   . "</month>".
+            "<day>"    .    $to->day    . "</day>".
+            "<hour>"   .   $to->hour    . "</hour>".
+            "<minute>" . $to->minute    . "</minute>".
+            "<second>" . $to->second    . "</second>".
         "</to></booking>";
 
     return $xml;
@@ -90,20 +90,22 @@ sub from_xml {
     my $b = XMLin($xml);
 
     my $obj = $class->SUPER::from_datetimes(
-          start=>      DateTime->new(
+                start=> DateTime->new(
                     year   => $b->{from}->{year}, 
                     month  => $b->{from}->{month}, 
                     day    => $b->{from}->{day}, 
                     hour   => $b->{from}->{hour}, 
                     minute => $b->{from}->{minute}, 
-                    second => $b->{from}->{second}), 
-           end=>     DateTime->new(
+                    second => $b->{from}->{second} 
+                    ), 
+                end => DateTime->new(
                     year   => $b->{to}->{year}, 
                     month  => $b->{to}->{month}, 
                     day    => $b->{to}->{day}, 
                     hour   => $b->{to}->{hour}, 
                     minute => $b->{to}->{minute}, 
-                    second => $b->{to}->{second})
+                    second => $b->{to}->{second} 
+                    )
                 );
 
     bless $obj, $class;

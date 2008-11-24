@@ -1,27 +1,25 @@
 # Un recurs (les dades que corresponen)
 package Resource;
-use XML::Simple;
-use Data::Dumper;
+use XML::LibXML;
 use DataStore ();
 
 sub new {
     my $class = shift;
-    my ($id, $desc, $gra) = @_;
+    my ($id, $desc, $gra, $ag) = @_;
 
     # Load on runtime to get rid of cross-dependency between
-    # both Resoure and Agenda
+    # both Resource and Agenda
     require Agenda;
 
     my $obj = {
         id => $id,
         desc => $desc,
         gra => $gra,
-        ag => Agenda->new(),
+        ag => $ag ? $ag : Agenda->new(),
     };
 
     bless $obj, $class;
 }
-
 
 # from_xml: creates a Resource via an XML string
 # (XML validation not yet implemented)
@@ -29,13 +27,33 @@ sub from_xml {
     my $class = shift;
     my $xml = shift;
 
-    my $doc = XMLin($xml);
+    # Load on runtime to get rid of cross-dependency between
+    # both Resource and Agenda
+    require Agenda;
+    
+    # validate XML string against the DTD
+    my $dtd = XML::LibXML::Dtd->new(
+        "CPL UPC//Resource DTD v0.01",
+        "http://devel.cpl.upc.edu/recursos/export/HEAD/angel/xml/resource.dtd");
+
+    my $dom = XML::LibXML->new->parse_string($xml);
+
+    if (!$dom->is_valid($dtd)) {
+        # validation failed
+        return 0;
+    }
+
     my $obj = {
-        id => $doc->{id}, 
-        desc => $doc->{description},
-        gra => $doc->{granularity},
-        ag => Agenda->new(),
+        id   => $dom->getElementsByTagName('id')->string_value, 
+        desc => $dom->getElementsByTagName('description')->string_value,
+        gra  => $dom->getElementsByTagName('granularity')->string_value,
+        ag   => Agenda->new() 
     };
+
+    if ($dom->getElementsByTagName('agenda')->get_node(1)) {
+        $obj->{ag} = Agenda->from_xml(
+            $dom->getElementsByTagName('agenda')->get_node(1)->toString);
+    }
 
     bless $obj, $class;
 }

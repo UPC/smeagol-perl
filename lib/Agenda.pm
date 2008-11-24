@@ -2,6 +2,7 @@ package Agenda;
 
 use Set::Object ();
 use base qw(Set::Object);
+use XML::LibXML;
 
 sub new {
     my $class = shift;
@@ -42,5 +43,43 @@ sub to_xml {
 
     return $xml;
 }
-        
+
+
+sub from_xml {
+    my $class = shift;
+    my $xml = shift;
+
+    # validate XML string against the DTD
+    my $dtd = XML::LibXML::Dtd->new(
+        "CPL UPC//Agenda DTD v0.01",
+        "http://devel.cpl.upc.edu/recursos/export/HEAD/angel/xml/agenda.dtd");
+
+    my $dom = XML::LibXML->new->parse_string($xml);
+
+    if (!$dom->is_valid($dtd)) {
+        # validation failed
+        return 0;
+    }
+
+    # at this point, we are certain that $xml was a valid XML 
+    # representation of an Agenda object; that is, 
+    # $dom variable contains a DOM (Document Object Model)
+    # representation of the $xml string
+
+    my $ag = $class->SUPER::new();
+    bless $ag, $class;
+
+    # traverse all '<booking>' elements found in DOM structure.
+    # note: all intersecting bookings in the agenda will be ignored,
+    # because we use the "append" method to store bookings in the 
+    # $ag object, so we do not need to worry about eventual 
+    # intersections present in the $xml
+    for my $booking_dom_node ( $dom->getElementsByTagName('booking') ) {
+        my $b = Booking->from_xml( $booking_dom_node->toString );
+        $ag->append($b);
+    }
+
+    return $ag;
+}
+
 1;

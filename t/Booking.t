@@ -94,3 +94,4 @@ ok(  $b1->intersects($b4), 'b1 interlaces b4' );
 ok(  $b4->intersects($b5), 'b4 interlaces b5' );
 ok(  $b5->intersects($b4), 'b5 interlaces b4' );
 
+END { unlink </tmp/*.db> };

@@ -73,4 +73,5 @@ my $resource_as_xml;
        $res->content);
 }
 
-END { kill 3, $pid; }
+END { 	kill 3, $pid; 
+	unlink </tmp/*.db> };

@@ -1,23 +1,28 @@
 package DataStore;
-use Storable qw(nstore retrieve);
 use Data::Dumper;
+#use Storable qw(nstore retrieve);
 
-my @data;
-
-sub add {
-    my $self = shift;
-    push @data, @_ ;
-}
 
 sub load {
-    if(-e 'data.db'){
-    	@data = retrieve('data.db') or die;
-    }
-    return @data;
+    my $self = shift;
+    my ($id) = @_;
+    my $data = 0;
+    if(-e $id.'.db'){
+        #$data = retrieve($id.'.db') or die;
+        $data = require ("/tmp/".$id.'.db');
+	}
+    return $data;
 }
 
 sub save {
-    nstore(\@data, 'data.db') or die;
+    my $self = shift;
+    my ($id,$data) = @_;
+	#nstore(\$data, $id.'.db') or die;
+    
+	open my $out, ">",  "/tmp/".$id.'.db' or die;
+    print $out Dumper($data);
+    close $out;
+
 }
 
 1;

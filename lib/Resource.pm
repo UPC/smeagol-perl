@@ -2,22 +2,29 @@
 package Resource;
 use XML::LibXML;
 use DataStore ();
+use Data::Dumper;
 
 sub new {
     my $class = shift;
     my ($id, $desc, $gra, $ag) = @_;
 
-    # Load on runtime to get rid of cross-dependency between
-    # both Resource and Agenda
-    require Agenda;
-
-    my $obj = {
-        id => $id,
-        desc => $desc,
-        gra => $gra,
-        ag => $ag ? $ag : Agenda->new(),
-    };
-
+	my $obj = {};
+    my $data = DataStore->load($id);
+	
+	if ($data){
+		$obj = Resource->from_xml($data);
+	}else{
+	    # Load on runtime to get rid of cross-dependency between
+	    # both Resource and Agenda
+	    require Agenda;
+	
+    	$obj = {
+    	    id => $id,
+    	    desc => $desc,
+    	    gra => $gra,
+    	    ag => $ag ? $ag : Agenda->new(),
+    	};
+	}
     bless $obj, $class;
 }
 
@@ -73,7 +80,7 @@ sub to_xml {
 
 sub DESTROY {
     my $self = shift;
-    DataStore->save();
+	DataStore->save($self->{id},$self->to_xml());
 }
 
 1;

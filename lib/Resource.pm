@@ -8,21 +8,23 @@ sub new {
     my $class = shift;
     my ($id, $desc, $gra, $ag) = @_;
 
+    return undef if (!defined($id) || !defined($desc) || !defined($gra)); # $ag argument is not mandatory
+
     my $obj = {};
     my $data = DataStore->load($id);
 	
-	if ($data){
+	if ($data) {
 	    $obj = Resource->from_xml($data);
-	}else{
+	} else {
 	    # Load on runtime to get rid of cross-dependency between
 	    # both Resource and Agenda
 	    require Agenda;
 	
     	    $obj = {
-    	        id => $id,
+    	        id   => $id,
     	        desc => $desc,
-    	        gra => $gra,
-    	        ag => $ag ? $ag : Agenda->new(),
+    	        gra  => $gra,
+    	        ag   => (defined $ag) ? $ag : Agenda->new(),
     	    };
 	}
     bless $obj, $class;
@@ -53,7 +55,7 @@ sub from_xml {
 
         if (!$dom->is_valid($dtd)) {
             # validation failed
-            return 0;
+            return undef;
         }
 
         $obj = {

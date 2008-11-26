@@ -14,6 +14,8 @@ sub new {
     my $class = shift;
     my ($from, $to) = @_;
 
+    return undef if ( !defined($from) || !defined($to) ); 
+    
     my $obj = $class->SUPER::from_datetimes(
         start => $from,
         end   => $to,
@@ -83,7 +85,7 @@ sub from_xml {
 
     if (!$doc->is_valid($dtd)) {
         # Validation failed
-        return 0;
+        return undef;
     }
 
     # XML is valid.

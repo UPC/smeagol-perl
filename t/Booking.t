@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-use Test::More tests => 9;
+use Test::More tests => 11;
 
 use strict;
 use warnings;
@@ -38,6 +38,10 @@ my $b4 = Booking->new(datetime(2008,4,14,15),
 # 16:00 - 16:29
 my $b5 = Booking->new(datetime(2008,4,14,16),
                       datetime(2008,4,14,16,29));
+
+# missing parameter(s)
+my $wrong = Booking->new(datetime(2008, 4, 14, 16));
+ok(!defined($wrong), 'Booking->new with missing parameter');
 
 #to_xml booking test
 my $booking1_as_hash = {
@@ -83,6 +87,21 @@ my $booking_as_xml = <<'EOF';
 EOF
 
 ok($b1 == Booking->from_xml($booking_as_xml), 'from_xml booking');
+
+# from_xml booking test (wrong XML)
+my $booking_as_xml_wrong = Booking->from_xml('
+<booking>
+    <from>
+        <year>2008</year>
+        <month>4</month>
+        <day>14</day>
+        <hour>17</hour>
+        <minute>0</minute>
+        <second>0</second>
+    </from>
+    <!-- <to> is missing! -->
+</booking>');
+ok(!defined($booking_as_xml_wrong), 'from_xml booking (with wrong XML)');
 
 # Booking Equality Tests
 ok( $b1 != $b2, 'b1 != b2' );

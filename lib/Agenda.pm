@@ -58,7 +58,7 @@ sub from_xml {
 
     if (!$dom->is_valid($dtd)) {
         # validation failed
-        return 0;
+        return undef;
     }
 
     # at this point, we are certain that $xml was a valid XML 

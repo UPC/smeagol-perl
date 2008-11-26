@@ -8,22 +8,22 @@ sub new {
     my $class = shift;
     my ($id, $desc, $gra, $ag) = @_;
 
-	my $obj = {};
+    my $obj = {};
     my $data = DataStore->load($id);
 	
 	if ($data){
-		$obj = Resource->from_xml($data);
+	    $obj = Resource->from_xml($data);
 	}else{
 	    # Load on runtime to get rid of cross-dependency between
 	    # both Resource and Agenda
 	    require Agenda;
 	
-    	$obj = {
-    	    id => $id,
-    	    desc => $desc,
-    	    gra => $gra,
-    	    ag => $ag ? $ag : Agenda->new(),
-    	};
+    	    $obj = {
+    	        id => $id,
+    	        desc => $desc,
+    	        gra => $gra,
+    	        ag => $ag ? $ag : Agenda->new(),
+    	    };
 	}
     bless $obj, $class;
 }
@@ -33,35 +33,41 @@ sub new {
 sub from_xml {
     my $class = shift;
     my $xml = shift;
-
-    # Load on runtime to get rid of cross-dependency between
-    # both Resource and Agenda
-    require Agenda;
     
-    # validate XML string against the DTD
-    my $dtd = XML::LibXML::Dtd->new(
-        "CPL UPC//Resource DTD v0.01",
-        "http://devel.cpl.upc.edu/recursos/export/HEAD/angel/xml/resource.dtd");
+    my $obj = {};
+    my $data = DataStore->load($id);
+	
+    if ($data){
+	$obj = Resource->from_xml($data);
+    }else{
+	# Load on runtime to get rid of cross-dependency between
+	# both Resource and Agenda
+	require Agenda;
+    
+	# validate XML string against the DTD
+	my $dtd = XML::LibXML::Dtd->new(
+            "CPL UPC//Resource DTD v0.01",
+            "http://devel.cpl.upc.edu/recursos/export/HEAD/angel/xml/resource.dtd");
 
-    my $dom = XML::LibXML->new->parse_string($xml);
+        my $dom = XML::LibXML->new->parse_string($xml);
 
-    if (!$dom->is_valid($dtd)) {
-        # validation failed
-        return 0;
+        if (!$dom->is_valid($dtd)) {
+            # validation failed
+            return 0;
+        }
+
+        $obj = {
+            id   => $dom->getElementsByTagName('id')->string_value, 
+            desc => $dom->getElementsByTagName('description')->string_value,
+            gra  => $dom->getElementsByTagName('granularity')->string_value,
+            ag   => Agenda->new() 
+        };
+
+        if ($dom->getElementsByTagName('agenda')->get_node(1)) {
+            $obj->{ag} = Agenda->from_xml(
+                $dom->getElementsByTagName('agenda')->get_node(1)->toString);
+        }
     }
-
-    my $obj = {
-        id   => $dom->getElementsByTagName('id')->string_value, 
-        desc => $dom->getElementsByTagName('description')->string_value,
-        gra  => $dom->getElementsByTagName('granularity')->string_value,
-        ag   => Agenda->new() 
-    };
-
-    if ($dom->getElementsByTagName('agenda')->get_node(1)) {
-        $obj->{ag} = Agenda->from_xml(
-            $dom->getElementsByTagName('agenda')->get_node(1)->toString);
-    }
-
     bless $obj, $class;
 }
 

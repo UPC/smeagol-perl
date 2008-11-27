@@ -6,11 +6,25 @@ use warnings;
 use HTTP::Server::Simple::CGI;
 use base qw(HTTP::Server::Simple::CGI);
 
+use Data::Dumper;
+
 use Resource;
 use YAML::Tiny;
 
 my %resource_by;
 my $cgi;
+
+
+
+sub new {
+    my $class = shift;
+
+    my $server = $class->SUPER::new(@_);
+
+    bless $server, $class;
+}
+
+
 
 sub _reply {
     my ($status, $type, @output) = @_;
@@ -21,9 +35,11 @@ sub _reply {
     print "HTTP/1.0 $status\n", $cgi->header('-type' => $type), @output, "\n";
 }
 
+
 sub _reply_default {
     _reply('400 Bad Request', 'text/plain', 'Bad Request');
 }
+
 
 sub _list_resources {
     my $yaml = YAML::Tiny->new();
@@ -33,7 +49,7 @@ sub _list_resources {
 }
 
 sub _create_resource {
-    my ($id, @args) = @_;
+    my ($id) = @_;
 
     $id = $cgi->param('id')
         unless defined $id;
@@ -59,7 +75,7 @@ sub _create_resource {
 }
 
 sub _retrieve_resource {
-    my ($id, @args) = @_;
+    my ($id) = @_;
 
     if (!defined $id || !exists $resource_by{$id}) {
         _reply('404 Not Found', 'text/plain',
@@ -75,7 +91,7 @@ sub _update_resource {
 }
 
 sub _delete_resource {
-    my ($id, @args) = @_;
+    my ($id) = @_;
 
     if (!defined $id || !exists $resource_by{$id}) {
         _reply('404 Not Found', 'text/plain',
@@ -88,44 +104,75 @@ sub _delete_resource {
 }
 
 
+
+#
+# Despatxa segons URL i operació contra aquest
+# controlador. La URL és un pattern amb blocs nominals
+# que són automàticament passats a la funció.
+#
+# Nota: hauria de funcionar amb "named buffers" però només
+# s'implementen a partir de perl 5.10. Quina misèria, no?
+# A Python fa temps que funcionen...
+#
 my %crud_for = (
-    POST   => \&_create_resource,
-    GET    => \&_retrieve_resource,
-    PUT    => \&_update_resource,
-    DELETE => \&_delete_resource,
+    '/resources' => {
+         GET    => \&_list_resources,
+    },
+    '/resource/(\d+)' => {
+	 POST   => \&_create_resource,
+         GET    => \&_retrieve_resource,
+         PUT    => \&_update_resource,
+         DELETE => \&_delete_resource,
+    },
+    '/resource/(\d+)/bookings' => {
+         GET    => \&_reply_default,
+         POST   => \&_reply_default,
+    },
+    '/booking/(\d+)' => {
+         GET    => \&_reply_default,
+         PUT    => \&_reply_default,
+         DELETE => \&_reply_default,
+    },
+    'default_action' => {
+         POST   => \&_reply_default,
+         GET    => \&_reply_default,
+         PUT    => \&_reply_default,
+         DELETE => \&_reply_default,
+    },
 );
 
 
-sub print_banner {}
-
-
-sub new {
-    my $class = shift;
-
-    my $server = $class->SUPER::new(@_);
-
-    bless $server, $class;
-}
-
+#
+# Aquest és el handler que invoca el ServerHTTP per a cada
+# request que ha de resoldre. El handler ha de trencar la URL del
+# request i determinar qui ha de donar el servei.
+#
 sub handle_request {
     my $self = shift;
 
+    # Obté les dades del request via CGI
     $cgi  = shift;
     my $path_info = $cgi->path_info();
     my $method    = $cgi->request_method();
 
-    my (undef, $main, $id, @args) = split m{/+}, $path_info;
+    # Busca el primer pattern del diccionari que s'acara.
+    my $url_key = 'default_action';
+    foreach my $url_pattern (keys(%crud_for)) {
+	my $pattern = '^' . $url_pattern . '/?$'; # allow URLs ending in '/'
+	if ($path_info =~ m{$pattern}) {
+	    $url_key = $url_pattern;
+	    last;
+	}
+    }
 
-    if ($main eq 'resources' and $method eq 'GET') {
-        _list_resources();
-    }
-    elsif ($main eq 'resource' and exists $crud_for{$method}) {
-        $crud_for{$method}->($id, @args);
-    }
-    else {
-        # unknown request
-        _reply_default();
+    # Despatxa segons recurs i mètode invocat
+    if (exists $crud_for{$url_key}->{$method}) {
+	$crud_for{$url_key}->{$method}->($1);
+    } else {
+	# Requested http method not available
+	_reply_default();
     }
 }
+
 
 1;

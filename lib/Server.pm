@@ -5,42 +5,90 @@ use warnings;
 
 use HTTP::Server::Simple::CGI;
 use base qw(HTTP::Server::Simple::CGI);
-
-use Data::Dumper;
+use CGI qw(header);
 
 use Resource;
-use YAML::Tiny;
-
-my %resource_by;
-my $cgi;
 
 
+# Nota: hauria de funcionar amb "named groups" però només
+# s'implementen a partir de perl 5.10. Quina misèria, no?
+# A Python fa temps que funcionen...
+#
+# Dispatcher table. Associates a handler to an URL. Groups in
+# the URL pattern are given as parameters to handler.
+my %crud_for = (
+    '/resources' => {
+         GET    => \&_list_resources,
+	 POST   => \&_create_resource,
+    },
+    '/resource/(\d+)' => {
+         DELETE => \&_delete_resource,
+    },
+    '/resource/(\d+)/bookings' => {
+    },
+    '/booking/(\d+)' => {
+    },
+);
 
-sub new {
-    my $class = shift;
 
-    my $server = $class->SUPER::new(@_);
+# Http request dispatcher. Sends every request to the corresponding
+# handler according to hash %crud_for. The handler receives
+# the CGI object and the list of parameters acording to the corresponding
+# groups in the %crud_for regular expressions.
+sub handle_request {
+    my $self = shift;
+    my ($cgi) = @_;
 
-    bless $server, $class;
+    my $path_info = $cgi->path_info();
+    my $method    = $cgi->request_method();
+
+    # Find the corresponding action
+    my $url_key = 'default_action';
+    foreach my $url_pattern (keys(%crud_for)) {
+	# Anchor pattern and allow URLs ending in '/'
+	my $pattern = '^' . $url_pattern . '/?$'; 
+	if ($path_info =~ m{$pattern}) {
+	    $url_key = $url_pattern;
+	    last;
+	}
+    }
+
+    # Dispatch to the corresponding action. 
+    # Pass parameters obtained from the pattern to action
+    if (exists $crud_for{$url_key}) {
+	if (exists $crud_for{$url_key}->{$method}) {
+	    $crud_for{$url_key}->{$method}->($cgi, $1);
+	} else {
+	    # Requested http method not available
+	    _status(405);
+	}
+    } else {
+	# Requested URL not available
+	_status(404)
+    }
 }
 
 
+
+#############################################################
+# Http tools
+#############################################################
 
 sub _reply {
     my ($status, $type, @output) = @_;
 
-    $type = 'text/plain'
-        unless defined $type and $type ne '';
-
-    print "HTTP/1.0 $status\n", $cgi->header('-type' => $type), @output, "\n";
+    $type = 'text/plain' unless defined $type and $type ne '';
+    print "HTTP/1.0 $status\n", header($type), @output, "\n";
 }
 
 
-
-sub _fail {
+# Prints an Http response. Message is optional. 
+sub _status {
     my ($code, $message) = @_;
 
     my %codes = (
+        200 => 'OK',
+        201 => 'Created',
 	400 => 'Bad Request',
 	403 => 'Forbidden',
 	404 => 'Not Found',
@@ -52,143 +100,46 @@ sub _fail {
 }
        
 
-    
+sub _send_xml {
+    my $xml = shift;
 
-
-sub _reply_default {
-    _fail(404);
+    _reply('200 OK', 'text/xml', $xml);
 }
 
 
-sub _list_resources {
-    my $yaml = YAML::Tiny->new();
-    $yaml->[0] = \%resource_by;
 
-    _reply('200 OK', 'text/yaml', $yaml->write_string());
+
+
+##############################################################
+# Handlers for resources
+##############################################################
+
+sub _list_resources {
+    _status(200, "List of resources");
 }
 
 sub _create_resource {
-    my ($id) = @_;
+    my ($cgi, $id) = @_;
 
-    $id = $cgi->param('id')
-        unless defined $id;
-    my $desc = $cgi->param('desc');
-    my $gra  = $cgi->param('gra');
-
-    if (defined $id && exists $resource_by{$id}) {
-        _fail(403, "Resource #$id already exists!");
-    }
-    elsif (!defined $id && !defined $desc && !defined $gra) {
-        my $resource = Resource->from_xml($cgi->param('POSTDATA'));
-        $resource_by{ $resource->{id} } = $resource;
-        _reply('201 Created', 'text/plain', "Resource #$resource->{id} created");
-    }
-    elsif (defined $id && defined $desc && defined $gra) {
-        my $resource = Resource->new($id, $desc, $gra);
-        $resource_by{ $resource->{id} } = $resource;
-        _reply('201 Created', 'text/plain', "Resource #$id created");
-    }
-    else {
-        _fail(400, 'Missing description!');
+    if ($id == 1) {
+        _status(403, "Resource #$id already exists!");
+    } else {
+        _status(201, "Resource #$id created");
     }
 }
 
 sub _retrieve_resource {
-    my ($id) = @_;
-
-    if (!defined $id || !exists $resource_by{$id}) {
-        _fail(404);
-    }
-    else {
-        _reply('200 OK', 'text/xml', $resource_by{$id}->to_xml());
-    }
+    my (undef, $id) = @_;
+    
+    _status(200, "Resource #$id retrieved");
+    
 }
 
-sub _update_resource {
-    _reply_default();
-}
 
 sub _delete_resource {
-    my ($id) = @_;
+    my (undef, $id) = @_;
 
-    if (!defined $id || !exists $resource_by{$id}) {
-        _fail(404);
-    }
-    else {
-        delete $resource_by{$id};
-        _reply('200 OK', 'text/plain', "Resource #$id deleted");
-    }
-}
-
-
-
-#
-# Despatxa segons URL i operació contra aquest
-# controlador. La URL és un pattern amb blocs nominals
-# que són automàticament passats a la funció.
-#
-# Nota: hauria de funcionar amb "named buffers" però només
-# s'implementen a partir de perl 5.10. Quina misèria, no?
-# A Python fa temps que funcionen...
-#
-my %crud_for = (
-    '/resources' => {
-         GET    => \&_list_resources,
-    },
-    '/resource/(\d+)' => {
-	 POST   => \&_create_resource,
-         GET    => \&_retrieve_resource,
-         PUT    => \&_update_resource,
-         DELETE => \&_delete_resource,
-    },
-    '/resource/(\d+)/bookings' => {
-         GET    => \&_reply_default,
-         POST   => \&_reply_default,
-    },
-    '/booking/(\d+)' => {
-         GET    => \&_reply_default,
-         PUT    => \&_reply_default,
-         DELETE => \&_reply_default,
-    },
-    'default_action' => {
-         POST   => \&_reply_default,
-         GET    => \&_reply_default,
-         PUT    => \&_reply_default,
-         DELETE => \&_reply_default,
-    },
-);
-
-
-#
-# Aquest és el handler que invoca el ServerHTTP per a cada
-# request que ha de resoldre. El handler ha de trencar la URL del
-# request i determinar qui ha de donar el servei.
-#
-sub handle_request {
-    my $self = shift;
-
-    # Obté les dades del request via CGI
-    $cgi  = shift;
-    my $path_info = $cgi->path_info();
-    my $method    = $cgi->request_method();
-
-    # Busca el primer pattern del diccionari que s'acara.
-    my $url_key = 'default_action';
-    foreach my $url_pattern (keys(%crud_for)) {
-	my $pattern = '^' . $url_pattern . '/?$'; # allow URLs ending in '/'
-	if ($path_info =~ m{$pattern}) {
-	    $url_key = $url_pattern;
-	    last;
-	}
-    }
-
-    # Despatxa segons recurs i mètode invocat
-    if (exists $crud_for{$url_key}->{$method}) {
-	$crud_for{$url_key}->{$method}->($1);
-    } else {
-	# Requested http method not available
-	_fail(405);
-    }
+    _reply('200 OK', 'text/plain', "Resource #$id deleted");
 }
 
 

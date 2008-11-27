@@ -4,30 +4,24 @@ package Client;
 use strict;
 use warnings;
 
-=pod
+use Carp;
 
-de moment no cal
-
-my %crud_for = (
-    POST   => \&_create_resource,
-    GET    => \&_retrieve_resource,
-    PUT    => \&_update_resource,
-    DELETE => \&_delete_resource,
-);
-
-=cut
+my %COMMAND_VALID = map { $_ => 1 } qw( POST GET PUT DELETE );
 
 use LWP::UserAgent;
 
 sub _client_call {
-    my ($comand, $sub_url) = @_;
+  my ($server,$url,$port,$command ) = @_;
+	$port ||=80;
+	$command ||= "GET";
 
+	carp "Error: Invalid Command '$command'";
   # Create a user agent object
-  $ua = LWP::UserAgent->new;
-  $ua->agent("MyApp/0.1 ");
+  my $ua = LWP::UserAgent->new;
+  $ua->agent("SmeagolClient/0.1 ");
 
   # Create a request
-  my $req = HTTP::Request->new($comand => 'http://localhost/'+$sub_url);
+  my $req = HTTP::Request->new($command => "http://$server:$port/$url");
 
   # Pass request to the user agent and get a response back
   my $res = $ua->request($req);

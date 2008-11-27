@@ -4,12 +4,18 @@ package Client;
 use strict;
 use warnings;
 
+=pod
+
+de moment no cal
+
 my %crud_for = (
     POST   => \&_create_resource,
     GET    => \&_retrieve_resource,
     PUT    => \&_update_resource,
     DELETE => \&_delete_resource,
 );
+
+=cut
 
 use LWP::UserAgent;
 

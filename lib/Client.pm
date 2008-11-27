@@ -15,7 +15,7 @@ sub _client_call {
 	$port ||=80;
 	$command ||= "GET";
 
-	carp "Error: Invalid Command '$command'";
+	croak "Error: Invalid Command '$command'" unless $COMMAND_VALID{$command};
   # Create a user agent object
   my $ua = LWP::UserAgent->new;
   $ua->agent("SmeagolClient/0.1 ");

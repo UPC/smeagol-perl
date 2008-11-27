@@ -36,8 +36,27 @@ sub _reply {
 }
 
 
+
+sub _fail {
+    my ($code, $message) = @_;
+
+    my %codes = (
+	400 => 'Bad Request',
+	403 => 'Forbidden',
+	404 => 'Not Found',
+        405 => 'Method Not Allowed',
+    );
+
+    my $text = $codes{$code} || die "Unknown http code error";
+    _reply($code . $text, 'text/plain', $message || $text)
+}
+       
+
+    
+
+
 sub _reply_default {
-    _reply('400 Bad Request', 'text/plain', 'Bad Request');
+    _fail(404);
 }
 
 
@@ -57,7 +76,7 @@ sub _create_resource {
     my $gra  = $cgi->param('gra');
 
     if (defined $id && exists $resource_by{$id}) {
-        _reply('403 Forbidden', 'text/plain', "Resource #$id already exists!");
+        _fail(403, "Resource #$id already exists!");
     }
     elsif (!defined $id && !defined $desc && !defined $gra) {
         my $resource = Resource->from_xml($cgi->param('POSTDATA'));
@@ -70,7 +89,7 @@ sub _create_resource {
         _reply('201 Created', 'text/plain', "Resource #$id created");
     }
     else {
-        _reply('400 Bad Request', 'text/plain', 'Missing description!');
+        _fail(400, 'Missing description!');
     }
 }
 
@@ -78,8 +97,7 @@ sub _retrieve_resource {
     my ($id) = @_;
 
     if (!defined $id || !exists $resource_by{$id}) {
-        _reply('404 Not Found', 'text/plain',
-               "Resource does not exist!");
+        _fail(404);
     }
     else {
         _reply('200 OK', 'text/xml', $resource_by{$id}->to_xml());
@@ -94,8 +112,7 @@ sub _delete_resource {
     my ($id) = @_;
 
     if (!defined $id || !exists $resource_by{$id}) {
-        _reply('404 Not Found', 'text/plain',
-               "Resource does not exist!");
+        _fail(404);
     }
     else {
         delete $resource_by{$id};
@@ -170,7 +187,7 @@ sub handle_request {
 	$crud_for{$url_key}->{$method}->($1);
     } else {
 	# Requested http method not available
-	_reply_default();
+	_fail(405);
     }
 }
 

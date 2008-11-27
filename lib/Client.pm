@@ -22,8 +22,6 @@ use LWP::UserAgent;
 sub _client_call {
     my ($comand, $sub_url) = @_;
 
-  my %resource_by;
-
   # Create a user agent object
   $ua = LWP::UserAgent->new;
   $ua->agent("MyApp/0.1 ");

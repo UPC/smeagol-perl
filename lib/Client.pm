@@ -46,27 +46,36 @@ sub _client_call {
 		print $res->content;
 	}
 	else {
-      print $res->status_line, "\n";
+		print $res->status_line, "\n";
 	}
 
 }
 
 ###RESOURCE
+sub list_resources {
+	my $self = shift;
+
+	my $ua  = LWP::UserAgent->new();
+    my $res = $ua->get("$server:$port/resources");
+
+	return wantarray ? ($res->status_line,$res->content) : $res->status_line;
+}
+
 sub create_resource {
 	my $self = shift;
 	my ($id, $des, $gra) = @_;
 
-	my $req = HTTP::Request->new(POST => "http://$server:$port/resource");
+	my $req = HTTP::Request->new(POST => "http://$server:$port/resources");
 	$req->content_type('text/xml');
 	my $res_xml = "<resource>
 	    			<id>$id</id>
 	    			<description>$des</description>
-    				<granularity>$gra</granularity>
+					<granularity>$gra</granularity>
 					</resource>";
-    $req->content($res_xml);
+	$req->content($res_xml);
 
-    my $ua  = LWP::UserAgent->new(); #Client
-    my $res = $ua->request($req); 
+	my $ua  = LWP::UserAgent->new(); #Client
+	my $res = $ua->request($req);
 
 	return $res->status_line;		
 }
@@ -132,8 +141,8 @@ sub retrieve_booking {
 	my ($id) = @_;
 
 	my $ua  = LWP::UserAgent->new();
-    my $res = $ua->get("$server:$port/booking/".$id);
-
+	my $res = $ua->get("$server:$port/booking/".$id);
+	
 	return wantarray ? ($res->status_line,$res->content) : $res->status_line;
 }
 

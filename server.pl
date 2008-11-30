@@ -42,46 +42,50 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 END
 
 # command-line options (with default values)
-my $opt_port           = 8000;
-my $opt_host           = '';
-my $opt_background     = '';
-my $opt_log_file       = ''; # option not yet implemented
-my $opt_error_file     = ''; # option not yet implemented
-my $opt_debug          = ''; 
-my $opt_show_version   = '';
-my $opt_show_license   = '';
-my $opt_show_help      = '';
+my $opt_port         = 8000;
+my $opt_host         = '';
+my $opt_background   = '';
+my $opt_log_file     = '';     # option not yet implemented
+my $opt_error_file   = '';     # option not yet implemented
+my $opt_debug        = '';
+my $opt_show_version = '';
+my $opt_show_license = '';
+my $opt_show_help    = '';
 
 # parse command-line options
 
 my $result = GetOptions(
-                "port=i"     => \$opt_port,          # =i means "requires numeric value"
-                "host=s"     => \$opt_host,          # no modifier; means "flag value"
-                "log=s"      => \$opt_log_file,      # =s means "requires string value"
-                "error=s"    => \$opt_error_file,
-                "debug"      => \$opt_debug,
-                "background" => \$opt_background,
-                "version"    => \$opt_show_version,
-                "license"    => \$opt_show_license,
-                "help"       => \$opt_show_help);
+    "port=i"     => \$opt_port,           # =i means "requires numeric value"
+    "host=s"     => \$opt_host,           # no modifier; means "flag value"
+    "log=s"      => \$opt_log_file,       # =s means "requires string value"
+    "error=s"    => \$opt_error_file,
+    "debug"      => \$opt_debug,
+    "background" => \$opt_background,
+    "version"    => \$opt_show_version,
+    "license"    => \$opt_show_license,
+    "help"       => \$opt_show_help
+);
 
 # Perform action according to options
 
-if (!$result) { 
+if ( !$result ) {
+
     # Error parsing options. Show errors and quit.
-} elsif ($opt_show_help) { 
-    show_help(); 
-} elsif ($opt_show_license) {
-    show_license(); 
-} elsif ($opt_show_version) { 
-    show_version(); 
-} else { 
-    launch_server($opt_port, 
-                  $opt_host, 
-                  $opt_background, 
-                  $opt_log_file, 
-                  $opt_error_file, 
-                  $opt_debug);
+}
+elsif ($opt_show_help) {
+    show_help();
+}
+elsif ($opt_show_license) {
+    show_license();
+}
+elsif ($opt_show_version) {
+    show_version();
+}
+else {
+    launch_server(
+        $opt_port,     $opt_host,       $opt_background,
+        $opt_log_file, $opt_error_file, $opt_debug
+    );
 }
 
 # Program ends here. Auxiliary functions follow.
@@ -109,37 +113,39 @@ General options:
 END
 }
 
-
 sub show_license {
     print $license_full;
 }
-
 
 sub show_version {
     print $license_short;
 }
 
-
 sub launch_server {
-    my ($port, $host, $background, $log_file, $error_file, $debug) = @_;
+    my ( $port, $host, $background, $log_file, $error_file, $debug ) = @_;
 
     if ($debug) {
         print "$version\n\n";
         print "Entering debug mode.\n";
         print "Listening on port $port.\n";
-        print "Binding to " . ($host or "all interfaces") . ".\n";
-        print "Log messages to " . ($log_file or "stdout") . " (not implemented).\n";
-        print "Log errors to " . ($error_file or "stdout") . " (not implemented).\n";
+        print "Binding to " . ( $host or "all interfaces" ) . ".\n";
+        print "Log messages to "
+            . ( $log_file or "stdout" )
+            . " (not implemented).\n";
+        print "Log errors to "
+            . ( $error_file or "stdout" )
+            . " (not implemented).\n";
     }
 
     my $s = Server->new($port);
 
     $s->host($host);
 
-    if ($background) { 
+    if ($background) {
         my $pid = $s->background;
         print "Going background (PID $pid).\n";
-    } else {
+    }
+    else {
         print "Running...\n" if $debug;
         $s->run;
     }

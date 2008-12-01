@@ -135,7 +135,7 @@ sub _create_resource {
         _status(400);
     }
     elsif ( exists $resource_db{ $r->{id} } ) {
-        _status( 403, "Resource $r->{id} already exists!" );
+        _status( 403, "Resource #$r->{id} already exists!" );
     }
     else {
         $resource_db{ $r->{id} } = $r;
@@ -161,7 +161,13 @@ sub _retrieve_resource {
 sub _delete_resource {
     my ( undef, $id ) = @_;
 
-    _reply( '200 OK', 'text/plain', "Resource #$id deleted" );
+    if ( !exists $resource_db{$id} ) {
+        _status(404);
+    }
+    else {
+        delete $resource_db{$id};
+        _status( 200, "Resource #$id deleted" );
+    }
 }
 
 1;

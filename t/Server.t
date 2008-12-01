@@ -6,6 +6,7 @@ use warnings;
 use Test::More tests => 11;
 use LWP::UserAgent;
 use HTTP::Request;
+use YAML::Tiny;
 
 BEGIN { use_ok($_) for qw(Server Resource Agenda Booking DateTime) }
 

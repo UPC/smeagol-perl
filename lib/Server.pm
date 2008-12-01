@@ -54,7 +54,7 @@ sub handle_request {
         # Anchor pattern and allow URLs ending in '/'
         my $pattern = '^' . $url_pattern . '/?$';
         if ( $path_info =~ m{$pattern} ) {
-            $id = $1;
+            $id      = $1;
             $url_key = $url_pattern;
             last;
         }

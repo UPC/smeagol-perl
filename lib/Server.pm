@@ -48,11 +48,13 @@ sub handle_request {
 
     # Find the corresponding action
     my $url_key = 'default_action';
+    my $id;
     foreach my $url_pattern ( keys(%crud_for) ) {
 
         # Anchor pattern and allow URLs ending in '/'
         my $pattern = '^' . $url_pattern . '/?$';
         if ( $path_info =~ m{$pattern} ) {
+            $id = $1;
             $url_key = $url_pattern;
             last;
         }
@@ -62,7 +64,7 @@ sub handle_request {
     # Pass parameters obtained from the pattern to action
     if ( exists $crud_for{$url_key} ) {
         if ( exists $crud_for{$url_key}->{$method} ) {
-            $crud_for{$url_key}->{$method}->( $cgi, $1 );
+            $crud_for{$url_key}->{$method}->( $cgi, $id );
         }
         else {
 

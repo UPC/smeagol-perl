@@ -11,12 +11,12 @@ use Resource;
 
 my %resource_db;
 
-my $r = Resource->new(
-    '10',
-    'aula chachipilongui',
-    'granularitat chachipilongui'
-);
-$resource_db{ $r->{id} } = $r;
+#my $r = Resource->new(
+#    '10',
+#    'aula chachipilongui',
+#    'granularitat chachipilongui'
+#);
+#$resource_db{ $r->{id} } = $r;
 
 # Nota: hauria de funcionar amb "named groups" però només
 # s'implementen a partir de perl 5.10. Quina misèria, no?
@@ -139,7 +139,7 @@ sub _create_resource {
     }
     else {
         $resource_db{ $r->{id} } = $r;
-        _status( 201, "Resource #$r->{id} created" );
+        _status( 201, $r->to_xml() );
     }
 }
 
@@ -162,7 +162,7 @@ sub _delete_resource {
     my ( undef, $id ) = @_;
 
     if ( !exists $resource_db{$id} ) {
-        _status(404);
+        _status( 404, "Resource #$id does not exist" );
     }
     else {
         delete $resource_db{$id};

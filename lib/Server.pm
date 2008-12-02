@@ -5,7 +5,6 @@ use warnings;
 
 use HTTP::Server::Simple::CGI;
 use base qw(HTTP::Server::Simple::CGI);
-use CGI qw(header);
 
 use Resource;
 
@@ -87,7 +86,7 @@ sub _reply {
     my ( $status, $type, @output ) = @_;
 
     $type = 'text/plain' unless defined $type and $type ne '';
-    print "HTTP/1.0 $status\n", header($type), @output, "\n";
+    print "HTTP/1.0 $status\n", "Content-Type: $type\n\n", @output, "\n";
 }
 
 # Prints an Http response. Message is optional.

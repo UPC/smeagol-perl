@@ -32,24 +32,30 @@ sub exists {
     my $self = shift;
     my ($id) = @_;
     if ( -e $db_path . $id . '.db' ) {
-		return 1;
+        return 1;
     }
-	return 0;
+    return 0;
 }
 
 sub list_id {
-	my $self = shift;
-	my @list;
-	my @files = <$db_path.*>;
-	foreach (@files) {
-		push @list, $_;
-	}
-	return @list;
+    my $self = shift;
+    my @list;
+    my @files = <$db_path.*.'.db'>;
+    foreach (@files) {
+        my ($id, $dummy) = split(/\./, $_); # remove ".db" from filename
+        push @list, $id;
+    }
+    return @list;
 }
 
 sub init_path {
-	my $self = shift;
-	$db_path = @_;
+    my $self = shift;
+    my $path = shift;
+
+    if ( !-e $path ) {
+        mkdir $path or die "Could not create DataStore path $path\n";
+    }
+    $db_path = $path;
 }
 
 1;

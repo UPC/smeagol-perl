@@ -8,7 +8,26 @@ use Client;
 
 =pod
 
-documentacio
+Documentacio of the Comand Line Client for the Smeagol Server powered CPL-TIC-UPC
+
+sub list_resources () -> ( @_ ) __tq__ $_[0] = num_status & $_[1] = "xml_result"
+sub create_resource ( $id, $des, $gra ) -> num_status
+sub retrieve_resource ( $id ) -> ( @_ ) __tq__ $_[0] = num_status & $_[1] = "xml_result"
+sub delete_resource ( $id ) -> num_status
+sub update_resource ( $id, $des, $gra ) -> num_status
+sub list_bookings_resource ( $id  ) -> ( @_ ) __tq__ $_[0] = num_status & $_[1] = "xml_result"
+sub create_booking_resource ( $id, @from, @to ) -> num_status
+sub create_booking ( $id, @from, @to ) -> num_status
+sub retrieve_booking ( $id  ) -> ( @_ ) __tq__ $_[0] = num_status & $_[1] = "xml_result"
+sub delete_booking ( $id ) -> num_status
+sub update_booking ( $id, @from, @to ) -> num_status
+
+:· tipus of parameters ::
+$id   = "identificador del objecte"
+$des  = "descripció del objecte"
+$gra  = "granularity"
+@from = " data in format "
+@to   = " data in format "
 
 =cut
 

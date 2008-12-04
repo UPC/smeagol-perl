@@ -13,7 +13,7 @@ sub new {
     return undef
         if ( !defined($id) || !defined($desc) || !defined($gra) )
         ;    # $ag argument is not mandatory
-    return undef if DataStore->exists($id)
+    return undef if DataStore->exists($id);
     
     my $obj;
     my $data;
@@ -39,12 +39,12 @@ sub fetch {
     my $class = shift;
     my ( $id ) = @_;
 
-    return undef if (!defined($id))
+    return undef if (!defined($id));
 
     my $obj;
     my $data = DataStore->load($id);
 
-    return undef if (!defined($data))
+    return undef if (!defined($data));
 
     $obj = Resource->from_xml($data);
 

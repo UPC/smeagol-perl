@@ -8,15 +8,9 @@ use base qw(HTTP::Server::Simple::CGI);
 use CGI qw();
 
 use Resource;
+use DataStore;
 
-my %resource_db;
-
-#my $r = Resource->new(
-#    '10',
-#    'aula chachipilongui',
-#    'granularitat chachipilongui'
-#);
-#$resource_db{ $r->{id} } = $r;
+DataStore->init_path('/tmp/smeagol_datastore');
 
 # Nota: hauria de funcionar amb "named groups" però només
 # s'implementen a partir de perl 5.10. Quina misèria, no?
@@ -30,7 +24,10 @@ my %crud_for = (
         GET    => \&_retrieve_resource,
         DELETE => \&_delete_resource,
     },
-    '/resource'                => { POST => \&_create_resource, },
+    '/resource' => {
+        POST => \&_create_resource,
+        PUT  => \&_update_resource,
+    },
     '/resource/(\d+)/bookings' => {},
     '/booking/(\d+)'           => {},
 );
@@ -119,8 +116,9 @@ sub _send_xml {
 
 sub _list_resources {
     my $xml = "<resources>";
-    foreach my $id ( keys(%resource_db) ) {
-        $xml .= $resource_db{$id}->to_xml();
+    foreach my $id ( DataStore->list_id ) {
+        warn $id;
+        $xml .= DataStore->load($id);
     }
     $xml .= "</resources>";
     _send_xml($xml);
@@ -134,11 +132,11 @@ sub _create_resource {
     if ( !defined $r ) {    # wrong XML argument
         _status(400);
     }
-    elsif ( exists $resource_db{ $r->{id} } ) {
+    elsif ( DataStore->exists( $r->{id} ) ) {
         _status( 403, "Resource #$r->{id} already exists!" );
     }
     else {
-        $resource_db{ $r->{id} } = $r;
+        DataStore->save( $cgi->param('POSTDATA') );
         _status( 201, $r->to_xml() );
     }
 }
@@ -150,23 +148,41 @@ sub _retrieve_resource {
     if ( !defined $id ) {
         _status(400);
     }
-    elsif ( !exists $resource_db{$id} ) {
+    elsif ( !DataStore->exists($id) ) {
         _status(404);
     }
     else {
-        _send_xml( $resource_db{$id}->to_xml() );
+        _send_xml( DataStore->load($id) );
     }
 }
 
 sub _delete_resource {
     my ( undef, $id ) = @_;
 
-    if ( !exists $resource_db{$id} ) {
+    if ( !DataStore->exists($id) ) {
         _status( 404, "Resource #$id does not exist" );
     }
     else {
-        delete $resource_db{$id};
+        DataStore->remove($id);
         _status( 200, "Resource #$id deleted" );
+    }
+}
+
+sub _update_resource {
+    my $cgi = shift;
+
+    my $r = Resource->from_xml( $cgi->param('POSTDATA') );
+
+    if ( !defined $r ) {
+        _status(400);
+    }
+    elsif ( !DataStore->exists( $r->{id} ) ) {
+        _status(404);
+    }
+    else {
+        my $resource_xml = $r->to_xml();
+        DataStore->save($resource_xml);
+        _send_xml($resource_xml);
     }
 }
 

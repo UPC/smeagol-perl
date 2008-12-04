@@ -4,6 +4,8 @@ use XML::LibXML;
 use DataStore ();
 use Data::Dumper;
 
+# Create a new resource or fail if a resource exists in the 
+# datastore with the required identifier.
 sub new {
     my $class = shift;
     my ( $id, $desc, $gra, $ag ) = @_;
@@ -11,28 +13,46 @@ sub new {
     return undef
         if ( !defined($id) || !defined($desc) || !defined($gra) )
         ;    # $ag argument is not mandatory
+    return undef if DataStore->exists($id)
+    
+    my $obj;
+    my $data;
 
-    my $obj  = {};
-    my $data = DataStore->load($id);
+    # Load on runtime to get rid of cross-dependency between
+    # both Resource and Agenda
+    require Agenda;
 
-    if ($data) {
-        $obj = Resource->from_xml($data);
-    }
-    else {
+    $obj = {
+	id   => $id,
+	desc => $desc,
+	gra  => $gra,
+	ag   => ( defined $ag ) ? $ag : Agenda->new(),
+    };
 
-        # Load on runtime to get rid of cross-dependency between
-        # both Resource and Agenda
-        require Agenda;
-
-        $obj = {
-            id   => $id,
-            desc => $desc,
-            gra  => $gra,
-            ag   => ( defined $ag ) ? $ag : Agenda->new(),
-        };
-    }
     bless $obj, $class;
 }
+
+
+# Constructor that fetchs a resource from datastore 
+# or fail if not exists
+sub fetch {
+    my $class = shift;
+    my ( $id ) = @_;
+
+    return undef if (!defined($id))
+
+    my $obj;
+    my $data = DataStore->load($id);
+
+    return undef if (!defined($data))
+
+    $obj = Resource->from_xml($data);
+
+    bless $obj, $class;
+}
+
+
+
 
 # from_xml: creates a Resource via an XML string
 # (XML validation not yet implemented)

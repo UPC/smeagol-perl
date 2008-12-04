@@ -4,7 +4,9 @@ use XML::LibXML;
 use DataStore ();
 use Data::Dumper;
 
-# Create a new resource or fail if a resource exists in the 
+DataStore->init_path('/tmp/smeagol_datastore');
+
+# Create a new resource or fail if a resource exists in the
 # datastore with the required identifier.
 sub new {
     my $class = shift;
@@ -14,7 +16,7 @@ sub new {
         if ( !defined($id) || !defined($desc) || !defined($gra) )
         ;    # $ag argument is not mandatory
     return undef if DataStore->exists($id);
-    
+
     my $obj;
     my $data;
 
@@ -23,36 +25,32 @@ sub new {
     require Agenda;
 
     $obj = {
-	id   => $id,
-	desc => $desc,
-	gra  => $gra,
-	ag   => ( defined $ag ) ? $ag : Agenda->new(),
+        id   => $id,
+        desc => $desc,
+        gra  => $gra,
+        ag   => ( defined $ag ) ? $ag : Agenda->new(),
     };
 
     bless $obj, $class;
 }
 
-
-# Constructor that fetchs a resource from datastore 
+# Constructor that fetchs a resource from datastore
 # or fail if not exists
-sub fetch {
+sub load {
     my $class = shift;
-    my ( $id ) = @_;
+    my ($id) = @_;
 
-    return undef if (!defined($id));
+    return undef if ( !defined($id) );
 
     my $obj;
     my $data = DataStore->load($id);
 
-    return undef if (!defined($data));
+    return undef if ( !defined($data) );
 
     $obj = Resource->from_xml($data);
 
     bless $obj, $class;
 }
-
-
-
 
 # from_xml: creates a Resource via an XML string
 # (XML validation not yet implemented)
@@ -113,9 +111,15 @@ sub to_xml {
     return $xml;
 }
 
-sub DESTROY {
+# Save Resource in DataStore
+sub save {
     my $self = shift;
     DataStore->save( $self->{id}, $self->to_xml() );
+}
+
+sub DESTROY {
+    my $self = shift;
+    $self->save;
 }
 
 1;

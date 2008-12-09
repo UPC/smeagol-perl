@@ -8,9 +8,6 @@ use base qw(HTTP::Server::Simple::CGI);
 use CGI qw();
 
 use Resource;
-use DataStore;
-
-DataStore->init_path('/tmp/smeagol_datastore');
 
 # Nota: hauria de funcionar amb "named groups" però només
 # s'implementen a partir de perl 5.10. Quina misèria, no?
@@ -116,9 +113,11 @@ sub _send_xml {
 
 sub _list_resources {
     my $xml = "<resources>";
-    foreach my $id ( DataStore->list_id ) {
-        warn $id;
-        $xml .= DataStore->load($id);
+    foreach my $id ( Resource->list_id ) {
+        my $r = Resource->load($id);
+        if ( defined $r ) {
+            $xml .= $r->to_xml();
+        }
     }
     $xml .= "</resources>";
     _send_xml($xml);
@@ -136,7 +135,7 @@ sub _create_resource {
         _status( 403, "Resource #$r->{id} already exists!" );
     }
     else {
-        DataStore->save( $cgi->param('POSTDATA') );
+        $r->save();
         _status( 201, $r->to_xml() );
     }
 }

@@ -94,4 +94,4 @@ ok( $ag->size == 0, 'ag has no slots' );
 $ag->remove($b4);
 ok( $ag->size == 0, 'remove non-existing b4 from ag' );
 
-END { unlink </tmp/*.db> }
+END { unlink </tmp/smeagol_datastore/*.db> }

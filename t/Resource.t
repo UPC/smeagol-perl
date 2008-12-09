@@ -163,4 +163,4 @@ ok(        $res->{id} eq '3'
         && $res->{gra}  eq 'horaria'
         && 'from_xml resource' );
 
-END { unlink </tmp/*.db> }
+END { unlink </tmp/smeagol_datastore/*.db> }

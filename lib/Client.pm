@@ -67,13 +67,13 @@ sub list_resources {
 sub create_resource {
     my $self = shift;
     my ( $id, $des, $gra ) = @_;
-	
-	my $res_xml = "<resource>
+
+    my $res_xml = "<resource>
 					<id>$id</id>
 					<description>$des</description>
 					<granularity>$gra</granularity>
 					</resource>";
-    my $req = HTTP::Request->new( POST => "http://$server:$port/resource");
+    my $req = HTTP::Request->new( POST => "http://$server:$port/resource" );
     $req->content_type('text/xml');
     $req->content($res_xml);
 
@@ -86,13 +86,14 @@ sub create_resource {
 sub update_resource {
     my $self = shift;
     my ( $id, $des, $gra ) = @_;
-	
-	my $res_xml = "<resource>
+
+    my $res_xml = "<resource>
 					<id>$id</id>
 					<description>$des</description>
 					<granularity>$gra</granularity>
 					</resource>";
-    my $req = HTTP::Request->new( PUT => "http://$server:$port/resource/$id");
+    my $req
+        = HTTP::Request->new( PUT => "http://$server:$port/resource/$id" );
     $req->content_type('text/xml');
     $req->content($res_xml);
 
@@ -108,7 +109,7 @@ sub retrieve_resource {
     my ($id) = @_;
 
     my $ua  = LWP::UserAgent->new();
-    my $res = $ua->get( "http://$server:$port/resource/$id" );
+    my $res = $ua->get("http://$server:$port/resource/$id");
 
     return
         wantarray ? ( $res->status_line, $res->content ) : $res->status_line;
@@ -128,12 +129,11 @@ sub delete_resource {
     return $res->status_line;
 }
 
-
 ###BOOKING MAINTENANCE
 #/resource/ID/bookings
 sub list_bookings_resource {
     my $self = shift;
-	my ($id) = @_;
+    my ($id) = @_;
 
     my $ua  = LWP::UserAgent->new();
     my $res = $ua->get("http://$server:$port/resource/$id/bookings");
@@ -147,7 +147,8 @@ sub create_booking {
     my $self = shift;
     my ( $id, @from, @to ) = @_;
 
-    my $req = HTTP::Request->new( POST => "http://$server:$port/resource/$id/booking" );
+    my $req = HTTP::Request->new(
+        POST => "http://$server:$port/resource/$id/booking" );
     $req->content_type('text/xml');
     my $booking_xml = "<booking>
 						<from>
@@ -178,7 +179,7 @@ sub create_booking {
 sub update_booking {
     my $self = shift;
     my ( $id, @from, @to ) = @_;
-	my $booking_xml = "<booking>
+    my $booking_xml = "<booking>
 						<from>
 							<year>$from[0]</year>
 							<month>$from[1]</month>
@@ -196,8 +197,9 @@ sub update_booking {
 							<second>$to[5]</second>
 						</to>
 					</booking>";
-	
-    my $req = HTTP::Request->new( PUT => "http://$server:$port/resource/$id/booking");
+
+    my $req = HTTP::Request->new(
+        PUT => "http://$server:$port/resource/$id/booking" );
     $req->content_type('text/xml');
     $req->content($booking_xml);
 
@@ -211,10 +213,11 @@ sub update_booking {
 
 sub retrieve_booking {
     my $self = shift;
-    my ($id_res, $id_book) = @_;
+    my ( $id_res, $id_book ) = @_;
 
-    my $ua  = LWP::UserAgent->new();
-    my $res = $ua->get( "http://$server:$port/resource/$id_res/booking/$id_book");
+    my $ua = LWP::UserAgent->new();
+    my $res
+        = $ua->get("http://$server:$port/resource/$id_res/booking/$id_book");
 
     return
         wantarray ? ( $res->status_line, $res->content ) : $res->status_line;
@@ -222,9 +225,9 @@ sub retrieve_booking {
 
 sub delete_booking {
     my $self = shift;
-    my ($id_res, $id_book) = @_;
-    my $req  = HTTP::Request->new(
-        DELETE => "http://$server:$port/resource/$id_res/booking/$id_book");
+    my ( $id_res, $id_book ) = @_;
+    my $req = HTTP::Request->new(
+        DELETE => "http://$server:$port/resource/$id_res/booking/$id_book" );
     $req->content_type('text/xml');
 
     my $ua  = LWP::UserAgent->new();
@@ -232,7 +235,5 @@ sub delete_booking {
 
     return $res->status_line;
 }
-
-
 
 1;

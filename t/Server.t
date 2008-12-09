@@ -3,10 +3,9 @@
 use strict;
 use warnings;
 
-use Test::More tests => 12;
+use Test::More tests => 13;
 use LWP::UserAgent;
 use HTTP::Request;
-use YAML::Tiny;
 
 BEGIN { use_ok($_) for qw(Server Resource Agenda Booking DateTime) }
 
@@ -15,14 +14,28 @@ my $server      = "http://localhost:$server_port";
 
 my $pid = Server->new($server_port)->background();
 
+# Auxiliary routine to encapsulate server requests
+sub smeagol_request {
+    my ( $method, $url, $xml ) = @_;
+
+    my $req = HTTP::Request->new( $method => $url );
+
+    $req->content_type('text/xml');
+    $req->content($xml);
+
+    my $ua  = LWP::UserAgent->new();
+    my $res = $ua->request($req);
+
+    return $res;
+}
+
 # Testing retrieve empty resource list
 {
-    my $ua  = LWP::UserAgent->new();
-    my $res = $ua->get("$server/resources");
-    ok( $res->is_success, "$server/resources" );
-    ok( $res->content eq "<resources></resources>\n", $res->content );
-
-    #"retrieve empty resource list");
+    my $res = smeagol_request( 'GET', "$server/resources" );
+    ok( $res->is_success, 'resource list retrieval status' );
+    ok( $res->content eq "<resources></resources>\n",
+        "resource list content $res->content"
+    );
 }
 
 # Testing resource creation via XML
@@ -65,25 +78,18 @@ my $resource_as_xml;
     $ag->append($b2);
     my $resource = Resource->new( 2, 'desc 2 2', 'gra 2 2', $ag );
 
-    my $req = HTTP::Request->new( POST => "$server/resource" );
-    $req->content_type('text/xml');
-    $resource_as_xml = $resource->to_xml();
-    $req->content($resource_as_xml);
+    my $res
+        = smeagol_request( 'POST', "$server/resource", $resource->to_xml() );
+    ok( $res->is_success, "resource creation status $res->status" );
 
-    my $ua  = LWP::UserAgent->new();
-    my $res = $ua->request($req);
-    my $r   = Resource->from_xml( $res->content );
-
-    #ok($res->is_success, $res->content);
-    ok( $r->{id} eq '2' && $r->{desc} eq 'desc 2 2',
-        "resource creation $res->content"
-    );
+    my $r = Resource->from_xml( $res->content );
+    ok( $r->{id} eq $resource->{id} && $r->{desc} eq $resource->{desc},
+        "resource creation content $res->content" );
 }
 
 # Testing resource retrieval
 {
-    my $ua  = LWP::UserAgent->new();
-    my $res = $ua->get("$server/resource/2");
+    my $res = smeagol_request( 'GET', "$server/resource/2" );
     ok( $res->is_success, "resource retrieval status" );
     my $r = Resource->from_xml( $res->content );
     ok( ( defined $r ) && $r->{id} eq '2',
@@ -93,16 +99,11 @@ my $resource_as_xml;
 
 # Testing resource removal
 {
-    my $req = HTTP::Request->new( DELETE => "$server/resource/2" );
-    my $ua  = LWP::UserAgent->new();
-    my $res = $ua->request($req);
+    my $res = smeagol_request( 'DELETE', "$server/resource/2" );
     ok( $res->is_success, $res->content );
 
-    $res = $ua->get("$server/resource/1");
-    ok( $res->code == 404, "resource removal $res->content" );
-
-    #ok( (!$res->is_success) && $res->content =~ /Resource #2 does not exist/,
-    #    "resource removal $res->content" );
+    $res = smeagol_request( 'DELETE', "$server/resource/1" );
+    ok( $res->code == 404, "non-existent resource removal $res->content" );
 }
 
 END {

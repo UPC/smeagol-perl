@@ -1,10 +1,14 @@
-# Un recurs (les dades que corresponen)
+# Resource class definition
 package Resource;
 use XML::LibXML;
 use DataStore ();
 use Data::Dumper;
 
-DataStore->init_path('/tmp/smeagol_datastore');
+# DataStore PATH should be defined externally
+# in a configuration file (smeagol.conf ?)
+$resource_datastore_path = '/tmp/smeagol_datastore';
+
+my $datastore = DataStore->new($resource_datastore_path);
 
 # Create a new resource or fail if a resource exists in the
 # datastore with the required identifier.
@@ -15,7 +19,7 @@ sub new {
     return undef
         if ( !defined($id) || !defined($desc) || !defined($gra) )
         ;    # $ag argument is not mandatory
-    return undef if DataStore->exists($id);
+    return undef if $datastore->exists($id);
 
     my $obj;
     my $data;
@@ -34,6 +38,31 @@ sub new {
     bless $obj, $class;
 }
 
+# Setters and getters
+sub id {
+    my $self = shift;
+    if (@_) { $self->{id} = shift; }
+    return $self->{id};
+}
+
+sub desc {
+    my $self = shift;
+    if (@_) { $self->{desc} = shift; }
+    return $self->{desc};
+}
+
+sub gra {
+    my $self = shift;
+    if (@_) { $self->{gra} = shift; }
+    return $self->{gra};
+}
+
+sub ag {
+    my $self = shift;
+    if (@_) { $self->{ag} = shift; }
+    return $self->{ag};
+}
+
 # Constructor that fetchs a resource from datastore
 # or fail if not exists
 sub load {
@@ -42,14 +71,11 @@ sub load {
 
     return undef if ( !defined($id) );
 
-    my $obj;
-    my $data = DataStore->load($id);
+    my $data = $datastore->load($id);
 
     return undef if ( !defined($data) );
 
-    $obj = Resource->from_xml($data);
-
-    bless $obj, $class;
+    return Resource->from_xml($data);
 }
 
 # from_xml: creates a Resource via an XML string
@@ -59,7 +85,7 @@ sub from_xml {
     my $xml   = shift;
 
     my $obj  = {};
-    my $data = DataStore->load($id);
+    my $data = $datastore->load($id);
 
     if ($data) {
         $obj = Resource->from_xml($data);
@@ -111,10 +137,15 @@ sub to_xml {
     return $xml;
 }
 
+sub list_id {
+    my $self = shift;
+    return $datastore->list_id;
+}
+
 # Save Resource in DataStore
 sub save {
     my $self = shift;
-    DataStore->save( $self->{id}, $self->to_xml() );
+    $datastore->save( $self->{id}, $self->to_xml() );
 }
 
 sub DESTROY {
@@ -122,9 +153,9 @@ sub DESTROY {
     $self->save;
 }
 
-sub next_id{
-	my $self = shift;
-	return DataStore->next_id($self);
+sub next_id {
+    my $self = shift;
+    return DataStore->next_id($self);
 }
 
 1;

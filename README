@@ -35,10 +35,24 @@ Aquesta prova depèn d'aquests altres mòduls:
 
 COPYRIGHT AND LICENCE
 
-Copyright (C) 2008 by Alex Muntada <alexm@alexm.org>
+Copyright (C) 2008  Angel Aguilera <angel.aguilera@upc.edu>
+Copyright (C) 2008  Eulàlia Formentí <eulalia.formenti@upc.edu>
+Copyright (C) 2008  Francesc Guasch <frankie@etsetb.upc.edu>
+Copyright (C) 2008  Francisco Morillas <fmorillas@etsetb.upc.edu>
+Copyright (C) 2008  Alex Muntada <alexm@alexm.org>
+Copyright (C) 2008  Isabel Polo <ipolo@etsetb.upc.edu>
+Copyright (C) 2008  Sebastià Vila <sebas@lsi.upc.edu>
 
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself, either Perl version 5.8.8 or,
-at your option, any later version of Perl 5 you may have available.
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
 
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
 

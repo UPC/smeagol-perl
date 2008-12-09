@@ -9,7 +9,7 @@ sub load {
     my $self = shift;
     my ($id) = @_;
     my $data;
-    if ( -e $db_path . $id . '.db' ) {
+	if(defined $id && -e $db_path . $id . '.db' ) {
 
         #$data = retrieve($id.'.db') or die;
         $data = require( $db_path . $id . '.db' );
@@ -20,11 +20,12 @@ sub load {
 sub save {
     my $self = shift;
     my ( $id, $data ) = @_;
-
-    #nstore(\$data, $id.'.db') or die;
-    open my $out, ">", $db_path . $id . '.db' or die;
-    print $out Dumper($data);
-    close $out;
+	if(defined $id && defined $data){
+    	#nstore(\$data, $id.'.db') or die;
+    	open my $out, ">", $db_path . $id . '.db' or die;
+    	print $out Dumper($data);
+    	close $out;
+	}
 
 }
 
@@ -56,6 +57,24 @@ sub init_path {
         mkdir $path or die "Could not create DataStore path $path\n";
     }
     $db_path = $path;
+}
+
+sub next_id{
+	my $self = shift;
+	my ($kind) = @_;
+	my $data = 1;
+	if(defined $kind){
+		if ( -e $db_path.'/next_'.$kind ) {
+        	$data = require( $db_path.'/next_'.$kind );
+			$data++;
+    	}
+		open my $out, ">", $db_path.'/next_'.$kind or die;
+		print $out Dumper($data);
+		close $out;
+		return $data;
+	}else{
+		return undef;
+	}
 }
 
 1;

@@ -122,4 +122,9 @@ sub DESTROY {
     $self->save;
 }
 
+sub next_id{
+	my $self = shift;
+	return DataStore->next_id($self);
+}
+
 1;

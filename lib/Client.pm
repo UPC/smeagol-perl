@@ -92,8 +92,8 @@ sub update_resource {
 					<description>$des</description>
 					<granularity>$gra</granularity>
 					</resource>";
-    my $req
-        = HTTP::Request->new( PUT => "http://$server:$port/resource/$id" );
+    my $req = HTTP::Request->new( PUT => "http://$server:$port/resource");
+
     $req->content_type('text/xml');
     $req->content($res_xml);
 

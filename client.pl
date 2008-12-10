@@ -1,10 +1,74 @@
 #!/usr/bin/perl
 
+### #!/usr/local/web/perl/bin/perl -w
+
 use strict;
 use warnings;
 use Getopt::Long;
 
+use YAML qw(LoadFile);
+use locale;
+use Carp qw(confess);
+
 use Client;
+
+=pod
+
+=head1 NAME
+
+Client command line for a standard Smeagol Server
+
+=head1 USAGE
+
+./client.pl [--debug] [--help] [--server=trantor.upc.edu] [--url="http://localhost/smeagol/ETSETB/"] [--port=80] ""
+
+=head1 REQUIRED ARGUMENTS
+
+=head1 OPTIONS
+
+=over
+
+=item *
+
+server
+
+Name of the server related of the Smeagol server
+
+=item *
+
+url
+
+Based in standard URI
+
+=item *
+
+port=80
+
+Standard port is 80
+
+=item *
+
+help
+
+=item *
+
+debug
+
+=back
+
+=head1 DESCRIPTION
+
+Client command line of the Smeagol system
+
+=head1 BUGS AND LIMITATIONS
+
+Gestió d'errors limitada.
+
+=head1 AUTHOR
+
+cpl-tic-upc smeagol group
+
+=cut
 
 =pod
 
@@ -31,37 +95,56 @@ $gra  = "granularity"
 
 =cut
 
+#######################################################################
+#
+# opcions
+#
+
 # command-line options (with default values)
-my $opt_server;
-my $opt_url;
-my $opt_port = '80';
-my $opt_comand;
-my $opt_show_help = '';
+my $OPT_SERVER;
+my $OPT_URL;
+my $OPT_PORT = '80';
+my $opt_COMMAND;
 
-# parse command-line options
-my $result = GetOptions(
-    "server=s" => \$opt_server,     # =s means "requires string value"
-    "url=s"    => \$opt_url,        # =s means "requires string value"
-    "port=i"   => \$opt_port,       # =i means "requires numeric value"
-    "comand=s" => \$opt_comand,     # =s means "requires string value"
-    "help"     => \$opt_show_help
-);
+{
+ # parse command-line options
+ my $opt_show_help = '';
 
-# Perform action according to options
+ my $result = GetOptions(
+    "server"   => \$OPT_SERVER,     # =s means "requires string value"
+    "url=s"    => \$OPT_URL,        # =s means "requires string value"
+    "port=i"   => \$OPT_PORT,       # =i means "requires numeric value"
+    "command=s" => \$OPT_COMMAND,    # =s means "requires string value"
+    "help"     => \$OPT_show_help
+ );
+
+ my ($me) = $0 =~ m{.*/(.*)};
+ $USAGE = "$me [--help] [--debug] ".
+          "[--server=\"???\"]".
+          "[--url=\"http:\/\/...\/\"]".
+          "[--port=80]".
+          "[--command=\" GET \| POST \| PUT \| DELETE \"]".
+          " \n";
+
+ if ($help) {
+ }
+
+ # Perform action according to options
 
 if ( !$result ) {
-
     # Error parsing options. Show errors and quit.
+    die $USAGE;
 }
 elsif ($opt_show_help) {
-    show_help();
-}
-else {
-
-    # Client::_client_call
+     print $USAGE;
+     exit(0);
+     # show_help();
 }
 
+#######################################################################
+#
 # Program ends here. Auxiliary functions follow.
+#
 
 sub show_help {
     print <<END;

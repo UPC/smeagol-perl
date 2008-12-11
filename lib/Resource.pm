@@ -28,6 +28,7 @@ sub new {
         description => $description,
         granularity  => $granularity,
         agenda   => ( defined $agenda ) ? $agenda : Agenda->new(),
+        _persistent => 0,
     };
 
     bless $obj, $class;
@@ -107,7 +108,8 @@ sub from_xml {
             id   => $dom->getElementsByTagName('id')->string_value,
             description => $dom->getElementsByTagName('description')->string_value,
             granularity  => $dom->getElementsByTagName('granularity')->string_value,
-            agenda   => Agenda->new()
+            agenda   => Agenda->new(),
+			_persistent => 0,
         };
 
         if ( $dom->getElementsByTagName('agenda')->get_node(1) ) {
@@ -136,10 +138,16 @@ sub list_id {
     return DataStore->list_id;
 }
 
+sub remove {
+	my $self = shift;
+	$datastore->remove($self->{id}) if $self->{_persistent};
+}
+
 # Save Resource in DataStore
 sub save {
     my $self = shift;
-    DataStore->save( $self->{id}, $self->to_xml() );
+	$self->{_persistent} = 1;
+    $datastore->save( $self->{id}, $self->to_xml() );
 }
 
 sub DESTROY {

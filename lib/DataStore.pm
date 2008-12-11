@@ -13,6 +13,10 @@ sub init {
 
     defined($path) or die "DataStore->init() needs an argument!\n";
 
+	if($path eq "/"){
+		$path = "/tmp/smeagol_datastore/";
+	}
+
     # Create the path, if needed
     if ( -d $path ) {
 
@@ -119,5 +123,8 @@ sub next_id {
     }
 }
 
+sub clean {
+	File::Path->rmtree($_PATH);
+}
 
 1;

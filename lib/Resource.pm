@@ -1,14 +1,9 @@
 # Resource class definition
 package Resource;
 use XML::LibXML;
-use DataStore ();
+use DataStore qw(storage);
 use Data::Dumper;
 
-# DataStore PATH should be defined externally
-# in a configuration file (smeagol.conf ?)
-$resource_datastore_path = '/tmp/smeagol_datastore';
-
-my $datastore = DataStore->new($resource_datastore_path);
 
 # Create a new resource or fail if a resource exists in the
 # datastore with the required identifier.
@@ -19,7 +14,7 @@ sub new {
     return undef
         if ( !defined($id) || !defined($description) || !defined($granularity) )
         ;    # $ag argument is not mandatory
-    return undef if $datastore->exists($id);
+    return undef if $storage->exists($id);
 
     my $obj;
     my $data;
@@ -71,7 +66,7 @@ sub load {
 
     return undef if ( !defined($id) );
 
-    my $data = $datastore->load($id);
+    my $data = $storage->load($id);
 
     return undef if ( !defined($data) );
 
@@ -85,7 +80,7 @@ sub from_xml {
     my $xml   = shift;
 
     my $obj  = {};
-    my $data = $datastore->load($id);
+    my $data = $storage->load($id);
 
     if ($data) {
         $obj = Resource->from_xml($data);
@@ -139,13 +134,13 @@ sub to_xml {
 
 sub list_id {
     my $self = shift;
-    return $datastore->list_id;
+    return $storage->list_id;
 }
 
 # Save Resource in DataStore
 sub save {
     my $self = shift;
-    $datastore->save( $self->{id}, $self->to_xml() );
+    $storage->save( $self->{id}, $self->to_xml() );
 }
 
 sub DESTROY {

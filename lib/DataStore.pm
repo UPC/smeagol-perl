@@ -128,4 +128,21 @@ sub next_id {
     }
 }
 
+
+
+#
+# Datastore objects are used as a singleton. Here we define a singleton
+# object together with a function to initialize it. 
+#
+
+my $storage;
+
+sub init {
+   my $path = shift;
+
+   defined($path) or die "Path needed";
+
+   $storage = new($path);
+}
+
 1;

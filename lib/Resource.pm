@@ -1,7 +1,7 @@
 # Resource class definition
 package Resource;
 use XML::LibXML;
-use DataStore qw(storage);
+use DataStore; 
 use Data::Dumper;
 
 
@@ -14,7 +14,7 @@ sub new {
     return undef
         if ( !defined($id) || !defined($description) || !defined($granularity) )
         ;    # $ag argument is not mandatory
-    return undef if $storage->exists($id);
+    return undef if DataStore->exists($id);
 
     my $obj;
     my $data;
@@ -66,7 +66,7 @@ sub load {
 
     return undef if ( !defined($id) );
 
-    my $data = $storage->load($id);
+    my $data = DataStore->load($id);
 
     return undef if ( !defined($data) );
 
@@ -74,13 +74,12 @@ sub load {
 }
 
 # from_xml: creates a Resource via an XML string
-# (XML validation not yet implemented)
 sub from_xml {
     my $class = shift;
     my $xml   = shift;
 
     my $obj  = {};
-    my $data = $storage->load($id);
+    my $data = DataStore->load($id);
 
     if ($data) {
         $obj = Resource->from_xml($data);
@@ -134,13 +133,13 @@ sub to_xml {
 
 sub list_id {
     my $self = shift;
-    return $storage->list_id;
+    return DataStore->list_id;
 }
 
 # Save Resource in DataStore
 sub save {
     my $self = shift;
-    $storage->save( $self->{id}, $self->to_xml() );
+    DataStore->save( $self->{id}, $self->to_xml() );
 }
 
 sub DESTROY {

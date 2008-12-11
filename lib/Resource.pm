@@ -14,10 +14,10 @@ my $datastore = DataStore->new($resource_datastore_path);
 # datastore with the required identifier.
 sub new {
     my $class = shift;
-    my ( $id, $desc, $gra, $ag ) = @_;
+    my ( $id, $description, $granularity, $agenda ) = @_;
 
     return undef
-        if ( !defined($id) || !defined($desc) || !defined($gra) )
+        if ( !defined($id) || !defined($description) || !defined($granularity) )
         ;    # $ag argument is not mandatory
     return undef if $datastore->exists($id);
 
@@ -30,9 +30,9 @@ sub new {
 
     $obj = {
         id   => $id,
-        desc => $desc,
-        gra  => $gra,
-        ag   => ( defined $ag ) ? $ag : Agenda->new(),
+        description => $description,
+        granularity  => $granularity,
+        agenda   => ( defined $agenda ) ? $agenda : Agenda->new(),
     };
 
     bless $obj, $class;
@@ -45,22 +45,22 @@ sub id {
     return $self->{id};
 }
 
-sub desc {
+sub description {
     my $self = shift;
-    if (@_) { $self->{desc} = shift; }
-    return $self->{desc};
+    if (@_) { $self->{description} = shift; }
+    return $self->{description};
 }
 
-sub gra {
+sub granularity {
     my $self = shift;
-    if (@_) { $self->{gra} = shift; }
-    return $self->{gra};
+    if (@_) { $self->{granularity} = shift; }
+    return $self->{granularity};
 }
 
-sub ag {
+sub agenda {
     my $self = shift;
-    if (@_) { $self->{ag} = shift; }
-    return $self->{ag};
+    if (@_) { $self->{agenda} = shift; }
+    return $self->{agenda};
 }
 
 # Constructor that fetchs a resource from datastore
@@ -111,13 +111,13 @@ sub from_xml {
 
         $obj = {
             id   => $dom->getElementsByTagName('id')->string_value,
-            desc => $dom->getElementsByTagName('description')->string_value,
-            gra  => $dom->getElementsByTagName('granularity')->string_value,
-            ag   => Agenda->new()
+            description => $dom->getElementsByTagName('description')->string_value,
+            granularity  => $dom->getElementsByTagName('granularity')->string_value,
+            agenda   => Agenda->new()
         };
 
         if ( $dom->getElementsByTagName('agenda')->get_node(1) ) {
-            $obj->{ag} = Agenda->from_xml(
+            $obj->{agenda} = Agenda->from_xml(
                 $dom->getElementsByTagName('agenda')->get_node(1)->toString );
         }
     }
@@ -129,10 +129,10 @@ sub to_xml {
 
     my $xml .= "<resource>";
     $xml    .= "<id>" . $self->{id} . "</id>";
-    $xml    .= "<description>" . $self->{desc} . "</description>";
-    $xml    .= "<granularity>" . $self->{gra} . "</granularity>";
-    $xml    .= $self->{ag}->to_xml()
-        if defined $self->{ag} && defined $self->{ag}->elements();
+    $xml    .= "<description>" . $self->{description} . "</description>";
+    $xml    .= "<granularity>" . $self->{granularity} . "</granularity>";
+    $xml    .= $self->{agenda}->to_xml()
+        if defined $self->{agenda} && defined $self->{agenda}->elements();
     $xml .= "</resource>";
     return $xml;
 }

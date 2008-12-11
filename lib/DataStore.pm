@@ -68,7 +68,7 @@ sub save {
     if ( defined $id && defined $data ) {
 
         #nstore(\$data, $id.'.db') or die;
-        open my $out, ">", $db_path . $id . '.db' or die;
+        open my $out, ">", full_path($id) or die;
         print $out Dumper($data);
         close $out;
     }

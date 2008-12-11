@@ -151,31 +151,43 @@ my $OPT_PARAM_TO;
 # switch case of the script.
 #
 
+my $result = "";
 if      (command  eq "list_resources") {
-	print Client::list_resources();
+	$result = Client::list_resources();
 } elsif (command  eq "create_resource") {
-	print Client::create_resource( $OPT_PARAM_ID, $OPT_PARAM_DES, $OPT_PARAM_GRA );
+	$result = Client::create_resource( $OPT_PARAM_ID, $OPT_PARAM_DES, $OPT_PARAM_GRA );
 } elsif (command  eq "retrieve_resource") {
-	print Client::retrieve_resource( $OPT_PARAM_ID );
+	$result = Client::retrieve_resource( $OPT_PARAM_ID );
 } elsif (command  eq "delete_resource") {
-	print Client::delete_resource( $OPT_PARAM_ID );
+	$result = Client::delete_resource( $OPT_PARAM_ID );
 } elsif (command  eq "update_resource") {
-	print Client::update_resource( $OPT_PARAM_ID, $OPT_PARAM_DES, $OPT_PARAM_GRA );
+	$result = Client::update_resource( $OPT_PARAM_ID, $OPT_PARAM_DES, $OPT_PARAM_GRA );
 } elsif (command  eq "list_bookings_resource") {
-	print Client::list_bookings_resource( $OPT_PARAM_ID );
+	$result = Client::list_bookings_resource( $OPT_PARAM_ID );
 } elsif (command  eq "create_booking_resource") {
-	print Client::create_booking_resource( $OPT_PARAM_ID, $OPT_PARAM_FROM, $OPT_PARAM_TO );
+	$result = Client::create_booking_resource( $OPT_PARAM_ID, $OPT_PARAM_FROM, $OPT_PARAM_TO );
 } elsif (command  eq "create_booking") {
-	print Client::create_booking( $OPT_PARAM_ID, $OPT_PARAM_FROM, $OPT_PARAM_TO );
+	$result = Client::create_booking( $OPT_PARAM_ID, $OPT_PARAM_FROM, $OPT_PARAM_TO );
 } elsif (command  eq "retrieve_booking") {
-	print Client::retrieve_booking( $OPT_PARAM_ID );
+	$result = Client::retrieve_booking( $OPT_PARAM_ID );
 } elsif (command  eq "delete_booking") {
-	print Client::delete_booking( $OPT_PARAM_ID );
+	$result = Client::delete_booking( $OPT_PARAM_ID );
 } elsif (command  eq "update_booking") {
-	print Client::update_booking( $OPT_PARAM_ID, $OPT_PARAM_FROM, $OPT_PARAM_TO );
+	$result = Client::update_booking( $OPT_PARAM_ID, $OPT_PARAM_FROM, $OPT_PARAM_TO );
 } elsif {
+	print "???";
 	exit(0);
 }
+
+if ( !$result ) {
+    # Error parsing options. Show errors and quit.
+    die $USAGE;
+ }
+ else {
+     print $result;
+     exit(0);
+ }
+
 
 #######################################################################
 #

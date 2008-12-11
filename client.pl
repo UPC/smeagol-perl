@@ -1,7 +1,5 @@
 #!/usr/bin/perl
 
-### #!/usr/local/web/perl/bin/perl -w
-
 use strict;
 use warnings;
 use Getopt::Long;
@@ -20,13 +18,11 @@ Client command line for a standard Smeagol Server
 
 =head1 USAGE
 
-./client.pl [--debug] [--help] [--server=trantor.upc.edu] [--url="http://localhost/smeagol/ETSETB/"] [--port=80] ""
+./client.pl [--debug] [--help] [--server=smeagol-gollum.upc.edu] [--port=80] [--command=] ... ""
+
+For details of command option see the pod section in the source client.pl
 
 =head1 REQUIRED ARGUMENTS
-
-=head1 OPTIONS
-
-=over
 
 =item *
 
@@ -36,15 +32,19 @@ Name of the server related of the Smeagol server
 
 =item *
 
-url
-
-Based in standard URI
-
-=item *
-
 port=80
 
 Standard port is 80
+
+=head1 OPTIONS
+
+=over
+
+=item *
+
+command
+
+Command for connect with the Smeagol system between the Client modul
 
 =item *
 
@@ -102,43 +102,79 @@ $gra  = "granularity"
 
 # command-line options (with default values)
 my $OPT_SERVER;
-my $OPT_URL;
 my $OPT_PORT = '80';
-my $opt_COMMAND;
+my $OPT_COMMAND;
+my $OPT_PARAM_ID;
+my $OPT_PARAM_DES;
+my $OPT_PARAM_GRA;
+my $OPT_PARAM_FROM;
+my $OPT_PARAM_TO;
 
 {
  # parse command-line options
  my $opt_show_help = '';
 
  my $result = GetOptions(
-    "server"   => \$OPT_SERVER,     # =s means "requires string value"
-    "url=s"    => \$OPT_URL,        # =s means "requires string value"
+    "server=s" => \$OPT_SERVER,     # =s means "requires string value"
     "port=i"   => \$OPT_PORT,       # =i means "requires numeric value"
-    "command=s" => \$OPT_COMMAND,    # =s means "requires string value"
-    "help"     => \$OPT_show_help
+    "command"  => \$OPT_COMMAND,    # =s means "requires string value"
+    "id"       => \$OPT_PARAM_ID,   #
+    "des"      => \$OPT_PARAM_DES,  #
+    "gra"      => \$OPT_PARAM_GRA,  #
+    "from"     => \$OPT_PARAM_FROM, #
+    "to"       => \$OPT_PARAM_TO,   #
+    "help"     => \$opt_show_help
  );
 
  my ($me) = $0 =~ m{.*/(.*)};
  $USAGE = "$me [--help] [--debug] ".
-          "[--server=\"???\"]".
-          "[--url=\"http:\/\/...\/\"]".
-          "[--port=80]".
-          "[--command=\" GET \| POST \| PUT \| DELETE \"]".
+          "--server=\"http:\/\/localhost\/\"".
+          "--port=80".
+          "[--command=\" list_resources \| * \"]".
           " \n";
-
- if ($help) {
- }
 
  # Perform action according to options
 
-if ( !$result ) {
+ if ( !$result ) {
     # Error parsing options. Show errors and quit.
     die $USAGE;
-}
-elsif ($opt_show_help) {
+ }
+ elsif ($opt_show_help) {
      print $USAGE;
      exit(0);
      # show_help();
+ }
+}
+
+#######################################################################
+#
+# switch case of the script.
+#
+
+if      (command  eq "list_resources") {
+	print Client::list_resources();
+} elsif (command  eq "create_resource") {
+	print Client::create_resource( $OPT_PARAM_ID, $OPT_PARAM_DES, $OPT_PARAM_GRA );
+} elsif (command  eq "retrieve_resource") {
+	print Client::retrieve_resource( $OPT_PARAM_ID );
+} elsif (command  eq "delete_resource") {
+	print Client::delete_resource( $OPT_PARAM_ID );
+} elsif (command  eq "update_resource") {
+	print Client::update_resource( $OPT_PARAM_ID, $OPT_PARAM_DES, $OPT_PARAM_GRA );
+} elsif (command  eq "list_bookings_resource") {
+	print Client::list_bookings_resource( $OPT_PARAM_ID );
+} elsif (command  eq "create_booking_resource") {
+	print Client::create_booking_resource( $OPT_PARAM_ID, $OPT_PARAM_FROM, $OPT_PARAM_TO );
+} elsif (command  eq "create_booking") {
+	print Client::create_booking( $OPT_PARAM_ID, $OPT_PARAM_FROM, $OPT_PARAM_TO );
+} elsif (command  eq "retrieve_booking") {
+	print Client::retrieve_booking( $OPT_PARAM_ID );
+} elsif (command  eq "delete_booking") {
+	print Client::delete_booking( $OPT_PARAM_ID );
+} elsif (command  eq "update_booking") {
+	print Client::update_booking( $OPT_PARAM_ID, $OPT_PARAM_FROM, $OPT_PARAM_TO );
+} elsif {
+	exit(0);
 }
 
 #######################################################################
@@ -146,7 +182,7 @@ elsif ($opt_show_help) {
 # Program ends here. Auxiliary functions follow.
 #
 
-sub show_help {
+sub _show_help_old_version {
     print <<END;
 Usage: $0 [options]
 

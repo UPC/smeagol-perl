@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-use Test::More tests => 12;
+use Test::More tests => 13;
 
 use strict;
 use warnings;
@@ -8,7 +8,7 @@ use DateTime;
 use XML::Simple;
 use Data::Compare;
 
-BEGIN { use_ok($_) for qw(Booking Agenda) }
+BEGIN { use_ok($_) for qw(Booking Agenda DataStore) }
 
 # Make a DateTime object with some defaults
 sub datetime {
@@ -94,4 +94,4 @@ ok( $ag->size == 0, 'ag has no slots' );
 $ag->remove($b4);
 ok( $ag->size == 0, 'remove non-existing b4 from ag' );
 
-END { unlink </tmp/smeagol_datastore/*.db> }
+END { DataStore->clean(); }

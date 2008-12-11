@@ -131,7 +131,7 @@ sub _create_resource {
     if ( !defined $r ) {    # wrong XML argument
         _status(400);
     }
-    elsif ( DataStore->exists( $r->{id} ) ) {
+    elsif ( defined Resource->load( $r->{id} ) ) {
         _status( 403, "Resource #$r->{id} already exists!" );
     }
     else {
@@ -146,23 +146,29 @@ sub _retrieve_resource {
 
     if ( !defined $id ) {
         _status(400);
+        return;
     }
-    elsif ( !DataStore->exists($id) ) {
+
+    my $r = Resource->load($id);
+
+    if ( !defined $r ) {
         _status(404);
     }
     else {
-        _send_xml( DataStore->load($id) );
+        _send_xml( $r->to_xml() );
     }
 }
 
 sub _delete_resource {
     my ( undef, $id ) = @_;
 
-    if ( !DataStore->exists($id) ) {
+    my $r = Resource->load($id);
+
+    if ( !defined $r ) {
         _status( 404, "Resource #$id does not exist" );
     }
     else {
-        DataStore->remove($id);
+        $r->remove();
         _status( 200, "Resource #$id deleted" );
     }
 }
@@ -175,13 +181,12 @@ sub _update_resource {
     if ( !defined $r ) {
         _status(400);
     }
-    elsif ( !DataStore->exists( $r->{id} ) ) {
+    elsif ( !defined Resource->load( $r->{id} ) ) {
         _status(404);
     }
     else {
-        my $resource_xml = $r->to_xml();
-        DataStore->save($resource_xml);
-        _send_xml($resource_xml);
+        $r->save();
+        _send_xml( $r->to_xml() );
     }
 }
 

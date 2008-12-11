@@ -76,15 +76,16 @@ my $resource_as_xml;
     my $ag = Agenda->new();
     $ag->append($b1);
     $ag->append($b2);
-    my $resource = Resource->new( 2, 'desc 2 2', 'gra 2 2', $ag );
+    my $resource = Resource->new( 'desc 2 2', 'gra 2 2', $ag );
 
     my $res
         = smeagol_request( 'POST', "$server/resource", $resource->to_xml() );
     ok( $res->is_success, "resource creation status $res->status" );
 
     my $r = Resource->from_xml( $res->content );
-    ok( $r->{id} eq $resource->{id} && $r->{desc} eq $resource->{desc},
-        "resource creation content $res->content" );
+    ok( $r->description eq $resource->description,
+        "resource creation content $res->content"
+    );
 }
 
 # Testing resource retrieval
@@ -92,9 +93,7 @@ my $resource_as_xml;
     my $res = smeagol_request( 'GET', "$server/resource/2" );
     ok( $res->is_success, "resource retrieval status" );
     my $r = Resource->from_xml( $res->content );
-    ok( ( defined $r ) && $r->{id} eq '2',
-        "resource retrieval $res->content"
-    );
+    ok( defined $r, "resource retrieval $res->content" );
 }
 
 # Testing resource removal
@@ -108,5 +107,6 @@ my $resource_as_xml;
 
 END {
     kill 3, $pid;
-    unlink </tmp/*.db>;
+
+    #DataStore->clean();
 }

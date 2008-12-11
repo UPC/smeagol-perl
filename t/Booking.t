@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-use Test::More tests => 11;
+use Test::More tests => 12;
 
 use strict;
 use warnings;
@@ -8,7 +8,7 @@ use DateTime;
 use XML::Simple;
 use Data::Compare;
 
-BEGIN { use_ok($_) for qw(Booking) }
+BEGIN { use_ok($_) for qw(Booking DataStore) }
 
 # Make a DateTime object with some defaults
 sub datetime {
@@ -117,4 +117,4 @@ ok( $b1->intersects($b4),  'b1 interlaces b4' );
 ok( $b4->intersects($b5),  'b4 interlaces b5' );
 ok( $b5->intersects($b4),  'b5 interlaces b4' );
 
-END { unlink </tmp/smeagol_datastore/*.db> }
+END { DataStore->clean() }

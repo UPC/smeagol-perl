@@ -1,21 +1,24 @@
 package DataStore;
 use Data::Dumper;
+use File::Path;
+use Carp;
 
+my $_PATH;
 
-my $_PATH = "/tmp/smeagol_datastore/";
+init('/tmp/smeagol_datastore/');
 
-# init($path): sets DataStore storage path. 
+# init($path): sets DataStore storage path.
 #       $path argument indicates the directory
 #       where persistent files will be stored.
 #       $path directory will be created, if needed.
 sub init {
-    my $path  = shift;
+    my $path = shift;
 
-    defined($path) or die "DataStore->init() needs an argument!\n";
+    defined($path) or die "DataStore->init() needs an argument!";
 
-	if($path eq "/"){
-		$path = "/tmp/smeagol_datastore/";
-	}
+    if ( $path eq "/" ) {
+        $path = "/tmp/smeagol_datastore/";
+    }
 
     # Create the path, if needed
     if ( -d $path ) {
@@ -24,7 +27,7 @@ sub init {
     }
     else {
         mkdir $path
-            or die "Could not create DataStore directory $path\n";
+            or die "Could not create DataStore directory $path";
     }
 
     # Add trailing slash if needed
@@ -35,15 +38,14 @@ sub init {
     $_PATH = $path;    # the path where DataStore will be located
 }
 
-
 # full_path(id):
 #       Auxiliary function to get the full path of the file where
 #       object identified by $id may be stored.
 #       This method should not be called from outside this class.
 sub _full_path {
-    my $id   = shift;
+    my $id = shift;
 
-    defined($id) or die "Error in call to full_path()\n";
+    defined($id) or confess "Error in call to full_path()";
 
     return $_PATH . $id . '.db';
 }
@@ -52,12 +54,14 @@ sub _full_path {
 # Object existence may be checked using exists($id) or list_id()
 # prior to calling load().
 sub load {
+    my $self = shift;
     my ($id) = @_;
+
+    defined ($id) or die "undefined id in call to load()";
 
     my $data;
     if ( defined $id && -e _full_path($id) ) {
 
-        #$data = retrieve($id.'.db') or die;
         $data = require( _full_path($id) );
     }
     return $data;
@@ -65,9 +69,12 @@ sub load {
 
 # Save object identified by $id in DataStore
 sub save {
+    my $self = shift;
     my ( $id, $data ) = @_;
-    if ( defined $id && defined $data ) {
 
+    defined($id) or die "undefined id in call to save()";
+
+    if ( defined $id && defined $data ) {
         open my $out, ">", _full_path($id) or die;
         print $out Dumper($data);
         close $out;
@@ -76,6 +83,7 @@ sub save {
 
 # Check wether object identified by $id is currently stored in DataStore
 sub exists {
+    my $self = shift;
     my ($id) = shift;
 
     if ( -e _full_path($id) ) {
@@ -86,6 +94,7 @@ sub exists {
 
 # Returns a list of all object id's stored in DataStore
 sub list_id {
+    my $self = shift;
     my @list;
     my $path  = $_PATH;
     my @files = <$path.*.'.db'>;
@@ -97,7 +106,8 @@ sub list_id {
 }
 
 sub remove {
-    my $id   = shift;
+    my $self = shift;
+    my $id = shift;
 
     if ( DataStore->exists($id) ) {
         unlink _full_path($id)
@@ -106,14 +116,15 @@ sub remove {
 }
 
 sub next_id {
+    my $self = shift;
     my ($kind) = @_;
-    my $data   = 1;
+    my $data = 1;
     if ( defined $kind ) {
-        if ( -e $db_path . '/next_' . $kind ) {
-            $data = require( $db_path . '/next_' . $kind );
+        if ( -e $_PATH . 'next_' . $kind ) {
+            $data = require( $_PATH . 'next_' . $kind );
             $data++;
         }
-        open my $out, ">", $db_path . '/next_' . $kind or die;
+        open my $out, ">", $_PATH . 'next_' . $kind or confess "$_PATH $! !!!";
         print $out Dumper($data);
         close $out;
         return $data;
@@ -124,7 +135,8 @@ sub next_id {
 }
 
 sub clean {
-	File::Path->rmtree($_PATH);
+    my $self = shift;
+    File::Path->rmtree($_PATH);
 }
 
 1;

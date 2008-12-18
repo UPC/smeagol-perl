@@ -128,7 +128,7 @@ my $OPT_PARAM_TO;
 
  my ($me) = $0 =~ m{.*/(.*)};
  $USAGE = "$me [--help] [--debug] ".
-          "--server=\"http:\/\/localhost\/\"".
+          "--server=localhost".
           "--port=80".
           "[--command=\" list_resources \| * \"]".
           " \n";
@@ -145,6 +145,13 @@ my $OPT_PARAM_TO;
      # show_help();
  }
 }
+
+#######################################################################
+#
+# kernel of script.
+#
+
+Client::new();
 
 #######################################################################
 #

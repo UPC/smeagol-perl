@@ -135,6 +135,7 @@ sub list_id {
 sub remove {
     my $self = shift;
     DataStore->remove( $self->{id} ) if $self->{_persistent};
+    $self->{_persistent} = 0;
 }
 
 # Save Resource in DataStore

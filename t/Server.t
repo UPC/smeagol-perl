@@ -39,7 +39,6 @@ sub smeagol_request {
 }
 
 # Testing resource creation via XML
-my $resource_as_xml;
 {
     my $b1 = Booking->new(
         DateTime->new(
@@ -88,20 +87,18 @@ my $resource_as_xml;
     );
 }
 
-# Testing resource retrieval
+# Testing resource retrieval and removal
 {
     my $res = smeagol_request( 'GET', "$server/resource/2" );
     ok( $res->is_success, "resource retrieval status" );
+
     my $r = Resource->from_xml( $res->content );
     ok( defined $r, "resource retrieval $res->content" );
-}
 
-# Testing resource removal
-{
-    my $res = smeagol_request( 'DELETE', "$server/resource/2" );
-    ok( $res->is_success, $res->content );
+    $res = smeagol_request( 'DELETE', "$server/resource/" . $r->id );
+    ok( $res->is_success, "trying to remove resource: " . $res->content );
 
-    $res = smeagol_request( 'DELETE', "$server/resource/1" );
+    $res = smeagol_request( 'DELETE', "$server/resource/" . $r->id );
     ok( $res->code == 404, "non-existent resource removal $res->content" );
 }
 

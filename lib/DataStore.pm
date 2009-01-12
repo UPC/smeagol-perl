@@ -1,4 +1,8 @@
 package DataStore;
+
+use strict;
+use warnings;
+
 use Data::Dumper;
 use File::Path;
 use Carp;

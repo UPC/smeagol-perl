@@ -1,5 +1,9 @@
 # Resource class definition
 package Resource;
+
+use strict;
+use warnings;
+
 use XML::LibXML;
 use DataStore;
 use Data::Dumper;

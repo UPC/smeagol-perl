@@ -1,5 +1,8 @@
 package Booking;
 
+use strict;
+use warnings;
+
 use DateTime::Span ();
 use XML::Simple;
 use XML::LibXML;

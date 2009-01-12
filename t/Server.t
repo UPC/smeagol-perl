@@ -7,7 +7,17 @@ use Test::More tests => 9;
 use LWP::UserAgent;
 use HTTP::Request;
 
-BEGIN { use_ok($_) for qw(Server Resource Agenda Booking DateTime) }
+BEGIN {
+    # Purge old test data before testing anything
+    #use_ok("DataStore");
+    #DataStore->clean();
+    #
+    # FIXME: Purge the hard way until DataStore does it better
+    #
+    unlink glob "/tmp/smeagol_datastore/*";
+
+    use_ok($_) for qw(Server Resource Agenda Booking DateTime);
+}
 
 my $server_port = 8000;
 my $server      = "http://localhost:$server_port";
@@ -107,6 +117,4 @@ sub smeagol_request {
 
 END {
     kill 3, $pid;
-
-    #DataStore->clean();
 }

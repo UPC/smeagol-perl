@@ -35,7 +35,6 @@ my $b2 = Booking->new( datetime( 2008, 4, 14, 19 ),
 my $resource_as_xml = <<'EOF';
 <?xml version="1.0" encoding="UTF-8"?>
 <resource>
-    <id>25</id>
     <description>aula chachipilongui</description>
     <granularity>reserves diaries</granularity>
 </resource>
@@ -63,7 +62,7 @@ my $ident = $r1->id;
 ok( $r1->agenda->contains($b1),  'b1 in r1->ag' );
 ok( !$r1->agenda->contains($b2), 'b2 not in r1->ag' );
 ok( $r1->to_xml() eq
-        "<resource><id>$ident</id><description>aula chachipilongui</description><granularity>reserves diaries</granularity><agenda><booking><from><year>2008</year><month>4</month><day>14</day><hour>17</hour><minute>0</minute><second>0</second></from><to><year>2008</year><month>4</month><day>14</day><hour>18</hour><minute>59</minute><second>0</second></to></booking></agenda></resource>",
+        "<resource><description>aula chachipilongui</description><granularity>reserves diaries</granularity><agenda><booking><from><year>2008</year><month>4</month><day>14</day><hour>17</hour><minute>0</minute><second>0</second></from><to><year>2008</year><month>4</month><day>14</day><hour>18</hour><minute>59</minute><second>0</second></to></booking></agenda></resource>",
     'to_xml resource with agenda and 1 booking'
 );
 $r1->agenda->append($b2);
@@ -71,7 +70,6 @@ ok( $r1->agenda->contains($b2), 'b2 in r->ag' );
 
 my $res = Resource->from_xml( '
 <resource>
-    <id>3</id>
     <description>aula</description>
     <granularity>horaria</granularity>
     <agenda>

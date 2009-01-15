@@ -121,7 +121,7 @@ sub to_xml {
     my $self = shift;
 
     my $xml .= "<resource>";
-    $xml    .= "<id>" . $self->{id} . "</id>";
+    #$xml    .= "<id>" . $self->{id} . "</id>";
     $xml    .= "<description>" . $self->{description} . "</description>";
     $xml    .= "<granularity>" . $self->{granularity} . "</granularity>";
     $xml    .= $self->{agenda}->to_xml()

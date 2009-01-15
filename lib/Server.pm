@@ -73,6 +73,32 @@ sub handle_request {
     }
 }
 
+
+##############################
+# Private auxiliary routines #
+##############################
+
+# Returns the REST URL which identifies a given resource
+sub _rest_get_resource_url {
+    my ($self) = shift;
+    my ($resource) = shift;
+
+    return "/resource/" . $resource->id;
+}
+
+# Extracts the Resource ID from a given Resource REST URL
+sub _rest_parse_resource_url {
+    my ($self) = shift;
+    my ($url) = shift;
+
+    if ( $url =~ /\/resource\/(\w+)/ ) {
+        return $1;
+    } else {
+        return undef;
+    }
+}
+
+
 #############################################################
 # Http tools
 #############################################################

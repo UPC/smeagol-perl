@@ -8,6 +8,7 @@ use LWP::UserAgent;
 use HTTP::Request;
 
 BEGIN {
+
     # Purge old test data before testing anything
     #use_ok("DataStore");
     #DataStore->clean();
@@ -48,45 +49,46 @@ sub smeagol_request {
     );
 }
 
+# A sample resource to be used in tests
+my $b1 = Booking->new(
+    DateTime->new(
+        year   => 2008,
+        month  => 4,
+        day    => 14,
+        hour   => 10,
+        second => 0
+    ),
+    DateTime->new(
+        year   => 2008,
+        month  => 4,
+        day    => 14,
+        hour   => 10,
+        second => 59
+    )
+);
+my $b2 = Booking->new(
+    DateTime->new(
+        year   => 2008,
+        month  => 4,
+        day    => 14,
+        hour   => 11,
+        second => 0
+    ),
+    DateTime->new(
+        year   => 2008,
+        month  => 4,
+        day    => 14,
+        hour   => 11,
+        second => 59
+    )
+);
+my $ag = Agenda->new();
+$ag->append($b1);
+$ag->append($b2);
+my $resource = Resource->new( 'desc 2 2', 'gra 2 2', $ag );
+
 # Testing resource creation via XML
 {
-    my $b1 = Booking->new(
-        DateTime->new(
-            year   => 2008,
-            month  => 4,
-            day    => 14,
-            hour   => 10,
-            second => 0
-        ),
-        DateTime->new(
-            year   => 2008,
-            month  => 4,
-            day    => 14,
-            hour   => 10,
-            second => 59
-        )
-    );
-    my $b2 = Booking->new(
-        DateTime->new(
-            year   => 2008,
-            month  => 4,
-            day    => 14,
-            hour   => 11,
-            second => 0
-        ),
-        DateTime->new(
-            year   => 2008,
-            month  => 4,
-            day    => 14,
-            hour   => 11,
-            second => 59
-        )
-    );
-    my $ag = Agenda->new();
-    $ag->append($b1);
-    $ag->append($b2);
-    my $resource = Resource->new( 'desc 2 2', 'gra 2 2', $ag );
-
     my $res
         = smeagol_request( 'POST', "$server/resource", $resource->to_xml() );
     ok( $res->is_success, "resource creation status $res->status" );
@@ -102,17 +104,17 @@ sub smeagol_request {
 # SOBRE ID'S, JA QUE ES A LA PART DEL SERVER ON S'ASSIGNEN I NO A LA PART
 # DEL CLIENT.
 #{
-    #my $res = smeagol_request( 'GET', "$server/resource/2" );
-    #ok( $res->is_success, "resource retrieval status" );
+#my $res = smeagol_request( 'GET', "$server/resource/2" );
+#ok( $res->is_success, "resource retrieval status" );
 
-    #my $r = Resource->from_xml( $res->content );
-    #ok( defined $r, "resource retrieval $res->content" );
+#my $r = Resource->from_xml( $res->content );
+#ok( defined $r, "resource retrieval $res->content" );
 
-    #$res = smeagol_request( 'DELETE', "$server/resource/" . $r->id );
-    #ok( $res->is_success, "trying to remove resource: " . $res->content );
+#$res = smeagol_request( 'DELETE', "$server/resource/" . $r->id );
+#ok( $res->is_success, "trying to remove resource: " . $res->content );
 
-    #$res = smeagol_request( 'DELETE', "$server/resource/" . $r->id );
-    #ok( $res->code == 404, "non-existent resource removal $res->content" );
+#$res = smeagol_request( 'DELETE', "$server/resource/" . $r->id );
+#ok( $res->code == 404, "non-existent resource removal $res->content" );
 #}
 
 END {

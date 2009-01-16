@@ -73,14 +73,13 @@ sub handle_request {
     }
 }
 
-
 ##############################
 # Private auxiliary routines #
 ##############################
 
 # Returns the REST URL which identifies a given resource
 sub _rest_get_resource_url {
-    my ($self) = shift;
+    my ($self)     = shift;
     my ($resource) = shift;
 
     return "/resource/" . $resource->id;
@@ -89,15 +88,38 @@ sub _rest_get_resource_url {
 # Extracts the Resource ID from a given Resource REST URL
 sub _rest_parse_resource_url {
     my ($self) = shift;
-    my ($url) = shift;
+    my ($url)  = shift;
 
-    if ( $url =~ /\/resource\/(\w+)/ ) {
+    if ( $url =~ m|/resource/(\w+)| ) {
         return $1;
-    } else {
+    }
+    else {
         return undef;
     }
 }
 
+# Adds xlink attributes defining REST locator for Resources
+sub _rest_resource_to_xml {
+    my ($self)     = shift;
+    my ($resource) = shift;
+    my $xml        = $resource->to_xml();
+
+    my $resource_url = _rest_get_resource_url($resource);
+
+# Add xlink decorations to <resource>, <agenda> and <booking> tag elements
+# We could use XML::LibXML DOM interface, but Perl regex are easier (I never tought I would say something like this)
+    $xml
+        =~ s|<resource>|<resource xmlns:xlink="http:/www.w3.org/1999/xlink" xlink:type="simple" xlink:href="$resource_url">|;
+
+    $xml
+        =~ s|<agenda>|<agenda xlink:type="simple" xlink:href="$resource_url/bookings">|;
+
+    $xml
+        =~ s|<booking>|<booking xlink:type="simple" xlink:href="$resource_url/bookings/ID">|
+        ;    # FIXME: Bookings must have IDs!!!!
+
+    return $prefix . $xml;
+}
 
 #############################################################
 # Http tools

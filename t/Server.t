@@ -3,9 +3,11 @@
 use strict;
 use warnings;
 
-use Test::More tests => 9;
+use Test::More tests => 13;
 use LWP::UserAgent;
 use HTTP::Request;
+use XML::Simple;
+use Carp;
 
 BEGIN {
 
@@ -44,7 +46,9 @@ sub smeagol_request {
 {
     my $res = smeagol_request( 'GET', "$server/resources" );
     ok( $res->is_success, 'resource list retrieval status' );
-    ok( $res->content eq "<resources></resources>\n",
+
+    ok( $res->content =~
+        m|<resources xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="/resources"></resources>| ,
         "resource list content $res->content"
     );
 }
@@ -94,28 +98,37 @@ my $resource = Resource->new( 'desc 2 2', 'gra 2 2', $ag );
     ok( $res->is_success, "resource creation status $res->status" );
 
     my $r = Resource->from_xml( $res->content );
+
+	my $xmltree = XMLin($res->content);
+    #carp "*** $xmltree->{'xlink:href'} ***";
+
     ok( $r->description eq $resource->description,
-        "resource creation content $res->content"
-    );
+        "resource creation content $res->content");
 }
 
 # Testing resource retrieval and removal
-# AQUEST APARTAT ESTA COMENTAT PERQUE S'HA D'ADAPTAR A LA NOVA FILOSOFIA
-# SOBRE ID'S, JA QUE ES A LA PART DEL SERVER ON S'ASSIGNEN I NO A LA PART
-# DEL CLIENT.
-#{
-#my $res = smeagol_request( 'GET', "$server/resource/2" );
-#ok( $res->is_success, "resource retrieval status" );
+{
+    # first, we create a new resource
+    my $res = smeagol_request('POST', "$server/resource", $resource->to_xml());
+    my $xmltree = XMLin($res->content);
 
-#my $r = Resource->from_xml( $res->content );
-#ok( defined $r, "resource retrieval $res->content" );
+    #carp "*** $xmltree->{'xlink:href'} ***";
 
-#$res = smeagol_request( 'DELETE', "$server/resource/" . $r->id );
-#ok( $res->is_success, "trying to remove resource: " . $res->content );
+    # retrieve the resource just created
+    $res = smeagol_request('GET', "$server$xmltree->{'xlink:href'}");
+    ok( $res->is_success, 'resource retrieval status');
 
-#$res = smeagol_request( 'DELETE', "$server/resource/" . $r->id );
-#ok( $res->code == 404, "non-existent resource removal $res->content" );
-#}
+    my $r = Resource->from_xml( $res->content );
+    ok( defined $r, "resource retrieval content $res->content" );
+
+    # delete the resource just created
+    $res = smeagol_request( 'DELETE', "$server$xmltree->{'xlink:href'}" );
+    ok( $res->is_success, "trying to remove resource: " . $res->content );
+
+    # try to retrieve the deleted resource
+    $res = smeagol_request( 'GET', "$server$xmltree->{'xlink:href'}" );
+    ok( $res->code == 404, "non-existent resource removal $res->content" );
+}
 
 END {
     kill 3, $pid;

@@ -7,6 +7,7 @@ use warnings;
 use XML::LibXML;
 use DataStore;
 use Data::Dumper;
+use Carp;
 
 # Create a new resource or fail if a resource exists in the
 # datastore with the required identifier.
@@ -73,7 +74,10 @@ sub load {
 
     return undef if ( !defined($data) );
 
-    return Resource->from_xml($data);
+    my $resource = Resource->from_xml($data);
+    $resource->id($id);
+
+    return $resource;
 }
 
 # from_xml: creates a Resource via an XML string
@@ -121,7 +125,6 @@ sub to_xml {
     my $self = shift;
 
     my $xml .= "<resource>";
-    #$xml    .= "<id>" . $self->{id} . "</id>";
     $xml    .= "<description>" . $self->{description} . "</description>";
     $xml    .= "<granularity>" . $self->{granularity} . "</granularity>";
     $xml    .= $self->{agenda}->to_xml()

@@ -101,9 +101,10 @@ sub list_id {
     my $self = shift;
     my @list;
     my $path  = $_PATH;
-    my @files = <$path.*.'.db'>;
-    foreach (@files) {
-        my ( $id, $dummy ) = split( /\./, $_ );   # remove ".db" from filename
+	foreach (glob "$path*.db") {
+    	my $id = $_;
+    	$id=~ s/\D//g;
+        #my ( $id, $dummy ) = split( /\./, $_ );   # remove ".db" from filename
         push @list, $id;
     }
     return @list;
@@ -123,12 +124,13 @@ sub next_id {
     my $self = shift;
     my ($kind) = @_;
     my $data = 1;
+	my $path = $_PATH . 'next_' . $kind;
     if ( defined $kind ) {
-        if ( -e $_PATH . 'next_' . $kind ) {
-            $data = require( $_PATH . 'next_' . $kind );
+        if ( -e $path ) {
+            $data = require( $path );
             $data++;
         }
-        open my $out, ">", $_PATH . 'next_' . $kind or confess "$_PATH $! !!!";
+        open my $out, ">", $path or confess "$_PATH $! !!!";
         print $out Dumper($data);
         close $out;
         return $data;

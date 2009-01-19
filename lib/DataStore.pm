@@ -65,8 +65,8 @@ sub load {
 
     my $data;
     if ( defined $id && -e _full_path($id) ) {
-
-        $data = require( _full_path($id) );
+        # I mean do EXPR not do SUB, hence the + sign
+        $data = do +_full_path($id);
     }
     return $data;
 }
@@ -127,7 +127,7 @@ sub next_id {
 	my $path = $_PATH . 'next_' . $kind;
     if ( defined $kind ) {
         if ( -e $path ) {
-            $data = require( $path );
+            $data = do $path;
             $data++;
         }
         open my $out, ">", $path or confess "$_PATH $! !!!";

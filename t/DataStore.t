@@ -25,7 +25,7 @@ ok($obj2 eq $obj, 'testing object saving and retrieving with just one object in 
 
 # Testing list_id with one object in DataStore
 @ids = DataStore->list_id;
-ok($#ids == 0, 'testing list_id with one object in DataStore');
+ok($#ids+1 == 1, 'testing list_id with one object in DataStore');
 
 # Testing DataStore->nest_id with one object in DataStore
 $id = DataStore->next_id('TEST');
@@ -33,8 +33,8 @@ ok($id == 2, 'testing next_id with one object in DataStore');
 
 DataStore->save(DataStore->next_id('TEST'), $obj);
 @ids = DataStore->list_id;
-carp Dumper(@ids);
-ok($#ids == 1, 'testing list_id with two objects in DataStore');
+##carp Dumper(@ids);
+ok($#ids+1 == 2, 'testing list_id with two objects in DataStore');
 
 
 END {

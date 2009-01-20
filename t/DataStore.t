@@ -11,7 +11,7 @@ BEGIN { use_ok($_) for qw(DataStore) }
 
 # Testing DataStore->list_id() with empty DataStore
 my @ids = DataStore->list_id;
-ok($#ids == -1, 'testing list_id with empty DataStore');
+ok(@ids == 0, 'testing list_id with empty DataStore');
 
 # Testing DataStore->next_id with empty DataStore
 my $id = DataStore->next_id('TEST');
@@ -25,7 +25,7 @@ ok($obj2 eq $obj, 'testing object saving and retrieving with just one object in 
 
 # Testing list_id with one object in DataStore
 @ids = DataStore->list_id;
-ok($#ids+1 == 1, 'testing list_id with one object in DataStore');
+ok(@ids == 1, 'testing list_id with one object in DataStore');
 
 # Testing DataStore->nest_id with one object in DataStore
 $id = DataStore->next_id('TEST');
@@ -33,11 +33,11 @@ ok($id == 2, 'testing next_id with one object in DataStore');
 
 DataStore->save(DataStore->next_id('TEST'), $obj);
 @ids = DataStore->list_id;
-ok($#ids+1 == 2, 'testing list_id with two objects in DataStore');
+ok(@ids == 2, 'testing list_id with two objects in DataStore');
 
 DataStore->save(DataStore->next_id('TEST'), $obj);
 @ids = DataStore->list_id;
-ok($#ids+1 == 3, 'testing list_id with three objects in DataStore');
+ok(@ids == 3, 'testing list_id with three objects in DataStore');
 
 # Testing DataStore->exist
 my $exist3 = DataStore->exists(3);
@@ -56,7 +56,7 @@ ok($id == 5, 'next_id after removing');
 
 DataStore->save(DataStore->next_id('TEST'), $obj);
 @ids = DataStore->list_id;
-ok($#ids+1 == 3, 'testing list_id with three objects in DataStore');
+ok(@ids == 3, 'testing list_id with three objects in DataStore');
 
 $id=DataStore->next_id('TEST');
 ok($id == 7, 'next_id after saving');
@@ -64,7 +64,7 @@ ok($id == 7, 'next_id after saving');
 my $object = "Hello, I am another object!";
 DataStore->save($id, $object);
 @ids = DataStore->list_id;
-ok($#ids+1 == 4, 'list_id after removing and saving');
+ok(@ids == 4, 'list_id after removing and saving');
 
 END {
     DataStore->clean();

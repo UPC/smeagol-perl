@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-use Test::More tests => 15;
+use Test::More tests => 16;
 
 use strict;
 use warnings;
@@ -67,6 +67,10 @@ my $object = "Hello, I am another object!";
 DataStore->save( $id, $object );
 @ids = DataStore->list_id;
 ok( @ids == 4, 'list_id after removing and saving' );
+
+DataStore->remove($id);
+$obj = DataStore->load($id);
+ok( !defined $obj, 'retrieval after removal' );
 
 END {
     DataStore->clean();

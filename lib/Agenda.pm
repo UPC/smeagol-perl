@@ -20,14 +20,16 @@ sub append {
     my $self = shift;
     my ($slot) = @_;
 
-    $self->insert($slot)
-        unless $self->interlace($slot);
+    ( defined $slot ) or die "Agenda->append requires one parameter";
+
+    $self->insert($slot) unless $self->interlace($slot);
 }
 
 sub interlace {
     my $self = shift;
     my ($slot) = @_;
 
+    ( defined $slot ) or die "Agenda->interlace requires one parameter";
     return grep { $slot->intersects($_) } $self->elements;
 }
 

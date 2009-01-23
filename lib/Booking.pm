@@ -24,7 +24,16 @@ sub new {
         end   => $to,
     );
 
+    $obj->{ __PACKAGE__ . "::id"} = DataStore->next_id(__PACKAGE__);
+
     bless $obj, $class;
+}
+
+sub id {
+    my $self = shift;
+    my $field = __PACKAGE__ . "::id";
+    if (@_) { $self->{$field} = shift };
+    return $self->{$field};
 }
 
 sub __str__ {
@@ -134,6 +143,8 @@ sub from_xml {
             second => $b->{to}->{second}
         )
     );
+
+    $obj->{ __PACKAGE__ . "::id"} = DataStore->next_id(__PACKAGE__);
 
     bless $obj, $class;
 }

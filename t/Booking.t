@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-use Test::More tests => 19;
+use Test::More tests => 22;
 
 use strict;
 use warnings;
@@ -8,7 +8,14 @@ use DateTime;
 use XML::Simple;
 use Data::Compare;
 
-BEGIN { use_ok($_) for qw(Booking DataStore) }
+BEGIN { 
+    #
+    # FIXME: Purge the hard way until DataStore does it better
+    #
+    unlink glob "/tmp/smeagol_datastore/*";
+
+    use_ok($_) for qw(Booking DataStore) 
+}
 
 # Make a DateTime object with some defaults
 sub datetime {
@@ -66,6 +73,16 @@ my $b10 = Booking->new( datetime( 2008, 4, 14, 21 ),
 # 21:00 - 21:00:01
 my $b11 = Booking->new( datetime( 2009, 4, 14, 21 ),
     datetime( 2009, 4, 14, 21, 0, 1 ) );
+
+# Booking->id getter and autoincrement
+ok( $b1->id == 1, 'Booking->id getter');
+ok( $b11->id == 11, 'id increments after each Booking creation');
+
+# Booking->id setter
+$b1->id(100);
+ok( $b1->id == 100, 'Booking->id setter');
+
+$b1->id(1); # undo previous modification
 
 
 # missing parameter(s)

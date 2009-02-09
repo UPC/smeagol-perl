@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 15;
+use Test::More tests => 17;
 use LWP::UserAgent;
 use HTTP::Request;
 use XML::Simple;
@@ -52,15 +52,14 @@ sub smeagol_url {
 # Testing retrieve empty resource list
 {
     my $res = smeagol_request( 'GET', "$server/resources" );
-    ok( $res->is_success, 'resource list retrieval status' );
+    ok( $res->is_success, 'resource list retrieval status ' . Dumper($res->code) );
 
     ok( $res->content
             =~ m|<resources xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="/resources"></resources>|,
-        "resource list content $res->content"
-    );
+        "resource list content " . Dumper($res->content));
 }
 
-# A sample resource to be used in tests
+# Build a sample resource to be used in tests
 my $b1 = Booking->new(
     DateTime->new(
         year   => 2008,
@@ -102,22 +101,21 @@ my $resource = Resource->new( 'desc 2 2', 'gra 2 2', $ag );
 {
     my $res = smeagol_request( 'POST', smeagol_url('/resource'),
         $resource->to_xml() );
-    ok( $res->code == 201, "resource creation status $res->status" );
+    ok( $res->code == 201, "resource creation status " . Dumper($res->code) );
 
     my $r = Resource->from_xml( $res->content );
 
     my $xmltree = XMLin( $res->content );
 
     ok( $r->description eq $resource->description,
-        "resource creation content $res->content"
-    );
+        "resource creation content " . Dumper($res->content));
 
 }
 
 # Testing list_id with non-empty DataStore
 {
 
-    # Count number of id's before test
+    # Count number of resources before test
     my @ids             = DataStore->list_id;
     my $id_count_before = @ids;
 
@@ -128,7 +126,7 @@ my $resource = Resource->new( 'desc 2 2', 'gra 2 2', $ag );
             $resource->to_xml() );
     }
 
-    # Count number of id's after test
+    # Count number of  after test
     @ids = DataStore->list_id;
     my $id_count_after = @ids;
 
@@ -146,23 +144,48 @@ my $resource = Resource->new( 'desc 2 2', 'gra 2 2', $ag );
 
     # retrieve the resource just created
     $res = smeagol_request( 'GET', smeagol_url( $xmltree->{'xlink:href'} ) );
-    ok( $res->code == 200, 'resource retrieval code' );
+    ok( $res->code == 200, "resource $xmltree->{'xlink:href'} retrieval, code " . Dumper($res->code) );
 
     my $r = Resource->from_xml( $res->content );
-    ok( defined $r, "resource retrieval content $res->content" );
+    ok( defined $r, "resource retrieval content " . Dumper($res->content) );
 
     # retrieve non-existent Resource
     $res = smeagol_request( 'GET', smeagol_url('/resource/666') );
-    ok( $res->code == 404, "non-existent resource retrieval" );
+    ok( $res->code == 404, "non-existent resource retrieval status " . Dumper($res->code) );
 
     # delete the resource just created
     $res = smeagol_request( 'DELETE',
         smeagol_url( $xmltree->{'xlink:href'} ) );
-    ok( $res->code == 200, "resource removal" );
+    ok( $res->code == 200, "resource removal $xmltree->{'xlink:href'}" );
 
     # try to retrieve the deleted resource
     $res = smeagol_request( 'GET', smeagol_url( $xmltree->{'xlink:href'} ) );
-    ok( $res->code == 404, "retrieval of a deleted resource" );
+    ok( $res->code == 404, "retrieval of $xmltree->{'xlink:href'} deleted resource " . Dumper( $res->code ) );
+}
+
+# Testing resource update
+{
+    # first, create a new resource
+    my $res = smeagol_request( 'POST', smeagol_url('/resource'),
+        $resource->to_xml() );
+
+    print Dumper($resource->to_xml());
+
+    ok( $res->code == '201', 'resource creation status ' . Dumper($res->code));
+    my $xmltree  = XMLin( $res->content );
+    my $r = Resource->from_xml( $res->content );
+
+    # modify description
+    my $nova_desc = 'He canviat la descripcio';
+    $r->description($nova_desc);
+
+    # update resource
+
+    $res = smeagol_request( 'POST', smeagol_url( $xmltree->{'xlink:href'} ),
+        $resource->to_xml );
+
+    ok( $res->code == 200, "resource $xmltree->{'xlink:href'} update code: " . Dumper( $res->code ) );
+
 }
 
 END {

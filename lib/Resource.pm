@@ -9,8 +9,7 @@ use DataStore;
 use Data::Dumper;
 use Carp;
 
-# Create a new resource or fail if a resource exists in the
-# datastore with the required identifier.
+# Create a new resource
 sub new {
     my $class = shift;
     my ( $description, $granularity, $agenda ) = @_;
@@ -63,7 +62,7 @@ sub agenda {
 }
 
 # Constructor that fetchs a resource from datastore
-# or fail if not exists
+# or fail if it cannot be found
 sub load {
     my $class = shift;
     my ($id) = @_;
@@ -141,7 +140,7 @@ sub list_id {
 
 sub remove {
     my $self = shift;
-    DataStore->remove( $self->{id} ) if $self->{_persistent};
+    DataStore->remove( $self->{id} );
     $self->{_persistent} = 0;
 }
 

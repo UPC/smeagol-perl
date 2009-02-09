@@ -21,10 +21,10 @@ my %crud_for = (
     '/resource/(\d+)' => {
         GET    => \&_retrieve_resource,
         DELETE => \&_delete_resource,
+        POST  => \&_update_resource,
     },
     '/resource' => {
         POST => \&_create_resource,
-        PUT  => \&_update_resource,
     },
     '/resource/(\d+)/bookings' => {},
     '/booking/(\d+)'           => {},
@@ -251,25 +251,26 @@ sub _delete_resource {
 
 
 sub _update_resource {
-    my ($cgi, $url) = shift;
-    my $id = _rest_parse_resource_url($url);
+    my $cgi = shift;
+    my $id = shift;
 
     if (!defined $id) {
         _status(400);
         return;
     }
 
-    my $r = Resource->from_xml( $cgi->param('POSTDATA') );
+    my $updated_resource = Resource->from_xml( $cgi->param('POSTDATA') );
 
-    if ( !defined $r ) {
+    if ( !defined $updated_resource ) {
         _status(400);
     }
     elsif ( !defined Resource->load( $id ) ) {
         _status(404);
     }
     else {
-        $r->save();
-        _send_xml( _rest_resource_to_xml($r) );
+        $updated_resource->id($id); # change id so updated resource will overwrite old resource
+        $updated_resource->save();
+        _send_xml( _rest_resource_to_xml($updated_resource) );
     }
 }
 

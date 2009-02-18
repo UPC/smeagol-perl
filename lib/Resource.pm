@@ -92,7 +92,7 @@ sub from_xml {
 
     # validate XML string against the DTD
     my $dtd = XML::LibXML::Dtd->new( "CPL UPC//Resource DTD v0.01",
-        "http://devel.cpl.upc.edu/recursos/export/HEAD/angel/xml/resource.dtd"
+        "dtd/resource.dtd"
     );
 
     my $dom = eval { XML::LibXML->new->parse_string($xml) };

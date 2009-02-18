@@ -28,6 +28,7 @@ my %crud_for = (
     },
     '/resource/(\d+)/bookings' => {},
     '/booking/(\d+)'           => {},
+    '/dtd/(\w+)\.dtd'          => { GET => \&_send_dtd },
 );
 
 # Http request dispatcher. Sends every request to the corresponding
@@ -271,6 +272,27 @@ sub _update_resource {
         $updated_resource->id($id); # change id so updated resource will overwrite old resource
         $updated_resource->save();
         _send_xml( _rest_resource_to_xml($updated_resource) );
+    }
+}
+
+##############################################################
+# Handlers for DTD
+##############################################################
+
+sub _send_dtd {
+    my ( $cgi, $id ) = @_;
+
+    #
+    # FIXME: make it work from anywhere, now it must run from
+    #        the project base dir or won't find dtd dir
+    #
+    if ( open my $dtd, "<", "dtd/$id.dtd" ) {
+        # slurp dtd file
+        local $/;
+        _reply( '200 OK', 'text/sgml', <$dtd> );
+    }
+    else {
+        _status(400);
     }
 }
 

@@ -1,0 +1,7 @@
+<!ELEMENT resources (resource*)>
+<!ATTLIST resources
+    xmlns:xlink CDATA #IMPLIED
+    xlink:href CDATA #IMPLIED
+    xlink:type CDATA #IMPLIED>
+<!ENTITY % resourcedtd SYSTEM "resource.dtd">
+%resourcedtd;

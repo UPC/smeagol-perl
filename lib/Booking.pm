@@ -111,7 +111,7 @@ sub from_xml {
 
     # validate XML string against the DTD
     my $dtd = XML::LibXML::Dtd->new( "CPL UPC//Resource DTD v0.01",
-        "http://devel.cpl.upc.edu/recursos/export/HEAD/angel/xml/booking.dtd"
+        "dtd/booking.dtd"
     );
 
     my $doc = eval { XML::LibXML->new->parse_string($xml) };

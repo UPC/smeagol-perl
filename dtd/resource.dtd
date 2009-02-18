@@ -1,0 +1,10 @@
+<!ELEMENT resource (description, granularity, agenda?)>
+<!ATTLIST resource
+    xmlns:xlink CDATA #IMPLIED
+    xlink:href CDATA #IMPLIED
+    xlink:xmlns CDATA #IMPLIED
+    xlink:type CDATA #IMPLIED>
+<!ELEMENT description (#PCDATA)>
+<!ELEMENT granularity (#PCDATA)>
+<!ENTITY % agendadtd SYSTEM "agenda.dtd">
+%agendadtd;

@@ -57,7 +57,7 @@ sub from_xml {
 
     # validate XML string against the DTD
     my $dtd = XML::LibXML::Dtd->new( "CPL UPC//Agenda DTD v0.01",
-        "http://devel.cpl.upc.edu/recursos/export/HEAD/angel/xml/agenda.dtd"
+        "dtd/agenda.dtd"
     );
 
     my $dom = eval { XML::LibXML->new->parse_string($xml) };

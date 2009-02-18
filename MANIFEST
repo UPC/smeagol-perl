@@ -8,7 +8,6 @@ dtd/booking.dtd
 dtd/resource-list.dtd
 dtd/resource.dtd
 lib/Agenda.pm
-lib/Client.pm
 lib/Booking.pm
 lib/Client.pm
 lib/DataStore.pm
@@ -19,7 +18,6 @@ MANIFEST
 README
 server.pl
 t/Agenda.t
-t/Client.t
 t/Booking.t
 t/Client.t
 t/DataStore.t

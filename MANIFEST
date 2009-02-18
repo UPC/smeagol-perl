@@ -3,6 +3,7 @@ COPYING
 doc/diagrams/arquitectura-88.dia
 doc/diagrams/arquitectura-88.png
 lib/Agenda.pm
+lib/Client.pm
 lib/Booking.pm
 lib/DataStore.pm
 lib/Resource.pm
@@ -12,6 +13,7 @@ MANIFEST
 README
 server.pl
 t/Agenda.t
+t/Client.t
 t/Booking.t
 t/Resource.t
 t/Server.t

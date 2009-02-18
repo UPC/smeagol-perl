@@ -24,15 +24,15 @@ sub new {
         end   => $to,
     );
 
-    $obj->{ __PACKAGE__ . "::id"} = DataStore->next_id(__PACKAGE__);
+    $obj->{ __PACKAGE__ . "::id" } = DataStore->next_id(__PACKAGE__);
 
     bless $obj, $class;
 }
 
 sub id {
-    my $self = shift;
+    my $self  = shift;
     my $field = __PACKAGE__ . "::id";
-    if (@_) { $self->{$field} = shift };
+    if (@_) { $self->{$field} = shift }
     return $self->{$field};
 }
 
@@ -111,8 +111,7 @@ sub from_xml {
 
     # validate XML string against the DTD
     my $dtd = XML::LibXML::Dtd->new( "CPL UPC//Resource DTD v0.01",
-        "dtd/booking.dtd"
-    );
+        "dtd/booking.dtd" );
 
     my $doc = eval { XML::LibXML->new->parse_string($xml) };
 
@@ -144,7 +143,7 @@ sub from_xml {
         )
     );
 
-    $obj->{ __PACKAGE__ . "::id"} = DataStore->next_id(__PACKAGE__);
+    $obj->{ __PACKAGE__ . "::id" } = DataStore->next_id(__PACKAGE__);
 
     bless $obj, $class;
 }

@@ -21,14 +21,12 @@ my %crud_for = (
     '/resource/(\d+)' => {
         GET    => \&_retrieve_resource,
         DELETE => \&_delete_resource,
-        POST  => \&_update_resource,
+        POST   => \&_update_resource,
     },
-    '/resource' => {
-        POST => \&_create_resource,
-    },
+    '/resource'                => { POST => \&_create_resource, },
     '/resource/(\d+)/bookings' => {},
     '/booking/(\d+)'           => {},
-    '/dtd/(\w+)\.dtd'          => { GET => \&_send_dtd },
+    '/dtd/(\w+)\.dtd'          => { GET  => \&_send_dtd },
 );
 
 # Http request dispatcher. Sends every request to the corresponding
@@ -61,7 +59,6 @@ sub handle_request {
     # Pass parameters obtained from the pattern to action
     if ( exists $crud_for{$url_key} ) {
         if ( exists $crud_for{$url_key}->{$method} ) {
-            #carp "\n*** Serving request for $url_key method $method, id #$id ***";
             $crud_for{$url_key}->{$method}->( $cgi, $id );
         }
         else {
@@ -77,7 +74,6 @@ sub handle_request {
     }
 }
 
-
 ############################
 # REST management routines #
 ############################
@@ -88,7 +84,6 @@ sub _rest_get_resource_url {
 
     return "/resource/" . $resource->id;
 }
-
 
 # Extracts the Resource ID from a given Resource REST URL
 sub _rest_parse_resource_url {
@@ -102,8 +97,7 @@ sub _rest_parse_resource_url {
     }
 }
 
-
-# Returns XML representation of a given ID, including 
+# Returns XML representation of a given ID, including
 # all REST decoration stuff (xlink resource locator)
 sub _rest_resource_to_xml {
     my ($resource) = shift;
@@ -148,7 +142,6 @@ sub _reply {
     print "HTTP/1.0 $status\n", CGI->header($type), @output, "\n";
 }
 
-
 # Prints an Http response. Message is optional.
 sub _status {
     my ( $code, $message ) = @_;
@@ -166,7 +159,6 @@ sub _status {
     _reply( "$code $codes{$code}", 'text/plain', $message || $text );
 }
 
-
 sub _send_xml {
     my $xml = shift;
 
@@ -183,13 +175,12 @@ sub _list_resources {
     foreach my $id ( Resource->list_id ) {
         my $r = Resource->load($id);
         if ( defined $r ) {
-            $xml .= _rest_resource_to_xml($r, 0);
+            $xml .= _rest_resource_to_xml( $r, 0 );
         }
     }
     $xml .= "</resources>";
     _send_xml($xml);
 }
-
 
 sub _create_resource {
     my $cgi = shift;
@@ -199,20 +190,20 @@ sub _create_resource {
     if ( !defined $r ) {    # wrong XML argument
         _status(400);
     }
+
     # FIXME: this will never happen: clients don't provide resource IDs!!!
     #elsif ( defined Resource->load( $id ) ) {
     #    _status( 403, "Resource #$id already exists!" );
     #}
     else {
         $r->save();
-        _status( 201, _rest_resource_to_xml($r, 1) );
+        _status( 201, _rest_resource_to_xml( $r, 1 ) );
     }
 }
 
-
 sub _retrieve_resource {
     my $cgi = shift;
-    my $id = shift;
+    my $id  = shift;
 
     if ( !defined $id ) {
         _status(400);
@@ -225,16 +216,15 @@ sub _retrieve_resource {
         _status(404);
     }
     else {
-        _send_xml( _rest_resource_to_xml($r, 1) );
+        _send_xml( _rest_resource_to_xml( $r, 1 ) );
     }
 }
 
-
 sub _delete_resource {
     my $cgi = shift;
-    my $id = shift;
+    my $id  = shift;
 
-    if (!defined $id) {
+    if ( !defined $id ) {
         _status(400);
         return;
     }
@@ -250,12 +240,11 @@ sub _delete_resource {
     }
 }
 
-
 sub _update_resource {
     my $cgi = shift;
-    my $id = shift;
+    my $id  = shift;
 
-    if (!defined $id) {
+    if ( !defined $id ) {
         _status(400);
         return;
     }
@@ -265,11 +254,12 @@ sub _update_resource {
     if ( !defined $updated_resource ) {
         _status(400);
     }
-    elsif ( !defined Resource->load( $id ) ) {
+    elsif ( !defined Resource->load($id) ) {
         _status(404);
     }
     else {
-        $updated_resource->id($id); # change id so updated resource will overwrite old resource
+        # change id so updated resource will overwrite old resource
+        $updated_resource->id($id);
         $updated_resource->save();
         _send_xml( _rest_resource_to_xml($updated_resource) );
     }
@@ -287,6 +277,7 @@ sub _send_dtd {
     #        the project base dir or won't find dtd dir
     #
     if ( open my $dtd, "<", "dtd/$id.dtd" ) {
+
         # slurp dtd file
         local $/;
         _reply( '200 OK', 'text/sgml', <$dtd> );

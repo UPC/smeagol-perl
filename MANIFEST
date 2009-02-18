@@ -1,15 +1,9 @@
 Changes
-client.pl
 COPYING
 doc/diagrams/arquitectura-88.dia
 doc/diagrams/arquitectura-88.png
-dtd/agenda.dtd
-dtd/booking.dtd
-dtd/resource-list.dtd
-dtd/resource.dtd
 lib/Agenda.pm
 lib/Booking.pm
-lib/Client.pm
 lib/DataStore.pm
 lib/Resource.pm
 lib/Server.pm
@@ -19,7 +13,5 @@ README
 server.pl
 t/Agenda.t
 t/Booking.t
-t/Client.t
-t/DataStore.t
 t/Resource.t
 t/Server.t

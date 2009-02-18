@@ -10,7 +10,7 @@ use Resource;
 use Storable qw(nstore retrieve);
 
 sub datetime {
-    my ( $year, $month, $day, $hour, $minute ) = @_;
+    my ($year, $month, $day, $hour, $minute) = @_;
 
     return DateTime->new(
         year   => $year   || '2008',
@@ -21,25 +21,25 @@ sub datetime {
     );
 }
 
+
 my $ag;
 
-if ( -e 'foo.db' ) {
+if (-e 'foo.db') {
     $ag = retrieve('foo.db') or die;
     warn $ag->to_xml;
 
 }
 else {
-
     # Create an agenda
 
-    my $b1 = Booking->new( datetime( 2008, 4, 14, 17 ),
-        datetime( 2008, 4, 14, 18, 59 ) );
+    my $b1 = Booking->new(datetime(2008, 4, 14, 17),
+                      datetime(2008,4,14,18,59));
 
-    my $b2 = Booking->new( datetime( 2008, 4, 14, 19 ),
-        datetime( 2008, 4, 14, 19, 59 ) );
+    my $b2 = Booking->new(datetime(2008,4,14,19),
+                      datetime(2008,4,14,19,59));
 
-    my $b3 = Booking->new( datetime( 2008, 4, 14, 15 ),
-        datetime( 2008, 4, 14, 17, 59 ) );
+    my $b3 = Booking->new(datetime(2008,4,14,15),
+                      datetime(2008,4,14,17,59));
 
     $ag = Agenda->new();
 
@@ -53,10 +53,9 @@ else {
             <id>25</id>
             <description>aula chachipilongui</description>
             <granularity>reserves diaries</granularity>
-        </resource>"
-    );
-
+        </resource>");
+    
 }
 
-nstore( $ag, 'foo.db' ) or die;
+nstore($ag, 'foo.db') or die;
 print "bye!\n";

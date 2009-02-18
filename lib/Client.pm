@@ -9,7 +9,6 @@ use Agenda;
 use Booking;
 use LWP::UserAgent;
 use Carp;
-use Data::Dumper;
 
 my %COMMAND_VALID = map { $_ => 1 } qw( POST GET PUT DELETE );
 
@@ -58,8 +57,8 @@ sub list_resources {
 
     my $ua  = LWP::UserAgent->new();
     my $res = $ua->get("http://$server:$port/resources");
-	
-	return
+
+    return
         wantarray ? ( $res->status_line, $res->content ) : $res->status_line;
 }
 
@@ -67,9 +66,10 @@ sub list_resources {
 
 sub create_resource {
     my $self = shift;
-    my ( $des, $gra ) = @_;
+    my ( $id, $des, $gra ) = @_;
 
     my $res_xml = "<resource>
+					<id>$id</id>
 					<description>$des</description>
 					<granularity>$gra</granularity>
 					</resource>";
@@ -79,8 +79,8 @@ sub create_resource {
 
     my $ua  = LWP::UserAgent->new();
     my $res = $ua->request($req);
-    return
-        wantarray ? ( $res->status_line, $res->content ) : $res->status_line;
+
+    return $res->status_line;
 }
 
 sub update_resource {
@@ -88,18 +88,19 @@ sub update_resource {
     my ( $id, $des, $gra ) = @_;
 
     my $res_xml = "<resource>
+					<id>$id</id>
 					<description>$des</description>
 					<granularity>$gra</granularity>
 					</resource>";
-    my $req = HTTP::Request->new( PUT => "http://$server:$port/resource/$id" );
-
+    my $req
+        = HTTP::Request->new( PUT => "http://$server:$port/resource/$id" );
     $req->content_type('text/xml');
     $req->content($res_xml);
 
     my $ua  = LWP::UserAgent->new();
     my $res = $ua->request($req);
 
-    return $res->content;
+    return $res->status_line;
 }
 
 #/resource/[ID]

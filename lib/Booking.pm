@@ -1,8 +1,5 @@
 package Booking;
 
-use strict;
-use warnings;
-
 use DateTime::Span ();
 use XML::Simple;
 use XML::LibXML;
@@ -24,16 +21,7 @@ sub new {
         end   => $to,
     );
 
-    $obj->{ __PACKAGE__ . "::id" } = DataStore->next_id(__PACKAGE__);
-
     bless $obj, $class;
-}
-
-sub id {
-    my $self  = shift;
-    my $field = __PACKAGE__ . "::id";
-    if (@_) { $self->{$field} = shift }
-    return $self->{$field};
 }
 
 sub __str__ {
@@ -111,7 +99,8 @@ sub from_xml {
 
     # validate XML string against the DTD
     my $dtd = XML::LibXML::Dtd->new( "CPL UPC//Resource DTD v0.01",
-        "dtd/booking.dtd" );
+        "http://devel.cpl.upc.edu/recursos/export/HEAD/angel/xml/booking.dtd"
+    );
 
     my $doc = eval { XML::LibXML->new->parse_string($xml) };
 
@@ -142,8 +131,6 @@ sub from_xml {
             second => $b->{to}->{second}
         )
     );
-
-    $obj->{ __PACKAGE__ . "::id" } = DataStore->next_id(__PACKAGE__);
 
     bless $obj, $class;
 }

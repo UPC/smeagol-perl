@@ -1,9 +1,8 @@
-llesca1 versió 0.01
-====================
+smeagol versió 0.01 (alpha)
+===========================
 
-Aquesta és una prova preliminar del projecte Sméagol que serveix
-com a demostració de com es comença un projecte senzill en Perl,
-com s'instal·la i com es pot verificar que funciona correctament.
+Aquesta és la prova pilot del projecte Sméagol, que pretén construir
+un gestor de recursos descentralitzat basat en components.
 
 INSTAL·LACIÓ
 
@@ -16,7 +15,7 @@ Per instal·lar aquesta prova executeu:
 
 DEPENDÈNCIES
 
-Aquesta prova depèn d'aquests altres mòduls:
+Aquesta distribució depèn d'aquests altres mòduls:
 
   +---------------------------+----------------------------+
   | Mòdul                     | Paquet Debian/Ubuntu       |

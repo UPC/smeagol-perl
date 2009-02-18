@@ -8,7 +8,7 @@ use DateTime;
 use XML::Simple;
 use Data::Compare;
 
-BEGIN { use_ok($_) for qw(Booking Resource Agenda DataStore) }
+BEGIN { use_ok($_) for qw(Booking Resource Agenda) }
 
 # Make a DateTime object with some defaults
 sub datetime {
@@ -35,41 +35,88 @@ my $b2 = Booking->new( datetime( 2008, 4, 14, 19 ),
 my $resource_as_xml = <<'EOF';
 <?xml version="1.0" encoding="UTF-8"?>
 <resource>
+    <id>25</id>
     <description>aula chachipilongui</description>
     <granularity>reserves diaries</granularity>
 </resource>
 EOF
 my $r1 = Resource->from_xml($resource_as_xml);
-ok( $r1->description eq "aula chachipilongui"
-        && $r1->granularity eq "reserves diaries",
+ok( $r1->{id}          eq "25"
+        && $r1->{desc} eq "aula chachipilongui"
+        && $r1->{gra}  eq "reserves diaries",
     'resource r created from XML string'
 );
 
 # to_xml Resource test
 my $resource_as_hash = {
+    id          => 25,
     description => "aula chachipilongui",
     granularity => "reserves diaries",
 };
-my $r2 = Resource->new( 'aula chachipilongui', 'reserves diaries' );
-my $r2bis = Resource->from_xml( $r2->to_xml() );
-ok( $r2bis->description eq 'aula chachipilongui'
-        && $r2bis->granularity eq 'reserves diaries',
-    'to_xml resource'
-);
+my $r2 = Resource->new( 25, 'aula chachipilongui', 'reserves diaries' );
+ok( Compare( XMLin( $r2->to_xml() ), $resource_as_hash ), 'to_xml resource' );
 
-$r1->agenda->append($b1);
-my $ident = $r1->id;
-ok( $r1->agenda->contains($b1),  'b1 in r1->ag' );
-ok( !$r1->agenda->contains($b2), 'b2 not in r1->ag' );
+$r1->{ag}->append($b1);
+ok( $r1->{ag}->contains($b1),  'b1 in r1->ag' );
+ok( !$r1->{ag}->contains($b2), 'b2 not in r1->ag' );
 ok( $r1->to_xml() eq
-        "<resource><description>aula chachipilongui</description><granularity>reserves diaries</granularity><agenda><booking><from><year>2008</year><month>4</month><day>14</day><hour>17</hour><minute>0</minute><second>0</second></from><to><year>2008</year><month>4</month><day>14</day><hour>18</hour><minute>59</minute><second>0</second></to></booking></agenda></resource>",
+        "<resource><id>25</id><description>aula chachipilongui</description><granularity>reserves diaries</granularity><agenda><booking><from><year>2008</year><month>4</month><day>14</day><hour>17</hour><minute>0</minute><second>0</second></from><to><year>2008</year><month>4</month><day>14</day><hour>18</hour><minute>59</minute><second>0</second></to></booking></agenda></resource>",
     'to_xml resource with agenda and 1 booking'
 );
-$r1->agenda->append($b2);
-ok( $r1->agenda->contains($b2), 'b2 in r->ag' );
+$r1->{ag}->append($b2);
+ok( $r1->{ag}->contains($b2), 'b2 in r->ag' );
+
+$resource_as_hash = {
+    id          => 25,
+    description => "aula chachipilongui",
+    granularity => "reserves diaries",
+    agenda      => {
+        booking => [
+            {   from => {
+                    year   => 2008,
+                    month  => 4,
+                    day    => 14,
+                    hour   => 17,
+                    minute => 0,
+                    second => 0,
+                },
+                to => {
+                    year   => 2008,
+                    month  => 4,
+                    day    => 14,
+                    hour   => 18,
+                    minute => 59,
+                    second => 0,
+                },
+            },
+            {   from => {
+                    year   => 2008,
+                    month  => 4,
+                    day    => 14,
+                    hour   => 19,
+                    minute => 0,
+                    second => 0,
+                },
+                to => {
+                    year   => 2008,
+                    month  => 4,
+                    day    => 14,
+                    hour   => 19,
+                    minute => 59,
+                    second => 0,
+                },
+            },
+
+        ],
+    },
+};
+ok( Compare( XMLin( $r1->to_xml() ), $resource_as_hash ),
+    'to_xml resource with agenda and 2 bookings'
+);
 
 my $res = Resource->from_xml( '
 <resource>
+    <id>3</id>
     <description>aula</description>
     <granularity>horaria</granularity>
     <agenda>
@@ -111,10 +158,9 @@ my $res = Resource->from_xml( '
         </booking>
     </agenda>
 </resource>' );
-ok(        $res->description eq 'aula'
-        && $res->granularity eq 'horaria'
+ok(        $res->{id} eq '3'
+        && $res->{desc} eq 'aula'
+        && $res->{gra}  eq 'horaria'
         && 'from_xml resource' );
 
-END {
-    DataStore->clean();
-}
+END { unlink </tmp/smeagol_datastore/*.db> }

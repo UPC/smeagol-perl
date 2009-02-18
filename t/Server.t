@@ -3,25 +3,11 @@
 use strict;
 use warnings;
 
-use Test::More tests => 17;
+use Test::More tests => 13;
 use LWP::UserAgent;
 use HTTP::Request;
-use XML::Simple;
-use Carp;
-use Data::Dumper;
 
-BEGIN {
-
-    # Purge old test data before testing anything
-    #use_ok("DataStore");
-    #DataStore->clean();
-    #
-    # FIXME: Purge the hard way until DataStore does it better
-    #
-    unlink glob "/tmp/smeagol_datastore/*";
-
-    use_ok($_) for qw(Server Resource Agenda Booking DateTime);
-}
+BEGIN { use_ok($_) for qw(Server Resource Agenda Booking DateTime) }
 
 my $server_port = 8000;
 my $server      = "http://localhost:$server_port";
@@ -43,166 +29,84 @@ sub smeagol_request {
     return $res;
 }
 
-# Auxiliary routine to generate smeagol absolute URLs
-sub smeagol_url {
-    my $suffix = shift;
-    return $server . $suffix;
-}
-
 # Testing retrieve empty resource list
 {
     my $res = smeagol_request( 'GET', "$server/resources" );
-    ok( $res->is_success,
-        'resource list retrieval status ' . Dumper( $res->code ) );
-
-    ok( $res->content
-            =~ m|<resources xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="/resources"></resources>|,
-        "resource list content " . Dumper( $res->content )
+    ok( $res->is_success, 'resource list retrieval status' );
+    ok( $res->content eq "<resources></resources>\n",
+        "resource list content $res->content"
     );
 }
-
-# Build a sample resource to be used in tests
-my $b1 = Booking->new(
-    DateTime->new(
-        year   => 2008,
-        month  => 4,
-        day    => 14,
-        hour   => 10,
-        second => 0
-    ),
-    DateTime->new(
-        year   => 2008,
-        month  => 4,
-        day    => 14,
-        hour   => 10,
-        second => 59
-    )
-);
-my $b2 = Booking->new(
-    DateTime->new(
-        year   => 2008,
-        month  => 4,
-        day    => 14,
-        hour   => 11,
-        second => 0
-    ),
-    DateTime->new(
-        year   => 2008,
-        month  => 4,
-        day    => 14,
-        hour   => 11,
-        second => 59
-    )
-);
-my $ag = Agenda->new();
-$ag->append($b1);
-$ag->append($b2);
-my $resource = Resource->new( 'desc 2 2', 'gra 2 2', $ag );
 
 # Testing resource creation via XML
+my $resource_as_xml;
 {
-    my $res = smeagol_request( 'POST', smeagol_url('/resource'),
-        $resource->to_xml() );
-    ok( $res->code == 201,
-        "resource creation status " . Dumper( $res->code ) );
+    my $b1 = Booking->new(
+        DateTime->new(
+            year   => 2008,
+            month  => 4,
+            day    => 14,
+            hour   => 10,
+            second => 0
+        ),
+        DateTime->new(
+            year   => 2008,
+            month  => 4,
+            day    => 14,
+            hour   => 10,
+            second => 59
+        )
+    );
+    my $b2 = Booking->new(
+        DateTime->new(
+            year   => 2008,
+            month  => 4,
+            day    => 14,
+            hour   => 11,
+            second => 0
+        ),
+        DateTime->new(
+            year   => 2008,
+            month  => 4,
+            day    => 14,
+            hour   => 11,
+            second => 59
+        )
+    );
+    my $ag = Agenda->new();
+    $ag->append($b1);
+    $ag->append($b2);
+    my $resource = Resource->new( 2, 'desc 2 2', 'gra 2 2', $ag );
+
+    my $res
+        = smeagol_request( 'POST', "$server/resource", $resource->to_xml() );
+    ok( $res->is_success, "resource creation status $res->status" );
 
     my $r = Resource->from_xml( $res->content );
-
-    my $xmltree = XMLin( $res->content );
-
-    ok( $r->description eq $resource->description,
-        "resource creation content " . Dumper( $res->content ) );
-
+    ok( $r->{id} eq $resource->{id} && $r->{desc} eq $resource->{desc},
+        "resource creation content $res->content" );
 }
 
-# Testing list_id with non-empty DataStore
+# Testing resource retrieval
 {
-
-    # Count number of resources before test
-    my @ids             = DataStore->list_id;
-    my $id_count_before = @ids;
-
-    # Create several resources
-    my $quants = 3;
-    for ( my $i = 0; $i < $quants; $i++ ) {
-        my $res = smeagol_request( 'POST', smeagol_url('/resource'),
-            $resource->to_xml() );
-    }
-
-    # Count number of  after test
-    @ids = DataStore->list_id;
-    my $id_count_after = @ids;
-
-    ok( $id_count_after == $id_count_before + $quants,
-        'list_id with non-empty datastore' );
-}
-
-# Testing resource retrieval and removal
-{
-
-    # first, we create a new resource
-    my $res = smeagol_request( 'POST', smeagol_url('/resource'),
-        $resource->to_xml() );
-    my $xmltree = XMLin( $res->content );
-
-    # retrieve the resource just created
-    $res = smeagol_request( 'GET', smeagol_url( $xmltree->{'xlink:href'} ) );
-    ok( $res->code == 200,
-        "resource $xmltree->{'xlink:href'} retrieval, code "
-            . Dumper( $res->code )
-    );
-
+    my $res = smeagol_request( 'GET', "$server/resource/2" );
+    ok( $res->is_success, "resource retrieval status" );
     my $r = Resource->from_xml( $res->content );
-    ok( defined $r, "resource retrieval content " . Dumper( $res->content ) );
-
-    # retrieve non-existent Resource
-    $res = smeagol_request( 'GET', smeagol_url('/resource/666') );
-    ok( $res->code == 404,
-        "non-existent resource retrieval status " . Dumper( $res->code ) );
-
-    # delete the resource just created
-    $res = smeagol_request( 'DELETE',
-        smeagol_url( $xmltree->{'xlink:href'} ) );
-    ok( $res->code == 200, "resource removal $xmltree->{'xlink:href'}" );
-
-    # try to retrieve the deleted resource
-    $res = smeagol_request( 'GET', smeagol_url( $xmltree->{'xlink:href'} ) );
-    ok( $res->code == 404,
-        "retrieval of $xmltree->{'xlink:href'} deleted resource "
-            . Dumper( $res->code )
+    ok( ( defined $r ) && $r->{id} eq '2',
+        "resource retrieval $res->content"
     );
 }
 
-# Testing resource update
+# Testing resource removal
 {
+    my $res = smeagol_request( 'DELETE', "$server/resource/2" );
+    ok( $res->is_success, $res->content );
 
-    # first, create a new resource
-    my $res = smeagol_request( 'POST', smeagol_url('/resource'),
-        $resource->to_xml() );
-
-    print Dumper( $resource->to_xml() );
-
-    ok( $res->code == '201',
-        'resource creation status ' . Dumper( $res->code ) );
-    my $xmltree = XMLin( $res->content );
-    my $r       = Resource->from_xml( $res->content );
-
-    # modify description
-    my $nova_desc = 'He canviat la descripcio';
-    $r->description($nova_desc);
-
-    # update resource
-
-    $res = smeagol_request( 'POST', smeagol_url( $xmltree->{'xlink:href'} ),
-        $resource->to_xml );
-
-    ok( $res->code == 200,
-        "resource $xmltree->{'xlink:href'} update code: "
-            . Dumper( $res->code )
-    );
-
+    $res = smeagol_request( 'DELETE', "$server/resource/1" );
+    ok( $res->code == 404, "non-existent resource removal $res->content" );
 }
 
 END {
     kill 3, $pid;
+    unlink </tmp/*.db>;
 }

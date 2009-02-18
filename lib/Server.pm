@@ -6,6 +6,7 @@ use warnings;
 use HTTP::Server::Simple::CGI;
 use base qw(HTTP::Server::Simple::CGI);
 use CGI qw();
+use Carp;
 
 use Resource;
 
@@ -20,13 +21,12 @@ my %crud_for = (
     '/resource/(\d+)' => {
         GET    => \&_retrieve_resource,
         DELETE => \&_delete_resource,
+        POST   => \&_update_resource,
     },
-    '/resource' => {
-        POST => \&_create_resource,
-        PUT  => \&_update_resource,
-    },
+    '/resource'                => { POST => \&_create_resource, },
     '/resource/(\d+)/bookings' => {},
     '/booking/(\d+)'           => {},
+    '/dtd/(\w+)\.dtd'          => { GET  => \&_send_dtd },
 );
 
 # Http request dispatcher. Sends every request to the corresponding
@@ -43,6 +43,7 @@ sub handle_request {
     # Find the corresponding action
     my $url_key = 'default_action';
     my $id;
+
     foreach my $url_pattern ( keys(%crud_for) ) {
 
         # Anchor pattern and allow URLs ending in '/'
@@ -71,6 +72,63 @@ sub handle_request {
         # Requested URL not available
         _status(404);
     }
+}
+
+############################
+# REST management routines #
+############################
+
+# Returns the REST URL which identifies a given resource
+sub _rest_get_resource_url {
+    my ($resource) = shift;
+
+    return "/resource/" . $resource->id;
+}
+
+# Extracts the Resource ID from a given Resource REST URL
+sub _rest_parse_resource_url {
+    my ($url) = shift;
+
+    if ( $url =~ /\/resource\/(\w+)/ ) {
+        return $1;
+    }
+    else {
+        return undef;
+    }
+}
+
+# Returns XML representation of a given ID, including
+# all REST decoration stuff (xlink resource locator)
+sub _rest_resource_to_xml {
+    my ($resource) = shift;
+    my ($include_ns)
+        = shift; # wether to include or not the Xlink namespace declaration in
+                 # result string (it might already been declared in
+                 # an external tag where this xml fragment is included)
+
+    my $xml          = $resource->to_xml();
+    my $resource_url = _rest_get_resource_url($resource);
+
+    # Add xlink decorations to <resource>, <agenda> and <booking> tag elements
+    # We could use XML::LibXML DOM interface, but Perl regex are easier
+    # (I never tought I would say something like this)
+    if ($include_ns) {
+        $xml
+            =~ s|<\s*resource\s*>|<resource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="$resource_url">|g;
+    }
+    else {
+        $xml
+            =~ s|<\s*resource\s*>|<resource xlink:type="simple" xlink:href="$resource_url">|g;
+    }
+
+    $xml
+        =~ s|<\s*agenda\s*>|<agenda xlink:type="simple" xlink:href="$resource_url/bookings">|g;
+
+    # FIXME: Bookings must have IDs???
+    $xml
+        =~ s|<\s*booking\s*>|<booking xlink:type="simple" xlink:href="$resource_url/bookings/ID">|g;
+
+    return $xml;
 }
 
 #############################################################
@@ -112,11 +170,12 @@ sub _send_xml {
 ##############################################################
 
 sub _list_resources {
-    my $xml = "<resources>";
+    my $xml
+        = '<resources xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="/resources">';
     foreach my $id ( Resource->list_id ) {
         my $r = Resource->load($id);
         if ( defined $r ) {
-            $xml .= $r->to_xml();
+            $xml .= _rest_resource_to_xml( $r, 0 );
         }
     }
     $xml .= "</resources>";
@@ -131,12 +190,14 @@ sub _create_resource {
     if ( !defined $r ) {    # wrong XML argument
         _status(400);
     }
-    elsif ( DataStore->exists( $r->{id} ) ) {
-        _status( 403, "Resource #$r->{id} already exists!" );
-    }
+
+    # FIXME: this will never happen: clients don't provide resource IDs!!!
+    #elsif ( defined Resource->load( $id ) ) {
+    #    _status( 403, "Resource #$id already exists!" );
+    #}
     else {
         $r->save();
-        _status( 201, $r->to_xml() );
+        _status( 201, _rest_resource_to_xml( $r, 1 ) );
     }
 }
 
@@ -146,42 +207,83 @@ sub _retrieve_resource {
 
     if ( !defined $id ) {
         _status(400);
+        return;
     }
-    elsif ( !DataStore->exists($id) ) {
+
+    my $r = Resource->load($id);
+
+    if ( !defined $r ) {
         _status(404);
     }
     else {
-        _send_xml( DataStore->load($id) );
+        _send_xml( _rest_resource_to_xml( $r, 1 ) );
     }
 }
 
 sub _delete_resource {
-    my ( undef, $id ) = @_;
+    my $cgi = shift;
+    my $id  = shift;
 
-    if ( !DataStore->exists($id) ) {
+    if ( !defined $id ) {
+        _status(400);
+        return;
+    }
+
+    my $r = Resource->load($id);
+
+    if ( !defined $r ) {
         _status( 404, "Resource #$id does not exist" );
     }
     else {
-        DataStore->remove($id);
+        $r->remove();
         _status( 200, "Resource #$id deleted" );
     }
 }
 
 sub _update_resource {
     my $cgi = shift;
+    my $id  = shift;
 
-    my $r = Resource->from_xml( $cgi->param('POSTDATA') );
+    if ( !defined $id ) {
+        _status(400);
+        return;
+    }
 
-    if ( !defined $r ) {
+    my $updated_resource = Resource->from_xml( $cgi->param('POSTDATA') );
+
+    if ( !defined $updated_resource ) {
         _status(400);
     }
-    elsif ( !DataStore->exists( $r->{id} ) ) {
+    elsif ( !defined Resource->load($id) ) {
         _status(404);
     }
     else {
-        my $resource_xml = $r->to_xml();
-        DataStore->save($resource_xml);
-        _send_xml($resource_xml);
+        # change id so updated resource will overwrite old resource
+        $updated_resource->id($id);
+        $updated_resource->save();
+        _send_xml( _rest_resource_to_xml($updated_resource) );
+    }
+}
+
+##############################################################
+# Handlers for DTD
+##############################################################
+
+sub _send_dtd {
+    my ( $cgi, $id ) = @_;
+
+    #
+    # FIXME: make it work from anywhere, now it must run from
+    #        the project base dir or won't find dtd dir
+    #
+    if ( open my $dtd, "<", "dtd/$id.dtd" ) {
+
+        # slurp dtd file
+        local $/;
+        _reply( '200 OK', 'text/sgml', <$dtd> );
+    }
+    else {
+        _status(400);
     }
 }
 

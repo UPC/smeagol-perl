@@ -5,30 +5,38 @@ use warnings;
 use Getopt::Long;
 
 use Server;
+use DataStore;
 
 my $version   = "Smeagol server v0.1";
-my $copyright = "Copyright (C) 2008 Universitat Politècnica de Catalunya";
+my $copyright = <<END;
+Copyright (C) 2008  Angel Aguilera <angel.aguilera\@upc.edu>
+Copyright (C) 2008  Eulàlia Formentí <eulalia.formenti\@upc.edu>
+Copyright (C) 2008  Francesc Guasch <frankie\@etsetb.upc.edu>
+Copyright (C) 2008  Francisco Morillas <fmorillas\@etsetb.upc.edu>
+Copyright (C) 2008  Alex Muntada <alexm\@alexm.org>
+Copyright (C) 2008  Isabel Polo <ipolo\@etsetb.upc.edu>
+Copyright (C) 2008  Sebastià Vila <sebas\@lsi.upc.edu>
+END
 
-####################################################
-# License messages (using the GPLv3 as an example) #
-####################################################
+#####################################
+# License messages (GNU Affero GPL) #
+#####################################
 
 # Long license message
 my $license_full = <<END;
 $version
 $copyright
-
 This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+GNU Affero General Public License for more details.
 
-You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 END
 
@@ -36,21 +44,22 @@ END
 my $license_short = <<END;
 $version
 $copyright
-
 This is free software; see the source for copying conditions.  There is NO
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+See the GNU Affero General Public License for more details.
 END
 
 # command-line options (with default values)
 my $opt_port         = 8000;
 my $opt_host         = '';
 my $opt_background   = '';
-my $opt_log_file     = '';     # option not yet implemented
-my $opt_error_file   = '';     # option not yet implemented
+my $opt_log_file     = '';                        # option not yet implemented
+my $opt_error_file   = '';                        # option not yet implemented
 my $opt_debug        = '';
 my $opt_show_version = '';
 my $opt_show_license = '';
 my $opt_show_help    = '';
+my $opt_storage_path = '/tmp/smeagol_datastore';
 
 # parse command-line options
 
@@ -59,11 +68,12 @@ my $result = GetOptions(
     "host=s"     => \$opt_host,           # no modifier; means "flag value"
     "log=s"      => \$opt_log_file,       # =s means "requires string value"
     "error=s"    => \$opt_error_file,
+    "storage=s"  => \$opt_storage_path,
     "debug"      => \$opt_debug,
     "background" => \$opt_background,
     "version"    => \$opt_show_version,
     "license"    => \$opt_show_license,
-    "help"       => \$opt_show_help
+    "help"       => \$opt_show_help,
 );
 
 # Perform action according to options
@@ -105,6 +115,7 @@ General options:
                         (This option is not yet implemented)
     --errors <file>   Log errors to file <file> (default: stdout)
                         (This option is not yet implemented)
+    --storage <dir>   Directory where datastore resides
     --debug           Show debug messages in log (see --log)
     --version         Show program version
     --license         Show program license
@@ -136,6 +147,10 @@ sub launch_server {
             . ( $error_file or "stdout" )
             . " (not implemented).\n";
     }
+
+    # initialize the datastore singleton
+    DataStore->init($opt_storage_path);
+    print "Datastore in " . $opt_storage_path;
 
     my $s = Server->new($port);
 

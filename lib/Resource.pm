@@ -1,25 +1,22 @@
 # Resource class definition
 package Resource;
+
+use strict;
+use warnings;
+
 use XML::LibXML;
-use DataStore ();
+use DataStore;
 use Data::Dumper;
+use Carp;
 
-# DataStore PATH should be defined externally
-# in a configuration file (smeagol.conf ?)
-$resource_datastore_path = '/tmp/smeagol_datastore';
-
-my $datastore = DataStore->new($resource_datastore_path);
-
-# Create a new resource or fail if a resource exists in the
-# datastore with the required identifier.
+# Create a new resource
 sub new {
     my $class = shift;
-    my ( $id, $desc, $gra, $ag ) = @_;
+    my ( $description, $granularity, $agenda ) = @_;
 
     return undef
-        if ( !defined($id) || !defined($desc) || !defined($gra) )
-        ;    # $ag argument is not mandatory
-    return undef if $datastore->exists($id);
+        if ( !defined($description)
+        || !defined($granularity) );    # $ag argument is not mandatory
 
     my $obj;
     my $data;
@@ -29,10 +26,11 @@ sub new {
     require Agenda;
 
     $obj = {
-        id   => $id,
-        desc => $desc,
-        gra  => $gra,
-        ag   => ( defined $ag ) ? $ag : Agenda->new(),
+        id          => _next_id(),
+        description => $description,
+        granularity => $granularity,
+        agenda      => ( defined $agenda ) ? $agenda : Agenda->new(),
+        _persistent => 0,
     };
 
     bless $obj, $class;
@@ -45,81 +43,78 @@ sub id {
     return $self->{id};
 }
 
-sub desc {
+sub description {
     my $self = shift;
-    if (@_) { $self->{desc} = shift; }
-    return $self->{desc};
+    if (@_) { $self->{description} = shift; }
+    return $self->{description};
 }
 
-sub gra {
+sub granularity {
     my $self = shift;
-    if (@_) { $self->{gra} = shift; }
-    return $self->{gra};
+    if (@_) { $self->{granularity} = shift; }
+    return $self->{granularity};
 }
 
-sub ag {
+sub agenda {
     my $self = shift;
-    if (@_) { $self->{ag} = shift; }
-    return $self->{ag};
+    if (@_) { $self->{agenda} = shift; }
+    return $self->{agenda};
 }
 
 # Constructor that fetchs a resource from datastore
-# or fail if not exists
+# or fail if it cannot be found
 sub load {
     my $class = shift;
     my ($id) = @_;
 
     return undef if ( !defined($id) );
 
-    my $data = $datastore->load($id);
+    my $data = DataStore->load($id);
 
     return undef if ( !defined($data) );
 
-    return Resource->from_xml($data);
+    my $resource = Resource->from_xml($data);
+    $resource->id($id);
+
+    return $resource;
 }
 
 # from_xml: creates a Resource via an XML string
-# (XML validation not yet implemented)
 sub from_xml {
     my $class = shift;
     my $xml   = shift;
 
-    my $obj  = {};
-    my $data = $datastore->load($id);
+    my $obj = {};
 
-    if ($data) {
-        $obj = Resource->from_xml($data);
+    # Load on runtime to get rid of cross-dependency between
+    # both Resource and Agenda
+    require Agenda;
+
+    # validate XML string against the DTD
+    my $dtd = XML::LibXML::Dtd->new( "CPL UPC//Resource DTD v0.01",
+        "dtd/resource.dtd" );
+
+    my $dom = eval { XML::LibXML->new->parse_string($xml) };
+
+    if ( ( !defined $dom ) || !$dom->is_valid($dtd) ) {
+
+        # validation failed
+        return undef;
     }
-    else {
 
-        # Load on runtime to get rid of cross-dependency between
-        # both Resource and Agenda
-        require Agenda;
+    $obj = {
+        id => _next_id(),
+        description =>
+            $dom->getElementsByTagName('description')->string_value,
+        granularity =>
+            $dom->getElementsByTagName('granularity')->string_value,
+        agenda      => Agenda->new(),
+        _persistent => 0,
+    };
 
-        # validate XML string against the DTD
-        my $dtd = XML::LibXML::Dtd->new( "CPL UPC//Resource DTD v0.01",
-            "http://devel.cpl.upc.edu/recursos/export/HEAD/angel/xml/resource.dtd"
-        );
-
-        my $dom = eval { XML::LibXML->new->parse_string($xml) };
-
-        if ( ( !defined $dom ) || !$dom->is_valid($dtd) ) {
-
-            # validation failed
-            return undef;
-        }
-
-        $obj = {
-            id   => $dom->getElementsByTagName('id')->string_value,
-            desc => $dom->getElementsByTagName('description')->string_value,
-            gra  => $dom->getElementsByTagName('granularity')->string_value,
-            ag   => Agenda->new()
-        };
-
-        if ( $dom->getElementsByTagName('agenda')->get_node(1) ) {
-            $obj->{ag} = Agenda->from_xml(
-                $dom->getElementsByTagName('agenda')->get_node(1)->toString );
-        }
+    if ( $dom->getElementsByTagName('agenda')->get_node(1) ) {
+        $obj->{agenda} = Agenda->from_xml(
+            $dom->getElementsByTagName('agenda')->get_node(1)->toString );
     }
     bless $obj, $class;
 }
@@ -128,34 +123,40 @@ sub to_xml {
     my $self = shift;
 
     my $xml .= "<resource>";
-    $xml    .= "<id>" . $self->{id} . "</id>";
-    $xml    .= "<description>" . $self->{desc} . "</description>";
-    $xml    .= "<granularity>" . $self->{gra} . "</granularity>";
-    $xml    .= $self->{ag}->to_xml()
-        if defined $self->{ag} && defined $self->{ag}->elements();
+    $xml    .= "<description>" . $self->{description} . "</description>";
+    $xml    .= "<granularity>" . $self->{granularity} . "</granularity>";
+    $xml    .= $self->{agenda}->to_xml()
+        if ( ( defined $self->{agenda} )
+        && defined( $self->{agenda}->elements ) );
     $xml .= "</resource>";
     return $xml;
 }
 
 sub list_id {
     my $self = shift;
-    return $datastore->list_id;
+    return DataStore->list_id;
+}
+
+sub remove {
+    my $self = shift;
+    DataStore->remove( $self->{id} );
+    $self->{_persistent} = 0;
 }
 
 # Save Resource in DataStore
 sub save {
     my $self = shift;
-    $datastore->save( $self->{id}, $self->to_xml() );
+    $self->{_persistent} = 1;
+    DataStore->save( $self->{id}, $self->to_xml() );
 }
 
 sub DESTROY {
     my $self = shift;
-    $self->save;
+    $self->save if ( $self->{_persistent} );
 }
 
-sub next_id {
-    my $self = shift;
-    return DataStore->next_id($self);
+sub _next_id {
+    return DataStore->next_id(__PACKAGE__);
 }
 
 1;

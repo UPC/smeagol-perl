@@ -1,5 +1,8 @@
 package Agenda;
 
+use strict;
+use warnings;
+
 use Set::Object ();
 use base qw(Set::Object);
 use XML::LibXML;
@@ -17,14 +20,16 @@ sub append {
     my $self = shift;
     my ($slot) = @_;
 
-    $self->insert($slot)
-        unless $self->interlace($slot);
+    ( defined $slot ) or die "Agenda->append requires one parameter";
+
+    $self->insert($slot) unless $self->interlace($slot);
 }
 
 sub interlace {
     my $self = shift;
     my ($slot) = @_;
 
+    ( defined $slot ) or die "Agenda->interlace requires one parameter";
     return grep { $slot->intersects($_) } $self->elements;
 }
 
@@ -52,8 +57,7 @@ sub from_xml {
 
     # validate XML string against the DTD
     my $dtd = XML::LibXML::Dtd->new( "CPL UPC//Agenda DTD v0.01",
-        "http://devel.cpl.upc.edu/recursos/export/HEAD/angel/xml/agenda.dtd"
-    );
+        "dtd/agenda.dtd" );
 
     my $dom = eval { XML::LibXML->new->parse_string($xml) };
 

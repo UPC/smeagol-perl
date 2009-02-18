@@ -111,39 +111,42 @@ my $OPT_PARAM_FROM;
 my $OPT_PARAM_TO;
 
 {
- # parse command-line options
- my $opt_show_help = '';
 
- my $result = GetOptions(
-    "server=s" => \$OPT_SERVER,     # =s means "requires string value"
-    "port=i"   => \$OPT_PORT,       # =i means "requires numeric value"
-    "command"  => \$OPT_COMMAND,    # =s means "requires string value"
-    "id"       => \$OPT_PARAM_ID,   #
-    "des"      => \$OPT_PARAM_DES,  #
-    "gra"      => \$OPT_PARAM_GRA,  #
-    "from"     => \$OPT_PARAM_FROM, #
-    "to"       => \$OPT_PARAM_TO,   #
-    "help"     => \$opt_show_help
- );
+    # parse command-line options
+    my $opt_show_help = '';
 
- my ($me) = $0 =~ m{.*/(.*)};
- $USAGE = "$me [--help] [--debug] ".
-          "--server=localhost".
-          "--port=80".
-          "[--command=\" list_resources \| * \"]".
-          " \n";
+    my $result = GetOptions(
+        "server=s" => \$OPT_SERVER,        # =s means "requires string value"
+        "port=i"   => \$OPT_PORT,          # =i means "requires numeric value"
+        "command"  => \$OPT_COMMAND,       # =s means "requires string value"
+        "id"       => \$OPT_PARAM_ID,      #
+        "des"      => \$OPT_PARAM_DES,     #
+        "gra"      => \$OPT_PARAM_GRA,     #
+        "from"     => \$OPT_PARAM_FROM,    #
+        "to"       => \$OPT_PARAM_TO,      #
+        "help"     => \$opt_show_help
+    );
 
- # Perform action according to options
+    my ($me) = $0 =~ m{.*/(.*)};
+    $USAGE
+        = "$me [--help] [--debug] "
+        . "--server=localhost"
+        . "--port=80"
+        . "[--command=\" list_resources \| * \"]" . " \n";
 
- if ( !$result ) {
-    # Error parsing options. Show errors and quit.
-    die $USAGE;
- }
- elsif ($opt_show_help) {
-     print $USAGE;
-     exit(0);
-     # show_help();
- }
+    # Perform action according to options
+
+    if ( !$result ) {
+
+        # Error parsing options. Show errors and quit.
+        die $USAGE;
+    }
+    elsif ($opt_show_help) {
+        print $USAGE;
+        exit(0);
+
+        # show_help();
+    }
 }
 
 #######################################################################
@@ -159,42 +162,58 @@ Client::new();
 #
 
 my $result = "";
-if      (command  eq "list_resources") {
-	$result = Client::list_resources();
-} elsif (command  eq "create_resource") {
-	$result = Client::create_resource( $OPT_PARAM_ID, $OPT_PARAM_DES, $OPT_PARAM_GRA );
-} elsif (command  eq "retrieve_resource") {
-	$result = Client::retrieve_resource( $OPT_PARAM_ID );
-} elsif (command  eq "delete_resource") {
-	$result = Client::delete_resource( $OPT_PARAM_ID );
-} elsif (command  eq "update_resource") {
-	$result = Client::update_resource( $OPT_PARAM_ID, $OPT_PARAM_DES, $OPT_PARAM_GRA );
-} elsif (command  eq "list_bookings_resource") {
-	$result = Client::list_bookings_resource( $OPT_PARAM_ID );
-} elsif (command  eq "create_booking_resource") {
-	$result = Client::create_booking_resource( $OPT_PARAM_ID, $OPT_PARAM_FROM, $OPT_PARAM_TO );
-} elsif (command  eq "create_booking") {
-	$result = Client::create_booking( $OPT_PARAM_ID, $OPT_PARAM_FROM, $OPT_PARAM_TO );
-} elsif (command  eq "retrieve_booking") {
-	$result = Client::retrieve_booking( $OPT_PARAM_ID );
-} elsif (command  eq "delete_booking") {
-	$result = Client::delete_booking( $OPT_PARAM_ID );
-} elsif (command  eq "update_booking") {
-	$result = Client::update_booking( $OPT_PARAM_ID, $OPT_PARAM_FROM, $OPT_PARAM_TO );
-} elsif {
-	print "???";
-	exit(0);
+if ( command eq "list_resources" ) {
+    $result = Client::list_resources();
+}
+elsif ( command eq "create_resource" ) {
+    $result = Client::create_resource( $OPT_PARAM_ID, $OPT_PARAM_DES,
+        $OPT_PARAM_GRA );
+}
+elsif ( command eq "retrieve_resource" ) {
+    $result = Client::retrieve_resource($OPT_PARAM_ID);
+}
+elsif ( command eq "delete_resource" ) {
+    $result = Client::delete_resource($OPT_PARAM_ID);
+}
+elsif ( command eq "update_resource" ) {
+    $result = Client::update_resource( $OPT_PARAM_ID, $OPT_PARAM_DES,
+        $OPT_PARAM_GRA );
+}
+elsif ( command eq "list_bookings_resource" ) {
+    $result = Client::list_bookings_resource($OPT_PARAM_ID);
+}
+elsif ( command eq "create_booking_resource" ) {
+    $result = Client::create_booking_resource( $OPT_PARAM_ID, $OPT_PARAM_FROM,
+        $OPT_PARAM_TO );
+}
+elsif ( command eq "create_booking" ) {
+    $result = Client::create_booking( $OPT_PARAM_ID, $OPT_PARAM_FROM,
+        $OPT_PARAM_TO );
+}
+elsif ( command eq "retrieve_booking" ) {
+    $result = Client::retrieve_booking($OPT_PARAM_ID);
+}
+elsif ( command eq "delete_booking" ) {
+    $result = Client::delete_booking($OPT_PARAM_ID);
+}
+elsif ( command eq "update_booking" ) {
+    $result = Client::update_booking( $OPT_PARAM_ID, $OPT_PARAM_FROM,
+        $OPT_PARAM_TO );
+}
+elsif {
+    print "???";
+    exit(0);
 }
 
 if ( !$result ) {
+
     # Error parsing options. Show errors and quit.
     die $USAGE;
- }
- else {
-     print $result;
-     exit(0);
- }
-
+}
+else {
+    print $result;
+    exit(0);
+}
 
 #######################################################################
 #

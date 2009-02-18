@@ -8,13 +8,14 @@ use DateTime;
 use XML::Simple;
 use Data::Compare;
 
-BEGIN { 
+BEGIN {
+
     #
     # FIXME: Purge the hard way until DataStore does it better
     #
     unlink glob "/tmp/smeagol_datastore/*";
 
-    use_ok($_) for qw(Booking DataStore) 
+    use_ok($_) for qw(Booking DataStore);
 }
 
 # Make a DateTime object with some defaults
@@ -51,12 +52,16 @@ my $b5 = Booking->new( datetime( 2008, 4, 14, 16 ),
     datetime( 2008, 4, 14, 16, 29 ) );
 
 # 16:29:00 - 16:29:01
-my $b6 = Booking->new( datetime( 2008, 4, 14, 16, 29, 0 ),
-    datetime( 2008, 4, 14, 16, 29, 1 ) );
+my $b6 = Booking->new(
+    datetime( 2008, 4, 14, 16, 29, 0 ),
+    datetime( 2008, 4, 14, 16, 29, 1 )
+);
 
 # 16:29:01 - 16:29:02
-my $b7 = Booking->new( datetime( 2008, 4, 14, 16, 29, 1 ),
-    datetime( 2008, 4, 14, 16, 29, 2 ) );
+my $b7 = Booking->new(
+    datetime( 2008, 4, 14, 16, 29, 1 ),
+    datetime( 2008, 4, 14, 16, 29, 2 )
+);
 
 # 17:00:00 - 19:00:00
 my $b8 = Booking->new( datetime( 2008, 4, 14, 17, 0, 0 ),
@@ -75,15 +80,14 @@ my $b11 = Booking->new( datetime( 2009, 4, 14, 21 ),
     datetime( 2009, 4, 14, 21, 0, 1 ) );
 
 # Booking->id getter and autoincrement
-ok( $b1->id == 1, 'Booking->id getter');
-ok( $b11->id == 11, 'id increments after each Booking creation');
+ok( $b1->id == 1,   'Booking->id getter' );
+ok( $b11->id == 11, 'id increments after each Booking creation' );
 
 # Booking->id setter
 $b1->id(100);
-ok( $b1->id == 100, 'Booking->id setter');
+ok( $b1->id == 100, 'Booking->id setter' );
 
-$b1->id(1); # undo previous modification
-
+$b1->id(1);    # undo previous modification
 
 # missing parameter(s)
 my $wrong = Booking->new( datetime( 2008, 4, 14, 16 ) );
@@ -153,17 +157,17 @@ ok( !defined($booking_as_xml_wrong), 'from_xml booking (with wrong XML)' );
 ok( $b1 != $b2, 'b1 != b2' );
 
 # Booking Interlacing Tests
-ok( !$b1->intersects($b2), 'b1 does not interlace b2' );
-ok( $b1->intersects($b3),  'b1 interlaces b3' );
-ok( $b1->intersects($b4),  'b1 interlaces b4' );
-ok( $b4->intersects($b5),  'b4 interlaces b5' );
-ok( $b5->intersects($b4),  'b5 interlaces b4' );
-ok( $b6->intersects($b5),  'b6 interlaces b5' );
-ok( $b6->intersects($b7),  'b6 interlaces b7' );
-ok( $b4->intersects($b8),  'b4 interlaces b8' );
-ok( $b2->intersects($b8),  'b2 interlaces b8' );
-ok( $b9->intersects($b8),  'b9 interlaces b8' );
-ok( $b9->intersects($b10),  'b9 interlaces b10' );
-ok( !$b10->intersects($b11),  'b11 does not interlace b10' );
+ok( !$b1->intersects($b2),   'b1 does not interlace b2' );
+ok( $b1->intersects($b3),    'b1 interlaces b3' );
+ok( $b1->intersects($b4),    'b1 interlaces b4' );
+ok( $b4->intersects($b5),    'b4 interlaces b5' );
+ok( $b5->intersects($b4),    'b5 interlaces b4' );
+ok( $b6->intersects($b5),    'b6 interlaces b5' );
+ok( $b6->intersects($b7),    'b6 interlaces b7' );
+ok( $b4->intersects($b8),    'b4 interlaces b8' );
+ok( $b2->intersects($b8),    'b2 interlaces b8' );
+ok( $b9->intersects($b8),    'b9 interlaces b8' );
+ok( $b9->intersects($b10),   'b9 interlaces b10' );
+ok( !$b10->intersects($b11), 'b11 does not interlace b10' );
 
 END { DataStore->clean() }

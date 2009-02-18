@@ -53,8 +53,8 @@ END
 my $opt_port         = 8000;
 my $opt_host         = '';
 my $opt_background   = '';
-my $opt_log_file     = '';     # option not yet implemented
-my $opt_error_file   = '';     # option not yet implemented
+my $opt_log_file     = '';                        # option not yet implemented
+my $opt_error_file   = '';                        # option not yet implemented
 my $opt_debug        = '';
 my $opt_show_version = '';
 my $opt_show_license = '';

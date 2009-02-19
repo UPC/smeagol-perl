@@ -10,6 +10,8 @@ use Booking;
 use LWP::UserAgent;
 use Carp;
 use Data::Dumper;
+use XML::LibXML;
+use XML::Simple;
 
 my %COMMAND_VALID = map { $_ => 1 } qw( POST GET PUT DELETE );
 
@@ -18,54 +20,38 @@ my $server = 'localhost';
 
 sub new {
     my $class = shift;
+	my ($url) = @_;
 
-    my $bless = {};
+	return undef unless defined $url;
+
+	my $ua = LWP::UserAgent->new();
+	$ua->agent("SmeagolClient/0.1 ");
+
+    my $bless = {	url => $url,
+					ua => $ua,
+				};
 
     bless $bless, $class;
 }
 
-sub _client_call {
-    my ( $server, $url, $port, $command ) = @_;
-    $port    ||= 80;
-    $command ||= "GET";
-
-    croak "Error: Invalid Command '$command'" unless $COMMAND_VALID{$command};
-
-    # Create a user agent object
-    my $ua = LWP::UserAgent->new;
-    $ua->agent("SmeagolClient/0.1 ");
-
-    # Create a request
-    my $req = HTTP::Request->new( $command => "http://$server:$port/$url" );
-
-    # Pass request to the user agent and get a response back
-    my $res = $ua->request($req);
-
-    # Check the outcome of the response
-    if ( $res->is_success ) {
-        print $res->content;
-    }
-    else {
-        print $res->status_line, "\n";
-    }
-
-}
-
-###RESOURCE MAINTENANCE
-#/resources
-sub list_resources {
+sub listResources {
     my $self = shift;
+    my $res = $self->{ua}->get($self->{url}."/resources");
+	my @idResources;
 
-    my $ua  = LWP::UserAgent->new();
-    my $res = $ua->get("http://$server:$port/resources");
-	
-	return
-        wantarray ? ( $res->status_line, $res->content ) : $res->status_line;
+	if( $res->status_line =~ /200/){
+		my $dom = eval {XML::LibXML->new->parse_string($res->content)};
+		for my $resNode ( $dom->getElementsByTagName('resource')){
+			my $idRes = $resNode->getAttribute('xlink:href');
+			push @idResources, $idRes;
+		}
+		return @idResources;
+	}
+	return undef;
+
 }
 
-#/resource
-
-sub create_resource {
+sub createResource {
     my $self = shift;
     my ( $des, $gra ) = @_;
 
@@ -73,111 +59,157 @@ sub create_resource {
 					<description>$des</description>
 					<granularity>$gra</granularity>
 					</resource>";
-    my $req = HTTP::Request->new( POST => "http://$server:$port/resource" );
+    my $req = HTTP::Request->new( POST => $self->{url}."/resource" );
     $req->content_type('text/xml');
     $req->content($res_xml);
 
-    my $ua  = LWP::UserAgent->new();
-    my $res = $ua->request($req);
-    return
-        wantarray ? ( $res->status_line, $res->content ) : $res->status_line;
+    my $res = $self->{ua}->request($req);
+
+	if( $res->status_line =~ /201/){
+		my $dom = eval {XML::LibXML->new->parse_string($res->content)};
+		return $dom->getElementsByTagName('resource')->get_node(1)->getAttribute('xlink:href');
+	}else{
+		return undef;
+	}
 }
 
-sub update_resource {
+sub createAgenda {
+	my $self = shift;
+	my ($idResource) = @_;
+
+	#XXX De moment no es te en compte que hi hagi mes d'una agenda per recurs
+	#Si es crea una nova agenda, en cas que hi hagi una anterior s'esborrara
+	my $resource = getResource($idResource);
+	$resource->{idAgenda} = '';
+	my $res_xml = XMLout($resource); 	
+
+	my $req = HTTP::Request->new( POST => $self->{url}.$idResource );
+    $req->content_type('text/xml');
+    $req->content($res_xml);
+
+	my $res = $self->{ua}->request($req);
+	if($res->status_line =~ /200/){
+		my $dom = eval {XML::LibXML->new->parse_string($res->content)};
+		return $dom->getElementsByTagName('agenda')->get_node(1)->getAttribute('xlink:href');
+	}
+	return undef;
+}
+
+sub createBooking {
     my $self = shift;
-    my ( $id, $des, $gra ) = @_;
+    my ( $idAgenda, @from, @to ) = @_;
+
+    my $req = HTTP::Request->new( POST => $self->{url}.$idAgenda );
+    $req->content_type('text/xml');
+    my $booking_xml = "<booking>
+						<from>
+							<year>$from[0]</year>
+							<month>$from[1]</month>
+							<day>$from[2]</day>
+							<hour>$from[3]</hour>
+							<minute>$from[4]</minute>
+							<second>$from[5]</second>
+						</from>
+						<to>
+							<year>$to[0]</year>
+							<month>$to[1]</month>
+							<day>$to[2]</day>
+							<hour>$to[3]</hour>
+							<minute>$to[4]</minute>
+							<second>$to[5]</second>
+						</to>
+					</booking>";
+    $req->content($booking_xml);
+
+    my $res = $self->{ua}->request($req);
+	if($res->status_line =~ /201/){
+		my $dom = eval {XML::LibXML->new->parse_string($res->content)};
+		return $dom->getElementsByTagName('booking')->get_node(1)->getAttribute('xlink:href');
+	}
+    return undef;
+}
+
+sub getResource {
+    my $self = shift;
+    my ($idResource) = @_;
+
+    my $res = $self->{ua}->get($self->{url}.$idResource);
+
+	#FIXME: Cal controlar el cas que si/no hi hagi agenda
+	if($res->status_line =~ /200/){
+		my $dom = eval {XML::LibXML->new->parse_string($res->content)};
+		my $resource = XMLin($res->content);
+		if(defined $resource->{idAgenda}){
+			$resource->{agenda} = $dom->getElementsByTagName('agenda')->get_node(1)->getAttribute('xlink:href');
+		}
+		return $resource;
+	}
+	return undef;
+}
+
+sub getAgenda {
+    my $self = shift;
+    my ($idAgenda) = @_;
+
+    my $res = $self->{ua}->get($self->{url}.$idAgenda);
+	my @bookings;
+
+	if($res->status_line =~ /200/){
+		my $dom = eval {XML::LibXML->new->parse_string($res->content)};
+		for my $booksNode ( $dom->getElementsByTagName('booking')){
+			push @bookings, $booksNode->get_node(1)->getAttribute('xlink:href');
+		}
+	}
+	return undef;
+}
+
+sub getBooking {
+    my $self = shift;
+    my ( $idBooking ) = @_;
+
+    my $res = $self->{ua}->get($self->{url}.$idBooking);
+
+	if($res->status_line =~ /200/){
+		my $dom = eval {XML::LibXML->new->parse_string($res->content)};
+		return XMLin($dom->getElementsByTagName('booking'));
+	}
+	return undef;
+}
+
+sub updateResource {
+    my $self = shift;
+    my ( $idResource, $des, $gra ) = @_;
 
     my $res_xml = "<resource>
 					<description>$des</description>
 					<granularity>$gra</granularity>
 					</resource>";
-    my $req = HTTP::Request->new( PUT => "http://$server:$port/resource/$id" );
+    my $req = HTTP::Request->new( POST => $self->{url}.$idResource );
 
     $req->content_type('text/xml');
     $req->content($res_xml);
 
-    my $ua  = LWP::UserAgent->new();
-    my $res = $ua->request($req);
+    my $res = $self->{ua}->request($req);
 
-    return $res->content;
+	if($res->status_line =~ /200/){
+		my $xml = $res->content;
+		if($xml !~ /xmlns:xlink/ ){
+			$xml =~ s/<resource /<resource xmlns:xlink=\"http:\/\/www.w3.org\/1999\/xlink\ "/; 
+    	}
+		my $dom = eval {XML::LibXML->new->parse_string($xml)};
+		return $dom->getElementsByTagName('resource')->get_node(1)->getAttribute('xlink:href');
+	}
+    return undef;
 }
 
-#/resource/[ID]
-sub retrieve_resource {
+sub updateAgenda {
     my $self = shift;
-    my ($id) = @_;
-
-    my $ua  = LWP::UserAgent->new();
-    my $res = $ua->get("http://$server:$port/resource/$id");
-
-    return
-        wantarray ? ( $res->status_line, $res->content ) : $res->status_line;
-
+    return @_;
 }
 
-sub delete_resource {
+sub updateBooking {
     my $self = shift;
-    my ($id) = @_;
-    my $req  = HTTP::Request->new(
-        DELETE => "http://$server:$port/resource/" . $id );
-    $req->content_type('text/xml');
-
-    my $ua  = LWP::UserAgent->new();
-    my $res = $ua->request($req);
-
-    return $res->status_line;
-}
-
-###BOOKING MAINTENANCE
-#/resource/ID/bookings
-sub list_bookings_resource {
-    my $self = shift;
-    my ($id) = @_;
-
-    my $ua  = LWP::UserAgent->new();
-    my $res = $ua->get("http://$server:$port/resource/$id/bookings");
-
-    return
-        wantarray ? ( $res->status_line, $res->content ) : $res->status_line;
-}
-
-#/resource/ID/booking
-sub create_booking {
-    my $self = shift;
-    my ( $id, @from, @to ) = @_;
-
-    my $req = HTTP::Request->new(
-        POST => "http://$server:$port/resource/$id/booking" );
-    $req->content_type('text/xml');
-    my $booking_xml = "<booking>
-						<from>
-							<year>$from[0]</year>
-							<month>$from[1]</month>
-							<day>$from[2]</day>
-							<hour>$from[3]</hour>
-							<minute>$from[4]</minute>
-							<second>$from[5]</second>
-						</from>
-						<to>
-							<year>$to[0]</year>
-							<month>$to[1]</month>
-							<day>$to[2]</day>
-							<hour>$to[3]</hour>
-							<minute>$to[4]</minute>
-							<second>$to[5]</second>
-						</to>
-					</booking>";
-    $req->content($booking_xml);
-
-    my $ua  = LWP::UserAgent->new();    #Client
-    my $res = $ua->request($req);
-
-    return $res->status_line;
-}
-
-sub update_booking {
-    my $self = shift;
-    my ( $id, @from, @to ) = @_;
+    my ( $idBooking, @from, @to ) = @_;
     my $booking_xml = "<booking>
 						<from>
 							<year>$from[0]</year>
@@ -197,42 +229,55 @@ sub update_booking {
 						</to>
 					</booking>";
 
-    my $req = HTTP::Request->new(
-        PUT => "http://$server:$port/resource/$id/booking" );
+    my $req = HTTP::Request->new( POST => $self->{url}.$idBooking );
     $req->content_type('text/xml');
     $req->content($booking_xml);
 
-    my $ua  = LWP::UserAgent->new();
-    my $res = $ua->request($req);
-
-    return $res->status_line;
+    my $res = $self->{ua}->request($req);
+	if($res->status_line =~ /200/ ){
+		my $dom = eval {XML::LibXML->new->parse_string($res->content)};
+		return $dom->getElementsByTagName('booking')->get_node(1)->getAttribute('xlink:href');
+	}
+    return undef;
 }
 
-#/resource/ID_RES/booking/ID_BOOK
-
-sub retrieve_booking {
+sub delResource {
     my $self = shift;
-    my ( $id_res, $id_book ) = @_;
-
-    my $ua = LWP::UserAgent->new();
-    my $res
-        = $ua->get("http://$server:$port/resource/$id_res/booking/$id_book");
-
-    return
-        wantarray ? ( $res->status_line, $res->content ) : $res->status_line;
-}
-
-sub delete_booking {
-    my $self = shift;
-    my ( $id_res, $id_book ) = @_;
-    my $req = HTTP::Request->new(
-        DELETE => "http://$server:$port/resource/$id_res/booking/$id_book" );
+    my ($idResource) = @_;
+    my $req  = HTTP::Request->new( DELETE => $self->{url}.$idResource );
     $req->content_type('text/xml');
 
-    my $ua  = LWP::UserAgent->new();
-    my $res = $ua->request($req);
+    my $res = $self->{ua}->request($req);
+	if($res->status_line =~ /200/ ){
+		return $idResource;
+	}
+    return undef;
+}
 
-    return $res->status_line;
+sub delAgenda {
+    my $self = shift;
+    my ($idAgenda) = @_;
+    my $req  = HTTP::Request->new( DELETE => $self->{url}.$idAgenda );
+    $req->content_type('text/xml');
+
+    my $res = $self->{ua}->request($req);
+	if($res->status_line =~ /200/ ){
+		return $idAgenda;
+	}
+    return undef;
+}
+
+sub delBooking {
+    my $self = shift;
+    my ($idBooking) = @_;
+    my $req  = HTTP::Request->new( DELETE => $self->{url}.$idBooking );
+    $req->content_type('text/xml');
+
+    my $res = $self->{ua}->request($req);
+	if($res->status_line =~ /200/ ){
+		return $idBooking;
+	}
+    return undef;
 }
 
 1;

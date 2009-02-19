@@ -6,52 +6,116 @@ use strict;
 use warnings;
 use Data::Dumper;
 
-BEGIN { use_ok("Client") }
+BEGIN {
+	unlink glob "/tmp/smeagol_datastore/*";
+    use_ok($_) for qw(Server Client);
+}
 
-eval { Client::_client_call( "localhost", "/", 80, "FAIL" ); };
+my $server_port = 8000;
+my $server      = "http://localhost:$server_port";
+my $pid = Server->new($server_port)->background();
 
-ok( $@ =~ /Invalid Command/ );
+my $client = Client->new();
+ok(!defined $client ,'client not created');
 
-#Llista de recursos buida
-my @res_list_resources = Client->list_resources();
-ok( $res_list_resources[0] =~ /200 OK/, 'list_resources empty' );
+$client = Client->new($server);
+ok(ref $client eq 'Client' ,'client created');
 
-#Creant recurs
-my @res_r1 = Client->create_resource( "aula 2", "hores" );
-ok( $res_r1[0] =~ /201/, 'created resource' );
 
-my @res_r2 = Client->create_resource( "altra aulaaa", "dies" );
-ok( $res_r2[0] =~ /201/, 'created resource' );
 
-#Recuperant recurs
-my @ret_r50 = Client->retrieve_resource(50);
-ok( $ret_r50[0] =~ /404/, 'retrieving resource not found' );
+my @idResources = $client->listResources();
+ok(@idResources == 0, 'list resources empty');
 
-my @ret_r99 = Client->retrieve_resource(-99);
-ok( $ret_r99[0] =~ /404/, 'retrieve_resource not existent' );
+my $idRes1 = $client->createResource("aula","hora");
+ok($idRes1 eq "/resource/1", 'created resource 1');
 
-my @ret_r1 = Client->retrieve_resource(1);
-ok( $ret_r1[0] =~ /200/, 'retrieve_resource r1' );
+@idResources = $client->listResources();
+ok($idResources[0] eq "/resource/1",'resource 1 at list');
 
-my @ret_r2 = Client->retrieve_resource(2);
-ok( $ret_r2[0] =~ /200/, 'retrieve_resource r2' );
+$idRes1 = $client->updateResource("/resource/1","aulaaaaaa","hora");
+ok($idRes1 eq "/resource/1", 'updated resource 1');
 
-#Esborrant recurs
-@ret_r50 = Client->delete_resource(50);
-ok( $ret_r50[0] =~ /404/, 'deleting resource not found' );
+my $dataRes1 = $client->getResource($idRes1);
+ok(
+	$dataRes1->{granularity} eq 'hora' &&
+	$dataRes1->{description} eq 'aulaaaaaa' &&
+	!defined $dataRes1->{agenda}
+	,'get resource 1');
 
-@ret_r50 = Client->delete_resource(1);
-ok( $ret_r50[0] =~ /200/, 'deleting resource found' );
+@idResources = $client->listResources();
+ok($idResources[0] eq "/resource/1",'resource 1 at list');
 
-@res_list_resources = Client->list_resources();
-ok( $res_list_resources[0] =~ /200 OK/, 'list_resources not empty' );
+$idRes1 = $client->delResource("/resource/1");
+ok($idRes1 eq "/resource/1", 'deleted resource 1');
 
-#Actualitzant recurs
+@idResources = $client->listResources();
+ok(@idResources == 0 ,'list resources empty');
 
 =pod
-my $ret_r2 = Client->update_resource(2,"portatil","mesos");
-ok($ret_r2 =~ /portatil/ , 'update_resource r2');
 
-my @books_r2 = Client->list_bookings_resource(2);
-ok($book_r2[0] =~ //, 'list_bookings_resource empty');
+my $idRes2 = $client->createResource("projector","minuts");
+ok($idRes2 eq "/resource/2", 'created resource 2');
+
+@idResources = $client->listResources();
+ok(@idResources == 1,'list resources 1 element');
+ok($idResources[0] eq "/resource/2",'resource 2 at begin');
+
+my $idRes3 = $client->createResource("projector","dia");
+ok($idRes3 eq "/resource/3", 'created resource 3');
+
+@idResources = $client->listResources();
+ok(@idResources == 2, 'list resources 2 elements');
+ok($idResources[0] eq "/resource/2", 'resource 2 at begin');
+ok($idResources[1] eq "/resource/3", 'resource 3 at end');
+
+my $idAgenda = $client->createAgenda($idResources[0]);
+ok($idAgenda eq $idResources[0], 'agenda created at '.$idResources[0]);
+
+my @idBookings = $client->getAgenda($idAgenda);
+ok(@idBookings == 0, 'list bookings empty');
+
+my $Agenda = $client->updateAgenda($idAgenda);
+ok($Agenda eq $idAgenda, 'agenda $idAgenda updated');
+
+$idAgenda = $client->delAgenda($idResources[0]);
+ok($idAgenda eq $idResources[0], 'agenda deleted at '.$idResources[0]);
+
+$idAgenda = $client->createAgenda($idResources[1]);
+ok($idAgenda eq $idResources[1], 'agenda created at '.$idResources[0]);
+
+my @from = (2008, 4, 14, 17, 0, 0 );
+my @to = (2008, 4, 14, 19, 0 , 0 );
+my $idBook1 = $client->createBooking($idAgenda,@from,@to);
+ok($idBook1 eq $idAgenda."/booking/1",'booking 1 created');
+
+@idBookings = $client->getAgenda($idAngenda);
+ok(@idBookings == 1, "booking 1 at agenda's list");
+ok($idBookings[0] eq $idBook1, 'booking 1 at begin');
+
+my $Book = $client->getBooking($idBook1);
+ok(
+	$Book->{from}->{year} == 2008 &&
+	$Book->{from}->{month} == 4 &&
+	$Book->{from}->{day} == 14 &&
+	$Book->{from}->{hour} == 17 &&
+	$Book->{to}->{year} == 2008 &&
+	$Book->{to}->{month} == 4 &&
+	$Book->{to}->{day} == 14 &&
+	$Book->{to}->{hour} == 19 ,
+	'get booking 1'
+);
+
+my $idBook = $client->updateBooking($idBook1);
+ok($idBook == $idBook1, 'updated booking 1');
+
+$idBook = $client->delBooking($idBook1);
+ok($idBook == $idBook1, 'updated booking 1');
+
+@idBookings = $client->getAgenda($idAngenda);
+ok(@idBookings == 0, "agenda's list empty");
+
 =cut
+
+END {
+	kill 3, $pid;
+}

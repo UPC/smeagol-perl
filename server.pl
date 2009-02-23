@@ -149,7 +149,7 @@ sub launch_server {
     }
 
     # initialize the datastore singleton
-    DataStore->init($opt_storage_path);
+    DataStore::init($opt_storage_path);
     print "Datastore in " . $opt_storage_path;
 
     my $s = Server->new($port);

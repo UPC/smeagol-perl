@@ -6,9 +6,14 @@ use warnings;
 use HTTP::Server::Simple::CGI;
 use base qw(HTTP::Server::Simple::CGI);
 use CGI qw();
+use XML::LibXML;
 use Carp;
 
 use Resource;
+
+my $XML_HEADER = 
+        '<?xml version="1.0" encoding="UTF-8"?>' .
+        '<?xml-stylesheet href="/css/smeagol.css" type="text/css"?>';
 
 # Nota: hauria de funcionar amb "named groups" però només
 # s'implementen a partir de perl 5.10. Quina misèria, no?
@@ -24,8 +29,18 @@ my %crud_for = (
         POST   => \&_update_resource,
     },
     '/resource'                => { POST => \&_create_resource, },
-    '/resource/(\d+)/bookings' => {},
-    '/booking/(\d+)'           => {},
+    '/resource/(\d+)/bookings' => {
+        GET => \&_list_bookings,
+    },
+    '/resource/(\d+)/booking' => {
+        POST => \&_create_booking,
+    },
+    '/resource/(\d+)/booking/(\d+)' => {
+        GET => \&_retrieve_booking,
+        POST => \&_update_booking,
+        DELETE => \&_delete_booking,
+    },
+    '/css/(\w+)\.css' => { GET  => \&_send_css },
     '/dtd/(\w+)\.dtd'          => { GET  => \&_send_dtd },
 );
 
@@ -42,14 +57,14 @@ sub handle_request {
 
     # Find the corresponding action
     my $url_key = 'default_action';
-    my $id;
+    my @ids;
 
     foreach my $url_pattern ( keys(%crud_for) ) {
 
         # Anchor pattern and allow URLs ending in '/'
         my $pattern = '^' . $url_pattern . '/?$';
         if ( $path_info =~ m{$pattern} ) {
-            $id      = $1;
+            @ids = ($1, $2);
             $url_key = $url_pattern;
             last;
         }
@@ -59,7 +74,7 @@ sub handle_request {
     # Pass parameters obtained from the pattern to action
     if ( exists $crud_for{$url_key} ) {
         if ( exists $crud_for{$url_key}->{$method} ) {
-            $crud_for{$url_key}->{$method}->( $cgi, $id );
+            $crud_for{$url_key}->{$method}->( $cgi, $ids[0], $ids[1] );
         }
         else {
 
@@ -97,39 +112,139 @@ sub _rest_parse_resource_url {
     }
 }
 
-# Returns XML representation of a given ID, including
+# Returns the REST URL which identifies the agenda of a given resource
+sub _rest_get_agenda_url {
+    my ($resource) = shift;
+    return _rest_get_resource_url($resource) . "/bookings";
+}
+
+# Returns the REST URL which identifies a booking of a given resource
+sub _rest_get_booking_url {
+    my $booking_id  = shift;
+    my $resource_id = shift;
+
+    return '/resource/' . $resource_id . '/booking/'. $booking_id;
+}
+
+
+# Returns XML representation of a given resource, including 
 # all REST decoration stuff (xlink resource locator)
 sub _rest_resource_to_xml {
-    my ($resource) = shift;
-    my ($include_ns)
-        = shift; # wether to include or not the Xlink namespace declaration in
-                 # result string (it might already been declared in
-                 # an external tag where this xml fragment is included)
+    my ($resource, $is_root_node) = shift;
 
-    my $xml          = $resource->to_xml();
-    my $resource_url = _rest_get_resource_url($resource);
+    $is_root_node = (defined $is_root_node) ? $is_root_node : 0;
 
-    # Add xlink decorations to <resource>, <agenda> and <booking> tag elements
-    # We could use XML::LibXML DOM interface, but Perl regex are easier
-    # (I never tought I would say something like this)
-    if ($include_ns) {
-        $xml
-            =~ s|<\s*resource\s*>|<resource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="$resource_url">|g;
+    my $agenda_url   = _rest_get_agenda_url($resource);
+
+    my $parser = XML::LibXML->new();
+    my $doc    = $parser->parse_string($resource->to_xml());
+
+    # Add xlink decorations to <resource>, <agenda> and <booking> elements
+    my @nodes = $doc->getElementsByTagName('resource');
+    if ($is_root_node) {
+        $nodes[0]->setNamespace("http://www.w3.org/1999/xlink", "xlink", 0);
     }
-    else {
-        $xml
-            =~ s|<\s*resource\s*>|<resource xlink:type="simple" xlink:href="$resource_url">|g;
+    $nodes[0]->setAttribute( 'xlink:type', 'simple' );
+    $nodes[0]->setAttribute( 'xlink:href', _rest_get_resource_url($resource) );
+
+    #
+    # FIXME: The following loop should be rewritten using _rest_agenda_to_xml
+    #
+    for my $agenda_node ( $doc->getElementsByTagName('agenda') ) {
+        $agenda_node->setAttribute('xlink:type','simple');
+        $agenda_node->setAttribute('xlink:href', _rest_get_agenda_url($resource) );
     }
 
-    $xml
-        =~ s|<\s*agenda\s*>|<agenda xlink:type="simple" xlink:href="$resource_url/bookings">|g;
+    #
+    # FIXME: The following loop should be rewritten using _rest_booking_to_xml
+    #
+    for my $booking_node ( $doc->getElementsByTagName('booking') ) {
+        my $booking = Booking->from_xml($booking_node->toString());
+        $booking_node->setAttribute('xlink:type', 'simple');
+        $booking_node->setAttribute('xlink:href', _rest_get_booking_url($booking->id, $resource->id) );
+    }
 
-    # FIXME: Bookings must have IDs???
-    $xml
-        =~ s|<\s*booking\s*>|<booking xlink:type="simple" xlink:href="$resource_url/bookings/ID">|g;
+    my $xml = $doc->toString();
 
+    # toString adds an XML preamble, not needed if 
+    # this is not a root node, so we remove it
+    $xml =~ s/<\?xml version="1.0"\?>//;
+
+    if ( $is_root_node ) {
+        $xml = $XML_HEADER . $xml;
+    }
+    return $xml;
+
+}
+
+
+sub _rest_agenda_to_xml {
+    my $resource = shift;
+    my $is_root_node = shift;
+
+    $is_root_node = (defined $is_root_node) ? $is_root_node : 0;
+
+    my $parser = XML::LibXML->new();
+    my $doc    = $parser->parse_string($resource->agenda->to_xml());
+    my @nodes  = $doc->getElementsByTagName('agenda');
+    if ($is_root_node) {
+        $nodes[0]->setNamespace("http://www.w3.org/1999/xlink", "xlink", 0);
+    }
+    $nodes[0]->setAttribute('xlink:type','simple');
+    $nodes[0]->setAttribute('xlink:href', _rest_get_agenda_url($resource));
+
+    #
+    # FIXME: The following loop should be rewritten using _rest_booking_to_xml
+    #
+    for my $booking_node ($doc->getElementsByTagName('booking')) {
+        my $booking = Booking->from_xml($booking_node->toString());
+        $booking_node->setAttribute('xlink:type','simple');
+        $booking_node->setAttribute('xlink:href', _rest_get_booking_url($booking->id, $resource->id));
+    }
+
+    my $xml = $doc->toString();
+
+    # toString adds an XML preamble, not needed if 
+    # this is not a root node, so we remove it
+    $xml =~ s/<\?xml version="1.0"\?>//;
+
+    if ( $is_root_node ) {
+        $xml = $XML_HEADER . $xml;
+    }
     return $xml;
 }
+
+
+sub _rest_booking_to_xml {
+    my ($booking, $resource_id, $is_root_node) = shift;
+
+    $is_root_node = (defined $is_root_node) ? $is_root_node : 0;
+
+    my $parser = XML::LibXML->new();
+    my $doc    = $parser->parse_string($booking->to_xml());
+
+    my @nodes  = $doc->getElementsByTagName('booking');
+
+    # Add XLink attributes
+    if ( $is_root_node ) {
+        $nodes[0]->setNamespace("http://www.w3.org/1999/xlink","xlink", 0);
+    }
+    $nodes[0]->setAttribute('xlink:type', 'simple');
+    $nodes[0]->setAttribute('xlink:href', _rest_get_booking_url($booking->id, $resource_id));
+
+    my $xml = $doc->toString();
+
+    # toString adds an XML preamble, not needed if 
+    # this is not a root node, so we remove it
+    $xml =~ s/<\?xml version="1.0"\?>//;
+
+    if ( $is_root_node ) {
+        $xml = $XML_HEADER . $xml;
+    }
+    return $xml;
+}
+
+
 
 #############################################################
 # Http tools
@@ -171,7 +286,7 @@ sub _send_xml {
 
 sub _list_resources {
     my $xml
-        = '<resources xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="/resources">';
+        = $XML_HEADER . '<resources xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="/resources">';
     foreach my $id ( Resource->list_id ) {
         my $r = Resource->load($id);
         if ( defined $r ) {
@@ -190,11 +305,6 @@ sub _create_resource {
     if ( !defined $r ) {    # wrong XML argument
         _status(400);
     }
-
-    # FIXME: this will never happen: clients don't provide resource IDs!!!
-    #elsif ( defined Resource->load( $id ) ) {
-    #    _status( 403, "Resource #$id already exists!" );
-    #}
     else {
         $r->save();
         _status( 201, _rest_resource_to_xml( $r, 1 ) );
@@ -249,7 +359,7 @@ sub _update_resource {
         return;
     }
 
-    my $updated_resource = Resource->from_xml( $cgi->param('POSTDATA') );
+    my $updated_resource = Resource->from_xml( $cgi->param('POSTDATA'), $id );
 
     if ( !defined $updated_resource ) {
         _status(400);
@@ -258,8 +368,6 @@ sub _update_resource {
         _status(404);
     }
     else {
-        # change id so updated resource will overwrite old resource
-        $updated_resource->id($id);
         $updated_resource->save();
         _send_xml( _rest_resource_to_xml($updated_resource) );
     }
@@ -281,6 +389,64 @@ sub _send_dtd {
         # slurp dtd file
         local $/;
         _reply( '200 OK', 'text/sgml', <$dtd> );
+    }
+    else {
+        _status(400);
+    }
+}
+
+sub _list_bookings {
+    my $cgi = shift;
+    my $id = shift; # Resource ID
+
+    my $r = Resource->load($id);
+
+    if (!defined $r) {
+        _status(404);
+    }
+    else {
+        my $xml = _rest_agenda_to_xml($r, 1);
+        _send_xml( $xml, $id);
+    }
+}
+
+
+sub _create_booking {
+    # FIXME: I'm just a stub
+}
+
+
+sub _retrieve_booking {
+    # FIXME: I'm just a stub
+}
+
+
+sub _delete_booking {
+    # FIXME: I'm just a stub
+}
+
+
+sub _update_booking {
+    # FIXME: I'm just a stub
+}
+
+
+####################
+# Handlers for CSS #
+####################
+
+sub _send_css {
+    my ( $cgi, $id ) = @_; #id should contain the CSS file name (without the ".css" extension)
+
+    #
+    # FIXME: make it work from anywhere, now it must run from
+    #        the project base dir or won't find dtd dir
+
+    if ( open my $css, "<", "css/$id.css" ) {
+
+        # slurp css file
+        local $/;
+        _reply( '200 OK', 'text/css', <$css> );
     }
     else {
         _status(400);

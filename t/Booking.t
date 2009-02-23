@@ -95,6 +95,7 @@ ok( !defined($wrong), 'Booking->new with missing parameter' );
 
 #to_xml booking test
 my $booking1_as_hash = {
+    id => $b1->id,
     from => {
         year   => 2008,
         month  => 4,
@@ -117,6 +118,7 @@ ok( Compare( $booking1_as_hash, XMLin( $b1->to_xml() ) ), 'to_xml booking' );
 # from_xml booking test
 my $booking_as_xml = <<'EOF';
 <booking>
+    <id>$b1->id</id>
     <from>
         <year>2008</year>
         <month>4</month>
@@ -141,6 +143,7 @@ ok( $b1 == Booking->from_xml($booking_as_xml), 'from_xml booking' );
 # from_xml booking test (wrong XML)
 my $booking_as_xml_wrong = Booking->from_xml( '
 <booking>
+    <!-- <id> is missing! -->
     <from>
         <year>2008</year>
         <month>4</month>

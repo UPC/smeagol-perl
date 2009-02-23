@@ -3,12 +3,13 @@
 use strict;
 use warnings;
 
-use Test::More tests => 17;
+use Test::More tests => 19;
 use LWP::UserAgent;
 use HTTP::Request;
 use XML::Simple;
 use Carp;
 use Data::Dumper;
+use Data::Compare;
 
 BEGIN {
 
@@ -56,7 +57,7 @@ sub smeagol_url {
         'resource list retrieval status ' . Dumper( $res->code ) );
 
     ok( $res->content
-            =~ m|<resources xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="/resources"></resources>|,
+            =~ m|<\?xml version="1.0" encoding="UTF-8"\?><\?xml-stylesheet href="/css/smeagol.css" type="text/css"\?><resources xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="/resources"></resources>|,
         "resource list content " . Dumper( $res->content )
     );
 }
@@ -106,11 +107,9 @@ my $resource = Resource->new( 'desc 2 2', 'gra 2 2', $ag );
     ok( $res->code == 201,
         "resource creation status " . Dumper( $res->code ) );
 
-    my $r = Resource->from_xml( $res->content );
-
     my $xmltree = XMLin( $res->content );
 
-    ok( $r->description eq $resource->description,
+    ok( $xmltree->{description} eq $resource->description && $xmltree->{granularity} eq $resource->granularity,
         "resource creation content " . Dumper( $res->content ) );
 
 }
@@ -152,7 +151,7 @@ my $resource = Resource->new( 'desc 2 2', 'gra 2 2', $ag );
             . Dumper( $res->code )
     );
 
-    my $r = Resource->from_xml( $res->content );
+    my $r = Resource->from_xml( $res->content, 1000 );
     ok( defined $r, "resource retrieval content " . Dumper( $res->content ) );
 
     # retrieve non-existent Resource
@@ -180,12 +179,10 @@ my $resource = Resource->new( 'desc 2 2', 'gra 2 2', $ag );
     my $res = smeagol_request( 'POST', smeagol_url('/resource'),
         $resource->to_xml() );
 
-    print Dumper( $resource->to_xml() );
-
     ok( $res->code == '201',
         'resource creation status ' . Dumper( $res->code ) );
     my $xmltree = XMLin( $res->content );
-    my $r       = Resource->from_xml( $res->content );
+    my $r       = Resource->from_xml( $res->content, 1000 );
 
     # modify description
     my $nova_desc = 'He canviat la descripcio';
@@ -201,6 +198,28 @@ my $resource = Resource->new( 'desc 2 2', 'gra 2 2', $ag );
             . Dumper( $res->code )
     );
 
+}
+
+# Testing list bookings
+{
+    # first, create a new resource
+    my $res = smeagol_request( 'POST', smeagol_url('/resource'), $resource->to_xml() );
+
+    ok( $res->code == '201', 'resource creation status ' . Dumper($res->code));
+
+    my $xmltree = XMLin($res->content);
+
+    print Dumper($xmltree->{agenda}->{'xlink:href'});
+
+    $res = smeagol_request( 'GET', smeagol_url( $xmltree->{agenda}->{'xlink:href'} ) );
+
+    ok( $res->code == 200, "list bookings ". $xmltree->{agenda}->{'xlink:href'} ." status " . Dumper($res->code) );
+
+    #carp Dumper($res->content);
+
+    #my $ag = Agenda->from_xml($res->content);
+
+    #ok( defined $ag , "list bookings content " . Dumper($ag));
 }
 
 END {

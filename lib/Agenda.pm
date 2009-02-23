@@ -38,11 +38,6 @@ sub to_xml {
 
     my $xml = "<agenda>";
 
-    #
-    # XXX: what order is used to get the bookings?
-    #      if the order changes, then the XML will
-    #      change too!
-    #
     for my $slot ( $self->elements ) {
         $xml .= $slot->to_xml();
     }

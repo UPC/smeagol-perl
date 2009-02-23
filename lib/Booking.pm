@@ -64,7 +64,9 @@ sub to_xml {
     my $to   = $self->end;
 
     my $xml
-        = "<booking><from>" 
+        = "<booking>"
+        . "<id>" . $self->id . "</id>"
+        . "<from>" 
         . "<year>"
         . $from->year
         . "</year>"
@@ -108,6 +110,7 @@ sub to_xml {
 sub from_xml {
     my $class = shift;
     my $xml   = shift;
+    my $id    = shift;
 
     # validate XML string against the DTD
     my $dtd = XML::LibXML::Dtd->new( "CPL UPC//Resource DTD v0.01",
@@ -143,7 +146,7 @@ sub from_xml {
         )
     );
 
-    $obj->{ __PACKAGE__ . "::id" } = DataStore->next_id(__PACKAGE__);
+    $obj->{ __PACKAGE__ . "::id" } = (defined $b->{id}) ? $b->{id} : (defined $id) ? $id : DataStore->next_id(__PACKAGE__);
 
     bless $obj, $class;
 }

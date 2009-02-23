@@ -1,0 +1,33 @@
+resource {
+    display: block;
+    margin: 2em;
+} 
+
+description {
+    display: block;
+}
+
+description:before {
+    content: "Descripció: ";
+}
+
+granularity {
+    display: block;
+}
+
+granularity:before {
+    content: "Granularitat: ";
+}
+	
+agenda {
+    display: block;
+    position: relative;
+    margin-left: 1em;
+}
+
+booking {
+    display: block;
+    position: relative;
+    margin-left: 1em;
+}
+

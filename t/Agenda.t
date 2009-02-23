@@ -53,6 +53,7 @@ ok( !$ag->contains($b2), 'b2 not in ag' );
 #to_xml agenda test
 my $agenda_as_hash = {
     booking => {
+        id => $b1->id,
         from => {
             year   => 2008,
             month  => 4,

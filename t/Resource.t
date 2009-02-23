@@ -51,7 +51,7 @@ my $resource_as_hash = {
     granularity => "reserves diaries",
 };
 my $r2 = Resource->new( 'aula chachipilongui', 'reserves diaries' );
-my $r2bis = Resource->from_xml( $r2->to_xml() );
+my $r2bis = Resource->from_xml( $r2->to_xml(), $r2->id );
 ok( $r2bis->description eq 'aula chachipilongui'
         && $r2bis->granularity eq 'reserves diaries',
     'to_xml resource'
@@ -62,8 +62,8 @@ my $ident = $r1->id;
 ok( $r1->agenda->contains($b1),  'b1 in r1->ag' );
 ok( !$r1->agenda->contains($b2), 'b2 not in r1->ag' );
 ok( $r1->to_xml() eq
-        "<resource><description>aula chachipilongui</description><granularity>reserves diaries</granularity><agenda><booking><from><year>2008</year><month>4</month><day>14</day><hour>17</hour><minute>0</minute><second>0</second></from><to><year>2008</year><month>4</month><day>14</day><hour>18</hour><minute>59</minute><second>0</second></to></booking></agenda></resource>",
-    'to_xml resource with agenda and 1 booking'
+        "<resource><description>aula chachipilongui</description><granularity>reserves diaries</granularity><agenda><booking><id>".$b1->id."</id><from><year>2008</year><month>4</month><day>14</day><hour>17</hour><minute>0</minute><second>0</second></from><to><year>2008</year><month>4</month><day>14</day><hour>18</hour><minute>59</minute><second>0</second></to></booking></agenda></resource>",
+    'to_xml resource with agenda and 1 booking: ' . $r1->to_xml()
 );
 $r1->agenda->append($b2);
 ok( $r1->agenda->contains($b2), 'b2 in r->ag' );
@@ -74,6 +74,7 @@ my $res = Resource->from_xml( '
     <granularity>horaria</granularity>
     <agenda>
         <booking>
+            <id>10</id>
             <from>
                 <year>2008</year>
                 <month>4</month>
@@ -92,6 +93,7 @@ my $res = Resource->from_xml( '
             </to>
         </booking>
         <booking>
+            <id>25</id>
             <from>
                 <year>2008</year>
                 <month>4</month>

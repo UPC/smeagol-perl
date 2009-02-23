@@ -111,6 +111,7 @@ my $OPT_PARAM_FROM;
 my $OPT_PARAM_TO;
 
 {
+
     # parse command-line options
     my $opt_show_help = '';
 
@@ -213,7 +214,6 @@ else {
     print $result;
     exit(0);
 }
-
 
 #######################################################################
 #

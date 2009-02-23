@@ -109,8 +109,10 @@ my $resource = Resource->new( 'desc 2 2', 'gra 2 2', $ag );
 
     my $xmltree = XMLin( $res->content );
 
-    ok( $xmltree->{description} eq $resource->description && $xmltree->{granularity} eq $resource->granularity,
-        "resource creation content " . Dumper( $res->content ) );
+    ok( $xmltree->{description} eq $resource->description
+            && $xmltree->{granularity} eq $resource->granularity,
+        "resource creation content " . Dumper( $res->content )
+    );
 
 }
 
@@ -182,7 +184,7 @@ my $resource = Resource->new( 'desc 2 2', 'gra 2 2', $ag );
     ok( $res->code == '201',
         'resource creation status ' . Dumper( $res->code ) );
     my $xmltree = XMLin( $res->content );
-    my $r       = Resource->from_xml( $res->content, 1000 );
+    my $r = Resource->from_xml( $res->content, 1000 );
 
     # modify description
     my $nova_desc = 'He canviat la descripcio';
@@ -202,18 +204,27 @@ my $resource = Resource->new( 'desc 2 2', 'gra 2 2', $ag );
 
 # Testing list bookings
 {
+
     # first, create a new resource
-    my $res = smeagol_request( 'POST', smeagol_url('/resource'), $resource->to_xml() );
+    my $res = smeagol_request( 'POST', smeagol_url('/resource'),
+        $resource->to_xml() );
 
-    ok( $res->code == '201', 'resource creation status ' . Dumper($res->code));
+    ok( $res->code == '201',
+        'resource creation status ' . Dumper( $res->code ) );
 
-    my $xmltree = XMLin($res->content);
+    my $xmltree = XMLin( $res->content );
 
-    print Dumper($xmltree->{agenda}->{'xlink:href'});
+    print Dumper( $xmltree->{agenda}->{'xlink:href'} );
 
-    $res = smeagol_request( 'GET', smeagol_url( $xmltree->{agenda}->{'xlink:href'} ) );
+    $res = smeagol_request( 'GET',
+        smeagol_url( $xmltree->{agenda}->{'xlink:href'} ) );
 
-    ok( $res->code == 200, "list bookings ". $xmltree->{agenda}->{'xlink:href'} ." status " . Dumper($res->code) );
+    ok( $res->code == 200,
+        "list bookings "
+            . $xmltree->{agenda}->{'xlink:href'}
+            . " status "
+            . Dumper( $res->code )
+    );
 
     #carp Dumper($res->content);
 

@@ -7,49 +7,47 @@ use warnings;
 use Data::Dumper;
 
 BEGIN {
-	unlink glob "/tmp/smeagol_datastore/*";
+    unlink glob "/tmp/smeagol_datastore/*";
     use_ok($_) for qw(Server Client);
 }
 
 my $server_port = 8000;
 my $server      = "http://localhost:$server_port";
-my $pid = Server->new($server_port)->background();
+my $pid         = Server->new($server_port)->background();
 
 my $client = Client->new();
-ok(!defined $client ,'client not created');
+ok( !defined $client, 'client not created' );
 
 $client = Client->new($server);
-ok(ref $client eq 'Client' ,'client created');
-
-
+ok( ref $client eq 'Client', 'client created' );
 
 my @idResources = $client->listResources();
-ok(@idResources == 0, 'list resources empty');
+ok( @idResources == 0, 'list resources empty' );
 
-my $idRes1 = $client->createResource("aula","hora");
-ok($idRes1 eq "/resource/1", 'created resource 1');
+my $idRes1 = $client->createResource( "aula", "hora" );
+ok( $idRes1 eq "/resource/1", 'created resource 1' );
 
 @idResources = $client->listResources();
-ok($idResources[0] eq "/resource/1",'resource 1 at list');
+ok( $idResources[0] eq "/resource/1", 'resource 1 at list' );
 
-$idRes1 = $client->updateResource("/resource/1","aulaaaaaa","hora");
-ok($idRes1 eq "/resource/1", 'updated resource 1');
+$idRes1 = $client->updateResource( "/resource/1", "aulaaaaaa", "hora" );
+ok( $idRes1 eq "/resource/1", 'updated resource 1' );
 
 my $dataRes1 = $client->getResource($idRes1);
-ok(
-	$dataRes1->{granularity} eq 'hora' &&
-	$dataRes1->{description} eq 'aulaaaaaa' &&
-	!defined $dataRes1->{agenda}
-	,'get resource 1');
+ok( $dataRes1->{granularity} eq 'hora'
+        && $dataRes1->{description} eq 'aulaaaaaa'
+        && !defined $dataRes1->{agenda},
+    'get resource 1'
+);
 
 @idResources = $client->listResources();
-ok($idResources[0] eq "/resource/1",'resource 1 at list');
+ok( $idResources[0] eq "/resource/1", 'resource 1 at list' );
 
 $idRes1 = $client->delResource("/resource/1");
-ok($idRes1 eq "/resource/1", 'deleted resource 1');
+ok( $idRes1 eq "/resource/1", 'deleted resource 1' );
 
 @idResources = $client->listResources();
-ok(@idResources == 0 ,'list resources empty');
+ok( @idResources == 0, 'list resources empty' );
 
 =pod
 
@@ -117,5 +115,5 @@ ok(@idBookings == 0, "agenda's list empty");
 =cut
 
 END {
-	kill 3, $pid;
+    kill 3, $pid;
 }

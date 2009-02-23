@@ -62,7 +62,9 @@ my $ident = $r1->id;
 ok( $r1->agenda->contains($b1),  'b1 in r1->ag' );
 ok( !$r1->agenda->contains($b2), 'b2 not in r1->ag' );
 ok( $r1->to_xml() eq
-        "<resource><description>aula chachipilongui</description><granularity>reserves diaries</granularity><agenda><booking><id>".$b1->id."</id><from><year>2008</year><month>4</month><day>14</day><hour>17</hour><minute>0</minute><second>0</second></from><to><year>2008</year><month>4</month><day>14</day><hour>18</hour><minute>59</minute><second>0</second></to></booking></agenda></resource>",
+        "<resource><description>aula chachipilongui</description><granularity>reserves diaries</granularity><agenda><booking><id>"
+        . $b1->id
+        . "</id><from><year>2008</year><month>4</month><day>14</day><hour>17</hour><minute>0</minute><second>0</second></from><to><year>2008</year><month>4</month><day>14</day><hour>18</hour><minute>59</minute><second>0</second></to></booking></agenda></resource>",
     'to_xml resource with agenda and 1 booking: ' . $r1->to_xml()
 );
 $r1->agenda->append($b2);

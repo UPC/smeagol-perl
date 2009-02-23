@@ -95,7 +95,7 @@ ok( !defined($wrong), 'Booking->new with missing parameter' );
 
 #to_xml booking test
 my $booking1_as_hash = {
-    id => $b1->id,
+    id   => $b1->id,
     from => {
         year   => 2008,
         month  => 4,

@@ -11,9 +11,8 @@ use Carp;
 
 use Resource;
 
-my $XML_HEADER = 
-        '<?xml version="1.0" encoding="UTF-8"?>' .
-        '<?xml-stylesheet href="/css/smeagol.css" type="text/css"?>';
+my $XML_HEADER = '<?xml version="1.0" encoding="UTF-8"?>'
+    . '<?xml-stylesheet href="/css/smeagol.css" type="text/css"?>';
 
 # Nota: hauria de funcionar amb "named groups" però només
 # s'implementen a partir de perl 5.10. Quina misèria, no?
@@ -28,20 +27,16 @@ my %crud_for = (
         DELETE => \&_delete_resource,
         POST   => \&_update_resource,
     },
-    '/resource'                => { POST => \&_create_resource, },
-    '/resource/(\d+)/bookings' => {
-        GET => \&_list_bookings,
-    },
-    '/resource/(\d+)/booking' => {
-        POST => \&_create_booking,
-    },
+    '/resource'                     => { POST => \&_create_resource, },
+    '/resource/(\d+)/bookings'      => { GET  => \&_list_bookings, },
+    '/resource/(\d+)/booking'       => { POST => \&_create_booking, },
     '/resource/(\d+)/booking/(\d+)' => {
-        GET => \&_retrieve_booking,
-        POST => \&_update_booking,
+        GET    => \&_retrieve_booking,
+        POST   => \&_update_booking,
         DELETE => \&_delete_booking,
     },
-    '/css/(\w+)\.css' => { GET  => \&_send_css },
-    '/dtd/(\w+)\.dtd'          => { GET  => \&_send_dtd },
+    '/css/(\w+)\.css' => { GET => \&_send_css },
+    '/dtd/(\w+)\.dtd' => { GET => \&_send_dtd },
 );
 
 # Http request dispatcher. Sends every request to the corresponding
@@ -64,7 +59,7 @@ sub handle_request {
         # Anchor pattern and allow URLs ending in '/'
         my $pattern = '^' . $url_pattern . '/?$';
         if ( $path_info =~ m{$pattern} ) {
-            @ids = ($1, $2);
+            @ids = ( $1, $2 );
             $url_key = $url_pattern;
             last;
         }
@@ -123,128 +118,128 @@ sub _rest_get_booking_url {
     my $booking_id  = shift;
     my $resource_id = shift;
 
-    return '/resource/' . $resource_id . '/booking/'. $booking_id;
+    return '/resource/' . $resource_id . '/booking/' . $booking_id;
 }
 
-
-# Returns XML representation of a given resource, including 
+# Returns XML representation of a given resource, including
 # all REST decoration stuff (xlink resource locator)
 sub _rest_resource_to_xml {
-    my ($resource, $is_root_node) = shift;
+    my ( $resource, $is_root_node ) = shift;
 
-    $is_root_node = (defined $is_root_node) ? $is_root_node : 0;
+    $is_root_node = ( defined $is_root_node ) ? $is_root_node : 0;
 
-    my $agenda_url   = _rest_get_agenda_url($resource);
+    my $agenda_url = _rest_get_agenda_url($resource);
 
     my $parser = XML::LibXML->new();
-    my $doc    = $parser->parse_string($resource->to_xml());
+    my $doc    = $parser->parse_string( $resource->to_xml() );
 
     # Add xlink decorations to <resource>, <agenda> and <booking> elements
     my @nodes = $doc->getElementsByTagName('resource');
     if ($is_root_node) {
-        $nodes[0]->setNamespace("http://www.w3.org/1999/xlink", "xlink", 0);
+        $nodes[0]->setNamespace( "http://www.w3.org/1999/xlink", "xlink", 0 );
     }
     $nodes[0]->setAttribute( 'xlink:type', 'simple' );
-    $nodes[0]->setAttribute( 'xlink:href', _rest_get_resource_url($resource) );
+    $nodes[0]
+        ->setAttribute( 'xlink:href', _rest_get_resource_url($resource) );
 
     #
     # FIXME: The following loop should be rewritten using _rest_agenda_to_xml
     #
     for my $agenda_node ( $doc->getElementsByTagName('agenda') ) {
-        $agenda_node->setAttribute('xlink:type','simple');
-        $agenda_node->setAttribute('xlink:href', _rest_get_agenda_url($resource) );
+        $agenda_node->setAttribute( 'xlink:type', 'simple' );
+        $agenda_node->setAttribute( 'xlink:href',
+            _rest_get_agenda_url($resource) );
     }
 
     #
     # FIXME: The following loop should be rewritten using _rest_booking_to_xml
     #
     for my $booking_node ( $doc->getElementsByTagName('booking') ) {
-        my $booking = Booking->from_xml($booking_node->toString());
-        $booking_node->setAttribute('xlink:type', 'simple');
-        $booking_node->setAttribute('xlink:href', _rest_get_booking_url($booking->id, $resource->id) );
+        my $booking = Booking->from_xml( $booking_node->toString() );
+        $booking_node->setAttribute( 'xlink:type', 'simple' );
+        $booking_node->setAttribute( 'xlink:href',
+            _rest_get_booking_url( $booking->id, $resource->id ) );
     }
 
     my $xml = $doc->toString();
 
-    # toString adds an XML preamble, not needed if 
+    # toString adds an XML preamble, not needed if
     # this is not a root node, so we remove it
     $xml =~ s/<\?xml version="1.0"\?>//;
 
-    if ( $is_root_node ) {
+    if ($is_root_node) {
         $xml = $XML_HEADER . $xml;
     }
     return $xml;
 
 }
 
-
 sub _rest_agenda_to_xml {
-    my $resource = shift;
+    my $resource     = shift;
     my $is_root_node = shift;
 
-    $is_root_node = (defined $is_root_node) ? $is_root_node : 0;
+    $is_root_node = ( defined $is_root_node ) ? $is_root_node : 0;
 
     my $parser = XML::LibXML->new();
-    my $doc    = $parser->parse_string($resource->agenda->to_xml());
+    my $doc    = $parser->parse_string( $resource->agenda->to_xml() );
     my @nodes  = $doc->getElementsByTagName('agenda');
     if ($is_root_node) {
-        $nodes[0]->setNamespace("http://www.w3.org/1999/xlink", "xlink", 0);
+        $nodes[0]->setNamespace( "http://www.w3.org/1999/xlink", "xlink", 0 );
     }
-    $nodes[0]->setAttribute('xlink:type','simple');
-    $nodes[0]->setAttribute('xlink:href', _rest_get_agenda_url($resource));
+    $nodes[0]->setAttribute( 'xlink:type', 'simple' );
+    $nodes[0]->setAttribute( 'xlink:href', _rest_get_agenda_url($resource) );
 
     #
     # FIXME: The following loop should be rewritten using _rest_booking_to_xml
     #
-    for my $booking_node ($doc->getElementsByTagName('booking')) {
-        my $booking = Booking->from_xml($booking_node->toString());
-        $booking_node->setAttribute('xlink:type','simple');
-        $booking_node->setAttribute('xlink:href', _rest_get_booking_url($booking->id, $resource->id));
+    for my $booking_node ( $doc->getElementsByTagName('booking') ) {
+        my $booking = Booking->from_xml( $booking_node->toString() );
+        $booking_node->setAttribute( 'xlink:type', 'simple' );
+        $booking_node->setAttribute( 'xlink:href',
+            _rest_get_booking_url( $booking->id, $resource->id ) );
     }
 
     my $xml = $doc->toString();
 
-    # toString adds an XML preamble, not needed if 
+    # toString adds an XML preamble, not needed if
     # this is not a root node, so we remove it
     $xml =~ s/<\?xml version="1.0"\?>//;
 
-    if ( $is_root_node ) {
+    if ($is_root_node) {
         $xml = $XML_HEADER . $xml;
     }
     return $xml;
 }
-
 
 sub _rest_booking_to_xml {
-    my ($booking, $resource_id, $is_root_node) = shift;
+    my ( $booking, $resource_id, $is_root_node ) = shift;
 
-    $is_root_node = (defined $is_root_node) ? $is_root_node : 0;
+    $is_root_node = ( defined $is_root_node ) ? $is_root_node : 0;
 
     my $parser = XML::LibXML->new();
-    my $doc    = $parser->parse_string($booking->to_xml());
+    my $doc    = $parser->parse_string( $booking->to_xml() );
 
-    my @nodes  = $doc->getElementsByTagName('booking');
+    my @nodes = $doc->getElementsByTagName('booking');
 
     # Add XLink attributes
-    if ( $is_root_node ) {
-        $nodes[0]->setNamespace("http://www.w3.org/1999/xlink","xlink", 0);
+    if ($is_root_node) {
+        $nodes[0]->setNamespace( "http://www.w3.org/1999/xlink", "xlink", 0 );
     }
-    $nodes[0]->setAttribute('xlink:type', 'simple');
-    $nodes[0]->setAttribute('xlink:href', _rest_get_booking_url($booking->id, $resource_id));
+    $nodes[0]->setAttribute( 'xlink:type', 'simple' );
+    $nodes[0]->setAttribute( 'xlink:href',
+        _rest_get_booking_url( $booking->id, $resource_id ) );
 
     my $xml = $doc->toString();
 
-    # toString adds an XML preamble, not needed if 
+    # toString adds an XML preamble, not needed if
     # this is not a root node, so we remove it
     $xml =~ s/<\?xml version="1.0"\?>//;
 
-    if ( $is_root_node ) {
+    if ($is_root_node) {
         $xml = $XML_HEADER . $xml;
     }
     return $xml;
 }
-
-
 
 #############################################################
 # Http tools
@@ -285,8 +280,8 @@ sub _send_xml {
 ##############################################################
 
 sub _list_resources {
-    my $xml
-        = $XML_HEADER . '<resources xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="/resources">';
+    my $xml = $XML_HEADER
+        . '<resources xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="/resources">';
     foreach my $id ( Resource->list_id ) {
         my $r = Resource->load($id);
         if ( defined $r ) {
@@ -397,46 +392,47 @@ sub _send_dtd {
 
 sub _list_bookings {
     my $cgi = shift;
-    my $id = shift; # Resource ID
+    my $id  = shift;    # Resource ID
 
     my $r = Resource->load($id);
 
-    if (!defined $r) {
+    if ( !defined $r ) {
         _status(404);
     }
     else {
-        my $xml = _rest_agenda_to_xml($r, 1);
-        _send_xml( $xml, $id);
+        my $xml = _rest_agenda_to_xml( $r, 1 );
+        _send_xml( $xml, $id );
     }
 }
 
-
 sub _create_booking {
+
     # FIXME: I'm just a stub
 }
-
 
 sub _retrieve_booking {
+
     # FIXME: I'm just a stub
 }
-
 
 sub _delete_booking {
+
     # FIXME: I'm just a stub
 }
-
 
 sub _update_booking {
+
     # FIXME: I'm just a stub
 }
-
 
 ####################
 # Handlers for CSS #
 ####################
 
 sub _send_css {
-    my ( $cgi, $id ) = @_; #id should contain the CSS file name (without the ".css" extension)
+    my ( $cgi, $id )
+        = @_
+        ;  #id should contain the CSS file name (without the ".css" extension)
 
     #
     # FIXME: make it work from anywhere, now it must run from

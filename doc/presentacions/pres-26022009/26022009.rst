@@ -9,7 +9,6 @@ El projecte Sméagol
 
 
 
-
 Índex
 -----
  
@@ -63,21 +62,18 @@ Sméagol: un petit pas
 * Sméagol és un petit pas en aquesta direcció.
    
 
+
 Sméagol: objectius generals
 ---------------------------
 
 * Avançar en la col·laboració aprenent de les comunitats de 
   desenvolupadors de programari lliure.
-
 * Aprendre a usar certes eines col·laboratives
-
 * Aprofitar algunes idees tecnológiques
-
 * Acabar tenint software compartit entre grups
-
 * Adquirir experiència
-
 * Animar el cotarro
+
 
 
 Sméagol: estratègia
@@ -89,14 +85,50 @@ Sméagol: estratègia
   - D'interès per als participants
   - Que pugui arrapinyar recursos
   
-.. note:: Smèagol:
-          El gestor de reserves de recursos
+* Smèagol: El gestor de reserves de recursos
 
 * Definir:
   
   - Una primera fita: simple i abastable
   - Una arquitectura
   - ... i... llençar-se a la piscina!
+
+
+
+
+Metodologies àgils
+------------------
+
+* Les (grans) especificacions són irreals i molt cares
+* L'ús és el millor especificador
+* És més rentable fer i refer
+* Cal tenir 
+
+  - arquitectures soft 
+  - mètodes de treball
+  
+  que ho permetin
+* Cicles d'especificació-implementació-release molt curts
+
+
+
+Test Driven Development
+-----------------------
+
+* Una de les eines que dónen suport a les metodologies de desenvolupament
+  àgil:
+
+  1) Determinar què ha de fer un mòdul
+  2) Escriure una conjunt de tests que ho comproven
+  3) Implementar el mòdul «lluitant contra el test»
+
+* Hi ha eines ad-hoc per usar la tècnica
+* Milloren el problemes de regressió
+* Els tests serveixen d'exemples i documenten
+* Nous errors impliquen nous tests
+
+
+
 
 
 

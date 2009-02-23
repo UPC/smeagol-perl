@@ -1,0 +1,102 @@
+.. include:: <s5defs.txt>
+
+El projecte Sméagol
+===================
+
+:author: A. Aguilera, E. Formentí, F. Morillas, 
+         A. Muntada, I. Polo, S. Vila 
+:date:   26 de febrer de 2009
+
+
+
+
+Índex
+-----
+ 
+* Context
+* Objectius del projecte
+* Aspectes tècnics
+* Avaluació d'aquesta fase
+* Arquitectura i estat del projecte
+* Següents passos
+
+
+La UPC és gran i heterogènea
+----------------------------
+
+* Els TIC UPC estàn dispersos: 
+
+   - Geogràficament
+   - Funcionalment
+   - Laboralment
+   - Tecnológicament
+
+* Els TIC UPC han de satisfer moltes demandes semblants 
+  però no idèntiques i no tenen prou recursos: :purple:`cal una solució`.
+
+
+
+No silver bullet
+----------------
+
+* Cap d'aquestes polítiques des de dalt és solució:
+
+  - El «ja s'ho faran»
+  - El «despotisme il·lustrat»
+  - La «subcontractació de serveis»
+
+* Cap d'aquestes polítiques des de baix és solució:
+
+  - Els veïns que s'espavilin
+  - La postura «kalimero»
+  - La fugida endavant
+
+
+
+Sméagol: un petit pas
+---------------------
+
+* Cal incentivar una cultura de col·laboració des d'una
+  òptica confederal: col·laborem per que ens surt a compte
+  i hi sortim guanyant.
+
+* Sméagol és un petit pas en aquesta direcció.
+   
+
+Sméagol: objectius generals
+---------------------------
+
+* Avançar en la col·laboració aprenent de les comunitats de 
+  desenvolupadors de programari lliure.
+
+* Aprendre a usar certes eines col·laboratives
+
+* Aprofitar algunes idees tecnológiques
+
+* Acabar tenint software compartit entre grups
+
+* Adquirir experiència
+
+* Animar el cotarro
+
+
+Sméagol: estratègia
+-------------------
+
+* Buscar un projecte software:
+
+  - Prou simple (i prou complex)
+  - D'interès per als participants
+  - Que pugui arrapinyar recursos
+  
+.. note:: Smèagol:
+          El gestor de reserves de recursos
+
+* Definir:
+  
+  - Una primera fita: simple i abastable
+  - Una arquitectura
+  - ... i... llençar-se a la piscina!
+
+
+

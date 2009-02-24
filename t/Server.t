@@ -50,6 +50,17 @@ sub smeagol_url {
     return $server . $suffix;
 }
 
+# Auxiliary routine to remove xlink attributes 
+sub remove_xlink {
+    my $xml = shift;
+
+    $xml =~ s/ xmlns:xlink=".*"//g;
+    $xml =~ s/ xlink:href=".*"//g;
+    $xml =~ s/ xlink:type=".*"//g;
+
+    return $xml;
+}
+
 # Testing retrieve empty resource list
 {
     my $res = smeagol_request( 'GET', "$server/resources" );
@@ -226,11 +237,11 @@ my $resource = Resource->new( 'desc 2 2', 'gra 2 2', $ag );
             . Dumper( $res->code )
     );
 
-    #carp Dumper($res->content);
+    carp remove_xlink($res->content);
 
-    #my $ag = Agenda->from_xml($res->content);
+    my $ag = Agenda->from_xml( remove_xlink($res->content) );
 
-    #ok( defined $ag , "list bookings content " . Dumper($ag));
+    ok( defined $ag , "list bookings content " . Dumper($ag));
 }
 
 END {

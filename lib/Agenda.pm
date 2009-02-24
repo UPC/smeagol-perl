@@ -76,7 +76,7 @@ sub from_xml {
     # $ag object, so we do not need to worry about eventual
     # intersections present in the $xml
     for my $booking_dom_node ( $dom->getElementsByTagName('booking') ) {
-        my $b = Booking->from_xml( $booking_dom_node->toString );
+        my $b = Booking->from_xml( $booking_dom_node->toString(0) );
         $ag->append($b);
     }
 

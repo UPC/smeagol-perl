@@ -1,4 +1,5 @@
-<!ELEMENT booking (from,to)>
+<!ELEMENT booking (id,from,to)>
+<!ELEMENT id (#PCDATA)>
 <!ELEMENT from (year, month, day, hour, minute, second)>
 <!ELEMENT to (year, month, day, hour, minute, second)>
 <!ELEMENT year (#PCDATA)>
@@ -10,5 +11,4 @@
 <!ATTLIST booking 
     xmlns:xlink CDATA #IMPLIED
     xlink:href CDATA #IMPLIED
-    xlink:xmlns CDATA #IMPLIED
     xlink:type CDATA #IMPLIED>

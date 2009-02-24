@@ -197,7 +197,7 @@ sub _rest_remove_xlink_attrs {
     # removeAttribute() cannot remove namespace declarations (WTF!!!)
     # ... and, if you are asking: *no*, removeAttributeNS() does not work, either!),
     # so let's be expeditive:
-    $result =~ s/ xmlns:xlink=".*"//g;
+    $result =~ s/ xmlns:xlink="[^"]*"//g;
 
     return $result;
 }

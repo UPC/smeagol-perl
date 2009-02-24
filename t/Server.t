@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 19;
+use Test::More tests => 20;
 use LWP::UserAgent;
 use HTTP::Request;
 use XML::Simple;
@@ -54,9 +54,9 @@ sub smeagol_url {
 sub remove_xlink {
     my $xml = shift;
 
-    $xml =~ s/ xmlns:xlink=".*"//g;
-    $xml =~ s/ xlink:href=".*"//g;
-    $xml =~ s/ xlink:type=".*"//g;
+    $xml =~ s/ xmlns:xlink="[^"]*"//g;
+    $xml =~ s/ xlink:href="[^"]*"//g;
+    $xml =~ s/ xlink:type="[^"]*"//g;
 
     return $xml;
 }
@@ -236,8 +236,6 @@ my $resource = Resource->new( 'desc 2 2', 'gra 2 2', $ag );
             . " status "
             . Dumper( $res->code )
     );
-
-    carp remove_xlink($res->content);
 
     my $ag = Agenda->from_xml( remove_xlink($res->content) );
 

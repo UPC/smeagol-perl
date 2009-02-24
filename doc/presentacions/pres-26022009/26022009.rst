@@ -130,5 +130,37 @@ Test Driven Development
 
 
 
+REST
+----
 
+* Un model per entendre la semàntica de la web (HTTP)
+* Si seguim el model les coses van bé:
+
+  - L'usuari se sent a casa
+  - Els clients funcionen bé
+  - El sistema és escalable i robust
+  - L'aplicació és part del món
+
+
+
+Conceptes REST
+--------------
+
+* Client/servidor
+* Recurs = entitat identificable
+* URL = identificador d'una entitat
+* 1 recurs - N representacions
+* HTTP i operacions (GET, PUT, DELETE, POST, ...)
+
+
+
+Principis REST
+--------------
+
+* Estat aplicació + funcionalitat => recursos
+* Significat dels recursos invariant en el temps
+* Cada recurs un URL
+* Es transmet la **representació** d'un recurs.
+* Un recurs diverses representacions negociables.
+* Mètodes del protocol HTTP -> semàntica CRUD
 

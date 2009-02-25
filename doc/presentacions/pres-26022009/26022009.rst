@@ -20,15 +20,15 @@ El projecte Sméagol
 * Següents passos
 
 
-La UPC és gran i heterogènea
+La UPC és gran i heterogènia
 ----------------------------
 
-* Els TIC UPC estàn dispersos: 
+* Els TIC UPC estan dispersos: 
 
    - Geogràficament
    - Funcionalment
    - Laboralment
-   - Tecnológicament
+   - Tecnològicament
 
 * Els TIC UPC han de satisfer moltes demandes semblants 
   però no idèntiques i no tenen prou recursos: :purple:`cal una solució`.
@@ -56,7 +56,7 @@ Sméagol: un petit pas
 ---------------------
 
 * Cal incentivar una cultura de col·laboració des d'una
-  òptica confederal: col·laborem per que ens surt a compte
+  òptica confederal: col·laborem perquè ens surt a compte
   i hi sortim guanyant.
 
 * Sméagol és un petit pas en aquesta direcció.
@@ -69,7 +69,7 @@ Sméagol: objectius generals
 * Avançar en la col·laboració aprenent de les comunitats de 
   desenvolupadors de programari lliure.
 * Aprendre a usar certes eines col·laboratives
-* Aprofitar algunes idees tecnológiques
+* Aprofitar algunes idees tecnològiques
 * Acabar tenint software compartit entre grups
 * Adquirir experiència
 * Animar el cotarro
@@ -83,9 +83,9 @@ Sméagol: estratègia
 
   - Prou simple (i prou complex)
   - D'interès per als participants
-  - Que pugui arrapinyar recursos
+  - Que pugui arrapinyar-se recursos
   
-* Smèagol: El gestor de reserves de recursos
+* Sméagol: El gestor de reserves de recursos
 
 * Definir:
   
@@ -104,7 +104,7 @@ Metodologies àgils
 * És més rentable fer i refer
 * Cal tenir 
 
-  - arquitectures soft 
+  - arquitectures soft
   - mètodes de treball
   
   que ho permetin
@@ -119,8 +119,8 @@ Test Driven Development
   àgil:
 
   1) Determinar què ha de fer un mòdul
-  2) Escriure una conjunt de tests que ho comproven
-  3) Implementar el mòdul «lluitant contra el test»
+  2) Escriure un conjunt de tests que ho comproven
+  3) Implementar el mòdul «lluitant contra els tests»
 
 * Hi ha eines ad-hoc per usar la tècnica
 * Milloren el problemes de regressió
@@ -149,7 +149,7 @@ Conceptes REST
 * Client/servidor
 * Recurs = entitat identificable
 * URL = identificador d'una entitat
-* 1 recurs - N representacions
+* 1 recurs té N representacions
 * HTTP i operacions (GET, PUT, DELETE, POST, ...)
 
 
@@ -159,10 +159,10 @@ Principis REST
 
 * Estat aplicació + funcionalitat => recursos
 * Significat dels recursos invariant en el temps
-* Cada recurs un URL
+* Cada recurs té un URL
 * Es transmet la **representació** d'un recurs.
-* Un recurs diverses representacions negociables.
-* Mètodes del protocol HTTP -> semàntica CRUD
+* Un recurs té diverses representacions negociables.
+* Mètodes del protocol HTTP => semàntica CRUD
 
 
 

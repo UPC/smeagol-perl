@@ -11,8 +11,7 @@ use Carp;
 use Data::Dumper;
 use Resource;
 
-my $XML_HEADER = '<?xml version="1.0" encoding="UTF-8"?>'
-  . '<?xml-stylesheet href="/css/smeagol.css" type="text/css"?>';
+my $XML_HEADER = my $XML_HEADER = '<?xml version="1.0" encoding="UTF-8"?>'; 
 
 sub _xml_preamble {
     my $type = shift; # resources, resource, agenda or booking

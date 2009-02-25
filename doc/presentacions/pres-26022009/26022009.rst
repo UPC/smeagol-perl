@@ -29,8 +29,7 @@ La UPC és gran i heterogènia
    - Tecnològicament
 
 * Els TIC UPC han de satisfer moltes demandes semblants 
-  però no idèntiques i no tenen prou recursos: cal una solució
-
+  però no idèntiques i no tenen prou recursos: **cal una solució**.
 
 
 No silver bullet
@@ -77,19 +76,20 @@ Sméagol: objectius generals
 Sméagol: estratègia
 -------------------
 
-* Buscar un projecte software:
+1. Buscar un projecte software:
 
   - Prou simple (i prou complex)
   - D'interès per als participants
   - Que pugui arrapinyar-se recursos
   
-* Sméagol: El gestor de reserves de recursos
+2. Sméagol: El gestor de reserves de recursos
 
-* Definir:
+3. Definir:
   
   - Una arquitectura
   - Una primera fita: simple i abastable
-  - ... i... llençar-se a la piscina!
+
+4. ... i ... llençar-se a la piscina!
 
 
 
@@ -97,13 +97,15 @@ Sméagol: estratègia
 Metodologies àgils
 ------------------
 
-* Les (grans) especificacions són irreals i molt cares
+* Les (grans) especificacions acostumen a ser irreals i molt cares
 * L'ús és el millor especificador
-* És més rentable fer i refer
+* És més rentable fer i refer (si es dissenya sota aquest precepte)
 * Cal tenir mitjans que ho permetin:
 
-  - arquitectures
-  - mètodes de treball
+  - arquitectures soft adequades
+  - mètodes de treball escaients
+  - eines que ajudin
+  - equips de treball motivats
   
 * Cicles d'especificació-implementació-release molt curts
 
@@ -112,12 +114,12 @@ Metodologies àgils
 Test Driven Development
 -----------------------
 
-* Una de les eines que dónen suport a les metodologies de desenvolupament
-  àgil:
+* Una de les eines que dónen suport a les metodologies de 
+  desenvolupament àgil:
 
-  1) Determinar què ha de fer un mòdul
-  2) Escriure un conjunt de tests que ho comproven
-  3) Implementar el mòdul «lluitant contra els tests»
+  - Determinar què ha de fer un mòdul
+  - Escriure una conjunt de tests que ho comproven
+  - Implementar el mòdul «lluitant contra el test»
 
 * Hi ha eines ad-hoc per usar la tècnica
 * Milloren el problemes de regressió
@@ -130,7 +132,8 @@ Test Driven Development
 REST
 ----
 
-* Un model per entendre la semàntica de la web (HTTP)
+* Un model per entendre la semàntica de la **web**
+  i poder-la aplicar a les **aplicacions web**.
 * Si seguim el model les coses van bé:
 
   - L'usuari se sent a casa
@@ -147,7 +150,7 @@ Conceptes REST
 * Recurs = entitat identificable
 * URL = identificador d'una entitat
 * 1 recurs té N representacions
-* HTTP i operacions (GET, PUT, DELETE, POST, ...)
+* operacions predefinides (GET, PUT, DELETE, POST, ...)
 
 
 
@@ -163,14 +166,43 @@ Principis REST
 
 
 
-SOA: SOAP vs. REST
-------------------
-
-
 
 Exemples REST i no REST
 -----------------------
 
+* http://escritorio.acceso.com/upc/dossier/prensa.html
+* http://www.upf.edu/recull/portada
+
+
+
+
+
+SOA
+---
+
+* Service Oriented Application
+* SOA: un apelatiu comercial:
+
+  - NFS és SOA?
+  - TELNET és SOA?
+  - NEWS és SOA?
+
+
+
+SOAP vs. REST
+-------------
+
+* SOAP: un protocol de crides remotes tipus RPC sobre transport HTTP
+* SOAP no estandaritza:
+
+  - Les operacions "cridables"
+  - Els formats dels continguts
+  - Els identificadors dels objectes
+
+* REST no estandaritza els formats dels continguts
+* SOAP no garanteix la interoperabilitat (REST tampoc, però molt més).
+* SOAP és la SOAP D'ALL: repeteix els esquemes de RPC, DCOM, CORBA, 
+  Java RMI,... però no aprèn de HTTP i la web.
 
 
 

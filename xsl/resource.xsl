@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:stylesheet version="1.0" 
+    xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+    xmlns:xlink="http://www.w3.org/1999/xlink">
 <xsl:template match="resource">
 <html><head></head><body>
-<h1>Dades del recurs</h1>
+<h1>Dades del recurs #<xsl:value-of select="substring-after(@xlink:href, 'resource/')"/></h1>
 
 <h2>Característiques</h2>
 <dl>
@@ -11,7 +13,7 @@
 </dl>
 
 <h2>Reserves</h2>
-<table style="margin-left: 1em; border: 1px solid black; border-spacing: 1em">
+<table style="border-spacing: 1em">
 <thead><tr><th>ID</th><th>Inici</th><th>Fi</th></tr></thead>
 <tbody>
 <xsl:apply-templates select="agenda"/>
@@ -19,7 +21,8 @@
 </table>
 
 <hr/>
-<a href="/resources">[Llista de recursos]</a>
+<a href="/resources">[Llista de recursos]</a> | 
+<a><xsl:attribute name="href"><xsl:value-of select="concat(@xlink:href, '/bookings')"/></xsl:attribute>[Agenda del recurs]</a>
 </body></html>
 </xsl:template>
 

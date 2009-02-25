@@ -11,11 +11,15 @@ use Carp;
 use Data::Dumper;
 use Resource;
 
-my $XML_HEADER = '<?xml version="1.0" encoding="UTF-8"?>'; 
+my $XML_HEADER = '<?xml version="1.0" encoding="UTF-8"?>';
 
 sub _xml_preamble {
-    my $type = shift; # resources, resource, agenda or booking
-    return $XML_HEADER . '<?xml-stylesheet type="application/xml" href="/xsl/' . $type . '.xsl"?>';
+    my $type = shift;    # resources, resource, agenda or booking
+    return
+          $XML_HEADER
+        . '<?xml-stylesheet type="application/xml" href="/xsl/'
+        . $type
+        . '.xsl"?>';
 }
 
 # Nota: hauria de funcionar amb "named groups" però només
@@ -129,7 +133,7 @@ sub _rest_get_booking_url {
 # Returns XML representation of a given resource, including
 # all REST decoration stuff (xlink resource locator)
 sub _rest_resource_to_xml {
-    my $resource = shift;
+    my $resource     = shift;
     my $is_root_node = shift;
 
     $is_root_node = ( defined $is_root_node ) ? $is_root_node : 0;
@@ -161,7 +165,8 @@ sub _rest_resource_to_xml {
     # FIXME: The following loop should be rewritten using _rest_booking_to_xml
     #
     for my $booking_node ( $doc->getElementsByTagName('booking') ) {
-        my $booking = Booking->from_xml( _rest_remove_xlink_attrs($booking_node->toString()) );
+        my $booking = Booking->from_xml(
+            _rest_remove_xlink_attrs( $booking_node->toString() ) );
         $booking_node->setAttribute( "xlink:type", 'simple' );
         $booking_node->setAttribute( "xlink:href",
             _rest_get_booking_url( $booking->id, $resource->id ) );
@@ -180,28 +185,28 @@ sub _rest_resource_to_xml {
 
 }
 
-
 sub _rest_remove_xlink_attrs {
     my $xml = shift;
 
     my $parser = XML::LibXML->new();
-    my $doc = $parser->parse_string($xml) or die "_rest_remove_xlink_attrs() received an invalid XML argument";
+    my $doc    = $parser->parse_string($xml)
+        or die "_rest_remove_xlink_attrs() received an invalid XML argument";
 
-    my @tags = ('booking', 'agenda', 'resource');
+    my @tags = ( 'booking', 'agenda', 'resource' );
 
     for my $tag (@tags) {
-        for my $node ($doc->getElementsByTagName($tag)) {
-            $node->removeAttribute( "xlink:href" );
-            $node->removeAttribute( "xlink:type" );
-            $node->removeAttribute( "xmlns:xlink" );
+        for my $node ( $doc->getElementsByTagName($tag) ) {
+            $node->removeAttribute("xlink:href");
+            $node->removeAttribute("xlink:type");
+            $node->removeAttribute("xmlns:xlink");
         }
     }
 
     my $result = $doc->toString(0);
 
-    # removeAttribute() cannot remove namespace declarations (WTF!!!)
-    # ... and, if you are asking: *no*, removeAttributeNS() does not work, either!),
-    # so let's be expeditive:
+# removeAttribute() cannot remove namespace declarations (WTF!!!)
+# ... and, if you are asking: *no*, removeAttributeNS() does not work, either!),
+# so let's be expeditive:
     $result =~ s/ xmlns:xlink="[^"]*"//g;
 
     return $result;
@@ -226,7 +231,8 @@ sub _rest_agenda_to_xml {
     # FIXME: The following loop should be rewritten using _rest_booking_to_xml
     #
     for my $booking_node ( $doc->getElementsByTagName('booking') ) {
-        my $booking = Booking->from_xml( _rest_remove_xlink_attrs($booking_node->toString()) );
+        my $booking = Booking->from_xml(
+            _rest_remove_xlink_attrs( $booking_node->toString() ) );
         $booking_node->setAttribute( "xlink:type", 'simple' );
         $booking_node->setAttribute( "xlink:href",
             _rest_get_booking_url( $booking->id, $resource->id ) );
@@ -243,7 +249,6 @@ sub _rest_agenda_to_xml {
     }
     return $xml;
 }
-
 
 sub _rest_booking_to_xml {
     my ( $booking, $resource_id, $is_root_node ) = @_;
@@ -274,7 +279,6 @@ sub _rest_booking_to_xml {
     }
     return $xml;
 }
-
 
 #############################################################
 # Http tools
@@ -317,7 +321,7 @@ sub _send_xml {
 
 sub _list_resources {
     my $xml = _xml_preamble('resources')
-      . '<resources xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="/resources">';
+        . '<resources xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="/resources">';
     foreach my $id ( Resource->list_id ) {
         my $r = Resource->load($id);
         if ( defined $r ) {
@@ -331,7 +335,8 @@ sub _list_resources {
 sub _create_resource {
     my $cgi = shift;
 
-    my $r = Resource->from_xml( _rest_remove_xlink_attrs($cgi->param('POSTDATA')) );
+    my $r = Resource->from_xml(
+        _rest_remove_xlink_attrs( $cgi->param('POSTDATA') ) );
 
     if ( !defined $r ) {    # wrong XML argument
         _status(400);
@@ -390,7 +395,8 @@ sub _update_resource {
         return;
     }
 
-    my $updated_resource = Resource->from_xml( _rest_remove_xlink_attrs($cgi->param('POSTDATA')), $id );
+    my $updated_resource = Resource->from_xml(
+        _rest_remove_xlink_attrs( $cgi->param('POSTDATA') ), $id );
 
     if ( !defined $updated_resource ) {
         _status(400);
@@ -437,7 +443,7 @@ sub _list_bookings {
     }
     else {
         my $xml = _rest_agenda_to_xml( $r, 1 );
-        _send_xml( $xml );
+        _send_xml($xml);
 
     }
 }
@@ -543,7 +549,7 @@ sub _delete_booking {
             }
             else {
                 $ag->remove($b);
-				$r->save();
+                $r->save();
                 _status( 200, "Booking #$idB deleted" );
             }
         }
@@ -560,8 +566,9 @@ sub _update_booking {
 ####################
 
 sub _send_css {
-    my ( $cgi, $id ) =
-      @_;    #id should contain the CSS file name (without the ".css" extension)
+    my ( $cgi, $id )
+        = @_
+        ;  #id should contain the CSS file name (without the ".css" extension)
 
     #
     # FIXME: make it work from anywhere, now it must run from
@@ -577,7 +584,6 @@ sub _send_css {
         _status(400);
     }
 }
-
 
 ####################
 # Handlers for XSL #
@@ -602,6 +608,5 @@ sub _send_xsl {
         _status(400);
     }
 }
-
 
 1;

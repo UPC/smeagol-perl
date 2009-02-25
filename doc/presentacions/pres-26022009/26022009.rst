@@ -78,16 +78,16 @@ Sméagol: estratègia
 
 1. Buscar un projecte software:
 
-  - Prou simple (i prou complex)
-  - D'interès per als participants
-  - Que pugui arrapinyar-se recursos
+   - Prou simple (i prou complex)
+   - D'interès per als participants
+   - Que pugui arrapinyar-se recursos
   
 2. Sméagol: El gestor de reserves de recursos
 
 3. Definir:
   
-  - Una arquitectura
-  - Una primera fita: simple i abastable
+   - Una arquitectura
+   - Una primera fita: simple i abastable
 
 4. ... i ... llençar-se a la piscina!
 
@@ -118,8 +118,8 @@ Test Driven Development
   desenvolupament àgil:
 
   - Determinar què ha de fer un mòdul
-  - Escriure una conjunt de tests que ho comproven
-  - Implementar el mòdul «lluitant contra el test»
+  - Escriure un conjunt de tests que ho comproven
+  - Implementar el mòdul «lluitant contra els tests»
 
 * Hi ha eines ad-hoc per usar la tècnica
 * Milloren el problemes de regressió
@@ -170,7 +170,7 @@ Principis REST
 Exemples REST i no REST
 -----------------------
 
-* http://escritorio.acceso.com/upc/dossier/prensa.html
+* http://escritorio.acceso.com/upc/dossier/prensa.html?comp_id=6394
 * http://www.upf.edu/recull/portada
 
 
@@ -200,14 +200,35 @@ SOAP vs. REST
   - Els identificadors dels objectes
 
 * REST no estandaritza els formats dels continguts
-* SOAP no garanteix la interoperabilitat (REST tampoc, però molt més).
+* SOAP no garanteix la interoperabilitat (REST si?).
 * SOAP és la SOAP D'ALL: repeteix els esquemes de RPC, DCOM, CORBA, 
   Java RMI,... però no aprèn de HTTP i la web.
 
 
 
 
-Avaluació d'aquesta fase
-------------------------
+En aquesta fase hem après
+-------------------------
+
+* Montanyes d'eines: Perl, Jabber, Subversion, Trac
+* Com fer treball remot amb eines col·laboratives
+* Conviure amb els interessos de diverses entitats
+* TDD
+* Uns patrons arquitecturals per aplicacions web
+* Una certa perspectiva del problema a resoldre
+
+
+
+
+Els bloquejadors han sigut
+--------------------------
+
+* El desconeixement de les eines i, especialment, el llenguatge
+* La manca de costum de treballar en grups dispersos
+* El vaivé d'objectius: cicle massa llarg i desendreçat.
+  (es pot fer en grup el treball inicial d'un gurú boig?)
+* Poc esforç invertit en fer entendre cap on anàvem al grup
+* Manca de lideratge
+
 
 

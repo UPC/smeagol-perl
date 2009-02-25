@@ -55,9 +55,9 @@ Sméagol: un petit pas
 
 * Cal incentivar una cultura de col·laboració des d'una
   òptica confederal: col·laborem perquè ens surt a compte
-  i hi sortim guanyant.
+  i hi sortim guanyant
 
-* Sméagol és un petit pas en aquesta direcció.
+* Sméagol és un petit pas en aquesta direcció
    
 
 
@@ -65,12 +65,12 @@ Sméagol: objectius generals
 ---------------------------
 
 * Avançar en la col·laboració aprenent de les comunitats de 
-  desenvolupadors de programari lliure.
+  desenvolupadors de programari lliure
 * Aprendre a usar certes eines col·laboratives
 * Aprofitar algunes idees tecnològiques
-* Acabar tenint software compartit entre grups
-* Adquirir experiència
-* Animar el cotarro
+* Acabar tenint programari compartit entre grups
+* Adquirir experiència i transmetre coneixement
+* Aconseguir que el treball sigui divertit i enriquidor
 
 
 
@@ -87,8 +87,8 @@ Sméagol: estratègia
 
 * Definir:
   
-  - Una primera fita: simple i abastable
   - Una arquitectura
+  - Una primera fita: simple i abastable
   - ... i... llençar-se a la piscina!
 
 
@@ -100,12 +100,11 @@ Metodologies àgils
 * Les (grans) especificacions són irreals i molt cares
 * L'ús és el millor especificador
 * És més rentable fer i refer
-* Cal tenir 
+* Cal tenir mitjans que ho permetin:
 
-  - arquitectures soft
+  - arquitectures
   - mètodes de treball
   
-  que ho permetin
 * Cicles d'especificació-implementació-release molt curts
 
 

@@ -14,7 +14,7 @@
 <xsl:template match="from|to">
 <xsl:value-of select="year"/>-<xsl:value-of select="month"/>-<xsl:value-of select="day"/>
 a les
-<xsl:value-of select="hour"/>:<xsl:value-of select="minute"/>
+<xsl:value-of select="hour"/>:<xsl:value-of select="minute"/>:<xsl:value-of select="second"/>
 </xsl:template>
 
 </xsl:stylesheet>

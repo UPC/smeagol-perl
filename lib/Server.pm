@@ -11,8 +11,12 @@ use Carp;
 
 use Resource;
 
-my $XML_HEADER = '<?xml version="1.0" encoding="UTF-8"?>'
-    . '<?xml-stylesheet href="/css/smeagol.css" type="text/css"?>';
+my $XML_HEADER = '<?xml version="1.0" encoding="UTF-8"?>';
+
+sub _xml_preamble {
+    my $type = shift; # resources, resource, agenda or booking
+    return $XML_HEADER . '<?xml-stylesheet type="application/xml" href="/xsl/' . $type . '.xsl"?>';
+}
 
 # Nota: hauria de funcionar amb "named groups" però només
 # s'implementen a partir de perl 5.10. Quina misèria, no?
@@ -37,6 +41,7 @@ my %crud_for = (
     },
     '/css/(\w+)\.css' => { GET => \&_send_css },
     '/dtd/(\w+)\.dtd' => { GET => \&_send_dtd },
+    '/xsl/(\w+)\.xsl' => { GET => \&_send_xsl },
 );
 
 # Http request dispatcher. Sends every request to the corresponding
@@ -169,7 +174,7 @@ sub _rest_resource_to_xml {
     $xml =~ s/<\?xml version="1.0"\?>//;
 
     if ($is_root_node) {
-        $xml = $XML_HEADER . $xml;
+        $xml = _xml_preamble('resource') . $xml;
     }
     return $xml;
 
@@ -235,7 +240,7 @@ sub _rest_agenda_to_xml {
     $xml =~ s/<\?xml version="1.0"\?>//;
 
     if ($is_root_node) {
-        $xml = $XML_HEADER . $xml;
+        $xml = _xml_preamble('agenda') . $xml;
     }
     return $xml;
 }
@@ -266,7 +271,7 @@ sub _rest_booking_to_xml {
     $xml =~ s/<\?xml version="1.0"\?>//;
 
     if ($is_root_node) {
-        $xml = $XML_HEADER . $xml;
+        $xml = _xml_preamble('booking') . $xml;
     }
     return $xml;
 }
@@ -311,7 +316,7 @@ sub _send_xml {
 ##############################################################
 
 sub _list_resources {
-    my $xml = $XML_HEADER
+    my $xml = _xml_preamble('resources')
         . '<resources xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="/resources">';
     foreach my $id ( Resource->list_id ) {
         my $r = Resource->load($id);
@@ -479,5 +484,31 @@ sub _send_css {
         _status(400);
     }
 }
+
+
+####################
+# Handlers for XSL #
+####################
+
+sub _send_xsl {
+    my ( $cgi, $id )
+        = @_
+        ;  #id should contain the XSL file name (without the ".xsl" extension)
+
+    #
+    # FIXME: make it work from anywhere, now it must run from
+    #        the project base dir or won't find dtd dir
+
+    if ( open my $xsl, "<", "xsl/$id.xsl" ) {
+
+        # slurp css file
+        local $/;
+        _reply( '200 OK', 'application/xml', <$xsl> );
+    }
+    else {
+        _status(400);
+    }
+}
+
 
 1;

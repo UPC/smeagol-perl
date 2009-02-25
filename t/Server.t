@@ -68,7 +68,7 @@ sub remove_xlink {
         'resource list retrieval status ' . Dumper( $res->code ) );
 
     ok( $res->content
-            =~ m|<\?xml version="1.0" encoding="UTF-8"\?><\?xml-stylesheet href="/css/smeagol.css" type="text/css"\?><resources xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="/resources"></resources>|,
+            =~ m|<\?xml version="1.0" encoding="UTF-8"\?><\?xml-stylesheet type="application/xml" href="/xsl/resources.xsl"\?><resources xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="/resources"></resources>|,
         "resource list content " . Dumper( $res->content )
     );
 }

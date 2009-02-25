@@ -8,10 +8,11 @@ use base qw(HTTP::Server::Simple::CGI);
 use CGI qw();
 use XML::LibXML;
 use Carp;
-
+use Data::Dumper;
 use Resource;
 
-my $XML_HEADER = '<?xml version="1.0" encoding="UTF-8"?>';
+my $XML_HEADER = '<?xml version="1.0" encoding="UTF-8"?>'
+  . '<?xml-stylesheet href="/css/smeagol.css" type="text/css"?>';
 
 sub _xml_preamble {
     my $type = shift; # resources, resource, agenda or booking
@@ -207,7 +208,6 @@ sub _rest_remove_xlink_attrs {
     return $result;
 }
 
-
 sub _rest_agenda_to_xml {
     my $resource     = shift;
     my $is_root_node = shift;
@@ -299,6 +299,7 @@ sub _status {
         403 => 'Forbidden',
         404 => 'Not Found',
         405 => 'Method Not Allowed',
+        409 => 'Conflict',
     );
 
     my $text = $codes{$code} || die "Unknown HTTP code error";
@@ -317,7 +318,7 @@ sub _send_xml {
 
 sub _list_resources {
     my $xml = _xml_preamble('resources')
-        . '<resources xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="/resources">';
+      . '<resources xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="/resources">';
     foreach my $id ( Resource->list_id ) {
         my $r = Resource->load($id);
         if ( defined $r ) {
@@ -438,22 +439,116 @@ sub _list_bookings {
     else {
         my $xml = _rest_agenda_to_xml( $r, 1 );
         _send_xml( $xml );
+
     }
 }
 
 sub _create_booking {
+    my $cgi = shift;
+    my $id  = shift;
 
-    # FIXME: I'm just a stub
+    if ( !defined $id ) {
+        _status(400);
+        return;
+    }
+
+    my $r = Resource->load($id);
+    if ( !defined $r ) {
+        _status(404);
+    }
+    else {
+        my $b = Booking->from_xml(
+            _rest_remove_xlink_attrs( $cgi->param('POSTDATA') ) );
+        if ( !defined $b ) {
+            _status(400);
+        }
+        else {
+            if ( $r->agenda->interlace($b) ) {
+                _status(409);
+            }
+            else {
+                $r->agenda->append($b);
+                $r->save();
+                _status( 201, _rest_booking_to_xml( $b, $id, 1 ) );
+            }
+        }
+    }
 }
 
 sub _retrieve_booking {
+    my $cgi = shift;
+    my $idR = shift;
+    my $idB = shift;
 
-    # FIXME: I'm just a stub
+    if ( !defined $idR || !defined $idB ) {
+        _status(400);
+        return;
+    }
+
+    my $r = Resource->load($idR);
+
+    if ( !defined $r ) {
+        _status(404);
+    }
+    else {
+        my $ag = $r->agenda;
+        if ( !defined $ag ) {
+            _status(404);
+        }
+        else {
+            my $b;
+            foreach ( $ag->elements ) {
+                if ( $_->id eq $idB ) {
+                    $b = $_;
+                }
+            }
+            if ( !defined $b ) {
+                _status(404);
+            }
+            else {
+                _send_xml( _rest_booking_to_xml( $b, $idR, 1 ) );
+            }
+        }
+    }
 }
 
 sub _delete_booking {
+    my $cgi = shift;
+    my $idR = shift;
+    my $idB = shift;
 
-    # FIXME: I'm just a stub
+    if ( !defined $idR || !defined $idB ) {
+        _status(400);
+        return;
+    }
+
+    my $r = Resource->load($idR);
+
+    if ( !defined $r ) {
+        _status(404);
+    }
+    else {
+        my $ag = $r->agenda;
+        if ( !defined $ag ) {
+            _status(404);
+        }
+        else {
+            my $b;
+            foreach ( $ag->elements ) {
+                if ( $_->id eq $idB ) {
+                    $b = $_;
+                }
+            }
+            if ( !defined $b ) {
+                _status(404);
+            }
+            else {
+                $ag->remove($b);
+				$r->save();
+                _status( 200, "Booking #$idB deleted" );
+            }
+        }
+    }
 }
 
 sub _update_booking {
@@ -466,9 +561,8 @@ sub _update_booking {
 ####################
 
 sub _send_css {
-    my ( $cgi, $id )
-        = @_
-        ;  #id should contain the CSS file name (without the ".css" extension)
+    my ( $cgi, $id ) =
+      @_;    #id should contain the CSS file name (without the ".css" extension)
 
     #
     # FIXME: make it work from anywhere, now it must run from

@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 20;
+use Test::More tests => 36;
 use LWP::UserAgent;
 use HTTP::Request;
 use XML::Simple;
@@ -106,10 +106,12 @@ my $b2 = Booking->new(
         second => 59
     )
 );
+
 my $ag = Agenda->new();
 $ag->append($b1);
 $ag->append($b2);
 my $resource = Resource->new( 'desc 2 2', 'gra 2 2', $ag );
+my $resource2 = Resource->new( 'desc 2 2', 'gra 2 2' );
 
 # Testing resource creation via XML
 {
@@ -241,6 +243,79 @@ my $resource = Resource->new( 'desc 2 2', 'gra 2 2', $ag );
 
     ok( defined $ag , "list bookings content " . Dumper($ag));
 }
+
+#Testing create booking
+{
+    # first, create a new resource without agenda, therefore neither bookings
+    my $res = smeagol_request( 'POST', smeagol_url('/resource'),
+        $resource2->to_xml(1000) );
+
+    ok( $res->code == '201',
+        'resource creation status ' . Dumper( $res->code ) );
+
+	my $r = Resource->from_xml($res->content,10);
+
+	$res = smeagol_request( 'POST', smeagol_url('/resource/10/booking'), $b1->to_xml());
+	ok( $res->code == '201' && Booking->from_xml(remove_xlink($res->content)) == $b1, 'created booking '.$res->code);
+
+	$res = smeagol_request( 'POST', smeagol_url('/resource/10/booking'), $b2->to_xml());
+	ok( $res->code == '201' && Booking->from_xml(remove_xlink($res->content)) == $b2, 'created booking '.$res->code);
+
+	$res = smeagol_request( 'POST', smeagol_url('/resource/10/booking'), $b2->to_xml());
+	ok( $res->code == '409', 'booking not created because is contained '.$res->code);
+}
+
+#Testing retrieve and remove bookings
+{
+    # first, create a new resource without bookings
+    my $res = smeagol_request( 'POST', smeagol_url('/resource'),
+        $resource2->to_xml() );
+
+    ok( $res->code == '201',
+        'resource creation status ' . Dumper( $res->code ) );
+
+	my $xmltree = XMLin( $res->content );
+
+	my $r = Resource->from_xml($res->content,11);
+
+	#and try to retrieve a booking not existent
+	$res = smeagol_request( 'GET', smeagol_url( '/resource/11/booking/1'));
+	ok($res->code == '404', 'not retrieved booking because there isn t agenda');
+
+	# second, add one booking
+	$res = smeagol_request( 'POST', smeagol_url('/resource/11/booking'), $b1->to_xml());
+	ok( $res->code == '201' && Booking->from_xml(remove_xlink($res->content)) == $b1, 'created booking status: '.$res->code);
+
+	#third, retrieve it, remove it, etc
+	$res = smeagol_request( 'GET', smeagol_url( '/resource/11/booking/1'));
+	ok(Booking->from_xml(remove_xlink($res->content)) == $b1, 'retrieved booking');
+
+	$res = smeagol_request( 'GET', smeagol_url( '/resource/11/booking/1000'));
+	ok($res->code == '404', 'not retrieved booking, booking not existent');
+
+	$res = smeagol_request( 'GET', smeagol_url( '/resource/1000/booking/1'));
+	ok($res->code == '404', 'not retrieved booking, resource not existent');
+
+	$res = smeagol_request( 'POST', smeagol_url('/resource/11/booking'), $b2->to_xml());
+	ok( $res->code == '201' && Booking->from_xml(remove_xlink($res->content)) == $b2, 'created booking '.$res->code);
+
+	$res = smeagol_request( 'GET', smeagol_url( '/resource/11/booking/2'));
+	ok(Booking->from_xml(remove_xlink($res->content)) == $b2, 'retrieved booking');
+
+	$res = smeagol_request( 'DELETE', smeagol_url( '/resource/1000/booking/1'));
+	ok($res->code == '404', 'not deleted booking, resource not existent '.$res->code );
+
+	$res = smeagol_request( 'DELETE', smeagol_url( '/resource/11/booking/1'));
+	ok($res->code == '200', 'deleted booking '.$res->code );
+
+	$res = smeagol_request( 'GET', smeagol_url( '/resource/11/booking/1'));
+	ok($res->code == '404', 'not retrieved booking, booking not existent '.$res->code);
+
+	$res = smeagol_request( 'DELETE', smeagol_url( '/resource/11/booking/1'));
+	ok($res->code == '404', 'not deleted booking, booking not existent '.$res->code);
+
+}
+
 
 END {
     kill 3, $pid;

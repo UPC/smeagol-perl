@@ -1,5 +1,3 @@
-.. include:: <s5defs.txt>
-
 El projecte Sméagol
 ===================
 
@@ -31,7 +29,7 @@ La UPC és gran i heterogènia
    - Tecnològicament
 
 * Els TIC UPC han de satisfer moltes demandes semblants 
-  però no idèntiques i no tenen prou recursos: :purple:`cal una solució`.
+  però no idèntiques i no tenen prou recursos: cal una solució
 
 
 

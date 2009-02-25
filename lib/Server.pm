@@ -246,7 +246,7 @@ sub _rest_agenda_to_xml {
 
 
 sub _rest_booking_to_xml {
-    my ( $booking, $resource_id, $is_root_node ) = shift;
+    my ( $booking, $resource_id, $is_root_node ) = @_;
 
     $is_root_node = ( defined $is_root_node ) ? $is_root_node : 0;
 

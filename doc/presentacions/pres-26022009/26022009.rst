@@ -164,3 +164,21 @@ Principis REST
 * Un recurs diverses representacions negociables.
 * Mètodes del protocol HTTP -> semàntica CRUD
 
+
+
+SOA: SOAP vs. REST
+------------------
+
+
+
+Exemples REST i no REST
+-----------------------
+
+
+
+
+
+Avaluació d'aquesta fase
+------------------------
+
+

@@ -232,3 +232,91 @@ Els bloquejadors han sigut
 
 
 
+Arquitectura del projecte
+-------------------------
+
+* Tres components funcionals:
+
+  - servidor
+  - client
+  - agregador
+
+
+
+
+Arquitectura: el servidor
+-------------------------
+
+* És el back-end (e.g. 1 per unitat)
+* S'hi dialoga amb l'API REST
+* 1 funcionament, N implementacions possibles
+  però totes es comporten igual
+* Gestiona i controla les dades a tots els nivells,
+  per això l'anomenem també l'sméagol.
+* Pot tenir polítiques pròpies (permisos, atributs, etc.)
+
+
+
+Arquitectura: el client
+-----------------------
+
+* És el front-end (e.g. N per unitat)
+* Dialoga amb el servidor a través de l'API REST
+* 1 funcionament, N implementacions possibles
+  però amb el mateix comportament
+* No aporta d'altra funcionalitat que no tingui
+  el servidor
+* Creació de wrappers per a clients de diferents
+  llenguatges de programació
+
+
+
+Arquitectura: l'agregador
+-------------------------
+
+* Fa d'intermediari entre servidors i entre
+  clients i servidors (e.g. 1 per campus)
+* Permet compartir recursos entre servidors
+* Permet als clients tenir una visió global
+* Té informació dels diferents servidors associats
+* Treballa com un proxy HTTP i un directori alhora
+* Associar-s'hi és voluntari
+
+
+
+Estat del projecte
+------------------
+
+* Hem consolidat els objectius inicials
+* Hem après a utilitzar eines de col·laboració
+  (missatgeria instantània amb jabber, control
+  de versions amb svn i gestió de projectes amb trac)
+* Hem establert un equip de treball capaç de
+  treballar en paral·lel
+* Hem desenvolupat una plataforma de referència,
+  amb un client i un servidor
+
+
+Passos següents
+---------------
+
+* Polir alguns defectes de l'API REST
+* Implementar els wrappers per a d'altres llenguatges
+  basats en el client de referència
+* Implementació d'un client web ric (i.e. formularis)
+* Ampliar les funcionalitats del servidor
+
+
+
+Possibles millores
+------------------
+
+* Formació en les eines i metodologies
+* Manca d'experiència similar
+* Limitacions de temps
+* Política de revisió de codi (peer review)
+* Guia d'estil de programació
+* Documentació d'usuari
+* Release plan i política de release ben definits
+
+

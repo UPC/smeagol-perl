@@ -241,7 +241,7 @@ Arquitectura del projecte
   - client
   - agregador
 
-
+* Per què?
 
 
 Arquitectura: el servidor
@@ -282,6 +282,40 @@ Arquitectura: l'agregador
 * Treballa com un proxy HTTP i un directori alhora
 * Associar-s'hi és voluntari
 
+
+
+Arquitectura: objetius
+----------------------
+
+* sistema modular i flexible
+* permetre integrar-hi eines existents
+* separar presentació i aplicació
+
+
+Arquitectura: raons d'explotació
+--------------------------------
+
+* possibilitat de triar la tecnologia que l'implementa
+* facilitat per implantar el sistema, no cal imposar-lo
+* sistema federat, cadascú és responsable de la seva part
+
+
+Arquitectura: raons tècniques
+-----------------------------
+
+* obligació de tenir una interfície clara
+* els components estan ben separats i són substituïbles
+* es pot dividir la feina més fàcilment
+
+
+Arquitectura: raons estratègiques
+---------------------------------
+
+* sistema flexible
+* el model federat s'adecua al context de la UPC
+* potencia la col·laboració entre unitats
+* nous reptes tècnics que dinamitzin la feina i
+  motivin el personal
 
 
 Estat del projecte

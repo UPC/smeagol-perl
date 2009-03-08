@@ -4,7 +4,6 @@ use strict;
 use warnings;
 use Getopt::Long;
 
-use YAML qw(LoadFile);
 use locale;
 use Carp qw(confess);
 

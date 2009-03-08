@@ -13,7 +13,6 @@ WriteMakefile(
         'XML::LibXML'               => undef,
         'XML::Simple'               => undef,
         'HTTP::Server::Simple::CGI' => undef,
-        'YAML::Tiny'                => undef,
         'Getopt::Long'              => undef,
         'Data::Compare'             => undef,
     },

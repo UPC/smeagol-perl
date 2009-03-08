@@ -26,7 +26,6 @@ Aquesta distribució depèn d'aquests altres mòduls:
   | Test::More                | perl-modules               |
   | XML::LibXML               | libxml-libxml-perl         |
   | XML::Simple               | libxml-simple-perl         |
-  | YAML::Tiny                | libyaml-tiny-perl          |
   | HTTP::Server::Simple::CGI | libhttp-server-simple-perl |
   | Getopt::Long              | perl-base                  |
   | Data::Compare             | libdata-compare-perl       |

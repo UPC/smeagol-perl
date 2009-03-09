@@ -7,7 +7,10 @@ use Data::Dumper;
 
 use Carp;
 
-BEGIN { use_ok($_) for qw(DataStore) }
+BEGIN {
+    unlink glob "/tmp/smeagol_datastore/*";
+    use_ok($_) for qw(DataStore);
+}
 
 # Testing DataStore->list_id() with empty DataStore
 my @ids = DataStore->list_id;

@@ -76,56 +76,34 @@ sub createResource {
     }
 }
 
-sub createAgenda {
-    my $self = shift;
-    my ($idResource) = @_;
-
-    #XXX De moment no es te en compte que hi hagi mes d'una agenda per recurs
-    #Si es crea una nova agenda, en cas que hi hagi una anterior s'esborrara
-    my $resource = getResource($idResource);
-    $resource->{idAgenda} = '';
-    my $res_xml = XMLout($resource);
-
-    my $req = HTTP::Request->new( POST => $self->{url} . $idResource );
-    $req->content_type('text/xml');
-    $req->content($res_xml);
-
-    my $res = $self->{ua}->request($req);
-    if ( $res->status_line =~ /200/ ) {
-        my $dom = eval { XML::LibXML->new->parse_string( $res->content ) };
-        return $dom->getElementsByTagName('agenda')->get_node(1)
-            ->getAttribute('xlink:href');
-    }
-    return undef;
-}
-
 sub createBooking {
     my $self = shift;
-    my ( $idAgenda, @from, @to ) = @_;
+    my ( $idR, $from, $to ) = @_;
 
-    my $req = HTTP::Request->new( POST => $self->{url} . $idAgenda );
+    my $req = HTTP::Request->new( POST => $self->{url} . '/resource/' .  $idR . '/booking' );
     $req->content_type('text/xml');
     my $booking_xml = "<booking>
 						<from>
-							<year>$from[0]</year>
-							<month>$from[1]</month>
-							<day>$from[2]</day>
-							<hour>$from[3]</hour>
-							<minute>$from[4]</minute>
-							<second>$from[5]</second>
+							<year>".$from->{year}."</year>
+							<month>".$from->{month}."</month>
+							<day>".$from->{day}."</day>
+							<hour>".$from->{hour}."</hour>
+							<minute>".$from->{minute}."</minute>
+							<second>".$from->{second}."</second>
 						</from>
 						<to>
-							<year>$to[0]</year>
-							<month>$to[1]</month>
-							<day>$to[2]</day>
-							<hour>$to[3]</hour>
-							<minute>$to[4]</minute>
-							<second>$to[5]</second>
+							<year>".$to->{year}."</year>
+							<month>".$to->{month}."</month>
+							<day>".$to->{day}."</day>
+							<hour>".$to->{hour}."</hour>
+							<minute>".$to->{minute}."</minute>
+							<second>".$to->{second}."</second>
 						</to>
 					</booking>";
     $req->content($booking_xml);
 
     my $res = $self->{ua}->request($req);
+
     if ( $res->status_line =~ /201/ ) {
         my $dom = eval { XML::LibXML->new->parse_string( $res->content ) };
         return $dom->getElementsByTagName('booking')->get_node(1)
@@ -136,9 +114,9 @@ sub createBooking {
 
 sub getResource {
     my $self = shift;
-    my ($idResource) = @_;
+    my ($id) = @_;
 
-    my $res = $self->{ua}->get( $self->{url} . $idResource );
+    my $res = $self->{ua}->get( $self->{url} . '/resource/' . $id );
 
     #FIXME: Cal controlar el cas que si/no hi hagi agenda
     if ( $res->status_line =~ /200/ ) {
@@ -154,34 +132,37 @@ sub getResource {
     return undef;
 }
 
-sub getAgenda {
+sub getBooking {
     my $self = shift;
-    my ($idAgenda) = @_;
+    my ($idR, $idB) = @_;
 
-    my $res = $self->{ua}->get( $self->{url} . $idAgenda );
-    my @bookings;
+	return undef unless (defined $idB || defined $idR);
+
+    my $res = $self->{ua}->get( $self->{url} . '/resource/' . $idR . '/booking/' . $idB );
 
     if ( $res->status_line =~ /200/ ) {
         my $dom = eval { XML::LibXML->new->parse_string( $res->content ) };
-        for my $booksNode ( $dom->getElementsByTagName('booking') ) {
-            push @bookings,
-                $booksNode->get_node(1)->getAttribute('xlink:href');
-        }
+        return XMLin( $res->content );
     }
     return undef;
 }
 
-sub getBooking {
-    my $self = shift;
-    my ($idBooking) = @_;
+sub listBookings { 
+	my $self = shift;
+	my ($id) = @_;
 
-    my $res = $self->{ua}->get( $self->{url} . $idBooking );
+	my $res = $self->{ua}->get( $self->{url} . '/resource/' . $id . '/bookings' );
 
-    if ( $res->status_line =~ /200/ ) {
-        my $dom = eval { XML::LibXML->new->parse_string( $res->content ) };
-        return XMLin( $dom->getElementsByTagName('booking') );
-    }
-    return undef;
+	my @bookings;
+
+	if ( $res->status_line =~ /200/ ) {
+		my $dom = eval { XML::LibXML->new->parse_string( $res->content ) };
+		for my $booksNode ( $dom->getElementsByTagName('booking') ) {
+			push @bookings, $booksNode->getAttribute('xlink:href');
+		}
+		return @bookings;
+	}
+	return undef;
 }
 
 sub updateResource {
@@ -192,7 +173,7 @@ sub updateResource {
 					<description>$des</description>
 					<granularity>$gra</granularity>
 					</resource>";
-    my $req = HTTP::Request->new( POST => $self->{url} . $idResource );
+    my $req = HTTP::Request->new( POST => $self->{url} . '/resource/'.$idResource );
 
     $req->content_type('text/xml');
     $req->content($res_xml);
@@ -212,34 +193,30 @@ sub updateResource {
     return undef;
 }
 
-sub updateAgenda {
-    my $self = shift;
-    return @_;
-}
-
 sub updateBooking {
-    my $self = shift;
-    my ( $idBooking, @from, @to ) = @_;
-    my $booking_xml = "<booking>
+	my $self = shift;
+	my ( $idR, $idB, $from, $to ) = @_;
+    
+	my $booking_xml = "<booking>
 						<from>
-							<year>$from[0]</year>
-							<month>$from[1]</month>
-							<day>$from[2]</day>
-							<hour>$from[3]</hour>
-							<minute>$from[4]</minute>
-							<second>$from[5]</second>
+							<year>".$from->{year}."</year>
+							<month>".$from->{month}."</month>
+							<day>".$from->{day}."</day>
+							<hour>".$from->{hour}."</hour>
+							<minute>".$from->{minute}."</minute>
+							<second>".$from->{second}."</second>
 						</from>
 						<to>
-							<year>$to[0]</year>
-							<month>$to[1]</month>
-							<day>$to[2]</day>
-							<hour>$to[3]</hour>
-							<minute>$to[4]</minute>
-							<second>$to[5]</second>
+							<year>".$to->{year}."</year>
+							<month>".$to->{month}."</month>
+							<day>".$to->{day}."</day>
+							<hour>".$to->{hour}."</hour>
+							<minute>".$to->{minute}."</minute>
+							<second>".$to->{second}."</second>
 						</to>
 					</booking>";
 
-    my $req = HTTP::Request->new( POST => $self->{url} . $idBooking );
+    my $req = HTTP::Request->new( POST => $self->{url} . '/resource/' . $idR . '/booking/' . $idB );
     $req->content_type('text/xml');
     $req->content($booking_xml);
 
@@ -254,39 +231,30 @@ sub updateBooking {
 
 sub delResource {
     my $self = shift;
-    my ($idResource) = @_;
-    my $req = HTTP::Request->new( DELETE => $self->{url} . $idResource );
+    my ($id) = @_;
+
+    my $req = HTTP::Request->new( DELETE => $self->{url} . '/resource/' .  $id );
     $req->content_type('text/xml');
 
     my $res = $self->{ua}->request($req);
     if ( $res->status_line =~ /200/ ) {
-        return $idResource;
-    }
-    return undef;
-}
-
-sub delAgenda {
-    my $self       = shift;
-    my ($idAgenda) = @_;
-    my $req        = HTTP::Request->new( DELETE => $self->{url} . $idAgenda );
-    $req->content_type('text/xml');
-
-    my $res = $self->{ua}->request($req);
-    if ( $res->status_line =~ /200/ ) {
-        return $idAgenda;
+        return $id;
     }
     return undef;
 }
 
 sub delBooking {
     my $self = shift;
-    my ($idBooking) = @_;
-    my $req = HTTP::Request->new( DELETE => $self->{url} . $idBooking );
+    my ($idR, $idB) = @_;
+
+	return unless (defined $idB || defined $idR);
+
+    my $req = HTTP::Request->new( DELETE => $self->{url} . '/resource/' . $idR . '/booking/' . $idB );
     $req->content_type('text/xml');
 
     my $res = $self->{ua}->request($req);
     if ( $res->status_line =~ /200/ ) {
-        return $idBooking;
+        return $idB;
     }
     return undef;
 }

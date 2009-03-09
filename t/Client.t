@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-use Test::More tests => 41;
+use Test::More tests => 46;
 
 use strict;
 use warnings;

@@ -440,12 +440,12 @@ sub _list_bookings {
 
     if ( !defined $r ) {
         _status(404);
+        return;
     }
-    else {
-        my $xml = _rest_agenda_to_xml( $r, 1 );
-        _send_xml($xml);
 
-    }
+    my $xml = _rest_agenda_to_xml( $r, 1 );
+    _send_xml($xml);
+
 }
 
 sub _create_booking {
@@ -460,24 +460,24 @@ sub _create_booking {
     my $r = Resource->load($id);
     if ( !defined $r ) {
         _status(404);
+        return;
     }
-    else {
-        my $b = Booking->from_xml(
-            _rest_remove_xlink_attrs( $cgi->param('POSTDATA') ) );
-        if ( !defined $b ) {
-            _status(400);
-        }
-        else {
-            if ( $r->agenda->interlace($b) ) {
-                _status(409);
-            }
-            else {
-                $r->agenda->append($b);
-                $r->save();
-                _status( 201, _rest_booking_to_xml( $b, $id, 1 ) );
-            }
-        }
+
+    my $b = Booking->from_xml(
+        _rest_remove_xlink_attrs( $cgi->param('POSTDATA') ) );
+    if ( !defined $b ) {
+        _status(400);
+        return;
     }
+
+    if ( $r->agenda->interlace($b) ) {
+        _status(409);
+        return;
+    }
+
+    $r->agenda->append($b);
+    $r->save();
+    _status( 201, _rest_booking_to_xml( $b, $id, 1 ) );
 }
 
 sub _retrieve_booking {
@@ -491,30 +491,24 @@ sub _retrieve_booking {
     }
 
     my $r = Resource->load($idR);
-
     if ( !defined $r ) {
         _status(404);
+        return;
     }
-    else {
-        my $ag = $r->agenda;
-        if ( !defined $ag ) {
-            _status(404);
-        }
-        else {
-            my $b;
-            foreach ( $ag->elements ) {
-                if ( $_->id eq $idB ) {
-                    $b = $_;
-                }
-            }
-            if ( !defined $b ) {
-                _status(404);
-            }
-            else {
-                _send_xml( _rest_booking_to_xml( $b, $idR, 1 ) );
-            }
-        }
+
+    my $ag = $r->agenda;
+    if ( !defined $ag ) {
+        _status(404);
+        return;
     }
+
+    my $b = ( grep { $_->id eq $idB } $ag->elements )[0];
+    if ( !defined $b ) {
+        _status(404);
+        return;
+    }
+
+    _send_xml( _rest_booking_to_xml( $b, $idR, 1 ) );
 }
 
 sub _delete_booking {
@@ -531,35 +525,97 @@ sub _delete_booking {
 
     if ( !defined $r ) {
         _status(404);
+        return;
     }
-    else {
-        my $ag = $r->agenda;
-        if ( !defined $ag ) {
-            _status(404);
-        }
-        else {
-            my $b;
-            foreach ( $ag->elements ) {
-                if ( $_->id eq $idB ) {
-                    $b = $_;
-                }
-            }
-            if ( !defined $b ) {
-                _status(404);
-            }
-            else {
-                $ag->remove($b);
-                $r->save();
-                _status( 200, "Booking #$idB deleted" );
-            }
-        }
+
+    my $ag = $r->agenda;
+    if ( !defined $ag ) {
+        _status(404);
+        return;
     }
+
+    my $b = ( grep { $_->id eq $idB } $ag->elements )[0];
+    if ( !defined $b ) {
+        _status(404);
+        return;
+    }
+
+    $ag->remove($b);
+    $r->save();
+    _status( 200, "Booking #$idB deleted" );
 }
 
+#
+# NOTE: No race conditions in _update_bookings, because we're using HTTP::Server::Simple
+#       which has no concurrence (requests are served sequentially)
+#
 sub _update_booking {
+    my ( $cgi, $idR, $idB ) = @_;
 
-    # FIXME: I'm just a stub
+    if ( !defined $idR || !defined $idB ) {
+        _status(400);
+        return;
+    }
+
+    my $r = Resource->load($idR);
+    if ( !defined $r ) {
+        _status(404);
+        return;
+    }
+
+    my $ag = $r->agenda;
+    if ( !defined $ag ) {
+        _status(404);
+        return;
+    }
+
+    my $old_booking = ( grep { $_->id eq $idB } $ag->elements )[0];
+    if ( !defined $old_booking ) {
+        _status(404);
+        return;
+    }
+
+    my $new_booking = Booking->from_xml(
+        _rest_remove_xlink_attrs( $cgi->param('POSTDATA') ), $idB );
+
+    if ( !defined $new_booking ) {
+        _status(400);
+        return;
+    }
+
+    #
+    # Search if updated booking would overlap
+    #
+    $ag->remove($old_booking);
+
+    my @overlapping = grep { $_->intersects($new_booking) } $ag->elements;
+    if ( $#overlapping > 0 ) {
+
+        my $overlapping_agenda = Agenda->new();
+        for (@overlapping) {
+            $overlapping_agenda->append($_);
+        }
+
+    # FIXME: _rest_agenda_to_xml should accept an 
+    # agenda and a resource_id as parameters
+    # so we should not need to perform the following hack
+    #
+    # REALLY UGLY HACK: create a dummy resource to build the agenda XML
+        my $dummy_resource
+            = Resource->new( 'dummy', 'dummy', $overlapping_agenda );
+        $dummy_resource->id($idR);
+        _status( 409, _rest_agenda_to_xml( $dummy_resource, 1 ) );
+        return;
+    }
+
+    $ag->append($new_booking);
+    $r->agenda($ag);
+
+    $r->save();
+    _send_xml( _rest_booking_to_xml( $new_booking, $idR, 1 ) );
+    return;
 }
+
 
 ####################
 # Handlers for CSS #

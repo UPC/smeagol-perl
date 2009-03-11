@@ -32,36 +32,32 @@ sub datetime {
 }
 
 # 17:00 - 18:59
-my $b1 = Booking->new( datetime( 2008, 4, 14, 17 ),
-    datetime( 2008, 4, 14, 18, 59 ) );
+my $b1 =
+  Booking->new( datetime( 2008, 4, 14, 17 ), datetime( 2008, 4, 14, 18, 59 ) );
 
 # 19:00 - 19:59
-my $b2 = Booking->new( datetime( 2008, 4, 14, 19 ),
-    datetime( 2008, 4, 14, 19, 59 ) );
+my $b2 =
+  Booking->new( datetime( 2008, 4, 14, 19 ), datetime( 2008, 4, 14, 19, 59 ) );
 
 # 15:00 - 17:59
-my $b3 = Booking->new( datetime( 2008, 4, 14, 15 ),
-    datetime( 2008, 4, 14, 17, 59 ) );
+my $b3 =
+  Booking->new( datetime( 2008, 4, 14, 15 ), datetime( 2008, 4, 14, 17, 59 ) );
 
 # 15:00 - 17:00
-my $b4 = Booking->new( datetime( 2008, 4, 14, 15 ),
-    datetime( 2008, 4, 14, 17 ) );
+my $b4 =
+  Booking->new( datetime( 2008, 4, 14, 15 ), datetime( 2008, 4, 14, 17 ) );
 
 # 16:00 - 16:29
-my $b5 = Booking->new( datetime( 2008, 4, 14, 16 ),
-    datetime( 2008, 4, 14, 16, 29 ) );
+my $b5 =
+  Booking->new( datetime( 2008, 4, 14, 16 ), datetime( 2008, 4, 14, 16, 29 ) );
 
 # 16:29:00 - 16:29:01
-my $b6 = Booking->new(
-    datetime( 2008, 4, 14, 16, 29, 0 ),
-    datetime( 2008, 4, 14, 16, 29, 1 )
-);
+my $b6 = Booking->new( datetime( 2008, 4, 14, 16, 29, 0 ),
+    datetime( 2008, 4, 14, 16, 29, 1 ) );
 
 # 16:29:01 - 16:29:02
-my $b7 = Booking->new(
-    datetime( 2008, 4, 14, 16, 29, 1 ),
-    datetime( 2008, 4, 14, 16, 29, 2 )
-);
+my $b7 = Booking->new( datetime( 2008, 4, 14, 16, 29, 1 ),
+    datetime( 2008, 4, 14, 16, 29, 2 ) );
 
 # 17:00:00 - 19:00:00
 my $b8 = Booking->new( datetime( 2008, 4, 14, 17, 0, 0 ),
@@ -72,11 +68,13 @@ my $b9 = Booking->new( datetime( 2008, 4, 14, 18, 0, 0 ),
     datetime( 2008, 4, 14, 21, 0, 0 ) );
 
 # 21:00 - 21:00:01
-my $b10 = Booking->new( datetime( 2008, 4, 14, 21 ),
+my $b10 =
+  Booking->new( datetime( 2008, 4, 14, 21 ),
     datetime( 2008, 4, 14, 21, 0, 1 ) );
 
 # 21:00 - 21:00:01
-my $b11 = Booking->new( datetime( 2009, 4, 14, 21 ),
+my $b11 =
+  Booking->new( datetime( 2009, 4, 14, 21 ),
     datetime( 2009, 4, 14, 21, 0, 1 ) );
 
 # Booking->id getter and autoincrement

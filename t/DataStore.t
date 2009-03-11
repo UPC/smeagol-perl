@@ -25,8 +25,7 @@ my $obj = "Hello, I am an object!";
 DataStore->save( $id, $obj );
 my $obj2 = DataStore->load($id);
 ok( $obj2 eq $obj,
-    'testing object saving and retrieving with just one object in DataStore'
-);
+    'testing object saving and retrieving with just one object in DataStore' );
 
 # Testing list_id with one object in DataStore
 @ids = DataStore->list_id;

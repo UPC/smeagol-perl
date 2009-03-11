@@ -15,11 +15,10 @@ my $XML_HEADER = '<?xml version="1.0" encoding="UTF-8"?>';
 
 sub _xml_preamble {
     my $type = shift;    # resources, resource, agenda or booking
-    return
-          $XML_HEADER
-        . '<?xml-stylesheet type="application/xml" href="/xsl/'
-        . $type
-        . '.xsl"?>';
+    return $XML_HEADER
+      . '<?xml-stylesheet type="application/xml" href="/xsl/'
+      . $type
+      . '.xsl"?>';
 }
 
 # Nota: hauria de funcionar amb "named groups" però només
@@ -149,8 +148,7 @@ sub _rest_resource_to_xml {
         $nodes[0]->setNamespace( "http://www.w3.org/1999/xlink", "xlink", 0 );
     }
     $nodes[0]->setAttribute( "xlink:type", "simple" );
-    $nodes[0]
-        ->setAttribute( "xlink:href", _rest_get_resource_url($resource) );
+    $nodes[0]->setAttribute( "xlink:href", _rest_get_resource_url($resource) );
 
     #
     # FIXME: The following loop should be rewritten using _rest_agenda_to_xml
@@ -190,7 +188,7 @@ sub _rest_remove_xlink_attrs {
 
     my $parser = XML::LibXML->new();
     my $doc    = $parser->parse_string($xml)
-        or die "_rest_remove_xlink_attrs() received an invalid XML argument";
+      or die "_rest_remove_xlink_attrs() received an invalid XML argument";
 
     my @tags = ( 'booking', 'agenda', 'resource' );
 
@@ -321,7 +319,7 @@ sub _send_xml {
 
 sub _list_resources {
     my $xml = _xml_preamble('resources')
-        . '<resources xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="/resources">';
+      . '<resources xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="/resources">';
     foreach my $id ( Resource->list_id ) {
         my $r = Resource->load($id);
         if ( defined $r ) {
@@ -335,8 +333,8 @@ sub _list_resources {
 sub _create_resource {
     my $cgi = shift;
 
-    my $r = Resource->from_xml(
-        _rest_remove_xlink_attrs( $cgi->param('POSTDATA') ) );
+    my $r =
+      Resource->from_xml( _rest_remove_xlink_attrs( $cgi->param('POSTDATA') ) );
 
     if ( !defined $r ) {    # wrong XML argument
         _status(400);
@@ -395,8 +393,9 @@ sub _update_resource {
         return;
     }
 
-    my $updated_resource = Resource->from_xml(
-        _rest_remove_xlink_attrs( $cgi->param('POSTDATA') ), $id );
+    my $updated_resource =
+      Resource->from_xml( _rest_remove_xlink_attrs( $cgi->param('POSTDATA') ),
+        $id );
 
     if ( !defined $updated_resource ) {
         _status(400);
@@ -463,8 +462,8 @@ sub _create_booking {
         return;
     }
 
-    my $b = Booking->from_xml(
-        _rest_remove_xlink_attrs( $cgi->param('POSTDATA') ) );
+    my $b =
+      Booking->from_xml( _rest_remove_xlink_attrs( $cgi->param('POSTDATA') ) );
     if ( !defined $b ) {
         _status(400);
         return;
@@ -575,8 +574,9 @@ sub _update_booking {
         return;
     }
 
-    my $new_booking = Booking->from_xml(
-        _rest_remove_xlink_attrs( $cgi->param('POSTDATA') ), $idB );
+    my $new_booking =
+      Booking->from_xml( _rest_remove_xlink_attrs( $cgi->param('POSTDATA') ),
+        $idB );
 
     if ( !defined $new_booking ) {
         _status(400);
@@ -589,20 +589,20 @@ sub _update_booking {
     $ag->remove($old_booking);
 
     my @overlapping = grep { $_->intersects($new_booking) } $ag->elements;
-    if ( $#overlapping > 0 ) {
+    if ( @overlapping > 0 ) {
 
         my $overlapping_agenda = Agenda->new();
         for (@overlapping) {
             $overlapping_agenda->append($_);
         }
 
-    # FIXME: _rest_agenda_to_xml should accept an 
-    # agenda and a resource_id as parameters
-    # so we should not need to perform the following hack
-    #
-    # REALLY UGLY HACK: create a dummy resource to build the agenda XML
-        my $dummy_resource
-            = Resource->new( 'dummy', 'dummy', $overlapping_agenda );
+        # FIXME: _rest_agenda_to_xml should accept an
+        # agenda and a resource_id as parameters
+        # so we should not need to perform the following hack
+        #
+        # REALLY UGLY HACK: create a dummy resource to build the agenda XML
+        my $dummy_resource =
+          Resource->new( 'dummy', 'dummy', $overlapping_agenda );
         $dummy_resource->id($idR);
         _status( 409, _rest_agenda_to_xml( $dummy_resource, 1 ) );
         return;
@@ -616,15 +616,13 @@ sub _update_booking {
     return;
 }
 
-
 ####################
 # Handlers for CSS #
 ####################
 
 sub _send_css {
-    my ( $cgi, $id )
-        = @_
-        ;  #id should contain the CSS file name (without the ".css" extension)
+    my ( $cgi, $id ) =
+      @_;    #id should contain the CSS file name (without the ".css" extension)
 
     #
     # FIXME: make it work from anywhere, now it must run from
@@ -646,9 +644,8 @@ sub _send_css {
 ####################
 
 sub _send_xsl {
-    my ( $cgi, $id )
-        = @_
-        ;  #id should contain the XSL file name (without the ".xsl" extension)
+    my ( $cgi, $id ) =
+      @_;    #id should contain the XSL file name (without the ".xsl" extension)
 
     #
     # FIXME: make it work from anywhere, now it must run from

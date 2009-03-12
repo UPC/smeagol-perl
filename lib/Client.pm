@@ -38,7 +38,7 @@ sub new {
 sub listResources {
     my $self = shift;
 
-    my $res  = $self->{ua}->get( $self->{url} . "/resources" );
+    my $res = $self->{ua}->get( $self->{url} . "/resources" );
     my @idResources;
 
     if ( $res->status_line =~ /200/ ) {
@@ -70,7 +70,7 @@ sub createResource {
     if ( $res->status_line =~ /201/ ) {
         my $dom = eval { XML::LibXML->new->parse_string( $res->content ) };
         return $dom->getElementsByTagName('resource')->get_node(1)
-          ->getAttribute('xlink:href');
+            ->getAttribute('xlink:href');
     }
     else {
         return;
@@ -81,8 +81,7 @@ sub createBooking {
     my $self = shift;
     my ( $idR, $from, $to ) = @_;
 
-    my $req =
-      HTTP::Request->new(
+    my $req = HTTP::Request->new(
         POST => $self->{url} . '/resource/' . $idR . '/booking' );
     $req->content_type('text/xml');
     my $booking_xml = "<booking>
@@ -110,8 +109,9 @@ sub createBooking {
     if ( $res->status_line =~ /201/ ) {
         my $dom = eval { XML::LibXML->new->parse_string( $res->content ) };
         return $dom->getElementsByTagName('booking')->get_node(1)
-          ->getAttribute('xlink:href');
+            ->getAttribute('xlink:href');
     }
+
     # FIXME: weird, returning w/o unless makes tests fail
     return undef;
 }
@@ -127,9 +127,9 @@ sub getResource {
         my $dom = eval { XML::LibXML->new->parse_string( $res->content ) };
         my $resource = XMLin( $res->content );
         if ( defined $resource->{idAgenda} ) {
-            $resource->{agenda} =
-              $dom->getElementsByTagName('agenda')->get_node(1)
-              ->getAttribute('xlink:href');
+            $resource->{agenda}
+                = $dom->getElementsByTagName('agenda')->get_node(1)
+                ->getAttribute('xlink:href');
         }
         return $resource;
     }
@@ -142,9 +142,8 @@ sub getBooking {
 
     return unless ( defined $idB || defined $idR );
 
-    my $res =
-      $self->{ua}
-      ->get( $self->{url} . '/resource/' . $idR . '/booking/' . $idB );
+    my $res = $self->{ua}
+        ->get( $self->{url} . '/resource/' . $idR . '/booking/' . $idB );
 
     if ( $res->status_line =~ /200/ ) {
         my $dom = eval { XML::LibXML->new->parse_string( $res->content ) };
@@ -157,8 +156,8 @@ sub listBookings {
     my $self = shift;
     my ($id) = @_;
 
-    my $res =
-      $self->{ua}->get( $self->{url} . '/resource/' . $id . '/bookings' );
+    my $res
+        = $self->{ua}->get( $self->{url} . '/resource/' . $id . '/bookings' );
 
     my @bookings;
 
@@ -180,8 +179,8 @@ sub updateResource {
 					<description>$des</description>
 					<granularity>$gra</granularity>
 					</resource>";
-    my $req =
-      HTTP::Request->new( POST => $self->{url} . '/resource/' . $idResource );
+    my $req = HTTP::Request->new(
+        POST => $self->{url} . '/resource/' . $idResource );
 
     $req->content_type('text/xml');
     $req->content($res_xml);
@@ -191,12 +190,12 @@ sub updateResource {
     if ( $res->status_line =~ /200/ ) {
         my $xml = $res->content;
         if ( $xml !~ /xmlns:xlink/ ) {
-            $xml =~
-s/<resource /<resource xmlns:xlink=\"http:\/\/www.w3.org\/1999\/xlink\ "/;
+            $xml
+                =~ s/<resource /<resource xmlns:xlink=\"http:\/\/www.w3.org\/1999\/xlink\ "/;
         }
         my $dom = eval { XML::LibXML->new->parse_string($xml) };
         return $dom->getElementsByTagName('resource')->get_node(1)
-          ->getAttribute('xlink:href');
+            ->getAttribute('xlink:href');
     }
     return;
 }
@@ -224,8 +223,7 @@ sub updateBooking {
 						</to>
 					</booking>";
 
-    my $req =
-      HTTP::Request->new(
+    my $req = HTTP::Request->new(
         POST => $self->{url} . '/resource/' . $idR . '/booking/' . $idB );
     $req->content_type('text/xml');
     $req->content($booking_xml);
@@ -234,7 +232,7 @@ sub updateBooking {
     if ( $res->status_line =~ /200/ ) {
         my $dom = eval { XML::LibXML->new->parse_string( $res->content ) };
         return $dom->getElementsByTagName('booking')->get_node(1)
-          ->getAttribute('xlink:href');
+            ->getAttribute('xlink:href');
     }
     return;
 }
@@ -243,7 +241,8 @@ sub delResource {
     my $self = shift;
     my ($id) = @_;
 
-    my $req = HTTP::Request->new( DELETE => $self->{url} . '/resource/' . $id );
+    my $req
+        = HTTP::Request->new( DELETE => $self->{url} . '/resource/' . $id );
     $req->content_type('text/xml');
 
     my $res = $self->{ua}->request($req);
@@ -259,8 +258,7 @@ sub delBooking {
 
     return unless ( defined $idB || defined $idR );
 
-    my $req =
-      HTTP::Request->new(
+    my $req = HTTP::Request->new(
         DELETE => $self->{url} . '/resource/' . $idR . '/booking/' . $idB );
     $req->content_type('text/xml');
 

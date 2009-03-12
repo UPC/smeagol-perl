@@ -9,9 +9,9 @@ use XML::LibXML;
 use base qw(DateTime::Span);
 
 use overload
-  q{""} => \&__str__,
-  q{==} => \&__equal__,
-  q{!=} => \&__not_equal__;
+    q{""} => \&__str__,
+    q{==} => \&__equal__,
+    q{!=} => \&__not_equal__;
 
 sub new {
     my $class = shift;
@@ -31,7 +31,7 @@ sub new {
 }
 
 sub id {
-    my $self  = shift;
+    my $self = shift;
 
     my $field = __PACKAGE__ . "::id";
     if (@_) { $self->{$field} = shift; }
@@ -53,7 +53,7 @@ sub __equal__ {
     my ($booking) = @_;
 
     return $self->start == $booking->start
-      && $self->end == $booking->end;
+        && $self->end == $booking->end;
 }
 
 sub __not_equal__ {
@@ -66,46 +66,46 @@ sub to_xml {
     my $from = $self->start;
     my $to   = $self->end;
 
-    my $xml =
-        "<booking>" . "<id>"
-      . $self->id . "</id>"
-      . "<from>"
-      . "<year>"
-      . $from->year
-      . "</year>"
-      . "<month>"
-      . $from->month
-      . "</month>" . "<day>"
-      . $from->day
-      . "</day>"
-      . "<hour>"
-      . $from->hour
-      . "</hour>"
-      . "<minute>"
-      . $from->minute
-      . "</minute>"
-      . "<second>"
-      . $from->second
-      . "</second>"
-      . "</from><to>"
-      . "<year>"
-      . $to->year
-      . "</year>"
-      . "<month>"
-      . $to->month
-      . "</month>" . "<day>"
-      . $to->day
-      . "</day>"
-      . "<hour>"
-      . $to->hour
-      . "</hour>"
-      . "<minute>"
-      . $to->minute
-      . "</minute>"
-      . "<second>"
-      . $to->second
-      . "</second>"
-      . "</to></booking>";
+    my $xml
+        = "<booking>" . "<id>"
+        . $self->id . "</id>"
+        . "<from>"
+        . "<year>"
+        . $from->year
+        . "</year>"
+        . "<month>"
+        . $from->month
+        . "</month>" . "<day>"
+        . $from->day
+        . "</day>"
+        . "<hour>"
+        . $from->hour
+        . "</hour>"
+        . "<minute>"
+        . $from->minute
+        . "</minute>"
+        . "<second>"
+        . $from->second
+        . "</second>"
+        . "</from><to>"
+        . "<year>"
+        . $to->year
+        . "</year>"
+        . "<month>"
+        . $to->month
+        . "</month>" . "<day>"
+        . $to->day
+        . "</day>"
+        . "<hour>"
+        . $to->hour
+        . "</hour>"
+        . "<minute>"
+        . $to->minute
+        . "</minute>"
+        . "<second>"
+        . $to->second
+        . "</second>"
+        . "</to></booking>";
 
     return $xml;
 }
@@ -115,8 +115,8 @@ sub from_xml {
     my ( $xml, $id ) = @_;
 
     # validate XML string against the DTD
-    my $dtd =
-      XML::LibXML::Dtd->new( "CPL UPC//Resource DTD v0.01", "dtd/booking.dtd" );
+    my $dtd = XML::LibXML::Dtd->new( "CPL UPC//Resource DTD v0.01",
+        "dtd/booking.dtd" );
 
     my $doc = eval { XML::LibXML->new->parse_string($xml) };
 
@@ -148,10 +148,10 @@ sub from_xml {
         )
     );
 
-    $obj->{ __PACKAGE__ . "::id" } =
-        ( defined $b->{id} ) ? $b->{id}
-      : ( defined $id )      ? $id
-      :                        DataStore->next_id(__PACKAGE__);
+    $obj->{ __PACKAGE__ . "::id" }
+        = ( defined $b->{id} ) ? $b->{id}
+        : ( defined $id ) ? $id
+        :                   DataStore->next_id(__PACKAGE__);
 
     bless $obj, $class;
     return $obj;

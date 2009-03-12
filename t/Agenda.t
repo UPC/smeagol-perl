@@ -24,30 +24,30 @@ sub datetime {
 }
 
 # 17:00 - 18:59
-my $b1 =
-  Booking->new( datetime( 2008, 4, 14, 17 ), datetime( 2008, 4, 14, 18, 59 ) );
+my $b1 = Booking->new( datetime( 2008, 4, 14, 17 ),
+    datetime( 2008, 4, 14, 18, 59 ) );
 
 # 19:00 - 19:59
-my $b2 =
-  Booking->new( datetime( 2008, 4, 14, 19 ), datetime( 2008, 4, 14, 19, 59 ) );
+my $b2 = Booking->new( datetime( 2008, 4, 14, 19 ),
+    datetime( 2008, 4, 14, 19, 59 ) );
 
 # 15:00 - 17:59
-my $b3 =
-  Booking->new( datetime( 2008, 4, 14, 15 ), datetime( 2008, 4, 14, 17, 59 ) );
+my $b3 = Booking->new( datetime( 2008, 4, 14, 15 ),
+    datetime( 2008, 4, 14, 17, 59 ) );
 
 # 15:00 - 17:00
-my $b4 =
-  Booking->new( datetime( 2008, 4, 14, 15 ), datetime( 2008, 4, 14, 17 ) );
+my $b4 = Booking->new( datetime( 2008, 4, 14, 15 ),
+    datetime( 2008, 4, 14, 17 ) );
 
 # 16:00 - 16:29
-my $b5 =
-  Booking->new( datetime( 2008, 4, 14, 16 ), datetime( 2008, 4, 14, 16, 29 ) );
+my $b5 = Booking->new( datetime( 2008, 4, 14, 16 ),
+    datetime( 2008, 4, 14, 16, 29 ) );
 
 # Agenda Append Tests
 my $ag = Agenda->new();
 
 $ag->append($b1);
-ok( $ag->contains($b1), 'b1 in ag' );
+ok( $ag->contains($b1),  'b1 in ag' );
 ok( !$ag->contains($b2), 'b2 not in ag' );
 
 #to_xml agenda test

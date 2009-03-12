@@ -70,7 +70,8 @@ sub id_resource_booking {
     ok( $idResources[0] eq $Resources[0],
         'resource ' . id_resource( $Resources[0] ) . ' at list' );
 
-    push @Resources, $idRes = $client->createResource( "projector", "minuts" );
+    push @Resources,
+        $idRes = $client->createResource( "projector", "minuts" );
     ok( defined $Resources[1],
         'created resource ' . id_resource( $Resources[1] ) );
 
@@ -100,23 +101,21 @@ sub id_resource_booking {
         'updated resource ' . id_resource( $Resources[0] ) );
 
     $dataRes = $client->getResource( id_resource( $Resources[0] ) );
-    ok(
-        $dataRes->{granularity}      eq 'hora'
-          && $dataRes->{description} eq 'aulaaaaaa'
-          && !defined $dataRes->{agenda},
+    ok( $dataRes->{granularity} eq 'hora'
+            && $dataRes->{description} eq 'aulaaaaaa'
+            && !defined $dataRes->{agenda},
         'get resource ' . id_resource( $Resources[0] )
     );
 
-    $idRes =
-      $client->updateResource( id_resource( $Resources[0] ), "aula", "hora" );
+    $idRes = $client->updateResource( id_resource( $Resources[0] ),
+        "aula", "hora" );
     ok( $idRes eq $Resources[0],
         'updated resource ' . id_resource( $Resources[0] ) );
 
     $dataRes = $client->getResource( id_resource( $Resources[0] ) );
-    ok(
-        $dataRes->{granularity}      eq 'hora'
-          && $dataRes->{description} eq 'aula'
-          && !defined $dataRes->{agenda},
+    ok( $dataRes->{granularity} eq 'hora'
+            && $dataRes->{description} eq 'aula'
+            && !defined $dataRes->{agenda},
         'get resource ' . id_resource( $Resources[0] )
     );
 
@@ -130,10 +129,9 @@ sub id_resource_booking {
         'updated resource ' . id_resource( $Resources[1] ) );
 
     $dataRes = $client->getResource( id_resource( $Resources[1] ) );
-    ok(
-        $dataRes->{granularity}      eq 'hora'
-          && $dataRes->{description} eq 'projector'
-          && !defined $dataRes->{agenda},
+    ok( $dataRes->{granularity} eq 'hora'
+            && $dataRes->{description} eq 'projector'
+            && !defined $dataRes->{agenda},
         'get resource ' . id_resource( $Resources[1] )
     );
 }
@@ -237,21 +235,21 @@ my $to0 = {
 #Testing create booking
 {
     push @Bookings,
-      $client->createBooking( id_resource( $Resources[1] ), $from, $to );
+        $client->createBooking( id_resource( $Resources[1] ), $from, $to );
     ok( defined $Bookings[0],
         'booking created ' . id_resource( $Bookings[0] ) );
 
     push @Bookings,
-      $client->createBooking( id_resource( $Resources[1] ), $from2, $to2 );
+        $client->createBooking( id_resource( $Resources[1] ), $from2, $to2 );
     ok( defined $Bookings[1],
         'booking created ' . id_resource( $Bookings[1] ) );
 
     push @Bookings,
-      $client->createBooking( id_resource( $Resources[1] ), $from, $to );
+        $client->createBooking( id_resource( $Resources[1] ), $from, $to );
     ok( !defined $Bookings[2], 'booking not created, intersection' );
 
     push @Bookings,
-      $client->createBooking( id_resource( $Resources[1] ), $from3, $to3 );
+        $client->createBooking( id_resource( $Resources[1] ), $from3, $to3 );
     ok( defined $Bookings[3],
         'booking created ' . id_resource( $Bookings[3] ) );
 
@@ -272,50 +270,47 @@ my $to0 = {
 #Testing retrieve and delete booking
 {
     $dataBoo = $client->getBooking( id_resource_booking( $Bookings[1] ) );
-    ok(
-        $dataBoo->{from}->{year} == 2008
-          && $dataBoo->{from}->{month} == 4
-          && $dataBoo->{from}->{day} == 15
-          && $dataBoo->{from}->{hour} == 19
-          && $dataBoo->{from}->{minute} == 0
-          && $dataBoo->{from}->{second} == 0
-          && $dataBoo->{to}->{year} == 2008
-          && $dataBoo->{to}->{month} == 4
-          && $dataBoo->{to}->{day} == 15
-          && $dataBoo->{to}->{hour} == 20
-          && $dataBoo->{to}->{minute} == 0
-          && $dataBoo->{to}->{second} == 0,
+    ok( $dataBoo->{from}->{year} == 2008
+            && $dataBoo->{from}->{month} == 4
+            && $dataBoo->{from}->{day} == 15
+            && $dataBoo->{from}->{hour} == 19
+            && $dataBoo->{from}->{minute} == 0
+            && $dataBoo->{from}->{second} == 0
+            && $dataBoo->{to}->{year} == 2008
+            && $dataBoo->{to}->{month} == 4
+            && $dataBoo->{to}->{day} == 15
+            && $dataBoo->{to}->{hour} == 20
+            && $dataBoo->{to}->{minute} == 0
+            && $dataBoo->{to}->{second} == 0,
         'resource '
-          . id_resource( $Bookings[1] )
-          . ' booking '
-          . id_resource_booking( $Bookings[1] )
-          . '-> retrieved'
+            . id_resource( $Bookings[1] )
+            . ' booking '
+            . id_resource_booking( $Bookings[1] )
+            . '-> retrieved'
     );
 
     $dataBoo = $client->getBooking( id_resource_booking( $Bookings[0] ) );
-    ok(
-        $dataBoo->{from}->{year} == 2008
-          && $dataBoo->{from}->{month} == 4
-          && $dataBoo->{from}->{day} == 14
-          && $dataBoo->{from}->{hour} == 17
-          && $dataBoo->{from}->{minute} == 0
-          && $dataBoo->{from}->{second} == 0
-          && $dataBoo->{to}->{year} == 2008
-          && $dataBoo->{to}->{month} == 4
-          && $dataBoo->{to}->{day} == 14
-          && $dataBoo->{to}->{hour} == 19
-          && $dataBoo->{to}->{minute} == 0
-          && $dataBoo->{to}->{second} == 0,
+    ok( $dataBoo->{from}->{year} == 2008
+            && $dataBoo->{from}->{month} == 4
+            && $dataBoo->{from}->{day} == 14
+            && $dataBoo->{from}->{hour} == 17
+            && $dataBoo->{from}->{minute} == 0
+            && $dataBoo->{from}->{second} == 0
+            && $dataBoo->{to}->{year} == 2008
+            && $dataBoo->{to}->{month} == 4
+            && $dataBoo->{to}->{day} == 14
+            && $dataBoo->{to}->{hour} == 19
+            && $dataBoo->{to}->{minute} == 0
+            && $dataBoo->{to}->{second} == 0,
         'resource '
-          . id_resource( $Bookings[0] )
-          . ' booking '
-          . id_resource_booking( $Bookings[0] )
-          . '-> retrieved'
+            . id_resource( $Bookings[0] )
+            . ' booking '
+            . id_resource_booking( $Bookings[0] )
+            . '-> retrieved'
     );
 
     $idBook = $client->delBooking( id_resource_booking( $Bookings[0] ) );
-    ok(
-        $idBook eq id_resource_booking( $Bookings[0] ),
+    ok( $idBook eq id_resource_booking( $Bookings[0] ),
         'deleted booking ' . id_resource_booking( $Bookings[0] )
     );
 
@@ -338,16 +333,16 @@ my $to0 = {
 
 #Testing update Booking
 {
-    $idBook =
-      $client->updateBooking( id_resource_booking( $Bookings[0] ), $from, $to );
+    $idBook = $client->updateBooking( id_resource_booking( $Bookings[0] ),
+        $from, $to );
     ok( !defined $idBook, 'not updated booking, not existent resource' );
 
-    $idBook =
-      $client->updateBooking( id_resource( $Resources[2] ), 1, $from, $to );
+    $idBook = $client->updateBooking( id_resource( $Resources[2] ), 1, $from,
+        $to );
     ok( !defined $idBook, 'not updated booking, not existent resource' );
 
-    $idBook =
-      $client->updateBooking( id_resource( $Resources[1] ), -555, $from, $to );
+    $idBook = $client->updateBooking( id_resource( $Resources[1] ),
+        -555, $from, $to );
     ok( !defined $idBook, 'not updated booking, not existent booking' );
 
     $idBook = $client->updateBooking( id_resource_booking( $Bookings[1] ),
@@ -355,44 +350,45 @@ my $to0 = {
     ok( defined $idBook, 'updated booking ' . $Bookings[1] );
 
     $dataBoo = $client->getBooking( id_resource_booking( $Bookings[1] ) );
-    ok(
-        $dataBoo->{from}->{year} == $from2->{year}
-          && $dataBoo->{from}->{month} == $from2->{month}
-          && $dataBoo->{from}->{day} == $from2->{day}
-          && $dataBoo->{from}->{hour} == $from2->{hour}
-          && $dataBoo->{from}->{minute} == $from2->{minute}
-          && $dataBoo->{from}->{second} == $from2->{second}
-          && $dataBoo->{to}->{year} == $to2->{year}
-          && $dataBoo->{to}->{month} == $to2->{month}
-          && $dataBoo->{to}->{day} == $to2->{day}
-          && $dataBoo->{to}->{hour} == $to2->{hour}
-          && $dataBoo->{to}->{minute} == $to2->{minute}
-          && $dataBoo->{to}->{second} == $to2->{second},
+    ok( $dataBoo->{from}->{year} == $from2->{year}
+            && $dataBoo->{from}->{month} == $from2->{month}
+            && $dataBoo->{from}->{day} == $from2->{day}
+            && $dataBoo->{from}->{hour} == $from2->{hour}
+            && $dataBoo->{from}->{minute} == $from2->{minute}
+            && $dataBoo->{from}->{second} == $from2->{second}
+            && $dataBoo->{to}->{year} == $to2->{year}
+            && $dataBoo->{to}->{month} == $to2->{month}
+            && $dataBoo->{to}->{day} == $to2->{day}
+            && $dataBoo->{to}->{hour} == $to2->{hour}
+            && $dataBoo->{to}->{minute} == $to2->{minute}
+            && $dataBoo->{to}->{second} == $to2->{second},
         'retrieved booking updated' . $Bookings[1]
     );
 
     $idBook = $client->updateBooking( id_resource_booking( $Bookings[3] ),
         $from2, $to2 );
-    ok( !defined $idBook, 'not updated booking, intersection ' . id_resource_booking( $Bookings[3] ) );
+    ok( !defined $idBook,
+        'not updated booking, intersection '
+            . id_resource_booking( $Bookings[3] )
+    );
 
-    $idBook =
-      $client->updateBooking( id_resource_booking( $Bookings[3] ), $from, $to );
+    $idBook = $client->updateBooking( id_resource_booking( $Bookings[3] ),
+        $from, $to );
     ok( defined $idBook, 'updated booking ' . $idBook );
 
     $dataBoo = $client->getBooking( id_resource_booking( $Bookings[3] ) );
-    ok(
-        $dataBoo->{from}->{year} == $from->{year}
-          && $dataBoo->{from}->{month} == $from->{month}
-          && $dataBoo->{from}->{day} == $from->{day}
-          && $dataBoo->{from}->{hour} == $from->{hour}
-          && $dataBoo->{from}->{minute} == $from->{minute}
-          && $dataBoo->{from}->{second} == $from->{second}
-          && $dataBoo->{to}->{year} == $to->{year}
-          && $dataBoo->{to}->{month} == $to->{month}
-          && $dataBoo->{to}->{day} == $to->{day}
-          && $dataBoo->{to}->{hour} == $to->{hour}
-          && $dataBoo->{to}->{minute} == $to->{minute}
-          && $dataBoo->{to}->{second} == $to->{second},
+    ok( $dataBoo->{from}->{year} == $from->{year}
+            && $dataBoo->{from}->{month} == $from->{month}
+            && $dataBoo->{from}->{day} == $from->{day}
+            && $dataBoo->{from}->{hour} == $from->{hour}
+            && $dataBoo->{from}->{minute} == $from->{minute}
+            && $dataBoo->{from}->{second} == $from->{second}
+            && $dataBoo->{to}->{year} == $to->{year}
+            && $dataBoo->{to}->{month} == $to->{month}
+            && $dataBoo->{to}->{day} == $to->{day}
+            && $dataBoo->{to}->{hour} == $to->{hour}
+            && $dataBoo->{to}->{minute} == $to->{minute}
+            && $dataBoo->{to}->{second} == $to->{second},
         'retrieved booking updated' . $Bookings[3]
     );
 

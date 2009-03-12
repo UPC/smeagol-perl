@@ -15,7 +15,7 @@ sub new {
     my ( $description, $granularity, $agenda ) = @_;
 
     return
-      if ( !defined($description)
+        if ( !defined($description)
         || !defined($granularity) );    # $ag argument is not mandatory
 
     my $obj;
@@ -114,8 +114,10 @@ sub from_xml {
 
     $obj = {
         id => ( ( defined $id ) ? $id : _next_id() ),
-        description => $dom->getElementsByTagName('description')->string_value,
-        granularity => $dom->getElementsByTagName('granularity')->string_value,
+        description =>
+            $dom->getElementsByTagName('description')->string_value,
+        granularity =>
+            $dom->getElementsByTagName('granularity')->string_value,
         agenda      => Agenda->new(),
         _persistent => 0,
     };
@@ -135,7 +137,7 @@ sub to_xml {
     $xml    .= "<description>" . $self->{description} . "</description>";
     $xml    .= "<granularity>" . $self->{granularity} . "</granularity>";
     $xml    .= $self->{agenda}->to_xml()
-      if ( ( defined $self->{agenda} )
+        if ( ( defined $self->{agenda} )
         && defined( $self->{agenda}->elements ) );
     $xml .= "</resource>";
     return $xml;

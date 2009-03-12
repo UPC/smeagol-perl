@@ -31,7 +31,7 @@ sub init {
     }
     else {
         mkdir $path
-          or die "Could not create DataStore directory $path";
+            or die "Could not create DataStore directory $path";
     }
 
     # Add trailing slash if needed
@@ -108,7 +108,7 @@ sub list_id {
         my $id = $_;
         $id =~ s/\D//g;
 
-        #my ( $id, $dummy ) = split( /\./, $_ );   # remove ".db" from filename
+       #my ( $id, $dummy ) = split( /\./, $_ );   # remove ".db" from filename
         push @list, $id;
     }
     return @list;
@@ -120,16 +120,16 @@ sub remove {
 
     if ( DataStore->exists($id) ) {
         unlink _full_path($id)
-          or die " Could not remove persistent object $id\n ";
+            or die " Could not remove persistent object $id\n ";
     }
 }
 
 sub next_id {
-    my $self   = shift;
+    my $self = shift;
     my ($kind) = @_;
 
-    my $data   = 1;
-    my $path   = $_PATH . 'next_' . $kind;
+    my $data = 1;
+    my $path = $_PATH . 'next_' . $kind;
     if ( defined $kind ) {
         if ( -e $path ) {
             $data = do $path;

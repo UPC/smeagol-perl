@@ -1,8 +1,8 @@
 package Client;
 
-# version -0.01 alfa-alfa-version
 use strict;
 use warnings;
+
 use DateTime;
 use Resource;
 use Agenda;
@@ -27,16 +27,17 @@ sub new {
     my $ua = LWP::UserAgent->new();
     $ua->agent("SmeagolClient/0.1 ");
 
-    my $bless = {
+    my $obj = {
         url => $url,
         ua  => $ua,
     };
 
-    bless $bless, $class;
+    bless $obj, $class;
 }
 
 sub listResources {
     my $self = shift;
+
     my $res  = $self->{ua}->get( $self->{url} . "/resources" );
     my @idResources;
 

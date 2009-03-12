@@ -17,7 +17,7 @@ sub new {
     my $class = shift;
     my ( $from, $to ) = @_;
 
-    return undef if ( !defined($from) || !defined($to) );
+    return if ( !defined($from) || !defined($to) );
 
     my $obj = $class->SUPER::from_datetimes(
         start => $from,
@@ -27,12 +27,15 @@ sub new {
     $obj->{ __PACKAGE__ . "::id" } = DataStore->next_id(__PACKAGE__);
 
     bless $obj, $class;
+    return $obj;
 }
 
 sub id {
     my $self  = shift;
+
     my $field = __PACKAGE__ . "::id";
-    if (@_) { $self->{$field} = shift }
+    if (@_) { $self->{$field} = shift; }
+
     return $self->{$field};
 }
 
@@ -109,8 +112,7 @@ sub to_xml {
 
 sub from_xml {
     my $class = shift;
-    my $xml   = shift;
-    my $id    = shift;
+    my ( $xml, $id ) = @_;
 
     # validate XML string against the DTD
     my $dtd =
@@ -121,7 +123,7 @@ sub from_xml {
     if ( ( !defined $doc ) || !$doc->is_valid($dtd) ) {
 
         # Validation failed
-        return undef;
+        return;
     }
 
     # XML is valid.
@@ -152,6 +154,7 @@ sub from_xml {
       :                        DataStore->next_id(__PACKAGE__);
 
     bless $obj, $class;
+    return $obj;
 }
 
 1;

@@ -13,8 +13,10 @@ use Resource;
 
 my $XML_HEADER = '<?xml version="1.0" encoding="UTF-8"?>';
 
+# type may be: resources, resource, agenda or booking
 sub _xml_preamble {
-    my $type = shift;    # resources, resource, agenda or booking
+    my ($type) = @_;
+
     return $XML_HEADER
       . '<?xml-stylesheet type="application/xml" href="/xsl/'
       . $type
@@ -98,14 +100,14 @@ sub handle_request {
 
 # Returns the REST URL which identifies a given resource
 sub _rest_get_resource_url {
-    my ($resource) = shift;
+    my ($resource) = @_;
 
     return "/resource/" . $resource->id;
 }
 
 # Extracts the Resource ID from a given Resource REST URL
 sub _rest_parse_resource_url {
-    my ($url) = shift;
+    my ($url) = @_;
 
     if ( $url =~ /\/resource\/(\w+)/ ) {
         return $1;
@@ -117,14 +119,14 @@ sub _rest_parse_resource_url {
 
 # Returns the REST URL which identifies the agenda of a given resource
 sub _rest_get_agenda_url {
-    my ($resource) = shift;
+    my ($resource) = @_;
+
     return _rest_get_resource_url($resource) . "/bookings";
 }
 
 # Returns the REST URL which identifies a booking of a given resource
 sub _rest_get_booking_url {
-    my $booking_id  = shift;
-    my $resource_id = shift;
+    my ( $booking_id, $resource_id ) = @_;
 
     return '/resource/' . $resource_id . '/booking/' . $booking_id;
 }
@@ -132,8 +134,7 @@ sub _rest_get_booking_url {
 # Returns XML representation of a given resource, including
 # all REST decoration stuff (xlink resource locator)
 sub _rest_resource_to_xml {
-    my $resource     = shift;
-    my $is_root_node = shift;
+    my ( $resource, $is_root_node ) = @_;
 
     $is_root_node = ( defined $is_root_node ) ? $is_root_node : 0;
 
@@ -184,7 +185,7 @@ sub _rest_resource_to_xml {
 }
 
 sub _rest_remove_xlink_attrs {
-    my $xml = shift;
+    my ($xml) = @_;
 
     my $parser = XML::LibXML->new();
     my $doc    = $parser->parse_string($xml)
@@ -211,8 +212,7 @@ sub _rest_remove_xlink_attrs {
 }
 
 sub _rest_agenda_to_xml {
-    my $resource     = shift;
-    my $is_root_node = shift;
+    my ( $resource, $is_root_node ) = @_;
 
     $is_root_node = ( defined $is_root_node ) ? $is_root_node : 0;
 
@@ -308,7 +308,7 @@ sub _status {
 }
 
 sub _send_xml {
-    my $xml = shift;
+    my ($xml) = @_;
 
     _reply( '200 OK', 'text/xml', $xml );
 }
@@ -331,7 +331,7 @@ sub _list_resources {
 }
 
 sub _create_resource {
-    my $cgi = shift;
+    my ($cgi) = @_;
 
     my $r =
       Resource->from_xml( _rest_remove_xlink_attrs( $cgi->param('POSTDATA') ) );
@@ -346,8 +346,7 @@ sub _create_resource {
 }
 
 sub _retrieve_resource {
-    my $cgi = shift;
-    my $id  = shift;
+    my ($cgi, $id) = @_;
 
     if ( !defined $id ) {
         _status(400);
@@ -365,8 +364,7 @@ sub _retrieve_resource {
 }
 
 sub _delete_resource {
-    my $cgi = shift;
-    my $id  = shift;
+    my ($cgi, $id) = @_;
 
     if ( !defined $id ) {
         _status(400);
@@ -385,8 +383,7 @@ sub _delete_resource {
 }
 
 sub _update_resource {
-    my $cgi = shift;
-    my $id  = shift;
+    my ( $cgi, $id ) = @_;
 
     if ( !defined $id ) {
         _status(400);
@@ -432,10 +429,9 @@ sub _send_dtd {
 }
 
 sub _list_bookings {
-    my $cgi = shift;
-    my $id  = shift;    # Resource ID
+    my ( $cgi, $idResource ) = @_;
 
-    my $r = Resource->load($id);
+    my $r = Resource->load($idResource);
 
     if ( !defined $r ) {
         _status(404);
@@ -448,15 +444,14 @@ sub _list_bookings {
 }
 
 sub _create_booking {
-    my $cgi = shift;
-    my $id  = shift;
+    my ( $cgi, $idResource ) = @_;
 
-    if ( !defined $id ) {
+    if ( !defined $idResource ) {
         _status(400);
         return;
     }
 
-    my $r = Resource->load($id);
+    my $r = Resource->load($idResource);
     if ( !defined $r ) {
         _status(404);
         return;
@@ -476,13 +471,11 @@ sub _create_booking {
 
     $r->agenda->append($b);
     $r->save();
-    _status( 201, _rest_booking_to_xml( $b, $id, 1 ) );
+    _status( 201, _rest_booking_to_xml( $b, $idResource, 1 ) );
 }
 
 sub _retrieve_booking {
-    my $cgi = shift;
-    my $idR = shift;
-    my $idB = shift;
+    my ( $cgi, $idR, $idB ) = @_;
 
     if ( !defined $idR || !defined $idB ) {
         _status(400);
@@ -511,9 +504,7 @@ sub _retrieve_booking {
 }
 
 sub _delete_booking {
-    my $cgi = shift;
-    my $idR = shift;
-    my $idB = shift;
+    my ( $cgi, $idR, $idB ) = @_;
 
     if ( !defined $idR || !defined $idB ) {
         _status(400);
@@ -616,14 +607,12 @@ sub _update_booking {
 # Handlers for CSS #
 ####################
 
+# id should contain the CSS file name (without the ".css" extension)
 sub _send_css {
-    my ( $cgi, $id ) =
-      @_;    #id should contain the CSS file name (without the ".css" extension)
+    my ( $cgi, $id ) = @_;
 
-    #
     # FIXME: make it work from anywhere, now it must run from
     #        the project base dir or won't find dtd dir
-
     if ( open my $css, "<", "css/$id.css" ) {
 
         # slurp css file
@@ -639,14 +628,12 @@ sub _send_css {
 # Handlers for XSL #
 ####################
 
+# id should contain the XSL file name (without the ".xsl" extension)
 sub _send_xsl {
-    my ( $cgi, $id ) =
-      @_;    #id should contain the XSL file name (without the ".xsl" extension)
+    my ( $cgi, $id ) = @_;
 
-    #
     # FIXME: make it work from anywhere, now it must run from
     #        the project base dir or won't find dtd dir
-
     if ( open my $xsl, "<", "xsl/$id.xsl" ) {
 
         # slurp css file

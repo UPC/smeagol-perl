@@ -14,6 +14,7 @@ sub new {
     my $obj = $class->SUPER::new();
 
     bless $obj, $class;
+    return $obj;
 }
 
 sub append {
@@ -48,7 +49,7 @@ sub to_xml {
 
 sub from_xml {
     my $class = shift;
-    my $xml   = shift;
+    my ($xml) = @_;
 
     # validate XML string against the DTD
     my $dtd =
@@ -59,7 +60,7 @@ sub from_xml {
     if ( ( !defined $dom ) || !$dom->is_valid($dtd) ) {
 
         # validation failed
-        return undef;
+        return;
     }
 
     # at this point, we are certain that $xml was a valid XML

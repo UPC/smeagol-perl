@@ -16,7 +16,7 @@ init('/tmp/smeagol_datastore/');
 #       where persistent files will be stored.
 #       $path directory will be created, if needed.
 sub init {
-    my $path = shift;
+    my ($path) = @_;
 
     defined($path) or die "DataStore->init() needs an argument!";
 
@@ -47,7 +47,7 @@ sub init {
 #       object identified by $id may be stored.
 #       This method should not be called from outside this class.
 sub _full_path {
-    my $id = shift;
+    my ($id) = @_;
 
     defined($id) or confess "Error in call to full_path()";
 
@@ -100,6 +100,7 @@ sub exists {
 # Returns a list of all object id's stored in DataStore
 sub list_id {
     my $self = shift;
+
     my @list;
     my $path = $_PATH;
 
@@ -115,7 +116,7 @@ sub list_id {
 
 sub remove {
     my $self = shift;
-    my $id   = shift;
+    my ($id) = @_;
 
     if ( DataStore->exists($id) ) {
         unlink _full_path($id)
@@ -126,6 +127,7 @@ sub remove {
 sub next_id {
     my $self   = shift;
     my ($kind) = @_;
+
     my $data   = 1;
     my $path   = $_PATH . 'next_' . $kind;
     if ( defined $kind ) {
@@ -145,6 +147,7 @@ sub next_id {
 
 sub clean {
     my $self = shift;
+
     File::Path->rmtree($_PATH);
 }
 

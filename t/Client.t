@@ -373,7 +373,7 @@ my $to0 = {
 
     $idBook = $client->updateBooking( id_resource_booking( $Bookings[3] ),
         $from2, $to2 );
-    ok( !defined $idBook, 'not updated booking, intersection ' . $idBook );
+    ok( !defined $idBook, 'not updated booking, intersection ' . id_resource_booking( $Bookings[3] ) );
 
     $idBook =
       $client->updateBooking( id_resource_booking( $Bookings[3] ), $from, $to );

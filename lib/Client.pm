@@ -22,7 +22,7 @@ sub new {
     my $class = shift;
     my ($url) = @_;
 
-    return undef unless defined $url;
+    return unless defined $url;
 
     my $ua = LWP::UserAgent->new();
     $ua->agent("SmeagolClient/0.1 ");
@@ -49,7 +49,7 @@ sub listResources {
         }
         return @idResources;
     }
-    return undef;
+    return;
 
 }
 
@@ -73,7 +73,7 @@ sub createResource {
           ->getAttribute('xlink:href');
     }
     else {
-        return undef;
+        return;
     }
 }
 
@@ -112,6 +112,7 @@ sub createBooking {
         return $dom->getElementsByTagName('booking')->get_node(1)
           ->getAttribute('xlink:href');
     }
+    # FIXME: weird, returning w/o unless makes tests fail
     return undef;
 }
 
@@ -132,14 +133,14 @@ sub getResource {
         }
         return $resource;
     }
-    return undef;
+    return;
 }
 
 sub getBooking {
     my $self = shift;
     my ( $idR, $idB ) = @_;
 
-    return undef unless ( defined $idB || defined $idR );
+    return unless ( defined $idB || defined $idR );
 
     my $res =
       $self->{ua}
@@ -149,7 +150,7 @@ sub getBooking {
         my $dom = eval { XML::LibXML->new->parse_string( $res->content ) };
         return XMLin( $res->content );
     }
-    return undef;
+    return;
 }
 
 sub listBookings {
@@ -168,7 +169,7 @@ sub listBookings {
         }
         return @bookings;
     }
-    return undef;
+    return;
 }
 
 sub updateResource {
@@ -197,7 +198,7 @@ s/<resource /<resource xmlns:xlink=\"http:\/\/www.w3.org\/1999\/xlink\ "/;
         return $dom->getElementsByTagName('resource')->get_node(1)
           ->getAttribute('xlink:href');
     }
-    return undef;
+    return;
 }
 
 sub updateBooking {
@@ -235,7 +236,7 @@ sub updateBooking {
         return $dom->getElementsByTagName('booking')->get_node(1)
           ->getAttribute('xlink:href');
     }
-    return undef;
+    return;
 }
 
 sub delResource {
@@ -249,7 +250,7 @@ sub delResource {
     if ( $res->status_line =~ /200/ ) {
         return $id;
     }
-    return undef;
+    return;
 }
 
 sub delBooking {
@@ -267,7 +268,7 @@ sub delBooking {
     if ( $res->status_line =~ /200/ ) {
         return $idB;
     }
-    return undef;
+    return;
 }
 
 1;

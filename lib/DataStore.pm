@@ -141,7 +141,7 @@ sub next_id {
         return $data;
     }
     else {
-        return undef;
+        return;
     }
 }
 

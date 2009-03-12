@@ -39,7 +39,7 @@ sub id_resource {
         return $1;
     }
     else {
-        return undef;
+        return;
     }
 }
 
@@ -50,7 +50,7 @@ sub id_resource_booking {
         return ( $1, $2 );
     }
     else {
-        return undef;
+        return;
     }
 }
 

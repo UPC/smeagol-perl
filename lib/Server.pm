@@ -113,7 +113,7 @@ sub _rest_parse_resource_url {
         return $1;
     }
     else {
-        return undef;
+        return;
     }
 }
 

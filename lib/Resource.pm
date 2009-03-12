@@ -14,7 +14,7 @@ sub new {
     my $class = shift;
     my ( $description, $granularity, $agenda ) = @_;
 
-    return undef
+    return
       if ( !defined($description)
         || !defined($granularity) );    # $ag argument is not mandatory
 
@@ -76,11 +76,11 @@ sub load {
     my $class = shift;
     my ($id) = @_;
 
-    return undef if ( !defined($id) );
+    return if ( !defined($id) );
 
     my $data = DataStore->load($id);
 
-    return undef if ( !defined($data) );
+    return if ( !defined($data) );
 
     my $resource = Resource->from_xml( $data, $id );
 
@@ -109,7 +109,7 @@ sub from_xml {
     if ( ( !defined $dom ) || !$dom->is_valid($dtd) ) {
 
         # validation failed
-        return undef;
+        return;
     }
 
     $obj = {

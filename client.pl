@@ -114,76 +114,71 @@ my $USAGE;
 
 # $OPT_COMMAND-line options (with default values)
 my $OPT_SERVER = "http://localhost";
-my $OPT_PORT = '8000';
+my $OPT_PORT   = '8000';
 my $OPT_COMMAND;
 my $OPT_PARAM_ID;
+my $OPT_PARAM_ID_B;
 my $OPT_PARAM_DES;
 my $OPT_PARAM_GRA;
 my $OPT_PARAM_FROM;
 my $OPT_PARAM_TO;
 my $OPT_PARAM_R;
 
-my @OPT_PARAM_FROM;
-my @OPT_PARAM_TO;
+# parse command-line options
 
-    # parse command-line options
+my $opt_show_help = '';
 
-    my $opt_show_help = '';
+my $options = GetOptions(
+    "server=s" => \$OPT_SERVER,        # server
+    "port=i"   => \$OPT_PORT,          # port
+    "c=s"      => \$OPT_COMMAND,       # command
+    "id=i"     => \$OPT_PARAM_ID,      #
+    "idB=i"    => \$OPT_PARAM_ID_B,    #
+    "des=s"    => \$OPT_PARAM_DES,     #
+    "gra=s"    => \$OPT_PARAM_GRA,     #
+    "from=s"   => \$OPT_PARAM_FROM,    #
+    "to=s"     => \$OPT_PARAM_TO,      #
+    "r"        => \$OPT_PARAM_R,       # recursive
+    "help"     => \$opt_show_help
 
-    my $options = GetOptions(
-        "server=s"  => \$OPT_SERVER,        # server
-        "port=i"    => \$OPT_PORT,          # port
-        "c=s"       => \$OPT_COMMAND,       # command
-        "id=i"      => \$OPT_PARAM_ID,      #
-        "des=s"     => \$OPT_PARAM_DES,     #
-        "gra=s"     => \$OPT_PARAM_GRA,     #
-        "from=s"    => \$OPT_PARAM_FROM,    #
-        "to=s"      => \$OPT_PARAM_TO,      #
-        "r"         => \$OPT_PARAM_R,       # recursive
-        "help"      => \$opt_show_help
-	# =i means "requires numeric value"
-	# =s means "requires string value"
-    );
+        # =i means "requires numeric value"
+        # =s means "requires string value"
+);
 
-    my ($me) = $0 =~ m{.*/(.*)};
-    $me = $0 if !(defined($me));
-    $USAGE
-        =  "$me [--help] [--debug] \n"
-        .  " --server=localhost \n"
-        .  " --port=8000 \n"
-	.  " [ --c=listResources [ --r ] \| \n"
-	.  "   --c=createResource --des=descripcio --gra=granularitat \| \n"
-	.  "   --c=getResource    --id=idResource \| \n"
-	.  "   --c=delResource    --id=idResource \| \n"
-	.  "   --c=updateResource --id=idResource --des=descripcio --gra=granularitat \| \n"
-	.  "   --c=createAgenda   --id=idResource \| \n"
-	.  "   --c=getAgenda      --id=idAgenda \| \n"
-	.  "   --c=delAgenda      --id=idAgenda \| \n"
-	.  "   --c=updateAgenda   --id=idAgenda \| \n"
-	.  "   --c=createBooking  --id=idAgenda --from=31/12/2009_00:00 --to=2009/12/31_23:59:00 \| \n"
-	.  "   --c=getBooking     --id=idBooking \| \n"
-	.  "   --c=delBooking     --id=idBooking \| \n"
-	.  "   --c=updateBooking  --id=idBooking --from=31/12/2009_00:00 --to=2009/12/31_23:59:00 ]\n"
-	.  " ";
+my ($me) = $0 =~ m{.*/(.*)};
+$me = $0 if !( defined($me) );
+$USAGE
+    = "$me [--help] [--debug] \n"
+    . " --server=localhost \n"
+    . " --port=8000 \n"
+    . " [ --c=listResources [ --r ] \| \n"
+    . "   --c=createResource --des=descripcio --gra=granularitat \| \n"
+    . "   --c=getResource    --id=idResource \| \n"
+    . "   --c=delResource    --id=idResource \| \n"
+    . "   --c=updateResource --id=idResource --des=descripcio --gra=granularitat \| \n"
+    . "   --c=createBooking  --id=idResource --from=31/12/2009_00:00:00 --to=2009/12/31_23:59:00:00 \| \n"
+    . "   --c=getBooking     --id=idResource --idB=idBooking \| \n"
+    . "   --c=delBooking     --id=idResource --idB=idBooking \| \n"
+    . "   --c=updateBooking  --id=idResource --idB=idBooking --from=31/12/2009_00:00:00 --to=2009/12/31_23:59:00:00 ]\n"
+    . " ";
 
-    $OPT_COMMAND = "" if !(defined($OPT_COMMAND));
+$OPT_COMMAND = "" if !( defined($OPT_COMMAND) );
 
-    if ($opt_show_help) {
-        print $USAGE;
-        exit(0);
+if ($opt_show_help) {
+    print $USAGE;
+    exit(0);
 
-        # show_help();
-    }
-
+    # show_help();
+}
 
 #######################################################################
 #
 # kernel of script.
 #
 my $server = "$OPT_SERVER:$OPT_PORT";
-# print $server."\n";
+print "Server = " . $server . "\n";
 my $client = Client->new($server);
-# if ( ref $client eq 'Client' ) { print "client created\n" } else { print "NOOOO\n" };
+defined $client or die "client NO created\n";
 
 #######################################################################
 #
@@ -192,58 +187,91 @@ my $client = Client->new($server);
 
 my $result = "";
 if ( $OPT_COMMAND eq "listResources" ) {
-    my @result = $client->listResources( );
-	foreach my $i (@result) {
-		$result.= " ".$i."\n";
-	}
+    my @result = $client->listResources();
+    foreach my $i (@result) {
+        $result .= " " . $i . "\n";
+    }
 }
 elsif ( $OPT_COMMAND eq "createResource" ) {
-    $result = $client->createResource( $OPT_PARAM_DES , $OPT_PARAM_GRA );
+    $result = $client->createResource( $OPT_PARAM_DES, $OPT_PARAM_GRA );
 }
 elsif ( $OPT_COMMAND eq "getResource" ) {
-    my $r = $client->getResource( "\/resource\/".$OPT_PARAM_ID );
-    if (defined $r) {
-	$result = " resource/".$OPT_PARAM_ID." ::\n";
-	$result.= " description = ".$r->{description}."\n";
-	$result.= " granularity = ".$r->{granularity}."\n";
+    my $r = $client->getResource($OPT_PARAM_ID);
+    if ( defined $r ) {
+        $result = " resource = " . $OPT_PARAM_ID . " ::\n";
+        $result .= " description = " . $r->{description} . "\n";
+        $result .= " granularity = " . $r->{granularity} . " .\n";
     }
 }
 elsif ( $OPT_COMMAND eq "delResource" ) {
-    $result = $client->delResource( "\/resource\/".$OPT_PARAM_ID );
+    $result = $client->delResource($OPT_PARAM_ID);
 }
 elsif ( $OPT_COMMAND eq "updateResource" ) {
-print $OPT_PARAM_ID."\n";
-    $result = $client->updateResource( "\/resource\/".$OPT_PARAM_ID , $OPT_PARAM_DES , $OPT_PARAM_GRA );
-}
-elsif ( $OPT_COMMAND eq "createAgenda" ) {
-    $result = $client->createAgenda( $OPT_PARAM_ID ); # idResource
-}
-elsif ( $OPT_COMMAND eq "getAgenda" ) {
-    $result = $client->getAgenda( $OPT_PARAM_ID ); # idAgenda
-}
-elsif ( $OPT_COMMAND eq "delAgenda" ) {
-    $result = $client->delAgenda( $OPT_PARAM_ID ); # idAgenda
-}
-elsif ( $OPT_COMMAND eq "updateAgenda" ) {
-    $result = $client->updateAgenda( $OPT_PARAM_ID ); # idAgenda # te sentit aquesta operació?
+    print "\n" . $OPT_PARAM_ID . "\n";
+    $result = $client->updateResource( $OPT_PARAM_ID, $OPT_PARAM_DES,
+        $OPT_PARAM_GRA );
 }
 elsif ( $OPT_COMMAND eq "createBooking" ) {
-    @OPT_PARAM_FROM = $OPT_PARAM_FROM =~ /(\d+)/g ;
-    @OPT_PARAM_TO = $OPT_PARAM_TO =~ /(\d+)/g;
-print Dumper(@OPT_PARAM_FROM);
-print Dumper(@OPT_PARAM_TO);
-    $result = $client->createBooking( $OPT_PARAM_ID, @OPT_PARAM_FROM, @OPT_PARAM_TO );
+    my @OPT_PARAM_FROM = $OPT_PARAM_FROM =~ /(\d+)/g;
+    my @OPT_PARAM_TO   = $OPT_PARAM_TO   =~ /(\d+)/g;
+
+    my $FROM = {
+        year   => $OPT_PARAM_FROM[0],
+        month  => $OPT_PARAM_FROM[1],
+        day    => $OPT_PARAM_FROM[2],
+        hour   => $OPT_PARAM_FROM[3],
+        minute => $OPT_PARAM_FROM[4],
+        second => $OPT_PARAM_FROM[5],
+    };
+    my $TO = {
+        year   => $OPT_PARAM_TO[0],
+        month  => $OPT_PARAM_TO[1],
+        day    => $OPT_PARAM_TO[2],
+        hour   => $OPT_PARAM_TO[3],
+        minute => $OPT_PARAM_TO[4],
+        second => $OPT_PARAM_TO[5],
+    };
+    print Dumper($OPT_PARAM_ID);
+    print Dumper($OPT_PARAM_ID_B);
+    print Dumper($FROM);
+    print Dumper($TO);
+
+    $result = $client->createBooking( $OPT_PARAM_ID, $FROM, $TO );
 }
 elsif ( $OPT_COMMAND eq "getBooking" ) {
-    $result = $client->getBooking( $OPT_PARAM_ID );
+    $result = $client->getBooking( $OPT_PARAM_ID, $OPT_PARAM_ID_B );
+    $result = Dumper($result);
 }
 elsif ( $OPT_COMMAND eq "delBooking" ) {
-    $result = $client->delBooking( $OPT_PARAM_ID );
+    $result = $client->delBooking( $OPT_PARAM_ID, $OPT_PARAM_ID_B );
 }
 elsif ( $OPT_COMMAND eq "updateBooking" ) {
-    @OPT_PARAM_FROM = $OPT_PARAM_FROM =~ /(\d+)/g;
-    @OPT_PARAM_TO = $OPT_PARAM_TO =~ /(\d+)/g;
-    $result = $client->updateBooking( $OPT_PARAM_ID, @OPT_PARAM_FROM, @OPT_PARAM_TO );
+    my @OPT_PARAM_FROM = $OPT_PARAM_FROM =~ /(\d+)/g;
+    my @OPT_PARAM_TO   = $OPT_PARAM_TO   =~ /(\d+)/g;
+
+    my $FROM = {
+        year   => $OPT_PARAM_FROM[0],
+        month  => $OPT_PARAM_FROM[1],
+        day    => $OPT_PARAM_FROM[2],
+        hour   => $OPT_PARAM_FROM[3],
+        minute => $OPT_PARAM_FROM[4],
+        second => $OPT_PARAM_FROM[5],
+    };
+    my $TO = {
+        year   => $OPT_PARAM_TO[0],
+        month  => $OPT_PARAM_TO[1],
+        day    => $OPT_PARAM_TO[2],
+        hour   => $OPT_PARAM_TO[3],
+        minute => $OPT_PARAM_TO[4],
+        second => $OPT_PARAM_TO[5],
+    };
+    print Dumper($OPT_PARAM_ID);
+    print Dumper($OPT_PARAM_ID_B);
+    print Dumper($FROM);
+    print Dumper($TO);
+
+    $result = $client->updateBooking( $OPT_PARAM_ID, $OPT_PARAM_ID_B, $FROM,
+        $TO );
 }
 else {
     print "No command, No action ...\n --help for help\n";
@@ -256,10 +284,10 @@ if ( !$result ) {
     die $causa;
 }
 else {
-    print "".
-#	"---Smeagol---\n".
-	$result.
-	"___Smeagol___\n";
+    print "" .
+
+        #	"---Smeagol---\n".
+        $result . "___Smeagol___\n";
     exit(0);
 }
 

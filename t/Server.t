@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 37;
+use Test::More tests => 46;
 use LWP::UserAgent;
 use HTTP::Request;
 use XML::Simple;
@@ -81,6 +81,7 @@ my $b1 = Booking->new(
         month  => 4,
         day    => 14,
         hour   => 10,
+        minute => 0,
         second => 0
     ),
     DateTime->new(
@@ -88,7 +89,8 @@ my $b1 = Booking->new(
         month  => 4,
         day    => 14,
         hour   => 10,
-        second => 59
+        minute => 59,
+        second => 0
     )
 );
 my $b2 = Booking->new(
@@ -97,6 +99,7 @@ my $b2 = Booking->new(
         month  => 4,
         day    => 14,
         hour   => 11,
+        minute => 0,
         second => 0
     ),
     DateTime->new(
@@ -104,7 +107,8 @@ my $b2 = Booking->new(
         month  => 4,
         day    => 14,
         hour   => 11,
-        second => 59
+        minute => 59,
+        second => 0
     )
 );
 
@@ -360,16 +364,132 @@ my $resource2 = Resource->new( 'desc 2 2', 'gra 2 2' );
 }
 
 # Testing update booking
-#{
-# non-existent resource
+{
+    my $res = smeagol_request( 'POST', smeagol_url('/resource'),
+        $resource->to_xml );
 
-# existent resource, non-existent booking
+    ok( $res->code == 201,
+        'created resource for booking_update tests: ' . Dumper( $res->code )
+    );
 
-# existent resource, existent booking, non-valid new booking
+    my $xmltree      = XMLin( $res->content );
+    my $resource_url = $xmltree->{'xlink:href'};
 
-# new booking producing overlaps
+    $res = smeagol_request( 'GET',
+        smeagol_url( $resource_url . '/bookings' ) );
 
-#}
+    ok( $res->code == 200,
+        'retrieve bookings list: ' . Dumper( $res->code ) );
+
+    my $ag = Agenda->from_xml( remove_xlink( $res->content ) );
+
+    ok( $ag->size == 2, 'agenda size: ' . Dumper( $ag->size ) );
+
+    my ( $booking1, $booking2 ) = $ag->elements;
+
+    # update first booking with non-existent resource #1000
+    $res
+        = smeagol_request( 'POST',
+        smeagol_url( '/resource/1000/booking/' . $booking1->id ),
+        $booking1->to_xml );
+    ok( $res->code == 404,
+        'trying to update booking for non-existent resource: '
+            . Dumper( $res->code )
+    );
+
+    # update with existent resource, non-existent booking #2222
+    $res
+        = smeagol_request( 'POST',
+        smeagol_url( $resource_url . '/booking/2222' ),
+        $booking1->to_xml );
+    ok( $res->code == 404,
+        'trying to update non-existent booking: ' . Dumper( $res->code ) );
+
+    # existent resource, existent booking, non-valid new booking
+    $res = smeagol_request(
+        'POST',
+        smeagol_url( $resource_url . '/booking/' . $booking1->id ),
+        '<booking>I am not a valid booking :-P</booking>'
+    );
+
+    ok( $res->code == 400,
+        'trying to update with invalid new booking: ' . Dumper( $res->code )
+    );
+
+    # new booking producing overlaps with both existent bookings:
+    #    booking1: 10:00 - 10:59
+    #    booking2: 11:00 - 11:59
+    # new_booking: 10:30 - 11:30  (overlaps booking1, booking2)
+    my $new_booking = Booking->new(
+        DateTime->new(
+            year   => 2008,
+            month  => 4,
+            day    => 14,
+            hour   => 10,
+            minute => 30,
+            second => 0
+        ),
+        DateTime->new(
+            year   => 2008,
+            month  => 4,
+            day    => 14,
+            hour   => 11,
+            minute => 30,
+            second => 0
+        )
+    );
+
+    $res
+        = smeagol_request( 'POST',
+        smeagol_url( $resource_url . '/booking/' . $booking1->id ),
+        $new_booking->to_xml );
+
+    ok( $res->code == 409,
+        'producing overlappings when updating booking '
+            . $resource_url
+            . '/booking/'
+            . $booking1->id . ': '
+            . Dumper( $res->content )
+    );
+
+    # update booking, no overlapping
+    my $new_booking2 = Booking->new(
+        DateTime->new(
+            year   => 2008,
+            month  => 4,
+            day    => 14,
+            hour   => 12,
+            minute => 0,
+            second => 0
+        ),
+        DateTime->new(
+            year   => 2008,
+            month  => 4,
+            day    => 14,
+            hour   => 12,
+            minute => 59,
+            second => 0
+        )
+    );
+
+    $res
+        = smeagol_request( 'POST',
+        smeagol_url( $resource_url . '/booking/' . $booking2->id ),
+        $new_booking2->to_xml );
+
+    ok( $res->code == 200,
+        "update booking $resource_url/booking/"
+            . $booking1->id
+            . ' status: '
+            . Dumper( $res->code )
+    );
+
+    my $result
+        = Booking->from_xml( remove_xlink( $res->content ), $booking2->id );
+
+    ok( $result == $new_booking2,
+        'update booking content: ' . Dumper( $result->to_xml ) );
+}
 
 END {
     kill 3, $pid;

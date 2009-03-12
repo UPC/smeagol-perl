@@ -545,8 +545,8 @@ sub _delete_booking {
 }
 
 #
-# NOTE: No race conditions in _update_bookings, because we're using HTTP::Server::Simple
-#       which has no concurrence (requests are served sequentially)
+# NOTE: No race conditions in _update_booking, because we're using HTTP::Server::Simple
+#       which has no concurrence management (requests are served sequentially)
 #
 sub _update_booking {
     my ( $cgi, $idR, $idB ) = @_;
@@ -584,34 +584,30 @@ sub _update_booking {
     }
 
     #
-    # Search if updated booking would overlap
+    # Check wether updated booking would produce overlappings
     #
     $ag->remove($old_booking);
 
-    my @overlapping = grep { $_->intersects($new_booking) } $ag->elements;
-    if ( @overlapping > 0 ) {
+    if ( $ag->interlace($new_booking) ) {
 
+        # if overlappings are produced, let's build a new agenda
+        # containing affected bookings and return it to the client
+        my @overlapping = grep { $_->intersects($new_booking) } $ag->elements;
         my $overlapping_agenda = Agenda->new();
-        for (@overlapping) {
-            $overlapping_agenda->append($_);
-        }
 
-        # FIXME: _rest_agenda_to_xml should accept an
-        # agenda and a resource_id as parameters
-        # so we should not need to perform the following hack
-        #
-        # REALLY UGLY HACK: create a dummy resource to build the agenda XML
-        my $dummy_resource =
-          Resource->new( 'dummy', 'dummy', $overlapping_agenda );
-        $dummy_resource->id($idR);
-        _status( 409, _rest_agenda_to_xml( $dummy_resource, 1 ) );
+        foreach my $aux (@overlapping) {
+            $overlapping_agenda->append($aux);
+        }
+        $r->agenda($overlapping_agenda);
+
+        _status( 409, _rest_agenda_to_xml( $r, 1 ) );
         return;
     }
 
     $ag->append($new_booking);
     $r->agenda($ag);
-
     $r->save();
+
     _send_xml( _rest_booking_to_xml( $new_booking, $idR, 1 ) );
     return;
 }

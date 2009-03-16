@@ -465,8 +465,19 @@ sub _create_booking {
         return;
     }
 
-    if ( $r->agenda->interlace($b) ) {
-        _status(409);
+    my $ag = $r->agenda;
+
+    if ( $ag->interlace($b) ) {
+        my $overlapping_agenda = Agenda->new();
+        my @overlapping = grep { $_->intersects($b) } $ag->elements;
+        foreach my $aux (@overlapping) {
+            $overlapping_agenda->append($aux);
+        }
+
+        # FIXME: HACK to pass _rest_agenda_to_xml
+        # a resource instead of an agenda
+        $r->agenda($overlapping_agenda);
+        _status( 409, _rest_agenda_to_xml( $r, 1 ) );
         return;
     }
 
@@ -536,10 +547,10 @@ sub _delete_booking {
     _status( 200, "Booking #$idB deleted" );
 }
 
-#
-# NOTE: No race conditions in _update_booking, because we're using HTTP::Server::Simple
-#       which has no concurrence management (requests are served sequentially)
-#
+# NOTE: No race conditions in _update_booking, because
+#       we're using HTTP::Server::Simple which has no
+#       concurrence management (requests are served
+#       sequentially)
 sub _update_booking {
     my ( $cgi, $idR, $idB ) = @_;
 

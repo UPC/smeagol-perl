@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 47;
+use Test::More tests => 48;
 use LWP::UserAgent;
 use HTTP::Request;
 use XML::Simple;
@@ -222,8 +222,6 @@ my $resource2 = Resource->new( 'desc 2 2', 'gra 2 2' );
 
     my $xmltree = XMLin( $res->content );
 
-    print Dumper( $xmltree->{agenda}->{'xlink:href'} );
-
     $res = smeagol_request( 'GET',
         smeagol_url( $xmltree->{agenda}->{'xlink:href'} ) );
 
@@ -249,26 +247,35 @@ my $resource2 = Resource->new( 'desc 2 2', 'gra 2 2' );
     ok( $res->code == '201',
         'resource creation status ' . Dumper( $res->code ) );
 
-    my $r = Resource->from_xml( $res->content, 10 );
+    my $xmltree      = XMLin( $res->content );
+    my $resource_url = $xmltree->{'xlink:href'};
 
-    $res = smeagol_request( 'POST', smeagol_url('/resource/10/booking'),
+    $res = smeagol_request( 'POST', smeagol_url("$resource_url/booking"),
         $b1->to_xml() );
     ok( $res->code == '201'
             && Booking->from_xml( remove_xlink( $res->content ) ) == $b1,
         'created booking ' . $res->code
     );
 
-    $res = smeagol_request( 'POST', smeagol_url('/resource/10/booking'),
+    $res = smeagol_request( 'POST', smeagol_url("$resource_url/booking"),
         $b2->to_xml() );
     ok( $res->code == '201'
             && Booking->from_xml( remove_xlink( $res->content ) ) == $b2,
         'created booking ' . $res->code
     );
 
-    $res = smeagol_request( 'POST', smeagol_url('/resource/10/booking'),
+    $res = smeagol_request( 'POST', smeagol_url("$resource_url/booking"),
         $b2->to_xml() );
     ok( $res->code == '409',
-        'booking not created because is contained ' . $res->code );
+        'update overlapping booking status ' . $res->code );
+
+    my $ag = Agenda->from_xml( remove_xlink( $res->content ) );
+
+    defined $ag or carp "aaaaagh!";
+
+    ok( $ag->size == 1 && ( $ag->elements )[0] == $b2,
+        'update overlapping booking content: ' . Dumper( $res->content ) );
+
 }
 
 #Testing retrieve and remove bookings

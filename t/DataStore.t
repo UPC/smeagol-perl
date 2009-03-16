@@ -8,7 +8,6 @@ use Data::Dumper;
 use Carp;
 
 BEGIN {
-    unlink glob "/tmp/smeagol_datastore/*";
     use_ok($_) for qw(DataStore);
 }
 

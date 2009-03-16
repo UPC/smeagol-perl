@@ -9,12 +9,6 @@ use XML::Simple;
 use Data::Compare;
 
 BEGIN {
-
-    #
-    # FIXME: Purge the hard way until DataStore does it better
-    #
-    unlink glob "/tmp/smeagol_datastore/*";
-
     use_ok($_) for qw(Booking DataStore);
 }
 

@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 46;
+use Test::More tests => 47;
 use LWP::UserAgent;
 use HTTP::Request;
 use XML::Simple;
@@ -12,16 +12,7 @@ use Data::Dumper;
 use Data::Compare;
 
 BEGIN {
-
-    # Purge old test data before testing anything
-    #use_ok("DataStore");
-    #DataStore->clean();
-    #
-    # FIXME: Purge the hard way until DataStore does it better
-    #
-    unlink glob "/tmp/smeagol_datastore/*";
-
-    use_ok($_) for qw(Server Resource Agenda Booking DateTime);
+    use_ok($_) for qw(Server Resource Agenda Booking DateTime DataStore);
 }
 
 my $server_port = 8000;
@@ -489,4 +480,5 @@ my $resource2 = Resource->new( 'desc 2 2', 'gra 2 2' );
 
 END {
     kill 3, $pid;
+    DataStore->clean();
 }

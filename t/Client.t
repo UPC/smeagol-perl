@@ -1,14 +1,13 @@
 #!/usr/bin/perl
 
-use Test::More tests => 49;
+use Test::More tests => 50;
 
 use strict;
 use warnings;
 use Data::Dumper;
 
 BEGIN {
-    unlink glob "/tmp/smeagol_datastore/*";
-    use_ok($_) for qw(Server Client);
+    use_ok($_) for qw(Server Client DataStore);
 }
 
 my $server_port = 8000;
@@ -396,4 +395,5 @@ my $to0 = {
 
 END {
     kill 3, $pid;
+    DataStore->clean();
 }

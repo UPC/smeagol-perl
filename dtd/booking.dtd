@@ -1,5 +1,6 @@
-<!ELEMENT booking (id?,from,to)>
+<!ELEMENT booking (id?, description, from, to)>
 <!ELEMENT id (#PCDATA)>
+<!ELEMENT description (#PCDATA)>
 <!ELEMENT from (year, month, day, hour, minute, second)>
 <!ELEMENT to (year, month, day, hour, minute, second)>
 <!ELEMENT year (#PCDATA)>

@@ -4,7 +4,12 @@
     xlink:href CDATA #IMPLIED
     xlink:xmlns CDATA #IMPLIED
     xlink:type CDATA #IMPLIED>
+<!-- 
+    FIXME: Commented out because booking.dtd includes a 
+        "description" attribute declaration. This conflict
+        could be resolved via namespaces (DTDs are soo limited!).
 <!ELEMENT description (#PCDATA)>
+-->
 <!ELEMENT granularity (#PCDATA)>
 <!ENTITY % agendadtd SYSTEM "agenda.dtd">
 %agendadtd;

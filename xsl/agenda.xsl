@@ -4,7 +4,7 @@
 <html><head></head><body>
 <h1>Agenda del recurs #<xsl:value-of select="substring-before(substring-after(@xlink:href, '/resource/'), '/bookings')"/></h1>
 <table style="border-spacing: 1em">
-<thead><tr><th>ID reserva</th><th>Inici</th><th>Fi</th><th></th></tr></thead>
+<thead><tr><th>ID reserva</th><th>Descripció</th><th>Inici</th><th>Fi</th><th></th></tr></thead>
 <tbody>
 <xsl:apply-templates select="booking">
     <xsl:sort select="id" data-type="number" order="ascending"/>
@@ -20,6 +20,7 @@
 <xsl:template match="booking">
     <tr>
     <td style="text-align:center"><xsl:value-of select="id"/></td>
+    <td><tt><xsl:apply-templates select="description"/></tt></td>
     <td><tt><xsl:apply-templates select="from"/></tt></td>
     <td><tt><xsl:apply-templates select="to"/></tt></td>
     <td><a><xsl:attribute name="href"><xsl:copy-of select="concat( substring-before( /agenda/@xlink:href, '/bookings'),'/booking/', id)"/></xsl:attribute>Detalls</a></td>

@@ -157,6 +157,7 @@ sub id_resource_booking {
         'remining resource is ' . id_resource( $Resources[1] ) );
 }
 
+my $desc = "description 1";
 my $from = {
     year   => 2008,
     month  => 4,
@@ -174,6 +175,7 @@ my $to = {
     second => 0,
 };
 
+my $desc2 = "description 2";
 my $from2 = {
     year   => 2008,
     month  => 4,
@@ -191,6 +193,7 @@ my $to2 = {
     second => 0,
 };
 
+my $desc3 = "description 3";
 my $from3 = {
     year   => 2008,
     month  => 4,
@@ -208,6 +211,7 @@ my $to3 = {
     second => 0,
 };
 
+my $desc0 = "description 0";
 my $from0 = {
     year   => 2008,
     month  => 4,
@@ -234,21 +238,25 @@ my $to0 = {
 #Testing create booking
 {
     push @Bookings,
-        $client->createBooking( id_resource( $Resources[1] ), $from, $to );
+        $client->createBooking( id_resource( $Resources[1] ),
+        $desc, $from, $to );
     ok( defined $Bookings[0],
         'booking created ' . id_resource( $Bookings[0] ) );
 
     push @Bookings,
-        $client->createBooking( id_resource( $Resources[1] ), $from2, $to2 );
+        $client->createBooking( id_resource( $Resources[1] ),
+        $desc2, $from2, $to2 );
     ok( defined $Bookings[1],
         'booking created ' . id_resource( $Bookings[1] ) );
 
     push @Bookings,
-        $client->createBooking( id_resource( $Resources[1] ), $from, $to );
+        $client->createBooking( id_resource( $Resources[1] ),
+        $desc, $from, $to );
     ok( !defined $Bookings[2], 'booking not created, intersection' );
 
     push @Bookings,
-        $client->createBooking( id_resource( $Resources[1] ), $from3, $to3 );
+        $client->createBooking( id_resource( $Resources[1] ),
+        $desc3, $from3, $to3 );
     ok( defined $Bookings[3],
         'booking created ' . id_resource( $Bookings[3] ) );
 
@@ -333,19 +341,19 @@ my $to0 = {
 #Testing update Booking
 {
     $idBook = $client->updateBooking( id_resource_booking( $Bookings[0] ),
-        $from, $to );
+        $desc, $from, $to );
     ok( !defined $idBook, 'not updated booking, not existent resource' );
 
-    $idBook = $client->updateBooking( id_resource( $Resources[2] ), 1, $from,
-        $to );
+    $idBook = $client->updateBooking( id_resource( $Resources[2] ),
+        1, $desc, $from, $to );
     ok( !defined $idBook, 'not updated booking, not existent resource' );
 
     $idBook = $client->updateBooking( id_resource( $Resources[1] ),
-        -555, $from, $to );
+        -555, $desc, $from, $to );
     ok( !defined $idBook, 'not updated booking, not existent booking' );
 
     $idBook = $client->updateBooking( id_resource_booking( $Bookings[1] ),
-        $from2, $to2 );
+        $desc2, $from2, $to2 );
     ok( defined $idBook, 'updated booking ' . $Bookings[1] );
 
     $dataBoo = $client->getBooking( id_resource_booking( $Bookings[1] ) );
@@ -365,14 +373,14 @@ my $to0 = {
     );
 
     $idBook = $client->updateBooking( id_resource_booking( $Bookings[3] ),
-        $from2, $to2 );
+        $desc2, $from2, $to2 );
     ok( !defined $idBook,
         'not updated booking, intersection '
             . id_resource_booking( $Bookings[3] )
     );
 
     $idBook = $client->updateBooking( id_resource_booking( $Bookings[3] ),
-        $from, $to );
+        $desc, $from, $to );
     ok( defined $idBook, 'updated booking ' . $idBook );
 
     $dataBoo = $client->getBooking( id_resource_booking( $Bookings[3] ) );

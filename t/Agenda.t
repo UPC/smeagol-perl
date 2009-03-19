@@ -24,24 +24,39 @@ sub datetime {
 }
 
 # 17:00 - 18:59
-my $b1 = Booking->new( datetime( 2008, 4, 14, 17 ),
-    datetime( 2008, 4, 14, 18, 59 ) );
+my $b1 = Booking->new(
+    "b1",
+    datetime( 2008, 4, 14, 17 ),
+    datetime( 2008, 4, 14, 18, 59 )
+);
 
 # 19:00 - 19:59
-my $b2 = Booking->new( datetime( 2008, 4, 14, 19 ),
-    datetime( 2008, 4, 14, 19, 59 ) );
+my $b2 = Booking->new(
+    "b2",
+    datetime( 2008, 4, 14, 19 ),
+    datetime( 2008, 4, 14, 19, 59 )
+);
 
 # 15:00 - 17:59
-my $b3 = Booking->new( datetime( 2008, 4, 14, 15 ),
-    datetime( 2008, 4, 14, 17, 59 ) );
+my $b3 = Booking->new(
+    "b3",
+    datetime( 2008, 4, 14, 15 ),
+    datetime( 2008, 4, 14, 17, 59 )
+);
 
 # 15:00 - 17:00
-my $b4 = Booking->new( datetime( 2008, 4, 14, 15 ),
-    datetime( 2008, 4, 14, 17 ) );
+my $b4 = Booking->new(
+    "b4",
+    datetime( 2008, 4, 14, 15 ),
+    datetime( 2008, 4, 14, 17 )
+);
 
 # 16:00 - 16:29
-my $b5 = Booking->new( datetime( 2008, 4, 14, 16 ),
-    datetime( 2008, 4, 14, 16, 29 ) );
+my $b5 = Booking->new(
+    "b5",
+    datetime( 2008, 4, 14, 16 ),
+    datetime( 2008, 4, 14, 16, 29 )
+);
 
 # Agenda Append Tests
 my $ag = Agenda->new();
@@ -53,8 +68,9 @@ ok( !$ag->contains($b2), 'b2 not in ag' );
 #to_xml agenda test
 my $agenda_as_hash = {
     booking => {
-        id   => $b1->id,
-        from => {
+        id          => $b1->id,
+        description => $b1->description,
+        from        => {
             year   => 2008,
             month  => 4,
             day    => 14,

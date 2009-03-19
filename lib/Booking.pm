@@ -15,16 +15,17 @@ use overload
 
 sub new {
     my $class = shift;
-    my ( $from, $to ) = @_;
+    my ( $description, $from, $to ) = @_;
 
-    return if ( !defined($from) || !defined($to) );
+    return if ( !defined($description) || !defined($from) || !defined($to) );
 
     my $obj = $class->SUPER::from_datetimes(
         start => $from,
         end   => $to,
     );
 
-    $obj->{ __PACKAGE__ . "::id" } = DataStore->next_id(__PACKAGE__);
+    $obj->{ __PACKAGE__ . "::description" } = $description;
+    $obj->{ __PACKAGE__ . "::id" }          = DataStore->next_id(__PACKAGE__);
 
     bless $obj, $class;
     return $obj;
@@ -39,20 +40,32 @@ sub id {
     return $self->{$field};
 }
 
+sub description {
+    my $self = shift;
+
+    my $field = __PACKAGE__ . "::description";
+    if (@_) { $self->{$field} = shift; }
+
+    return $self->{$field};
+}
+
 sub __str__ {
     my $self = shift;
 
-    my $from = $self->start;
-    my $to   = $self->end;
+    my $description = $self->description;
+    my $from        = $self->start;
+    my $to          = $self->end;
 
-    return "<$from,$to>";
+    return "<$description,$from,$to>";
 }
 
 sub __equal__ {
     my $self = shift;
     my ($booking) = @_;
 
-    return $self->start == $booking->start
+    return
+           $self->description eq $booking->description
+        && $self->start == $booking->start
         && $self->end == $booking->end;
 }
 
@@ -69,6 +82,9 @@ sub to_xml {
     my $xml
         = "<booking>" . "<id>"
         . $self->id . "</id>"
+        . "<description>"
+        . $self->description
+        . "</description>"
         . "<from>"
         . "<year>"
         . $from->year
@@ -115,7 +131,7 @@ sub from_xml {
     my ( $xml, $id ) = @_;
 
     # validate XML string against the DTD
-    my $dtd = XML::LibXML::Dtd->new( "CPL UPC//Resource DTD v0.01",
+    my $dtd = XML::LibXML::Dtd->new( "CPL UPC//Booking DTD v0.03",
         "dtd/booking.dtd" );
 
     my $doc = eval { XML::LibXML->new->parse_string($xml) };
@@ -152,6 +168,8 @@ sub from_xml {
         = ( defined $b->{id} ) ? $b->{id}
         : ( defined $id ) ? $id
         :                   DataStore->next_id(__PACKAGE__);
+
+    $obj->{ __PACKAGE__ . "::description" } = $b->{description};
 
     bless $obj, $class;
     return $obj;

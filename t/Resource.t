@@ -24,12 +24,18 @@ sub datetime {
 }
 
 # 17:00 - 18:59
-my $b1 = Booking->new( datetime( 2008, 4, 14, 17 ),
-    datetime( 2008, 4, 14, 18, 59 ) );
+my $b1 = Booking->new(
+    "b1",
+    datetime( 2008, 4, 14, 17 ),
+    datetime( 2008, 4, 14, 18, 59 )
+);
 
 # 19:00 - 19:59
-my $b2 = Booking->new( datetime( 2008, 4, 14, 19 ),
-    datetime( 2008, 4, 14, 19, 59 ) );
+my $b2 = Booking->new(
+    "b2",
+    datetime( 2008, 4, 14, 19 ),
+    datetime( 2008, 4, 14, 19, 59 )
+);
 
 # Resource creation Tests
 my $resource_as_xml = <<'EOF';
@@ -64,7 +70,9 @@ ok( !$r1->agenda->contains($b2), 'b2 not in r1->ag' );
 ok( $r1->to_xml() eq
         "<resource><description>aula chachipilongui</description><granularity>reserves diaries</granularity><agenda><booking><id>"
         . $b1->id
-        . "</id><from><year>2008</year><month>4</month><day>14</day><hour>17</hour><minute>0</minute><second>0</second></from><to><year>2008</year><month>4</month><day>14</day><hour>18</hour><minute>59</minute><second>0</second></to></booking></agenda></resource>",
+        . "</id><description>"
+        . $b1->description
+        . "</description><from><year>2008</year><month>4</month><day>14</day><hour>17</hour><minute>0</minute><second>0</second></from><to><year>2008</year><month>4</month><day>14</day><hour>18</hour><minute>59</minute><second>0</second></to></booking></agenda></resource>",
     'to_xml resource with agenda and 1 booking: ' . $r1->to_xml()
 );
 $r1->agenda->append($b2);
@@ -77,6 +85,7 @@ my $res = Resource->from_xml( '
     <agenda>
         <booking>
             <id>10</id>
+            <description>Hola</description>
             <from>
                 <year>2008</year>
                 <month>4</month>
@@ -96,6 +105,7 @@ my $res = Resource->from_xml( '
         </booking>
         <booking>
             <id>25</id>
+            <description>Adeu</description>
             <from>
                 <year>2008</year>
                 <month>4</month>

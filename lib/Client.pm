@@ -58,9 +58,9 @@ sub createResource {
     my ( $des, $gra ) = @_;
 
     my $res_xml = "<resource>
-					<description>$des</description>
-					<granularity>$gra</granularity>
-					</resource>";
+        <description>$des</description>
+        <granularity>$gra</granularity>
+        </resource>";
     my $req = HTTP::Request->new( POST => $self->{url} . "/resource" );
     $req->content_type('text/xml');
     $req->content($res_xml);
@@ -79,29 +79,30 @@ sub createResource {
 
 sub createBooking {
     my $self = shift;
-    my ( $idR, $from, $to ) = @_;
+    my ( $idR, $description, $from, $to ) = @_;
 
     my $req = HTTP::Request->new(
         POST => $self->{url} . '/resource/' . $idR . '/booking' );
     $req->content_type('text/xml');
     my $booking_xml = "<booking>
-						<from>
-							<year>" . $from->{year} . "</year>
-							<month>" . $from->{month} . "</month>
-							<day>" . $from->{day} . "</day>
-							<hour>" . $from->{hour} . "</hour>
-							<minute>" . $from->{minute} . "</minute>
-							<second>" . $from->{second} . "</second>
-						</from>
-						<to>
-							<year>" . $to->{year} . "</year>
-							<month>" . $to->{month} . "</month>
-							<day>" . $to->{day} . "</day>
-							<hour>" . $to->{hour} . "</hour>
-							<minute>" . $to->{minute} . "</minute>
-							<second>" . $to->{second} . "</second>
-						</to>
-					</booking>";
+        <description>$description</description>
+        <from>
+            <year>" . $from->{year} . "</year>
+            <month>" . $from->{month} . "</month>
+            <day>" . $from->{day} . "</day>
+            <hour>" . $from->{hour} . "</hour>
+            <minute>" . $from->{minute} . "</minute>
+            <second>" . $from->{second} . "</second>
+        </from>
+        <to>
+            <year>" . $to->{year} . "</year>
+            <month>" . $to->{month} . "</month>
+            <day>" . $to->{day} . "</day>
+            <hour>" . $to->{hour} . "</hour>
+            <minute>" . $to->{minute} . "</minute>
+            <second>" . $to->{second} . "</second>
+        </to>
+        </booking>";
     $req->content($booking_xml);
 
     my $res = $self->{ua}->request($req);
@@ -176,9 +177,9 @@ sub updateResource {
     my ( $idResource, $des, $gra ) = @_;
 
     my $res_xml = "<resource>
-					<description>$des</description>
-					<granularity>$gra</granularity>
-					</resource>";
+        <description>$des</description>
+        <granularity>$gra</granularity>
+        </resource>";
     my $req = HTTP::Request->new(
         POST => $self->{url} . '/resource/' . $idResource );
 
@@ -202,26 +203,27 @@ sub updateResource {
 
 sub updateBooking {
     my $self = shift;
-    my ( $idR, $idB, $from, $to ) = @_;
+    my ( $idR, $idB, $description, $from, $to ) = @_;
 
     my $booking_xml = "<booking>
-						<from>
-							<year>" . $from->{year} . "</year>
-							<month>" . $from->{month} . "</month>
-							<day>" . $from->{day} . "</day>
-							<hour>" . $from->{hour} . "</hour>
-							<minute>" . $from->{minute} . "</minute>
-							<second>" . $from->{second} . "</second>
-						</from>
-						<to>
-							<year>" . $to->{year} . "</year>
-							<month>" . $to->{month} . "</month>
-							<day>" . $to->{day} . "</day>
-							<hour>" . $to->{hour} . "</hour>
-							<minute>" . $to->{minute} . "</minute>
-							<second>" . $to->{second} . "</second>
-						</to>
-					</booking>";
+        <description>$description</description>
+        <from>
+            <year>" . $from->{year} . "</year>
+            <month>" . $from->{month} . "</month>
+            <day>" . $from->{day} . "</day>
+            <hour>" . $from->{hour} . "</hour>
+            <minute>" . $from->{minute} . "</minute>
+            <second>" . $from->{second} . "</second>
+        </from>
+        <to>
+            <year>" . $to->{year} . "</year>
+            <month>" . $to->{month} . "</month>
+            <day>" . $to->{day} . "</day>
+            <hour>" . $to->{hour} . "</hour>
+            <minute>" . $to->{minute} . "</minute>
+            <second>" . $to->{second} . "</second>
+        </to>
+        </booking>";
 
     my $req = HTTP::Request->new(
         POST => $self->{url} . '/resource/' . $idR . '/booking/' . $idB );

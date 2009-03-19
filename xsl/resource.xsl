@@ -14,7 +14,7 @@
 
 <h2>Reserves</h2>
 <table style="border-spacing: 1em">
-<thead><tr><th>ID</th><th>Inici</th><th>Fi</th></tr></thead>
+<thead><tr><th>ID</th><th>Descripció</th><th>Inici</th><th>Fi</th></tr></thead>
 <tbody>
 <xsl:apply-templates select="agenda"/>
 </tbody>
@@ -34,6 +34,7 @@
 <xsl:template match="booking">
 <tr>
     <td><xsl:value-of select="id"/></td>
+    <td><tt><xsl:apply-templates select="description"/></tt></td>
     <td><tt><xsl:apply-templates select="from"/></tt></td>
     <td><tt><xsl:apply-templates select="to"/></tt></td>
 </tr>

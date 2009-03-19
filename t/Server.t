@@ -66,6 +66,7 @@ sub remove_xlink {
 
 # Build a sample resource to be used in tests
 my $b1 = Booking->new(
+    "b1",
     DateTime->new(
         year   => 2008,
         month  => 4,
@@ -84,6 +85,7 @@ my $b1 = Booking->new(
     )
 );
 my $b2 = Booking->new(
+    "b2",
     DateTime->new(
         year   => 2008,
         month  => 4,
@@ -271,8 +273,6 @@ my $resource2 = Resource->new( 'desc 2 2', 'gra 2 2' );
 
     my $ag = Agenda->from_xml( remove_xlink( $res->content ) );
 
-    defined $ag or carp "aaaaagh!";
-
     ok( $ag->size == 1 && ( $ag->elements )[0] == $b2,
         'update overlapping booking content: ' . Dumper( $res->content ) );
 
@@ -415,6 +415,7 @@ my $resource2 = Resource->new( 'desc 2 2', 'gra 2 2' );
     #    booking2: 11:00 - 11:59
     # new_booking: 10:30 - 11:30  (overlaps booking1, booking2)
     my $new_booking = Booking->new(
+        "new booking",
         DateTime->new(
             year   => 2008,
             month  => 4,
@@ -448,6 +449,7 @@ my $resource2 = Resource->new( 'desc 2 2', 'gra 2 2' );
 
     # update booking, no overlapping
     my $new_booking2 = Booking->new(
+        "new booking 2",
         DateTime->new(
             year   => 2008,
             month  => 4,

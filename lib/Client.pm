@@ -43,6 +43,7 @@ sub listResources {
 
     if ( $res->status_line =~ /200/ ) {
         my $dom = eval { XML::LibXML->new->parse_string( $res->content ) };
+        croak $@ if $@;
         for my $resNode ( $dom->getElementsByTagName('resource') ) {
             my $idRes = $resNode->getAttribute('xlink:href');
             push @idResources, $idRes;
@@ -69,6 +70,7 @@ sub createResource {
 
     if ( $res->status_line =~ /201/ ) {
         my $dom = eval { XML::LibXML->new->parse_string( $res->content ) };
+        croak $@ if $@;
         return $dom->getElementsByTagName('resource')->get_node(1)
             ->getAttribute('xlink:href');
     }
@@ -109,6 +111,7 @@ sub createBooking {
 
     if ( $res->status_line =~ /201/ ) {
         my $dom = eval { XML::LibXML->new->parse_string( $res->content ) };
+        croak $@ if $@;
         return $dom->getElementsByTagName('booking')->get_node(1)
             ->getAttribute('xlink:href');
     }
@@ -126,6 +129,7 @@ sub getResource {
     #FIXME: Cal controlar el cas que si/no hi hagi agenda
     if ( $res->status_line =~ /200/ ) {
         my $dom = eval { XML::LibXML->new->parse_string( $res->content ) };
+        croak $@ if $@;
         my $resource = XMLin( $res->content );
         if ( defined $resource->{idAgenda} ) {
             $resource->{agenda}
@@ -148,6 +152,7 @@ sub getBooking {
 
     if ( $res->status_line =~ /200/ ) {
         my $dom = eval { XML::LibXML->new->parse_string( $res->content ) };
+        croak $@ if $@;
         return XMLin( $res->content );
     }
     return;
@@ -164,6 +169,7 @@ sub listBookings {
 
     if ( $res->status_line =~ /200/ ) {
         my $dom = eval { XML::LibXML->new->parse_string( $res->content ) };
+        croak $@ if $@;
         for my $booksNode ( $dom->getElementsByTagName('booking') ) {
             push @bookings, $booksNode->getAttribute('xlink:href');
         }
@@ -195,6 +201,7 @@ sub updateResource {
                 =~ s/<resource /<resource xmlns:xlink=\"http:\/\/www.w3.org\/1999\/xlink\ "/;
         }
         my $dom = eval { XML::LibXML->new->parse_string($xml) };
+        croak $@ if $@;
         return $dom->getElementsByTagName('resource')->get_node(1)
             ->getAttribute('xlink:href');
     }
@@ -233,6 +240,7 @@ sub updateBooking {
     my $res = $self->{ua}->request($req);
     if ( $res->status_line =~ /200/ ) {
         my $dom = eval { XML::LibXML->new->parse_string( $res->content ) };
+        croak $@ if $@;
         return $dom->getElementsByTagName('booking')->get_node(1)
             ->getAttribute('xlink:href');
     }

@@ -95,191 +95,6 @@ sub handle_request {
     }
 }
 
-############################
-# REST management routines #
-############################
-
-# Returns the REST URL which identifies a given resource
-sub _rest_get_resource_url {
-    my ($resource) = @_;
-
-    return "/resource/" . $resource->id;
-}
-
-# Extracts the Resource ID from a given Resource REST URL
-sub _rest_parse_resource_url {
-    my ($url) = @_;
-
-    if ( $url =~ /\/resource\/(\w+)/ ) {
-        return $1;
-    }
-    else {
-        return;
-    }
-}
-
-# Returns the REST URL which identifies the agenda of a given resource
-sub _rest_get_agenda_url {
-    my ($resource) = @_;
-
-    return _rest_get_resource_url($resource) . "/bookings";
-}
-
-# Returns the REST URL which identifies a booking of a given resource
-sub _rest_get_booking_url {
-    my ( $booking_id, $resource_id ) = @_;
-
-    return '/resource/' . $resource_id . '/booking/' . $booking_id;
-}
-
-# Returns XML representation of a given resource, including
-# all REST decoration stuff (xlink resource locator)
-sub _rest_resource_to_xml {
-    my ( $resource, $is_root_node ) = @_;
-
-    $is_root_node = ( defined $is_root_node ) ? $is_root_node : 0;
-
-    my $agenda_url = _rest_get_agenda_url($resource);
-
-    my $parser = XML::LibXML->new();
-    my $doc    = $parser->parse_string( $resource->to_xml() );
-
-    # Add xlink decorations to <resource>, <agenda> and <booking> elements
-    my @nodes = $doc->getElementsByTagName('resource');
-    if ($is_root_node) {
-        $nodes[0]->setNamespace( "http://www.w3.org/1999/xlink", "xlink", 0 );
-    }
-    $nodes[0]->setAttribute( "xlink:type", "simple" );
-    $nodes[0]
-        ->setAttribute( "xlink:href", _rest_get_resource_url($resource) );
-
-    #
-    # FIXME: The following loop should be rewritten using _rest_agenda_to_xml
-    #
-    for my $agenda_node ( $doc->getElementsByTagName('agenda') ) {
-        $agenda_node->setAttribute( "xlink:type", 'simple' );
-        $agenda_node->setAttribute( "xlink:href",
-            _rest_get_agenda_url($resource) );
-    }
-
-    #
-    # FIXME: The following loop should be rewritten using _rest_booking_to_xml
-    #
-    for my $booking_node ( $doc->getElementsByTagName('booking') ) {
-        my $booking = Booking->from_xml(
-            _rest_remove_xlink_attrs( $booking_node->toString() ) );
-        $booking_node->setAttribute( "xlink:type", 'simple' );
-        $booking_node->setAttribute( "xlink:href",
-            _rest_get_booking_url( $booking->id, $resource->id ) );
-    }
-
-    my $xml = $doc->toString();
-
-    # toString adds an XML preamble, not needed if
-    # this is not a root node, so we remove it
-    $xml =~ s/<\?xml version="1.0"\?>//;
-
-    if ($is_root_node) {
-        $xml = _xml_preamble('resource') . $xml;
-    }
-    return $xml;
-
-}
-
-sub _rest_remove_xlink_attrs {
-    my ($xml) = @_;
-
-    my $parser = XML::LibXML->new();
-    my $doc    = $parser->parse_string($xml)
-        or die "_rest_remove_xlink_attrs() received an invalid XML argument";
-
-    my @tags = ( 'booking', 'agenda', 'resource' );
-
-    for my $tag (@tags) {
-        for my $node ( $doc->getElementsByTagName($tag) ) {
-            $node->removeAttribute("xlink:href");
-            $node->removeAttribute("xlink:type");
-            $node->removeAttribute("xmlns:xlink");
-        }
-    }
-
-    my $result = $doc->toString(0);
-
-# removeAttribute() cannot remove namespace declarations (WTF!!!)
-# ... and, if you are asking: *no*, removeAttributeNS() does not work, either!),
-# so let's be expeditive:
-    $result =~ s/ xmlns:xlink="[^"]*"//g;
-
-    return $result;
-}
-
-sub _rest_agenda_to_xml {
-    my ( $resource, $is_root_node ) = @_;
-
-    $is_root_node = ( defined $is_root_node ) ? $is_root_node : 0;
-
-    my $parser = XML::LibXML->new();
-    my $doc    = $parser->parse_string( $resource->agenda->to_xml() );
-    my @nodes  = $doc->getElementsByTagName('agenda');
-    if ($is_root_node) {
-        $nodes[0]->setNamespace( "http://www.w3.org/1999/xlink", "xlink", 0 );
-    }
-    $nodes[0]->setAttribute( "xlink:type", 'simple' );
-    $nodes[0]->setAttribute( "xlink:href", _rest_get_agenda_url($resource) );
-
-    #
-    # FIXME: The following loop should be rewritten using _rest_booking_to_xml
-    #
-    for my $booking_node ( $doc->getElementsByTagName('booking') ) {
-        my $booking = Booking->from_xml(
-            _rest_remove_xlink_attrs( $booking_node->toString() ) );
-        $booking_node->setAttribute( "xlink:type", 'simple' );
-        $booking_node->setAttribute( "xlink:href",
-            _rest_get_booking_url( $booking->id, $resource->id ) );
-    }
-
-    my $xml = $doc->toString();
-
-    # toString adds an XML preamble, not needed if
-    # this is not a root node, so we remove it
-    $xml =~ s/<\?xml version="1.0"\?>//;
-
-    if ($is_root_node) {
-        $xml = _xml_preamble('agenda') . $xml;
-    }
-    return $xml;
-}
-
-sub _rest_booking_to_xml {
-    my ( $booking, $resource_id, $is_root_node ) = @_;
-
-    $is_root_node = ( defined $is_root_node ) ? $is_root_node : 0;
-
-    my $parser = XML::LibXML->new();
-    my $doc    = $parser->parse_string( $booking->to_xml() );
-
-    my @nodes = $doc->getElementsByTagName('booking');
-
-    # Add XLink attributes
-    if ($is_root_node) {
-        $nodes[0]->setNamespace( "http://www.w3.org/1999/xlink", "xlink", 0 );
-    }
-    $nodes[0]->setAttribute( "xlink:type", 'simple' );
-    $nodes[0]->setAttribute( "xlink:href",
-        _rest_get_booking_url( $booking->id, $resource_id ) );
-
-    my $xml = $doc->toString();
-
-    # toString adds an XML preamble, not needed if
-    # this is not a root node, so we remove it
-    $xml =~ s/<\?xml version="1.0"\?>//;
-
-    if ($is_root_node) {
-        $xml = _xml_preamble('booking') . $xml;
-    }
-    return $xml;
-}
-
 #############################################################
 # Http tools
 #############################################################
@@ -305,7 +120,11 @@ sub _status {
         409 => 'Conflict',
     );
 
-    my $text = $codes{$code} || die "Unknown HTTP code error";
+    my $text = $codes{$code} or croak "Unknown HTTP code error";
+    #
+    # FIXME: Since we're returning XML most of the time,
+    #        shouldn't we returning errors as XML too?
+    #
     _reply( "$code $codes{$code}", 'text/plain', $message || $text );
 }
 
@@ -325,7 +144,7 @@ sub _list_resources {
     foreach my $id ( Resource->list_id ) {
         my $r = Resource->load($id);
         if ( defined $r ) {
-            $xml .= _rest_resource_to_xml( $r, 0 );
+            $xml .= $r->to_xml( "", 0 );
         }
     }
     $xml .= "</resources>";
@@ -335,15 +154,17 @@ sub _list_resources {
 sub _create_resource {
     my ($cgi) = @_;
 
-    my $r = Resource->from_xml(
-        _rest_remove_xlink_attrs( $cgi->param('POSTDATA') ) );
+    my $r = Resource->from_xml( $cgi->param('POSTDATA') );
 
     if ( !defined $r ) {    # wrong XML argument
         _status(400);
     }
     else {
         $r->save();
-        _status( 201, _rest_resource_to_xml( $r, 1 ) );
+        #
+        # FIXME: We're returning XML as plaintext, wrong :/
+        #
+        _status( 201, $r->to_xml( "", 1 ) );
     }
 }
 
@@ -361,7 +182,7 @@ sub _retrieve_resource {
         _status(404);
     }
     else {
-        _send_xml( _rest_resource_to_xml( $r, 1 ) );
+        _send_xml( $r->to_xml( "", 1 ) );
     }
 }
 
@@ -392,8 +213,7 @@ sub _update_resource {
         return;
     }
 
-    my $updated_resource = Resource->from_xml(
-        _rest_remove_xlink_attrs( $cgi->param('POSTDATA') ), $id );
+    my $updated_resource = Resource->from_xml( $cgi->param('POSTDATA'), $id );
 
     if ( !defined $updated_resource ) {
         _status(400);
@@ -403,7 +223,7 @@ sub _update_resource {
     }
     else {
         $updated_resource->save();
-        _send_xml( _rest_resource_to_xml($updated_resource) );
+        _send_xml( $updated_resource->to_xml( "", 1 ) );
     }
 }
 
@@ -439,7 +259,7 @@ sub _list_bookings {
         return;
     }
 
-    my $xml = _rest_agenda_to_xml( $r, 1 );
+    my $xml = $r->agenda->to_xml( $r->url, 1 );
     _send_xml($xml);
 
 }
@@ -458,8 +278,7 @@ sub _create_booking {
         return;
     }
 
-    my $b = Booking->from_xml(
-        _rest_remove_xlink_attrs( $cgi->param('POSTDATA') ) );
+    my $b = Booking->from_xml( $cgi->param('POSTDATA') );
     if ( !defined $b ) {
         _status(400);
         return;
@@ -474,16 +293,16 @@ sub _create_booking {
             $overlapping_agenda->append($aux);
         }
 
-        # FIXME: HACK to pass _rest_agenda_to_xml
-        # a resource instead of an agenda
-        $r->agenda($overlapping_agenda);
-        _status( 409, _rest_agenda_to_xml( $r, 1 ) );
+        #
+        # FIXME: wrong again, returning XML as plaintext
+        #
+        _status( 409, $overlapping_agenda->to_xml( $r->url, 1 ) );
         return;
     }
 
     $r->agenda->append($b);
     $r->save();
-    _status( 201, _rest_booking_to_xml( $b, $idResource, 1 ) );
+    _status( 201, $b->to_xml( $r->url, 1 ) );
 }
 
 sub _retrieve_booking {
@@ -512,7 +331,7 @@ sub _retrieve_booking {
         return;
     }
 
-    _send_xml( _rest_booking_to_xml( $b, $idR, 1 ) );
+    _send_xml( $b->to_xml( $r->url, 1 ) );
 }
 
 sub _delete_booking {
@@ -577,8 +396,7 @@ sub _update_booking {
         return;
     }
 
-    my $new_booking = Booking->from_xml(
-        _rest_remove_xlink_attrs( $cgi->param('POSTDATA') ), $idB );
+    my $new_booking = Booking->from_xml( $cgi->param('POSTDATA'), $idB );
 
     if ( !defined $new_booking ) {
         _status(400);
@@ -602,7 +420,10 @@ sub _update_booking {
         }
         $r->agenda($overlapping_agenda);
 
-        _status( 409, _rest_agenda_to_xml( $r, 1 ) );
+        #
+        # FIXME: still wrong, returning XML as plaintext
+        #
+        _status( 409, $overlapping_agenda->to_xml( $r->url, 1 ) );
         return;
     }
 
@@ -610,7 +431,7 @@ sub _update_booking {
     $r->agenda($ag);
     $r->save();
 
-    _send_xml( _rest_booking_to_xml( $new_booking, $idR, 1 ) );
+    _send_xml( $new_booking->to_xml( $r->url, 1 ) );
     return;
 }
 

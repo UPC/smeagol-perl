@@ -7,6 +7,7 @@ use Set::Object ();
 use base qw(Set::Object);
 use XML::LibXML;
 use Booking;
+use Carp;
 
 sub new {
     my $class = shift;
@@ -21,7 +22,8 @@ sub append {
     my $self = shift;
     my ($slot) = @_;
 
-    ( defined $slot ) or die "Agenda->append requires one parameter";
+    croak "Agenda->append requires one parameter"
+        unless defined $slot;
 
     $self->insert($slot) unless $self->interlace($slot);
 }
@@ -30,21 +32,38 @@ sub interlace {
     my $self = shift;
     my ($slot) = @_;
 
-    ( defined $slot ) or die "Agenda->interlace requires one parameter";
+    croak "Agenda->interlace requires one parameter"
+        unless defined $slot;
+
     return grep { $slot->intersects($_) } $self->elements;
 }
 
 sub to_xml {
     my $self = shift;
+    my ( $url, $isRootNode ) = @_;
 
-    my $xml = "<agenda>";
-
+    my $xmlText = "<agenda>";
     for my $slot ( $self->elements ) {
-        $xml .= $slot->to_xml();
+        $xmlText .= $slot->to_xml($url);
     }
-    $xml .= "</agenda>";
+    $xmlText .= "</agenda>";
 
-    return $xml;
+    return $xmlText
+        unless defined $url;
+
+    my $xmlDoc = eval { XML->new($xmlText) };
+    croak $@ if $@;
+
+    $xmlDoc->addXLink( "agenda", $url . "/bookings" );
+    if ($isRootNode) {
+        $xmlDoc->addPreamble("agenda");
+        return "$xmlDoc";
+    }
+    else {
+        # Take the first node and skip processing instructions
+        my $node = $xmlDoc->doc->getElementsByTagName("agenda")->[0];
+        return $node->toString;
+    }
 }
 
 sub from_xml {

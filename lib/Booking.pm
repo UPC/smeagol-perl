@@ -6,6 +6,8 @@ use warnings;
 use DateTime::Span ();
 use XML::Simple;
 use XML::LibXML;
+use Carp;
+use XML;
 use base qw(DateTime::Span);
 
 use overload
@@ -49,6 +51,12 @@ sub description {
     return $self->{$field};
 }
 
+sub url {
+    my $self = shift;
+
+    return "/" . lc(__PACKAGE__) . "/" . $self->id;
+}
+
 sub __str__ {
     my $self = shift;
 
@@ -63,6 +71,9 @@ sub __equal__ {
     my $self = shift;
     my ($booking) = @_;
 
+    croak "invalid reference"
+        unless ref($booking) eq __PACKAGE__;
+
     return
            $self->description eq $booking->description
         && $self->start == $booking->start
@@ -75,11 +86,12 @@ sub __not_equal__ {
 
 sub to_xml {
     my $self = shift;
+    my ( $url, $isRootNode ) = @_;
 
     my $from = $self->start;
     my $to   = $self->end;
 
-    my $xml
+    my $xmlText
         = "<booking>" . "<id>"
         . $self->id . "</id>"
         . "<description>"
@@ -123,7 +135,23 @@ sub to_xml {
         . "</second>"
         . "</to></booking>";
 
-    return $xml;
+    return $xmlText
+        unless defined $url;
+
+    my $xmlDoc = eval { XML->new($xmlText) };
+    croak $@ if $@;
+
+    $xmlDoc->addXLink( "booking", $url . $self->url );
+    if ($isRootNode) {
+        $xmlDoc->addPreamble("booking");
+        return "$xmlDoc";
+    }
+    else {
+        # Take the first node and skip processing instructions
+        my $node = $xmlDoc->doc->getElementsByTagName("booking")->[0];
+        return $node->toString;
+    }
+
 }
 
 sub from_xml {
@@ -135,6 +163,7 @@ sub from_xml {
         "dtd/booking.dtd" );
 
     my $doc = eval { XML::LibXML->new->parse_string($xml) };
+    croak $@ if $@;
 
     if ( ( !defined $doc ) || !$doc->is_valid($dtd) ) {
 

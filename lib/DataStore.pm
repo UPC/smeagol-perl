@@ -18,7 +18,8 @@ init('/tmp/smeagol_datastore/');
 sub init {
     my ($path) = @_;
 
-    defined($path) or die "DataStore->init() needs an argument!";
+    croak "DataStore->init() needs an argument!"
+        unless defined $path;
 
     if ( $path eq "/" ) {
         $path = "/tmp/smeagol_datastore/";
@@ -31,7 +32,7 @@ sub init {
     }
     else {
         mkdir $path
-            or die "Could not create DataStore directory $path";
+            or croak "Could not create DataStore directory $path";
     }
 
     # Add trailing slash if needed
@@ -61,7 +62,8 @@ sub load {
     my $self = shift;
     my ($id) = @_;
 
-    defined($id) or die "undefined id in call to load()";
+    croak "undefined id in call to load()"
+        unless defined $id;
 
     my $data;
     if ( defined $id && -e _full_path($id) ) {
@@ -77,10 +79,12 @@ sub save {
     my $self = shift;
     my ( $id, $data ) = @_;
 
-    defined($id) or die "undefined id in call to save()";
+    croak "undefined id in call to save()"
+        unless defined $id;
 
     if ( defined $id && defined $data ) {
-        open my $out, ">", _full_path($id) or die;
+        open my $out, ">", _full_path($id)
+            or croak "cannot open " . _full_path($id);
         print $out Dumper($data);
         close $out;
     }
@@ -120,7 +124,7 @@ sub remove {
 
     if ( DataStore->exists($id) ) {
         unlink _full_path($id)
-            or die " Could not remove persistent object $id\n ";
+            or croak "Could not remove persistent object " . _full_path($id);
     }
 }
 

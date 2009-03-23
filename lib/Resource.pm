@@ -8,6 +8,7 @@ use XML::LibXML;
 use DataStore;
 use Data::Dumper;
 use Carp;
+use XML;
 
 # Create a new resource
 sub new {
@@ -68,6 +69,12 @@ sub agenda {
     if (@_) { $self->{agenda} = shift; }
 
     return $self->{agenda};
+}
+
+sub url {
+    my $self = shift;
+
+    return "/" . lc(__PACKAGE__) . "/" . $self->id;
 }
 
 # Constructor that fetchs a resource from datastore
@@ -132,15 +139,37 @@ sub from_xml {
 
 sub to_xml {
     my $self = shift;
+    my ( $url, $isRootNode ) = @_;
 
-    my $xml .= "<resource>";
-    $xml    .= "<description>" . $self->{description} . "</description>";
-    $xml    .= "<granularity>" . $self->{granularity} . "</granularity>";
-    $xml    .= $self->{agenda}->to_xml()
+    $url .= $self->url
+        if defined $url;
+
+    my $xmlText = "<resource>";
+    $xmlText .= "<description>" . $self->{description} . "</description>";
+    $xmlText .= "<granularity>" . $self->{granularity} . "</granularity>";
+
+    $xmlText .= $self->{agenda}->to_xml($url)
         if ( ( defined $self->{agenda} )
         && defined( $self->{agenda}->elements ) );
-    $xml .= "</resource>";
-    return $xml;
+
+    $xmlText .= "</resource>";
+
+    return $xmlText
+        unless defined $url && $url ne '';
+
+    my $xmlDoc = eval { XML->new($xmlText) };
+    croak $@ if $@;
+
+    $xmlDoc->addXLink( "resource", $url );
+    if ($isRootNode) {
+        $xmlDoc->addPreamble("resource");
+        return "$xmlDoc";
+    }
+    else {
+        # Take the first node and skip processing instructions
+        my $node = $xmlDoc->doc->getElementsByTagName("resource")->[0];
+        return $node->toString;
+    }
 }
 
 sub list_id {

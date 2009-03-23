@@ -41,26 +41,16 @@ sub smeagol_url {
     return $server . $suffix;
 }
 
-# Auxiliary routine to remove xlink attributes
-sub remove_xlink {
-    my $xml = shift;
-
-    $xml =~ s/ xmlns:xlink="[^"]*"//g;
-    $xml =~ s/ xlink:href="[^"]*"//g;
-    $xml =~ s/ xlink:type="[^"]*"//g;
-
-    return $xml;
-}
-
 # Testing retrieve empty resource list
 {
     my $res = smeagol_request( 'GET', "$server/resources" );
     ok( $res->is_success,
         'resource list retrieval status ' . Dumper( $res->code ) );
 
-    ok( $res->content
-            =~ m|<\?xml version="1.0" encoding="UTF-8"\?><\?xml-stylesheet type="application/xml" href="/xsl/resources.xsl"\?><resources xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="/resources"></resources>|,
-        "resource list content " . Dumper( $res->content )
+    like(
+        $res->content,
+        qr|<\?xml version="1.0" encoding="UTF-8"\?><\?xml-stylesheet type="application/xml" href="/xsl/resources.xsl"\?><resources xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="/resources"></resources>|,
+        "resource list content"
     );
 }
 
@@ -234,7 +224,7 @@ my $resource2 = Resource->new( 'desc 2 2', 'gra 2 2' );
             . Dumper( $res->code )
     );
 
-    my $ag = Agenda->from_xml( remove_xlink( $res->content ) );
+    my $ag = Agenda->from_xml( $res->content );
 
     ok( defined $ag, "list bookings content " . Dumper($ag) );
 }
@@ -255,14 +245,14 @@ my $resource2 = Resource->new( 'desc 2 2', 'gra 2 2' );
     $res = smeagol_request( 'POST', smeagol_url("$resource_url/booking"),
         $b1->to_xml() );
     ok( $res->code == '201'
-            && Booking->from_xml( remove_xlink( $res->content ) ) == $b1,
+            && Booking->from_xml( $res->content ) == $b1,
         'created booking ' . $res->code
     );
 
     $res = smeagol_request( 'POST', smeagol_url("$resource_url/booking"),
         $b2->to_xml() );
     ok( $res->code == '201'
-            && Booking->from_xml( remove_xlink( $res->content ) ) == $b2,
+            && Booking->from_xml( $res->content ) == $b2,
         'created booking ' . $res->code
     );
 
@@ -271,7 +261,7 @@ my $resource2 = Resource->new( 'desc 2 2', 'gra 2 2' );
     ok( $res->code == '409',
         'update overlapping booking status ' . $res->code );
 
-    my $ag = Agenda->from_xml( remove_xlink( $res->content ) );
+    my $ag = Agenda->from_xml( $res->content );
 
     ok( $ag->size == 1 && ( $ag->elements )[0] == $b2,
         'update overlapping booking content: ' . Dumper( $res->content ) );
@@ -302,7 +292,7 @@ my $resource2 = Resource->new( 'desc 2 2', 'gra 2 2' );
         $b1->to_xml() );
 
     ok( $res->code == '201'
-            && Booking->from_xml( remove_xlink( $res->content ), 1000 )
+            && Booking->from_xml( $res->content, 1000 )
             == $b1,
         'created booking status: ' . Dumper( $res->code )
     );
@@ -312,7 +302,7 @@ my $resource2 = Resource->new( 'desc 2 2', 'gra 2 2' );
 
     #third, retrieve it, remove it, etc
     $res = smeagol_request( 'GET', smeagol_url($booking_url) );
-    ok( Booking->from_xml( remove_xlink( $res->content ), 1000 ) == $b1,
+    ok( Booking->from_xml( $res->content, 1000 ) == $b1,
         'retrieved booking' );
 
     $res = smeagol_request( 'GET',
@@ -325,7 +315,7 @@ my $resource2 = Resource->new( 'desc 2 2', 'gra 2 2' );
     $res = smeagol_request( 'POST', smeagol_url( $resource_url . '/booking' ),
         $b2->to_xml() );
     ok( $res->code == '201'
-            && Booking->from_xml( remove_xlink( $res->content ), 1000 )
+            && Booking->from_xml( $res->content, 1000 )
             == $b2,
         'created booking ' . $res->code
     );
@@ -336,7 +326,7 @@ my $resource2 = Resource->new( 'desc 2 2', 'gra 2 2' );
     $res = smeagol_request( 'GET', smeagol_url($booking_url) );
     ok( $res->code == 200,
         'retrieve booking status ' . Dumper( $res->code ) );
-    ok( Booking->from_xml( remove_xlink( $res->content ), 1000 ) == $b2,
+    ok( Booking->from_xml( $res->content, 1000 ) == $b2,
         'retrieved booking content' );
 
     $res = smeagol_request( 'DELETE',
@@ -375,7 +365,7 @@ my $resource2 = Resource->new( 'desc 2 2', 'gra 2 2' );
     ok( $res->code == 200,
         'retrieve bookings list: ' . Dumper( $res->code ) );
 
-    my $ag = Agenda->from_xml( remove_xlink( $res->content ) );
+    my $ag = Agenda->from_xml( $res->content );
 
     ok( $ag->size == 2, 'agenda size: ' . Dumper( $ag->size ) );
 
@@ -481,7 +471,7 @@ my $resource2 = Resource->new( 'desc 2 2', 'gra 2 2' );
     );
 
     my $result
-        = Booking->from_xml( remove_xlink( $res->content ), $booking2->id );
+        = Booking->from_xml( $res->content, $booking2->id );
 
     ok( $result == $new_booking2,
         'update booking content: ' . Dumper( $result->to_xml ) );

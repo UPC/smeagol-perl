@@ -244,17 +244,13 @@ my $resource2 = Resource->new( 'desc 2 2', 'gra 2 2' );
 
     $res = smeagol_request( 'POST', smeagol_url("$resource_url/booking"),
         $b1->to_xml() );
-    ok( $res->code == '201'
-            && Booking->from_xml( $res->content ) == $b1,
-        'created booking ' . $res->code
-    );
+    ok( $res->code == '201' && Booking->from_xml( $res->content ) == $b1,
+        'created booking ' . $res->code );
 
     $res = smeagol_request( 'POST', smeagol_url("$resource_url/booking"),
         $b2->to_xml() );
-    ok( $res->code == '201'
-            && Booking->from_xml( $res->content ) == $b2,
-        'created booking ' . $res->code
-    );
+    ok( $res->code == '201' && Booking->from_xml( $res->content ) == $b2,
+        'created booking ' . $res->code );
 
     $res = smeagol_request( 'POST', smeagol_url("$resource_url/booking"),
         $b2->to_xml() );
@@ -292,8 +288,7 @@ my $resource2 = Resource->new( 'desc 2 2', 'gra 2 2' );
         $b1->to_xml() );
 
     ok( $res->code == '201'
-            && Booking->from_xml( $res->content, 1000 )
-            == $b1,
+            && Booking->from_xml( $res->content, 1000 ) == $b1,
         'created booking status: ' . Dumper( $res->code )
     );
 
@@ -315,8 +310,7 @@ my $resource2 = Resource->new( 'desc 2 2', 'gra 2 2' );
     $res = smeagol_request( 'POST', smeagol_url( $resource_url . '/booking' ),
         $b2->to_xml() );
     ok( $res->code == '201'
-            && Booking->from_xml( $res->content, 1000 )
-            == $b2,
+            && Booking->from_xml( $res->content, 1000 ) == $b2,
         'created booking ' . $res->code
     );
 
@@ -470,8 +464,7 @@ my $resource2 = Resource->new( 'desc 2 2', 'gra 2 2' );
             . Dumper( $res->code )
     );
 
-    my $result
-        = Booking->from_xml( $res->content, $booking2->id );
+    my $result = Booking->from_xml( $res->content, $booking2->id );
 
     ok( $result == $new_booking2,
         'update booking content: ' . Dumper( $result->to_xml ) );

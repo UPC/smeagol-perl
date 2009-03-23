@@ -147,6 +147,7 @@ sub to_xml {
         return "$xmlDoc";
     }
     else {
+
         # Take the first node and skip processing instructions
         my $node = $xmlDoc->doc->getElementsByTagName("booking")->[0];
         return $node->toString;

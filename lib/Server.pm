@@ -121,6 +121,7 @@ sub _status {
     );
 
     my $text = $codes{$code} or croak "Unknown HTTP code error";
+
     #
     # FIXME: Since we're returning XML most of the time,
     #        shouldn't we returning errors as XML too?
@@ -161,6 +162,7 @@ sub _create_resource {
     }
     else {
         $r->save();
+
         #
         # FIXME: We're returning XML as plaintext, wrong :/
         #

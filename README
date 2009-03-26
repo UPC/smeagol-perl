@@ -29,6 +29,8 @@ Aquesta distribució depèn d'aquests altres mòduls:
   | HTTP::Server::Simple::CGI | libhttp-server-simple-perl |
   | Getopt::Long              | perl-base                  |
   | Data::Compare             | libdata-compare-perl       |
+  | Date::ICal                | libdate-ical-perl          |
+  | Data::ICal                | libdata-ical-perl          |
   +---------------------------+----------------------------+
 
 COPYRIGHT AND LICENCE

@@ -15,6 +15,8 @@ WriteMakefile(
         'HTTP::Server::Simple::CGI' => undef,
         'Getopt::Long'              => undef,
         'Data::Compare'             => undef,
+        'Data::ICal'                => undef,
+        'Date::ICal'                => undef,
     },
     (   $] >= 5.005
         ?    ## Add these new keywords supported since 5.005

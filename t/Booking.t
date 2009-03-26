@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-use Test::More tests => 27;
+use Test::More tests => 33;
 
 use strict;
 use warnings;
@@ -7,9 +7,12 @@ use warnings;
 use DateTime;
 use XML::Simple;
 use Data::Compare;
+use Data::ICal;
+use Data::ICal::Entry::Event;
+use Date::ICal;
 
 BEGIN {
-    use_ok($_) for qw(Booking DataStore);
+    use_ok($_) for qw(Booking Booking::ICal DataStore);
 }
 
 # Make a DateTime object with some defaults
@@ -232,5 +235,53 @@ ok( $b2->intersects($b8),    'b2 interlaces b8' );
 ok( $b9->intersects($b8),    'b9 interlaces b8' );
 ok( $b9->intersects($b10),   'b9 interlaces b10' );
 ok( !$b10->intersects($b11), 'b11 does not interlace b10' );
+
+# Testing iCalendar
+{
+    my %dtstart = (
+        year  => 2008,
+        month => 4,
+        day   => 14,
+        hour  => 17
+    );
+    my %dtend = (
+        year  => 2008,
+        month => 4,
+        day   => 14,
+        hour  => 18
+    );
+
+    my $booking = Booking::ICal->new(
+        "description ical",
+        DateTime->new(%dtstart),
+        DateTime->new(%dtend),
+    );
+
+    isa_ok( $booking, "Booking::ICal" );
+
+    my $entry = Data::ICal::Entry::Event->new();
+    $entry->add_properties(
+        summary => "description ical",
+        dtstart => Date::ICal->new(%dtstart)->ical,
+        dtend   => Date::ICal->new(%dtend)->ical,
+    );
+
+    my @expected = sort grep { !/^(?:PRODID)/ }
+        split /\n/, $entry->as_string;
+    my @got = sort grep { !/^(?:PRODID)/ }
+        split /\n/, "$booking";
+
+    is_deeply( \@got, \@expected, "looks like an vcalendar" );
+
+    my $xmlBooking = Booking->from_xml( $booking->parent->to_xml );
+    ok( $booking == $xmlBooking, "ical == xml" );
+    ok( $booking eq $xmlBooking, "ical eq xml" );
+
+    my $icalBooking = $xmlBooking->ical;
+    @got = sort grep { !/^(?:PRODID)/ }
+        split /\n/, "$icalBooking";
+
+    is_deeply( \@got, \@expected, "booking->ical works" );
+};
 
 END { DataStore->clean() }

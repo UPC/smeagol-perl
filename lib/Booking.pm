@@ -13,7 +13,9 @@ use base qw(DateTime::Span);
 use overload
     q{""} => \&__str__,
     q{==} => \&__equal__,
-    q{!=} => \&__not_equal__;
+    q{eq} => \&__equal__,
+    q{!=} => \&__not_equal__,
+    q{ne} => \&__not_equal__;
 
 sub new {
     my $class = shift;
@@ -67,16 +69,6 @@ sub url {
     return "/" . lc(__PACKAGE__) . "/" . $self->id;
 }
 
-sub __str__ {
-    my $self = shift;
-
-    my $description = $self->description;
-    my $from        = $self->start;
-    my $to          = $self->end;
-
-    return "<$description,$from,$to>";
-}
-
 sub __equal__ {
     my $self = shift;
     my ($booking) = @_;
@@ -95,7 +87,7 @@ sub __not_equal__ {
     return !shift->__equal__(@_);
 }
 
-sub to_xml {
+sub __str__ {
     my $self = shift;
     my ( $url, $isRootNode ) = @_;
 
@@ -169,6 +161,11 @@ sub to_xml {
 
 }
 
+# DEPRECATED
+sub to_xml {
+    return shift->__str__(@_);
+}
+
 sub from_xml {
     my $class = shift;
     my ( $xml, $id ) = @_;
@@ -186,8 +183,8 @@ sub from_xml {
         return;
     }
 
-    # XML is valid.
-    my $b = XMLin($xml);
+    # XML is valid. Build empty elements as ''
+    my $b = XMLin( $xml, SuppressEmpty => '' );
 
     my $obj = $class->SUPER::from_datetimes(
         start => DateTime->new(
@@ -219,6 +216,15 @@ sub from_xml {
 
     bless $obj, $class;
     return $obj;
+}
+
+sub ical {
+    my $self = shift;
+
+    my $class = __PACKAGE__ . "::ICal";
+
+    eval "require $class";
+    return bless $self, $class;
 }
 
 1;

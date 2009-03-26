@@ -39,12 +39,15 @@ my %crud_for = (
     },
     '/resource'                     => { POST => \&_create_resource, },
     '/resource/(\d+)/bookings'      => { GET  => \&_list_bookings, },
+    '/resource/(\d+)/bookings/ical' => { GET  => \&_list_bookings_ical, },
     '/resource/(\d+)/booking'       => { POST => \&_create_booking, },
     '/resource/(\d+)/booking/(\d+)' => {
         GET    => \&_retrieve_booking,
         POST   => \&_update_booking,
         DELETE => \&_delete_booking,
     },
+    '/resource/(\d+)/booking/(\d+)/ical' =>
+        { GET => \&_retrieve_booking_ical },
     '/css/(\w+)\.css' => { GET => \&_send_css },
     '/dtd/(\w+)\.dtd' => { GET => \&_send_dtd },
     '/xsl/(\w+)\.xsl' => { GET => \&_send_xsl },
@@ -133,6 +136,12 @@ sub _send_xml {
     my ($xml) = @_;
 
     _reply( '200 OK', 'text/xml', $xml );
+}
+
+sub _send_ical {
+    my ($ical) = @_;
+
+    _reply( '200 OK', 'text/calendar', $ical );
 }
 
 ##############################################################
@@ -251,8 +260,13 @@ sub _send_dtd {
     }
 }
 
+#
+# FIXME: this call is made as _list_bookings($cgi, $1, $2, ...);
+#        $2 is always undef since this regex captures 1 item only,
+#        thus the undef on the args list below.
+#
 sub _list_bookings {
-    my ( $cgi, $idResource ) = @_;
+    my ( $cgi, $idResource, undef, $viewAs ) = @_;
 
     my $r = Resource->load($idResource);
 
@@ -261,9 +275,18 @@ sub _list_bookings {
         return;
     }
 
-    my $xml = $r->agenda->to_xml( $r->url, 1 );
-    _send_xml($xml);
+    if ( defined $viewAs && $viewAs eq 'ical' ) {
+        my $ical = $r->agenda->ical;
+        _send_ical("$ical");
+    }
+    else {
+        my $xml = $r->agenda->to_xml( $r->url, 1 );
+        _send_xml($xml);
+    }
+}
 
+sub _list_bookings_ical {
+    _list_bookings( @_, "ical" );
 }
 
 sub _create_booking {
@@ -308,7 +331,7 @@ sub _create_booking {
 }
 
 sub _retrieve_booking {
-    my ( $cgi, $idR, $idB ) = @_;
+    my ( $cgi, $idR, $idB, $viewAs ) = @_;
 
     if ( !defined $idR || !defined $idB ) {
         _status(400);
@@ -333,7 +356,17 @@ sub _retrieve_booking {
         return;
     }
 
-    _send_xml( $b->to_xml( $r->url, 1 ) );
+    if ( defined $viewAs && $viewAs eq 'ical' ) {
+        my $ics = $b->ical->calendar->as_string;
+        _send_ical($ics);
+    }
+    else {
+        _send_xml( $b->to_xml( $r->url, 1 ) );
+    }
+}
+
+sub _retrieve_booking_ical {
+    _retrieve_booking( @_, "ical" );
 }
 
 sub _delete_booking {

@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-use Test::More tests => 13;
+use Test::More tests => 19;
 
 use strict;
 use warnings;
@@ -7,9 +7,13 @@ use warnings;
 use DateTime;
 use XML::Simple;
 use Data::Compare;
-use Data::Dumper;
+use Data::ICal;
+use Data::ICal::Entry::Event;
+use Date::ICal;
 
-BEGIN { use_ok($_) for qw(Booking Agenda DataStore) }
+BEGIN {
+    use_ok($_) for qw(Booking Booking::ICal Agenda Agenda::ICal DataStore);
+}
 
 # Make a DateTime object with some defaults
 sub datetime {
@@ -117,5 +121,78 @@ ok( $ag->size == 0, 'ag has no slots' );
 
 $ag->remove($b4);
 ok( $ag->size == 0, 'remove non-existing b4 from ag' );
+
+# Testing iCalendar features
+{
+    my $agenda = Agenda::ICal->new();
+    ok( $agenda->size == 0, "agenda has no ical bookings" );
+
+    my %dtstart1 = (
+        year  => 2008,
+        month => 4,
+        day   => 14,
+        hour  => 10,
+    );
+    my %dtend1 = (
+        year  => 2008,
+        month => 4,
+        day   => 14,
+        hour  => 11,
+    );
+
+    my $booking1 = Booking::ICal->new(
+        "1st booking ical",
+        DateTime->new(%dtstart1),
+        DateTime->new(%dtend1),
+    );
+    $agenda->append($booking1);
+    ok( $agenda->size == 1, "agenda has 1 ical booking" );
+
+    my $entry1 = Data::ICal::Entry::Event->new();
+    $entry1->add_properties(
+        summary => "1st booking ical",
+        dtstart => Date::ICal->new(%dtstart1)->ical,
+        dtend   => Date::ICal->new(%dtend1)->ical,
+    );
+
+    my %dtstart2 = (
+        year  => 2008,
+        month => 4,
+        day   => 14,
+        hour  => 15,
+    );
+    my %dtend2 = (
+        year  => 2008,
+        month => 4,
+        day   => 14,
+        hour  => 16,
+    );
+
+    my $booking2 = Booking::ICal->new(
+        "2nd booking ical",
+        DateTime->new(%dtstart2),
+        DateTime->new(%dtend2),
+    );
+    $agenda->append($booking2);
+    ok( $agenda->size == 2, "agenda has 2 ical bookings" );
+
+    my $entry2 = Data::ICal::Entry::Event->new();
+    $entry2->add_properties(
+        summary => "2nd booking ical",
+        dtstart => Date::ICal->new(%dtstart2)->ical,
+        dtend   => Date::ICal->new(%dtend2)->ical,
+    );
+
+    my $calendar = Data::ICal->new();
+    $calendar->add_entry($entry1);
+    $calendar->add_entry($entry2);
+
+    my @expected = sort grep { !/^(?:PRODID)/ }
+        split /\n/, $calendar->as_string;
+    my @got = sort grep { !/^(?:PRODID)/ }
+        split /\n/, "$agenda";
+
+    is_deeply( \@got, \@expected, "looks like an vcalendar" );
+}
 
 END { DataStore->clean(); }

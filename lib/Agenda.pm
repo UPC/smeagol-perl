@@ -9,6 +9,8 @@ use XML::LibXML;
 use Booking;
 use Carp;
 
+use overload q{""} => \&__str__;
+
 sub new {
     my $class = shift;
 
@@ -38,7 +40,7 @@ sub interlace {
     return grep { $slot->intersects($_) } $self->elements;
 }
 
-sub to_xml {
+sub __str__ {
     my $self = shift;
     my ( $url, $isRootNode ) = @_;
 
@@ -65,6 +67,11 @@ sub to_xml {
         my $node = $xmlDoc->doc->getElementsByTagName("agenda")->[0];
         return $node->toString;
     }
+}
+
+# DEPRECATED
+sub to_xml {
+    return shift->__str__(@_);
 }
 
 sub from_xml {
@@ -102,6 +109,20 @@ sub from_xml {
     }
 
     return $ag;
+}
+
+sub ical {
+    my $self = shift;
+
+    my $class = __PACKAGE__ . "::ICal";
+
+    for my $elem ( $self->elements ) {
+        $self->remove($elem);
+        $self->append( $elem->ical );
+    }
+
+    eval "require $class";
+    return bless $self, $class;
 }
 
 1;

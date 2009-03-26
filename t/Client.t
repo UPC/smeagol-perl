@@ -1,10 +1,14 @@
 #!/usr/bin/perl
 
-use Test::More tests => 50;
+use Test::More tests => 52;
 
 use strict;
 use warnings;
 use Data::Dumper;
+
+use Date::ICal;
+use Data::ICal;
+use Data::ICal::Entry::Event;
 
 BEGIN {
     use_ok($_) for qw(Server Client DataStore);
@@ -260,6 +264,89 @@ my $to0 = {
     ok( defined $Bookings[3],
         'booking created ' . id_resource( $Bookings[3] ) );
 
+    my $ical1
+        = $client->getBookingICal( id_resource_booking( $Bookings[0] ) );
+    my $ical2 = $client->listBookingsICal( id_resource( $Resources[1] ) );
+
+    my $entry = Data::ICal::Entry::Event->new();
+    $entry->add_properties(
+        summary => $desc,
+        dtstart => Date::ICal->new(
+            year   => $from->{year},
+            month  => $from->{month},
+            day    => $from->{day},
+            hour   => $from->{hour},
+            minute => $from->{minute},
+            second => $from->{second},
+            )->ical,
+        dtend => Date::ICal->new(
+            year   => $to->{year},
+            month  => $to->{month},
+            day    => $to->{day},
+            hour   => $to->{hour},
+            minute => $to->{minute},
+            second => $to->{second},
+            )->ical,
+    );
+    my $calendar = Data::ICal->new();
+    $calendar->add_entry($entry);
+
+    my @ical1 = sort grep { !/^(?:PRODID)/ }
+        split /\n/, $ical1;
+    my @expected = sort grep { !/^(?:PRODID)/ }
+        split /\n/, $calendar->as_string;
+
+    is_deeply( \@ical1, \@expected, "get booking ical" );
+
+    $entry = Data::ICal::Entry::Event->new();
+    $entry->add_properties(
+        summary => $desc2,
+        dtstart => Date::ICal->new(
+            year   => $from2->{year},
+            month  => $from2->{month},
+            day    => $from2->{day},
+            hour   => $from2->{hour},
+            minute => $from2->{minute},
+            second => $from2->{second},
+            )->ical,
+        dtend => Date::ICal->new(
+            year   => $to2->{year},
+            month  => $to2->{month},
+            day    => $to2->{day},
+            hour   => $to2->{hour},
+            minute => $to2->{minute},
+            second => $to2->{second},
+            )->ical,
+    );
+    $calendar->add_entry($entry);
+    $entry = Data::ICal::Entry::Event->new();
+    $entry->add_properties(
+        summary => $desc3,
+        dtstart => Date::ICal->new(
+            year   => $from3->{year},
+            month  => $from3->{month},
+            day    => $from3->{day},
+            hour   => $from3->{hour},
+            minute => $from3->{minute},
+            second => $from3->{second},
+            )->ical,
+        dtend => Date::ICal->new(
+            year   => $to3->{year},
+            month  => $to3->{month},
+            day    => $to3->{day},
+            hour   => $to3->{hour},
+            minute => $to3->{minute},
+            second => $to3->{second},
+            )->ical,
+    );
+    $calendar->add_entry($entry);
+
+    my @ical2 = sort grep { !/^(?:PRODID)/ }
+        split /\n/, $ical2;
+    @expected = sort grep { !/^(?:PRODID)/ }
+        split /\n/, $calendar->as_string;
+
+    is_deeply( \@ical2, \@expected, "list bookings ical" );
 }
 
 #Testing retrieve Agenda not empty

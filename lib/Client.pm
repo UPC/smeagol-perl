@@ -143,39 +143,54 @@ sub getResource {
 
 sub getBooking {
     my $self = shift;
-    my ( $idR, $idB ) = @_;
+    my ( $idR, $idB, $viewAs ) = @_;
 
-    return unless ( defined $idB || defined $idR );
+    return unless ( defined $idB && defined $idR );
 
-    my $res = $self->{ua}
-        ->get( $self->{url} . '/resource/' . $idR . '/booking/' . $idB );
+    my $url = $self->{url} . '/resource/' . $idR . '/booking/' . $idB;
+    $url .= "/" . $viewAs
+        if defined $viewAs;
 
-    if ( $res->status_line =~ /200/ ) {
-        my $dom = eval { XML::LibXML->new->parse_string( $res->content ) };
-        croak $@ if $@;
-        return XMLin( $res->content );
-    }
-    return;
+    my $res = $self->{ua}->get($url);
+    return unless $res->status_line =~ /200/;
+
+    return $res->content
+        if defined $viewAs;
+
+    my $dom = eval { XML::LibXML->new->parse_string( $res->content ) };
+    croak $@ if $@;
+    return XMLin( $res->content );
+}
+
+sub getBookingICal {
+    return shift->getBooking( @_, "ical" );
 }
 
 sub listBookings {
     my $self = shift;
-    my ($id) = @_;
+    my ( $id, $viewAs ) = @_;
 
-    my $res
-        = $self->{ua}->get( $self->{url} . '/resource/' . $id . '/bookings' );
+    my $url = $self->{url} . '/resource/' . $id . '/bookings';
+    $url .= "/" . $viewAs
+        if defined $viewAs;
 
+    my $res = $self->{ua}->get($url);
+    return unless $res->status_line =~ /200/;
+
+    return $res->content
+        if defined $viewAs;
+
+    my $dom = eval { XML::LibXML->new->parse_string( $res->content ) };
+    croak $@ if $@;
     my @bookings;
-
-    if ( $res->status_line =~ /200/ ) {
-        my $dom = eval { XML::LibXML->new->parse_string( $res->content ) };
-        croak $@ if $@;
-        for my $booksNode ( $dom->getElementsByTagName('booking') ) {
-            push @bookings, $booksNode->getAttribute('xlink:href');
-        }
-        return @bookings;
+    for my $booksNode ( $dom->getElementsByTagName('booking') ) {
+        push @bookings, $booksNode->getAttribute('xlink:href');
     }
-    return;
+    return @bookings;
+}
+
+sub listBookingsICal {
+    return shift->listBookings( @_, "ical" );
 }
 
 sub updateResource {

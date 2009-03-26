@@ -3,13 +3,16 @@
 use strict;
 use warnings;
 
-use Test::More tests => 48;
+use Test::More tests => 58;
 use LWP::UserAgent;
 use HTTP::Request;
 use XML::Simple;
 use Carp;
 use Data::Dumper;
 use Data::Compare;
+use Data::ICal;
+use Data::ICal::Entry::Event;
+use Date::ICal;
 
 BEGIN {
     use_ok($_) for qw(Server Resource Agenda Booking DateTime DataStore);
@@ -472,6 +475,88 @@ my $resource2 = Resource->new( 'desc 2 2', 'gra 2 2' );
 
     ok( $result == $new_booking2,
         'update booking content: ' . Dumper( $result->to_xml ) );
+}
+
+# Testing iCalendar
+{
+    my %dtstart = ( year => 2008, month => 4, day => 14, hour => 17 );
+    my %dtend   = ( year => 2008, month => 4, day => 14, hour => 18 );
+
+    my $entry = Data::ICal::Entry::Event->new;
+    $entry->add_properties(
+        summary => "description ical",
+        dtstart => Date::ICal->new(%dtstart)->ical,
+        dtend   => Date::ICal->new(%dtend)->ical,
+    );
+    my $calendar = Data::ICal->new;
+    $calendar->add_entry($entry);
+
+    my $booking = Booking->new(
+        "description ical",
+        DateTime->new(%dtstart),
+        DateTime->new(%dtend),
+    );
+    isa_ok( $booking, "Booking" );
+
+    my $agenda = Agenda->new();
+    isa_ok( $agenda, "Agenda" );
+
+    $agenda->append($booking);
+    my $resource = Resource->new( 'desc ical', 'gra ical', $agenda );
+    isa_ok( $resource, "Resource" );
+
+    my $res = smeagol_request( 'POST', smeagol_url('/resource'),
+        $resource->to_xml() );
+    ok( $res->code == 201, "resource creation (ical)" );
+
+    my $xmltree = XMLin( $res->content );
+    my $xlink   = $xmltree->{agenda}{booking}{"xlink:href"};
+
+    $res = smeagol_request( 'GET', smeagol_url("$xlink/ical") );
+    is( $res->code, 200, "booking retrieved (ical)" );
+
+    my @expected = sort grep { !/^(?:PRODID)/ }
+        split /\n/, $calendar->as_string;
+
+    my @got = sort grep { !/^(?:PRODID)/ }
+        split /\n/, $res->content;
+
+    is_deeply( \@got, \@expected, "looks like an vcalendar" );
+
+    my %dtstart2 = ( year => 2008, month => 4, day => 15, hour => 17 );
+    my %dtend2   = ( year => 2008, month => 4, day => 15, hour => 18 );
+
+    my $entry2 = Data::ICal::Entry::Event->new;
+    $entry2->add_properties(
+        summary => "description ical 2",
+        dtstart => Date::ICal->new(%dtstart2)->ical,
+        dtend   => Date::ICal->new(%dtend2)->ical,
+    );
+    $calendar->add_entry($entry2);
+
+    my $booking2 = Booking->new(
+        "description ical 2",
+        DateTime->new(%dtstart2),
+        DateTime->new(%dtend2),
+    );
+    isa_ok( $booking2, "Booking" );
+
+    my $resourceUrl = $xmltree->{'xlink:href'};
+    $res = smeagol_request( 'POST', smeagol_url("$resourceUrl/booking"),
+        $booking2->to_xml() );
+    ok( $res->code == 201, "booking2 added (ical)" );
+
+    $res
+        = smeagol_request( 'GET', smeagol_url("$resourceUrl/bookings/ical") );
+    is( $res->code, 200, "resource bookings retrieved (ical)" );
+
+    @expected = sort grep { !/^(?:PRODID)/ }
+        split /\n/, $calendar->as_string;
+
+    @got = sort grep { !/^(?:PRODID)/ }
+        split /\n/, $res->content;
+
+    is_deeply( \@got, \@expected, "looks like an vcalendar" );
 }
 
 END {

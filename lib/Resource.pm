@@ -10,6 +10,8 @@ use Data::Dumper;
 use Carp;
 use XML;
 
+use overload q{""} => \&__str__;
+
 # Create a new resource
 sub new {
     my $class = shift;
@@ -137,7 +139,7 @@ sub from_xml {
     return $obj;
 }
 
-sub to_xml {
+sub __str__ {
     my $self = shift;
     my ( $url, $isRootNode ) = @_;
 
@@ -171,6 +173,11 @@ sub to_xml {
         my $node = $xmlDoc->doc->getElementsByTagName("resource")->[0];
         return $node->toString;
     }
+}
+
+# DEPRECATED
+sub to_xml {
+    return shift->__str__(@_);
 }
 
 sub list_id {

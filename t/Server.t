@@ -476,5 +476,5 @@ my $resource2 = Resource->new( 'desc 2 2', 'gra 2 2' );
 
 END {
     kill 3, $pid;
-    #DataStore->clean();
+    DataStore->clean();
 }

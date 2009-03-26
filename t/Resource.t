@@ -27,14 +27,16 @@ sub datetime {
 my $b1 = Booking->new(
     "b1",
     datetime( 2008, 4, 14, 17 ),
-    datetime( 2008, 4, 14, 18, 59 )
+    datetime( 2008, 4, 14, 18, 59 ),
+    "info b1",
 );
 
 # 19:00 - 19:59
 my $b2 = Booking->new(
     "b2",
     datetime( 2008, 4, 14, 19 ),
-    datetime( 2008, 4, 14, 19, 59 )
+    datetime( 2008, 4, 14, 19, 59 ),
+    "info b2",
 );
 
 # Resource creation Tests
@@ -72,7 +74,9 @@ ok( $r1->to_xml() eq
         . $b1->id
         . "</id><description>"
         . $b1->description
-        . "</description><from><year>2008</year><month>4</month><day>14</day><hour>17</hour><minute>0</minute><second>0</second></from><to><year>2008</year><month>4</month><day>14</day><hour>18</hour><minute>59</minute><second>0</second></to></booking></agenda></resource>",
+        . "</description><from><year>2008</year><month>4</month><day>14</day><hour>17</hour><minute>0</minute><second>0</second></from><to><year>2008</year><month>4</month><day>14</day><hour>18</hour><minute>59</minute><second>0</second></to><info>"
+        . $b1->info
+        . "</info></booking></agenda></resource>",
     'to_xml resource with agenda and 1 booking: ' . $r1->to_xml()
 );
 $r1->agenda->append($b2);

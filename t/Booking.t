@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-use Test::More tests => 24;
+use Test::More tests => 27;
 
 use strict;
 use warnings;
@@ -29,77 +29,88 @@ sub datetime {
 my $b1 = Booking->new(
     "description b1",
     datetime( 2008, 4, 14, 17 ),
-    datetime( 2008, 4, 14, 18, 59 )
+    datetime( 2008, 4, 14, 18, 59 ),
+    "info b1"
 );
 
 # 19:00 - 19:59
 my $b2 = Booking->new(
     "description b2",
     datetime( 2008, 4, 14, 19 ),
-    datetime( 2008, 4, 14, 19, 59 )
+    datetime( 2008, 4, 14, 19, 59 ),
+    "info b2"
 );
 
 # 15:00 - 17:59
 my $b3 = Booking->new(
     "description b3",
     datetime( 2008, 4, 14, 15 ),
-    datetime( 2008, 4, 14, 17, 59 )
+    datetime( 2008, 4, 14, 17, 59 ),
+    "info b3"
 );
 
 # 15:00 - 17:00
 my $b4 = Booking->new(
     "description b4",
     datetime( 2008, 4, 14, 15 ),
-    datetime( 2008, 4, 14, 17 )
+    datetime( 2008, 4, 14, 17 ),
+    "info b4"
 );
 
 # 16:00 - 16:29
 my $b5 = Booking->new(
     "description b5",
     datetime( 2008, 4, 14, 16 ),
-    datetime( 2008, 4, 14, 16, 29 )
+    datetime( 2008, 4, 14, 16, 29 ),
+    "info b5"
 );
 
 # 16:29:00 - 16:29:01
 my $b6 = Booking->new(
     "description b6",
     datetime( 2008, 4, 14, 16, 29, 0 ),
-    datetime( 2008, 4, 14, 16, 29, 1 )
+    datetime( 2008, 4, 14, 16, 29, 1 ),
+    "info b6"
 );
 
 # 16:29:01 - 16:29:02
 my $b7 = Booking->new(
     "description b7",
     datetime( 2008, 4, 14, 16, 29, 1 ),
-    datetime( 2008, 4, 14, 16, 29, 2 )
+    datetime( 2008, 4, 14, 16, 29, 2 ),
+    "info b7"
 );
 
 # 17:00:00 - 19:00:00
 my $b8 = Booking->new(
     "description b8",
     datetime( 2008, 4, 14, 17, 0, 0 ),
-    datetime( 2008, 4, 14, 19, 0, 0 )
+    datetime( 2008, 4, 14, 19, 0, 0 ),
+    "info b8"
 );
 
 # 18:00:00 - 21:00:00
 my $b9 = Booking->new(
     "description b9",
     datetime( 2008, 4, 14, 18, 0, 0 ),
-    datetime( 2008, 4, 14, 21, 0, 0 )
+    datetime( 2008, 4, 14, 21, 0, 0 ),
+    "info b9"
 );
 
 # 21:00 - 21:00:01
 my $b10 = Booking->new(
     "description b10",
     datetime( 2008, 4, 14, 21 ),
-    datetime( 2008, 4, 14, 21, 0, 1 )
+    datetime( 2008, 4, 14, 21, 0, 1 ),
+    "info b10"
 );
 
 # 21:00 - 21:00:01
 my $b11 = Booking->new(
     "description b11",
     datetime( 2009, 4, 14, 21 ),
-    datetime( 2009, 4, 14, 21, 0, 1 )
+    datetime( 2009, 4, 14, 21, 0, 1 ),
+    "info b11"
 );
 
 # Booking->id getter and autoincrement
@@ -118,9 +129,23 @@ $b1->description('test');
 ok( $b1->description eq 'test', 'Booking->description setter' );
 $b1->description('description b1');    # undo previous modification
 
+# Booking->info getter and setter
+ok( $b1->info eq 'info b1', 'Booking->info getter' );
+$b1->info('chachi pilongui');
+ok( $b1->info eq 'chachi pilongui', 'Booking->info setter' );
+$b1->info('info b1');                  # undo previous modification
+
 # missing parameter(s)
 my $wrong = Booking->new( "wrong", datetime( 2008, 4, 14, 16 ) );
 ok( !defined($wrong), 'Booking->new with missing parameter' );
+
+# Booking->info is optional
+my $good = Booking->new(
+    "good",
+    datetime( 2008, 4, 14, 16 ),
+    datetime( 2008, 4, 14, 17 )
+);
+ok( defined($good), 'Booking->new with missing info' );
 
 #to_xml booking test
 my $booking1_as_hash = {
@@ -142,6 +167,7 @@ my $booking1_as_hash = {
         minute => 59,
         second => 0,
     },
+    info => $b1->info,
 };
 ok( Compare( $booking1_as_hash, XMLin( $b1->to_xml() ) ), 'to_xml booking' );
 
@@ -155,8 +181,8 @@ my $booking_as_xml = '
         <month>4</month>
         <day>14</day>
         <hour>17</hour>
-        <minute>0</minute>
-        <second>0</second>
+        <minute>00</minute>
+        <second>00</second>
     </from>
     <to>
         <year>2008</year>
@@ -164,8 +190,9 @@ my $booking_as_xml = '
         <day>14</day>
         <hour>18</hour>
         <minute>59</minute>
-        <second>0</second>
+        <second>00</second>
     </to>
+    <info>' . $b1->info . '</info>
 </booking>';
 
 ok( $b1 == Booking->from_xml( $booking_as_xml, $b1->id ),
@@ -185,6 +212,7 @@ my $booking_as_xml_wrong = Booking->from_xml( '
         <second>0</second>
     </from>
     <!-- <to> is missing! -->
+    <info>Lalalala</info>
 </booking>', $b1->id );
 ok( !defined($booking_as_xml_wrong), 'from_xml booking (with wrong XML)' );
 

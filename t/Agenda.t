@@ -7,6 +7,7 @@ use warnings;
 use DateTime;
 use XML::Simple;
 use Data::Compare;
+use Data::Dumper;
 
 BEGIN { use_ok($_) for qw(Booking Agenda DataStore) }
 
@@ -27,35 +28,40 @@ sub datetime {
 my $b1 = Booking->new(
     "b1",
     datetime( 2008, 4, 14, 17 ),
-    datetime( 2008, 4, 14, 18, 59 )
+    datetime( 2008, 4, 14, 18, 59 ),
+    "info b1",
 );
 
 # 19:00 - 19:59
 my $b2 = Booking->new(
     "b2",
     datetime( 2008, 4, 14, 19 ),
-    datetime( 2008, 4, 14, 19, 59 )
+    datetime( 2008, 4, 14, 19, 59 ),
+    "info b2",
 );
 
 # 15:00 - 17:59
 my $b3 = Booking->new(
     "b3",
     datetime( 2008, 4, 14, 15 ),
-    datetime( 2008, 4, 14, 17, 59 )
+    datetime( 2008, 4, 14, 17, 59 ),
+    "info b3",
 );
 
 # 15:00 - 17:00
 my $b4 = Booking->new(
     "b4",
     datetime( 2008, 4, 14, 15 ),
-    datetime( 2008, 4, 14, 17 )
+    datetime( 2008, 4, 14, 17 ),
+    "info b4",
 );
 
 # 16:00 - 16:29
 my $b5 = Booking->new(
     "b5",
     datetime( 2008, 4, 14, 16 ),
-    datetime( 2008, 4, 14, 16, 29 )
+    datetime( 2008, 4, 14, 16, 29 ),
+    "info b5",
 );
 
 # Agenda Append Tests
@@ -86,6 +92,7 @@ my $agenda_as_hash = {
             minute => 59,
             second => 0,
         },
+        info => $b1->info,
     },
 };
 ok( Compare( XMLin( $ag->to_xml() ), $agenda_as_hash ), 'to_xml agenda' );

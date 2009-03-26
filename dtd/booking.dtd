@@ -1,8 +1,9 @@
-<!ELEMENT booking (id?, description, from, to)>
+<!ELEMENT booking (id?, description, from, to, info?)>
 <!ELEMENT id (#PCDATA)>
 <!ELEMENT description (#PCDATA)>
 <!ELEMENT from (year, month, day, hour, minute, second)>
 <!ELEMENT to (year, month, day, hour, minute, second)>
+<!ELEMENT info ANY>
 <!ELEMENT year (#PCDATA)>
 <!ELEMENT month (#PCDATA)>
 <!ELEMENT day (#PCDATA)>
@@ -13,3 +14,4 @@
     xmlns:xlink CDATA #IMPLIED
     xlink:href CDATA #IMPLIED
     xlink:type CDATA #IMPLIED>
+

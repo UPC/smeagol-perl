@@ -72,7 +72,8 @@ my $b1 = Booking->new(
         hour   => 10,
         minute => 59,
         second => 0
-    )
+    ),
+    "info b1",
 );
 my $b2 = Booking->new(
     "b2",
@@ -91,7 +92,8 @@ my $b2 = Booking->new(
         hour   => 11,
         minute => 59,
         second => 0
-    )
+    ),
+    "info b2",
 );
 
 my $ag = Agenda->new();
@@ -415,7 +417,8 @@ my $resource2 = Resource->new( 'desc 2 2', 'gra 2 2' );
             hour   => 11,
             minute => 30,
             second => 0
-        )
+        ),
+        "new booking info",
     );
 
     $res
@@ -449,7 +452,8 @@ my $resource2 = Resource->new( 'desc 2 2', 'gra 2 2' );
             hour   => 12,
             minute => 59,
             second => 0
-        )
+        ),
+        "new booking 2 info",
     );
 
     $res
@@ -472,5 +476,5 @@ my $resource2 = Resource->new( 'desc 2 2', 'gra 2 2' );
 
 END {
     kill 3, $pid;
-    DataStore->clean();
+    #DataStore->clean();
 }

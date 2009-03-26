@@ -17,7 +17,7 @@ use overload
 
 sub new {
     my $class = shift;
-    my ( $description, $from, $to ) = @_;
+    my ( $description, $from, $to, $info ) = @_;
 
     return if ( !defined($description) || !defined($from) || !defined($to) );
 
@@ -28,6 +28,7 @@ sub new {
 
     $obj->{ __PACKAGE__ . "::description" } = $description;
     $obj->{ __PACKAGE__ . "::id" }          = DataStore->next_id(__PACKAGE__);
+    $obj->{ __PACKAGE__ . "::info" }        = defined($info) ? $info : '';
 
     bless $obj, $class;
     return $obj;
@@ -46,6 +47,15 @@ sub description {
     my $self = shift;
 
     my $field = __PACKAGE__ . "::description";
+    if (@_) { $self->{$field} = shift; }
+
+    return $self->{$field};
+}
+
+sub info {
+    my $self = shift;
+
+    my $field = __PACKAGE__ . "::info";
     if (@_) { $self->{$field} = shift; }
 
     return $self->{$field};
@@ -77,7 +87,8 @@ sub __equal__ {
     return
            $self->description eq $booking->description
         && $self->start == $booking->start
-        && $self->end == $booking->end;
+        && $self->end == $booking->end
+        && $self->info eq $booking->info;
 }
 
 sub __not_equal__ {
@@ -132,8 +143,11 @@ sub to_xml {
         . "</minute>"
         . "<second>"
         . $to->second
-        . "</second>"
-        . "</to></booking>";
+        . "</second>" . "</to>"
+        . "<info>"
+        . $self->info
+        . "</info>"
+        . "</booking>";
 
     return $xmlText
         unless defined $url;
@@ -200,6 +214,8 @@ sub from_xml {
         :                   DataStore->next_id(__PACKAGE__);
 
     $obj->{ __PACKAGE__ . "::description" } = $b->{description};
+    $obj->{ __PACKAGE__ . "::info" }
+        = defined( $b->{info} ) ? $b->{info} : '';
 
     bless $obj, $class;
     return $obj;

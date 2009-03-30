@@ -81,7 +81,7 @@ sub createResource {
 
 sub createBooking {
     my $self = shift;
-    my ( $idR, $description, $from, $to ) = @_;
+    my ( $idR, $description, $from, $to, $info ) = @_;
 
     my $req = HTTP::Request->new(
         POST => $self->{url} . '/resource/' . $idR . '/booking' );
@@ -104,6 +104,7 @@ sub createBooking {
             <minute>" . $to->{minute} . "</minute>
             <second>" . $to->{second} . "</second>
         </to>
+        <info>" . ( ( defined $info ) ? $info : "" ) . "</info>
         </booking>";
     $req->content($booking_xml);
 
@@ -225,7 +226,7 @@ sub updateResource {
 
 sub updateBooking {
     my $self = shift;
-    my ( $idR, $idB, $description, $from, $to ) = @_;
+    my ( $idR, $idB, $description, $from, $to, $info ) = @_;
 
     my $booking_xml = "<booking>
         <description>$description</description>
@@ -245,6 +246,7 @@ sub updateBooking {
             <minute>" . $to->{minute} . "</minute>
             <second>" . $to->{second} . "</second>
         </to>
+        <info>" . ( ( defined $info ) ? $info : "" ) . "</info>
         </booking>";
 
     my $req = HTTP::Request->new(

@@ -178,6 +178,7 @@ my $to = {
     minute => 0,
     second => 0,
 };
+my $info = "info 1";
 
 my $desc2 = "description 2";
 my $from2 = {
@@ -196,6 +197,7 @@ my $to2 = {
     minute => 0,
     second => 0,
 };
+my $info2 = "info 2";
 
 my $desc3 = "description 3";
 my $from3 = {
@@ -214,6 +216,7 @@ my $to3 = {
     minute => 0,
     second => 0,
 };
+my $info3 = "info 3";
 
 my $desc0 = "description 0";
 my $from0 = {
@@ -232,6 +235,7 @@ my $to0 = {
     minute => 0,
     second => 0,
 };
+my $info0 = "info 0";
 
 #Testing retrieve Agenda empty
 {
@@ -243,24 +247,24 @@ my $to0 = {
 {
     push @Bookings,
         $client->createBooking( id_resource( $Resources[1] ),
-        $desc, $from, $to );
+        $desc, $from, $to, $info );
     ok( defined $Bookings[0],
         'booking created ' . id_resource( $Bookings[0] ) );
 
     push @Bookings,
         $client->createBooking( id_resource( $Resources[1] ),
-        $desc2, $from2, $to2 );
+        $desc2, $from2, $to2, $info2 );
     ok( defined $Bookings[1],
         'booking created ' . id_resource( $Bookings[1] ) );
 
     push @Bookings,
         $client->createBooking( id_resource( $Resources[1] ),
-        $desc, $from, $to );
+        $desc, $from, $to, $info );
     ok( !defined $Bookings[2], 'booking not created, intersection' );
 
     push @Bookings,
         $client->createBooking( id_resource( $Resources[1] ),
-        $desc3, $from3, $to3 );
+        $desc3, $from3, $to3, $info3 );
     ok( defined $Bookings[3],
         'booking created ' . id_resource( $Bookings[3] ) );
 

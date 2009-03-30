@@ -122,6 +122,7 @@ my $OPT_PARAM_DES;
 my $OPT_PARAM_GRA;
 my $OPT_PARAM_FROM;
 my $OPT_PARAM_TO;
+my $OPT_PARAM_INFO;
 my $OPT_PARAM_R;
 
 # parse command-line options
@@ -138,6 +139,7 @@ my $options = GetOptions(
     "gra=s"    => \$OPT_PARAM_GRA,     #
     "from=s"   => \$OPT_PARAM_FROM,    #
     "to=s"     => \$OPT_PARAM_TO,      #
+    "info=s"   => \$OPT_PARAM_INFO,    #
     "r"        => \$OPT_PARAM_R,       # recursive
     "help"     => \$opt_show_help
 
@@ -156,10 +158,10 @@ $USAGE
     . "   --c=getResource    --id=idResource \| \n"
     . "   --c=delResource    --id=idResource \| \n"
     . "   --c=updateResource --id=idResource --des=descripcio --gra=granularitat \| \n"
-    . "   --c=createBooking  --id=idResource --from=31/12/2009_00:00:00 --to=2009/12/31_23:59:00:00 \| \n"
+    . "   --c=createBooking  --id=idResource --des=descripcio --from=2009/12/31_10:00:00 --to=2009/12/31_10:59:00 [--info=info] \| \n"
     . "   --c=getBooking     --id=idResource --idB=idBooking \| \n"
     . "   --c=delBooking     --id=idResource --idB=idBooking \| \n"
-    . "   --c=updateBooking  --id=idResource --idB=idBooking --from=31/12/2009_00:00:00 --to=2009/12/31_23:59:00:00 ]\n"
+    . "   --c=updateBooking  --id=idResource --idB=idBooking --des=descripcio --from=2009/12/31_10:00:00 --to=2009/12/31_10:59:00 [--info=info] ]\n"
     . " ";
 
 $OPT_COMMAND = "" if !( defined($OPT_COMMAND) );
@@ -236,7 +238,9 @@ elsif ( $OPT_COMMAND eq "createBooking" ) {
     print Dumper($FROM);
     print Dumper($TO);
 
-    $result = $client->createBooking( $OPT_PARAM_ID, $FROM, $TO );
+    $result
+        = $client->createBooking( $OPT_PARAM_ID, $OPT_PARAM_DES, $FROM, $TO,
+        $OPT_PARAM_INFO );
 }
 elsif ( $OPT_COMMAND eq "getBooking" ) {
     $result = $client->getBooking( $OPT_PARAM_ID, $OPT_PARAM_ID_B );
@@ -270,8 +274,8 @@ elsif ( $OPT_COMMAND eq "updateBooking" ) {
     print Dumper($FROM);
     print Dumper($TO);
 
-    $result = $client->updateBooking( $OPT_PARAM_ID, $OPT_PARAM_ID_B, $FROM,
-        $TO );
+    $result = $client->updateBooking( $OPT_PARAM_ID, $OPT_PARAM_ID_B,
+        $OPT_PARAM_DES, $FROM, $TO, $OPT_PARAM_INFO );
 }
 else {
     print "No command, No action ...\n --help for help\n";

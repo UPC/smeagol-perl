@@ -249,13 +249,17 @@ my $resource2 = Resource->new( 'desc 2 2', 'gra 2 2' );
 
     $res = smeagol_request( 'POST', smeagol_url("$resource_url/booking"),
         $b1->to_xml() );
-    ok( $res->code == '201' && Booking->from_xml( $res->content ) == $b1,
-        'created booking ' . $res->code );
+    ok( $res->code == '201'
+            && Booking->from_xml( $res->content, $b1->id ) == $b1,
+        'created booking ' . $res->code
+    );
 
     $res = smeagol_request( 'POST', smeagol_url("$resource_url/booking"),
         $b2->to_xml() );
-    ok( $res->code == '201' && Booking->from_xml( $res->content ) == $b2,
-        'created booking ' . $res->code );
+    ok( $res->code == '201'
+            && Booking->from_xml( $res->content, $b2->id ) == $b2,
+        'created booking ' . $res->code
+    );
 
     $res = smeagol_request( 'POST', smeagol_url("$resource_url/booking"),
         $b2->to_xml() );
@@ -473,8 +477,9 @@ my $resource2 = Resource->new( 'desc 2 2', 'gra 2 2' );
 
     my $result = Booking->from_xml( $res->content, $booking2->id );
 
-    ok( $result == $new_booking2,
-        'update booking content: ' . Dumper( $result->to_xml ) );
+    ok( $result == $new_booking2 && ( $result->info eq $new_booking2->info ),
+        'update booking content: ' . Dumper( $result->to_xml )
+    );
 }
 
 # Testing iCalendar

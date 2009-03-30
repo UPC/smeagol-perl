@@ -5,7 +5,7 @@ use ExtUtils::MakeMaker;
 # the contents of the Makefile that is written.
 WriteMakefile(
     NAME      => 'smeagol',
-    VERSION   => '0.02',
+    VERSION   => '0.03',
     PREREQ_PM => {
         'DateTime'                  => undef,
         'DateTime::Span'            => undef,

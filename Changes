@@ -1,5 +1,8 @@
 Històric de revisions del projecte smeagol.
 
+0.03   Mon Mar 30 10:21:15 2009
+       - suport pel format iCalendar
+
 0.02   Thu Mar 12 12:51:21 2009
        - finalització de la implementació de l'API.
 

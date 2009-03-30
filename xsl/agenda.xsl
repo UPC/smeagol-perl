@@ -12,6 +12,7 @@
 </tbody>
 </table>
 <hr/>
+<a><xsl:attribute name="href"><xsl:value-of select="concat(@xlink:href, '/ical')"/></xsl:attribute>[iCalendar]</a> |
 <a href="/resources">[Mostra tots els recursos]</a> | <a><xsl:attribute name="href"><xsl:value-of select="substring-before(@xlink:href,'/booking')"/></xsl:attribute>[Mostra el recurs]</a>
 </body></html>
 </xsl:template>

@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-use Test::More tests => 52;
+use Test::More tests => 55;
 
 use strict;
 use warnings;
@@ -20,6 +20,15 @@ my $pid         = Server->new($server_port)->background();
 
 my $client = Client->new();
 ok( !defined $client, 'client not created' );
+
+$client = Client->new("http://bad.example.com");
+ok( !defined $client, 'client not created, bad DNS record' );
+
+$client = Client->new("://www.example.com");
+ok( !defined $client, 'client not created, bad scheme URI' );
+
+$client = Client->new("http://www.example.com");
+ok( !defined $client, 'client not created, server not responding' );
 
 $client = Client->new($server);
 ok( ref $client eq 'Client', 'client created' );
@@ -260,13 +269,13 @@ my $info0 = "info 0";
     push @Bookings,
         $client->createBooking( id_resource( $Resources[1] ),
         $desc, $from, $to, $info );
-    ok( !defined $Bookings[2], 'booking not created, intersection' );
+    ok( !exists $Bookings[2], 'booking not created, intersection' );
 
     push @Bookings,
         $client->createBooking( id_resource( $Resources[1] ),
         $desc3, $from3, $to3, $info3 );
-    ok( defined $Bookings[3],
-        'booking created ' . id_resource( $Bookings[3] ) );
+    ok( defined $Bookings[2],
+        'booking created ' . id_resource( $Bookings[2] ) );
 
     my $ical1
         = $client->getBookingICal( id_resource_booking( $Bookings[0] ) );
@@ -463,18 +472,18 @@ my $info0 = "info 0";
         'retrieved booking updated' . $Bookings[1]
     );
 
-    $idBook = $client->updateBooking( id_resource_booking( $Bookings[3] ),
+    $idBook = $client->updateBooking( id_resource_booking( $Bookings[2] ),
         $desc2, $from2, $to2 );
     ok( !defined $idBook,
         'not updated booking, intersection '
-            . id_resource_booking( $Bookings[3] )
+            . id_resource_booking( $Bookings[2] )
     );
 
-    $idBook = $client->updateBooking( id_resource_booking( $Bookings[3] ),
+    $idBook = $client->updateBooking( id_resource_booking( $Bookings[2] ),
         $desc, $from, $to );
     ok( defined $idBook, 'updated booking ' . $idBook );
 
-    $dataBoo = $client->getBooking( id_resource_booking( $Bookings[3] ) );
+    $dataBoo = $client->getBooking( id_resource_booking( $Bookings[2] ) );
     ok( $dataBoo->{from}->{year} == $from->{year}
             && $dataBoo->{from}->{month} == $from->{month}
             && $dataBoo->{from}->{day} == $from->{day}
@@ -487,7 +496,7 @@ my $info0 = "info 0";
             && $dataBoo->{to}->{hour} == $to->{hour}
             && $dataBoo->{to}->{minute} == $to->{minute}
             && $dataBoo->{to}->{second} == $to->{second},
-        'retrieved booking updated' . $Bookings[3]
+        'retrieved booking updated' . $Bookings[2]
     );
 
 }

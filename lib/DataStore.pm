@@ -152,7 +152,7 @@ sub next_id {
 sub clean {
     my $self = shift;
 
-    File::Path->rmtree($_PATH);
+    File::Path::rmtree($_PATH);
 }
 
 1;

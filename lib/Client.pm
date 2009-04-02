@@ -15,9 +15,6 @@ use XML::Simple;
 
 my %COMMAND_VALID = map { $_ => 1 } qw( POST GET PUT DELETE );
 
-my $port   = 8000;
-my $server = 'localhost';
-
 sub new {
     my $class = shift;
     my ($url) = @_;
@@ -39,24 +36,23 @@ sub listResources {
     my $self = shift;
 
     my $res = $self->{ua}->get( $self->{url} . "/resources" );
+    return unless $res->status_line =~ /200/;
+
+    my $dom = eval { XML::LibXML->new->parse_string( $res->content ) };
+    croak $@ if $@;
     my @idResources;
-
-    if ( $res->status_line =~ /200/ ) {
-        my $dom = eval { XML::LibXML->new->parse_string( $res->content ) };
-        croak $@ if $@;
-        for my $resNode ( $dom->getElementsByTagName('resource') ) {
-            my $idRes = $resNode->getAttribute('xlink:href');
-            push @idResources, $idRes;
-        }
-        return @idResources;
+    for my $resNode ( $dom->getElementsByTagName('resource') ) {
+        my $idRes = $resNode->getAttribute('xlink:href');
+        push @idResources, $idRes;
     }
-    return;
-
+    return @idResources;
 }
 
 sub createResource {
     my $self = shift;
     my ( $des, $gra ) = @_;
+
+    return unless defined $des && defined $gra;
 
     my $res_xml = "<resource>
         <description>$des</description>
@@ -67,21 +63,23 @@ sub createResource {
     $req->content($res_xml);
 
     my $res = $self->{ua}->request($req);
+    return unless $res->status_line =~ /201/;
 
-    if ( $res->status_line =~ /201/ ) {
-        my $dom = eval { XML::LibXML->new->parse_string( $res->content ) };
-        croak $@ if $@;
-        return $dom->getElementsByTagName('resource')->get_node(1)
-            ->getAttribute('xlink:href');
-    }
-    else {
-        return;
-    }
+    my $dom = eval { XML::LibXML->new->parse_string( $res->content ) };
+    croak $@ if $@;
+    return $dom->getElementsByTagName('resource')->get_node(1)
+        ->getAttribute('xlink:href');
 }
 
 sub createBooking {
     my $self = shift;
     my ( $idR, $description, $from, $to, $info ) = @_;
+
+    return
+        unless defined $idR
+            && defined $description
+            && ref($from) eq 'HASH'
+            && ref($to)   eq 'HASH';
 
     my $req = HTTP::Request->new(
         POST => $self->{url} . '/resource/' . $idR . '/booking' );
@@ -109,21 +107,19 @@ sub createBooking {
     $req->content($booking_xml);
 
     my $res = $self->{ua}->request($req);
+    return unless $res->status_line =~ /201/;
 
-    if ( $res->status_line =~ /201/ ) {
-        my $dom = eval { XML::LibXML->new->parse_string( $res->content ) };
-        croak $@ if $@;
-        return $dom->getElementsByTagName('booking')->get_node(1)
-            ->getAttribute('xlink:href');
-    }
-
-    # FIXME: weird, returning w/o unless makes tests fail
-    return undef;
+    my $dom = eval { XML::LibXML->new->parse_string( $res->content ) };
+    croak $@ if $@;
+    return $dom->getElementsByTagName('booking')->get_node(1)
+        ->getAttribute('xlink:href');
 }
 
 sub getResource {
     my $self = shift;
     my ($id) = @_;
+
+    return unless defined $id;
 
     my $res = $self->{ua}->get( $self->{url} . '/resource/' . $id );
 
@@ -171,6 +167,8 @@ sub listBookings {
     my $self = shift;
     my ( $id, $viewAs ) = @_;
 
+    return unless defined $id;
+
     my $url = $self->{url} . '/resource/' . $id . '/bookings';
     $url .= "/" . $viewAs
         if defined $viewAs;
@@ -198,6 +196,8 @@ sub updateResource {
     my $self = shift;
     my ( $idResource, $des, $gra ) = @_;
 
+    return unless defined $idResource && defined $des && defined $gra;
+
     my $res_xml = "<resource>
         <description>$des</description>
         <granularity>$gra</granularity>
@@ -209,24 +209,24 @@ sub updateResource {
     $req->content($res_xml);
 
     my $res = $self->{ua}->request($req);
+    return unless $res->status_line =~ /200/;
 
-    if ( $res->status_line =~ /200/ ) {
-        my $xml = $res->content;
-        if ( $xml !~ /xmlns:xlink/ ) {
-            $xml
-                =~ s/<resource /<resource xmlns:xlink=\"http:\/\/www.w3.org\/1999\/xlink\ "/;
-        }
-        my $dom = eval { XML::LibXML->new->parse_string($xml) };
-        croak $@ if $@;
-        return $dom->getElementsByTagName('resource')->get_node(1)
-            ->getAttribute('xlink:href');
-    }
-    return;
+    my $dom = eval { XML::LibXML->new->parse_string( $res->content ) };
+    croak $@ if $@;
+    return $dom->getElementsByTagName('resource')->get_node(1)
+        ->getAttribute('xlink:href');
 }
 
 sub updateBooking {
     my $self = shift;
     my ( $idR, $idB, $description, $from, $to, $info ) = @_;
+
+    return
+        unless defined $idR
+            && defined $idB
+            && defined $description
+            && ref($from) eq 'HASH'
+            && ref($to)   eq 'HASH';
 
     my $booking_xml = "<booking>
         <description>$description</description>
@@ -255,45 +255,44 @@ sub updateBooking {
     $req->content($booking_xml);
 
     my $res = $self->{ua}->request($req);
-    if ( $res->status_line =~ /200/ ) {
-        my $dom = eval { XML::LibXML->new->parse_string( $res->content ) };
-        croak $@ if $@;
-        return $dom->getElementsByTagName('booking')->get_node(1)
-            ->getAttribute('xlink:href');
-    }
-    return;
+    return unless $res->status_line =~ /200/;
+
+    my $dom = eval { XML::LibXML->new->parse_string( $res->content ) };
+    croak $@ if $@;
+    return $dom->getElementsByTagName('booking')->get_node(1)
+        ->getAttribute('xlink:href');
 }
 
 sub delResource {
     my $self = shift;
     my ($id) = @_;
 
+    return unless defined $id;
+
     my $req
         = HTTP::Request->new( DELETE => $self->{url} . '/resource/' . $id );
     $req->content_type('text/xml');
 
     my $res = $self->{ua}->request($req);
-    if ( $res->status_line =~ /200/ ) {
-        return $id;
-    }
-    return;
+    return unless $res->status_line =~ /200/;
+
+    return $id;
 }
 
 sub delBooking {
     my $self = shift;
     my ( $idR, $idB ) = @_;
 
-    return unless ( defined $idB || defined $idR );
+    return unless ( defined $idB && defined $idR );
 
     my $req = HTTP::Request->new(
         DELETE => $self->{url} . '/resource/' . $idR . '/booking/' . $idB );
     $req->content_type('text/xml');
 
     my $res = $self->{ua}->request($req);
-    if ( $res->status_line =~ /200/ ) {
-        return $idB;
-    }
-    return;
+    return unless $res->status_line =~ /200/;
+
+    return $idB;
 }
 
 1;

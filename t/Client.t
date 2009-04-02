@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-use Test::More tests => 52;
+use Test::More tests => 55;
 
 use strict;
 use warnings;
@@ -20,6 +20,15 @@ my $pid         = Server->new($server_port)->background();
 
 my $client = Client->new();
 ok( !defined $client, 'client not created' );
+
+$client = Client->new("http://bad.example.com");
+ok( !defined $client, 'client not created, bad DNS record' );
+
+$client = Client->new("://www.example.com");
+ok( !defined $client, 'client not created, bad scheme URI' );
+
+$client = Client->new("http://www.example.com");
+ok( !defined $client, 'client not created, server not responding' );
 
 $client = Client->new($server);
 ok( ref $client eq 'Client', 'client created' );

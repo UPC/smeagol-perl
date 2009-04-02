@@ -30,6 +30,12 @@ sub new {
     };
 
     bless $obj, $class;
+
+    # Should be 0 or more if server is working
+    my $numResources = $obj->listResources();
+    return unless defined $numResources;
+
+    return $obj;
 }
 
 sub listResources {

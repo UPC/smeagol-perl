@@ -6,7 +6,6 @@ use warnings;
 
 use XML::LibXML;
 use DataStore;
-use Data::Dumper;
 use Carp;
 use XML;
 
@@ -15,7 +14,7 @@ use overload q{""} => \&__str__;
 # Create a new resource
 sub new {
     my $class = shift;
-    my ( $description, $granularity, $agenda ) = @_;
+    my ( $description, $granularity, $agenda , $tags ) = @_;
 
     return
         if ( !defined($description)
@@ -27,12 +26,14 @@ sub new {
     # Load on runtime to get rid of cross-dependency between
     # both Resource and Agenda
     require Agenda;
+	require TagSet;
 
     $obj = {
         id          => _next_id(),
         description => $description,
         granularity => $granularity,
         agenda      => ( defined $agenda ) ? $agenda : Agenda->new(),
+        tags      => ( defined $tags ) ? $tags : TagSet->new(),
         _persistent => 0,
     };
 
@@ -79,6 +80,14 @@ sub url {
     return "/" . lc(__PACKAGE__) . "/" . $self->id;
 }
 
+sub tags {
+    my $self = shift;
+
+    if (@_) { $self->{tags} = shift; }
+
+    return $self->{tags};
+}
+
 # Constructor that fetchs a resource from datastore
 # or fail if it cannot be found
 sub load {
@@ -108,6 +117,7 @@ sub from_xml {
     # Load on runtime to get rid of cross-dependency between
     # both Resource and Agenda
     require Agenda;
+	require TagSet;
 
     # validate XML string against the DTD
     my $dtd = XML::LibXML::Dtd->new( "CPL UPC//Resource DTD v0.03",
@@ -128,12 +138,17 @@ sub from_xml {
         granularity =>
             $dom->getElementsByTagName('granularity')->string_value,
         agenda      => Agenda->new(),
+        tags      => TagSet->new(),
         _persistent => 0,
     };
 
     if ( $dom->getElementsByTagName('agenda')->get_node(1) ) {
         $obj->{agenda} = Agenda->from_xml(
             $dom->getElementsByTagName('agenda')->get_node(1)->toString );
+    }
+    if ( $dom->getElementsByTagName('tags')->get_node(1) ) {
+        $obj->{tags} = TagSet->from_xml(
+            $dom->getElementsByTagName('tags')->get_node(1)->toString );
     }
     bless $obj, $class;
     return $obj;

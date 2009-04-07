@@ -1,4 +1,4 @@
-<!ELEMENT resource (description, granularity, agenda?)>
+<!ELEMENT resource (description, granularity, agenda?, tags?)>
 <!ATTLIST resource
     xmlns:xlink CDATA #IMPLIED
     xlink:href CDATA #IMPLIED
@@ -13,3 +13,5 @@
 <!ELEMENT granularity (#PCDATA)>
 <!ENTITY % agendadtd SYSTEM "agenda.dtd">
 %agendadtd;
+<!ENTITY % tagsdtd SYSTEM "tagSet.dtd">
+%tagsdtd;

@@ -1,0 +1,8 @@
+<!ELEMENT tags (tag*)>
+<!ATTLIST tag 
+    xmlns:xlink CDATA #IMPLIED
+    xlink:href CDATA #IMPLIED
+    xlink:xmlns CDATA #IMPLIED
+    xlink:type CDATA #IMPLIED>
+<!ENTITY % tagdtd SYSTEM "tag.dtd">
+%tagdtd;

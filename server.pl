@@ -2,30 +2,113 @@
 
 use strict;
 use warnings;
-use Getopt::Long;
+
+my $VERSION = 0.2;
+
+use Getopt::Euclid qw( :minimal_keys );
 
 use Server;
 use DataStore;
 
-my $version   = "Smeagol server v0.1";
-my $copyright = <<END;
-Copyright (C) 2008  Angel Aguilera <angel.aguilera\@upc.edu>
-Copyright (C) 2008  Eulàlia Formentí <eulalia.formenti\@upc.edu>
-Copyright (C) 2008  Francesc Guasch <frankie\@etsetb.upc.edu>
-Copyright (C) 2008  Francisco Morillas <fmorillas\@etsetb.upc.edu>
-Copyright (C) 2008  Alex Muntada <alexm\@alexm.org>
-Copyright (C) 2008  Isabel Polo <ipolo\@etsetb.upc.edu>
-Copyright (C) 2008  Sebastià Vila <sebas\@lsi.upc.edu>
-END
+if ( $ARGV{verbose} ) {
+    print "$0 version $VERSION entering verbose mode.\n";
+    print "Binding to $ARGV{host} and listening on port $ARGV{port}.\n";
+    print "DataStore in $ARGV{storage}.\n";
+}
 
-#####################################
-# License messages (GNU Affero GPL) #
-#####################################
+# initialize the datastore singleton
+DataStore::init( $ARGV{storage} );
 
-# Long license message
-my $license_full = <<END;
-$version
-$copyright
+my $server = Server->new( $ARGV{port} );
+$server->host( $ARGV{host} );
+
+if ( $ARGV{background} ) {
+    my $pid = $server->background();
+    print "Going background (PID $pid).\n"
+        if $ARGV{verbose};
+}
+else {
+    print "Running...\n"
+        if $ARGV{verbose};
+    $server->run();
+}
+
+__END__
+
+=head1 NAME
+
+smeagol-server - Smeagol server
+
+=head1 VERSION
+
+This documentation refers to version 0.2
+
+=head1 OPTIONS
+
+=over
+
+=item --port [=] <port>
+
+Listen on port number
+
+=for Euclid:
+    port.type:    +integer
+    port.default: 8000
+
+=item --host [=] <host>
+
+Address to bind to
+
+=for Euclid:
+    host.type:    str
+    host.default: 'localhost'
+
+=item --storage [=] <storage>
+
+Directory where datastore resides
+
+=for Euclid:
+    storage.type:    string
+    storage.default: '/tmp/smeagol_datastore'
+
+=item --[no[-]]verbose
+
+[Don't] show verbose messages
+
+=for Euclid:
+    false: --no[-]verbose
+
+=item --[no[-]]background
+
+[Don't] run in the background
+
+=for Euclid:
+    false: --no[-]background
+
+=item --help
+
+=item --version
+
+=item --usage
+
+=item --man
+
+=back
+
+=head1 AUTHORS
+
+Angel Aguilera <angel.aguilera@upc.edu>
+Eulalia Formenti <eulalia.formenti@upc.edu>
+Francesc Guasch <frankie@etsetb.upc.edu>
+Francisco Morillas <fmorillas@etsetb.upc.edu>
+Alex Muntada <alexm@alexm.org>
+Isabel Polo <ipolo@etsetb.upc.edu>
+Sebastia Vila <sebas@lsi.upc.edu>
+
+=head1 COPYRIGHT 
+
+Copyright (C) 2008,2009  Universitat Politecnica de Catalunya
+
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
 published by the Free Software Foundation, either version 3 of the
@@ -38,132 +121,4 @@ GNU Affero General Public License for more details.
 
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-END
-
-# Short license message
-my $license_short = <<END;
-$version
-$copyright
-This is free software; see the source for copying conditions.  There is NO
-warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-See the GNU Affero General Public License for more details.
-END
-
-# command-line options (with default values)
-my $opt_port         = 8000;
-my $opt_host         = '';
-my $opt_background   = '';
-my $opt_log_file     = '';                        # option not yet implemented
-my $opt_error_file   = '';                        # option not yet implemented
-my $opt_debug        = '';
-my $opt_show_version = '';
-my $opt_show_license = '';
-my $opt_show_help    = '';
-my $opt_storage_path = '/tmp/smeagol_datastore';
-
-# parse command-line options
-
-my $result = GetOptions(
-    "port=i"     => \$opt_port,           # =i means "requires numeric value"
-    "host=s"     => \$opt_host,           # no modifier; means "flag value"
-    "log=s"      => \$opt_log_file,       # =s means "requires string value"
-    "error=s"    => \$opt_error_file,
-    "storage=s"  => \$opt_storage_path,
-    "debug"      => \$opt_debug,
-    "background" => \$opt_background,
-    "version"    => \$opt_show_version,
-    "license"    => \$opt_show_license,
-    "help"       => \$opt_show_help,
-);
-
-# Perform action according to options
-
-if ( !$result ) {
-
-    # Error parsing options. Show errors and quit.
-}
-elsif ($opt_show_help) {
-    show_help();
-}
-elsif ($opt_show_license) {
-    show_license();
-}
-elsif ($opt_show_version) {
-    show_version();
-}
-else {
-    launch_server(
-        $opt_port,     $opt_host,       $opt_background,
-        $opt_log_file, $opt_error_file, $opt_debug
-    );
-}
-
-# Program ends here. Auxiliary functions follow.
-
-sub show_help {
-    print $license_short;
-    print <<END;
-
-Usage: $0 [options]
-
-General options:
-
-    --port <number>   Listen on port <number> (default: $opt_port)
-    --host <address>  Address to bind to (default: all interfaces)             
-    --background      Run as server (go to background)
-    --log <file>      Log messages to file <file> (default: stdout)
-                        (This option is not yet implemented)
-    --errors <file>   Log errors to file <file> (default: stdout)
-                        (This option is not yet implemented)
-    --storage <dir>   Directory where datastore resides
-    --debug           Show debug messages in log (see --log)
-    --version         Show program version
-    --license         Show program license
-    --help            Show this message
-
-END
-}
-
-sub show_license {
-    print $license_full;
-}
-
-sub show_version {
-    print $license_short;
-}
-
-sub launch_server {
-    my ( $port, $host, $background, $log_file, $error_file, $debug ) = @_;
-
-    if ($debug) {
-        print "$version\n\n";
-        print "Entering debug mode.\n";
-        print "Listening on port $port.\n";
-        print "Binding to " . ( $host or "all interfaces" ) . ".\n";
-        print "Log messages to "
-            . ( $log_file or "stdout" )
-            . " (not implemented).\n";
-        print "Log errors to "
-            . ( $error_file or "stdout" )
-            . " (not implemented).\n";
-    }
-
-    # initialize the datastore singleton
-    DataStore::init($opt_storage_path);
-    print "Datastore in " . $opt_storage_path;
-
-    my $s = Server->new($port);
-
-    $s->host($host);
-
-    if ($background) {
-        my $pid = $s->background;
-        print "Going background (PID $pid).\n";
-    }
-    else {
-        print "Running...\n" if $debug;
-        $s->run;
-    }
-
-}
 

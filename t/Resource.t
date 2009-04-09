@@ -133,55 +133,56 @@ ok(        $res->description eq 'aula'
         && $res->granularity eq 'horaria'
         && 'from_xml resource' );
 
-
 my $r3;
-my ($tg, $tg1);
+my ( $tg, $tg1 );
 my $tgS;
 my $ag;
 
 #create resource with tags
 {
-	#with agenda
-	$tg = Tag->new("aula");
-	ok( defined $tg && $tg->value eq "aula", 'tag created ok');
 
-	$tgS = TagSet->new();
-	ok( defined $tgS, 'tagSet created ok');
+    #with agenda
+    $tg = Tag->new("aula");
+    ok( defined $tg && $tg->value eq "aula", 'tag created ok' );
 
-	$tgS->append($tg);
-	ok($tgS->size == 1, 'tgS contains 1 tag');
+    $tgS = TagSet->new();
+    ok( defined $tgS, 'tagSet created ok' );
 
-	$ag = Agenda->new();
-	ok( defined $ag, 'ag created ok');
-	
-	$r3 = Resource->new('A5123','dies', $ag,$tgS);
-	ok( defined $r3 
-		&& $r3->tags->to_xml() eq "<tags><tag>aula</tag></tags>",
-		 'resource created ok from data');
+    $tgS->append($tg);
+    ok( $tgS->size == 1, 'tgS contains 1 tag' );
 
-	#without agenda
-	$tg = Tag->new("aula");
-	ok( defined $tg && $tg->value eq "aula", 'tag created ok');
+    $ag = Agenda->new();
+    ok( defined $ag, 'ag created ok' );
 
-	$tgS = TagSet->new();
-	ok( defined $tgS, 'tagSet created ok');
+    $r3 = Resource->new( 'A5123', 'dies', $ag, $tgS );
+    ok( defined $r3 && $r3->tags->to_xml() eq "<tags><tag>aula</tag></tags>",
+        'resource created ok from data'
+    );
 
-	$tgS->append($tg);
-	ok($tgS->size == 1, 'tgS contains 1 tag');
+    #without agenda
+    $tg = Tag->new("aula");
+    ok( defined $tg && $tg->value eq "aula", 'tag created ok' );
 
-	$ag = Agenda->new();
-	ok( defined $ag, 'ag created ok');
-	
-	$r3 = Resource->new('A5123','dies',undef, $tgS);
-	ok( defined $r3 
-		&& $r3->tags->to_xml() eq "<tags><tag>aula</tag></tags>",
-		 'resource created ok from data');
+    $tgS = TagSet->new();
+    ok( defined $tgS, 'tagSet created ok' );
+
+    $tgS->append($tg);
+    ok( $tgS->size == 1, 'tgS contains 1 tag' );
+
+    $ag = Agenda->new();
+    ok( defined $ag, 'ag created ok' );
+
+    $r3 = Resource->new( 'A5123', 'dies', undef, $tgS );
+    ok( defined $r3 && $r3->tags->to_xml() eq "<tags><tag>aula</tag></tags>",
+        'resource created ok from data'
+    );
 }
 
 #create resource with tags from_xml
 {
-	#with agenda
-	$r3 = Resource->from_xml( '
+
+    #with agenda
+    $r3 = Resource->from_xml( '
 		<resource>
 		    <description>aula</description>
     		<granularity>horaria</granularity>
@@ -211,14 +212,15 @@ my $ag;
 				<tag>aula</tag>
 			</tags>
 		</resource>' );
-	ok(	defined $r3
-		&&   $r3->description eq 'aula'
-        && $r3->granularity eq 'horaria'
-        && $r3->tags->to_xml eq "<tags><tag>aula</tag></tags>",
-		 'resource created ok from_xml, with agenda'  );
+    ok( defined $r3
+            && $r3->description  eq 'aula'
+            && $r3->granularity  eq 'horaria'
+            && $r3->tags->to_xml eq "<tags><tag>aula</tag></tags>",
+        'resource created ok from_xml, with agenda'
+    );
 
-	#without agenda
-	$r3 = Resource->from_xml( '
+    #without agenda
+    $r3 = Resource->from_xml( '
 		<resource>
 		    <description>aula</description>
     		<granularity>horaria</granularity>
@@ -226,17 +228,18 @@ my $ag;
 				<tag>aula</tag>
 			</tags>
 		</resource>' );
-	ok(	defined $r3
-		&&   $r3->description eq 'aula'
-        && $r3->granularity eq 'horaria'
-        && $r3->tags->to_xml eq "<tags><tag>aula</tag></tags>",
-		 'resource created ok from_xml, without agenda'  );
+    ok( defined $r3
+            && $r3->description  eq 'aula'
+            && $r3->granularity  eq 'horaria'
+            && $r3->tags->to_xml eq "<tags><tag>aula</tag></tags>",
+        'resource created ok from_xml, without agenda'
+    );
 
 }
 
 #updating tags
 {
-	$r3 = Resource->from_xml( '
+    $r3 = Resource->from_xml( '
 		<resource>
 		    <description>aula</description>
     		<granularity>horaria</granularity>
@@ -244,37 +247,39 @@ my $ag;
 				<tag>aula</tag>
 			</tags>
 		</resource>' );
-	ok(	defined $r3
-		&&   $r3->description eq 'aula'
-        && $r3->granularity eq 'horaria'
-        && $r3->tags->to_xml eq "<tags><tag>aula</tag></tags>",
-		 'resource created ok'  );
+    ok( defined $r3
+            && $r3->description  eq 'aula'
+            && $r3->granularity  eq 'horaria'
+            && $r3->tags->to_xml eq "<tags><tag>aula</tag></tags>",
+        'resource created ok'
+    );
 
-	$tg = Tag->new("projector");
-	ok( defined $tg && $tg->value eq "projector", 'tag created ok');
+    $tg = Tag->new("projector");
+    ok( defined $tg && $tg->value eq "projector", 'tag created ok' );
 
-	$tg1 = Tag->new("campus:nord");
-	ok( defined $tg1 && $tg1->value eq "campus:nord", 'tag created ok');
+    $tg1 = Tag->new("campus:nord");
+    ok( defined $tg1 && $tg1->value eq "campus:nord", 'tag created ok' );
 
-	$tgS = TagSet->new();
-	ok( defined $tgS, 'tagSet created ok');
+    $tgS = TagSet->new();
+    ok( defined $tgS, 'tagSet created ok' );
 
-	$tgS->append($tg);
-	$tgS->append($tg1);
-	ok($tgS->size == 2, 'tagSet with 2 tags');
+    $tgS->append($tg);
+    $tgS->append($tg1);
+    ok( $tgS->size == 2, 'tagSet with 2 tags' );
 
-	ok($r3->tags->size == 1, 'resource tagSet with 1 tags');
-	$r3->tags($tgS);
-	ok($r3->tags->size == 2, 'resource tagSet updated with 2 tags');
+    ok( $r3->tags->size == 1, 'resource tagSet with 1 tags' );
+    $r3->tags($tgS);
+    ok( $r3->tags->size == 2, 'resource tagSet updated with 2 tags' );
 
-	my $values;
-	foreach ($r3->tags->elements){
-		$values .= " ".$_->value;
-	}
-	ok(	$values =~ /projector/
-		&& $values =~ /campus:nord/
-		&& $values !~ /aula/
-		, 'resource tagSet retrieved ok');
+    my $values;
+    foreach ( $r3->tags->elements ) {
+        $values .= " " . $_->value;
+    }
+    ok( $values =~ /projector/
+            && $values =~ /campus:nord/
+            && $values !~ /aula/,
+        'resource tagSet retrieved ok'
+    );
 }
 
 END {

@@ -23,7 +23,7 @@ sub append {
 
     ( defined $slot ) or die "SetTag->append requires one parameter";
 
-    $self->insert($slot) ;
+    $self->insert($slot);
 }
 
 sub to_xml {

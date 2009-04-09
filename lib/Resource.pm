@@ -14,7 +14,7 @@ use overload q{""} => \&__str__;
 # Create a new resource
 sub new {
     my $class = shift;
-    my ( $description, $granularity, $agenda , $tags ) = @_;
+    my ( $description, $granularity, $agenda, $tags ) = @_;
 
     return
         if ( !defined($description)
@@ -26,14 +26,14 @@ sub new {
     # Load on runtime to get rid of cross-dependency between
     # both Resource and Agenda
     require Agenda;
-	require TagSet;
+    require TagSet;
 
     $obj = {
         id          => _next_id(),
         description => $description,
         granularity => $granularity,
         agenda      => ( defined $agenda ) ? $agenda : Agenda->new(),
-        tags      => ( defined $tags ) ? $tags : TagSet->new(),
+        tags        => ( defined $tags ) ? $tags : TagSet->new(),
         _persistent => 0,
     };
 
@@ -117,7 +117,7 @@ sub from_xml {
     # Load on runtime to get rid of cross-dependency between
     # both Resource and Agenda
     require Agenda;
-	require TagSet;
+    require TagSet;
 
     # validate XML string against the DTD
     my $dtd = XML::LibXML::Dtd->new( "CPL UPC//Resource DTD v0.03",
@@ -138,7 +138,7 @@ sub from_xml {
         granularity =>
             $dom->getElementsByTagName('granularity')->string_value,
         agenda      => Agenda->new(),
-        tags      => TagSet->new(),
+        tags        => TagSet->new(),
         _persistent => 0,
     };
 

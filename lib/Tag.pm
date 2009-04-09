@@ -8,22 +8,22 @@ use XML::LibXML;
 
 sub new {
     my $class = shift;
-	my ( $descr ) = @_;
+    my ($descr) = @_;
 
-	return if( !defined _check_value($descr) );
+    return if ( !defined _check_value($descr) );
 
-	my $obj = \$descr;
+    my $obj = \$descr;
 
-    bless $obj , $class;
+    bless $obj, $class;
     return $obj;
 }
 
 sub value {
-	my $self = shift;
+    my $self = shift;
 
-    if (@_ && _check_value(@_)) { $$self = shift; }	
+    if ( @_ && _check_value(@_) ) { $$self = shift; }
 
-	return $$self;
+    return $$self;
 }
 
 sub toXML {
@@ -34,7 +34,7 @@ sub toXML {
 
 sub from_xml {
     my $class = shift;
-    my ( $xml ) = @_;
+    my ($xml) = @_;
 
     # validate XML string against the DTD
     my $dtd = XML::LibXML::Dtd->new( "CPL UPC//Resource DTD v0.01",
@@ -51,7 +51,7 @@ sub from_xml {
     # XML is valid.
     my $tg = XMLin($xml);
 
-	return if (!_check_value($tg));
+    return if ( !_check_value($tg) );
 
     my $obj = \$tg;
 
@@ -60,11 +60,11 @@ sub from_xml {
 }
 
 sub _check_value {
-	my ($val) = @_;
+    my ($val) = @_;
     return if ( !defined($val) );
-	return if ( $val =~ /[^\w.:_\-]/ );
-	return if ( length($val) < 4 || length($val) > 60 );
-	return 1;
+    return if ( $val =~ /[^\w.:_\-]/ );
+    return if ( length($val) < 4 || length($val) > 60 );
+    return 1;
 }
 
 1;

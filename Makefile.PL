@@ -17,6 +17,7 @@ WriteMakefile(
         'Data::Compare'             => undef,
         'Data::ICal'                => undef,
         'Date::ICal'                => undef,
+        'Getopt::Euclid'            => undef,
     },
     (   $] >= 5.005
         ?    ## Add these new keywords supported since 5.005

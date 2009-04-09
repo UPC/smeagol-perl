@@ -23,7 +23,7 @@ lib/XML.pm
 Makefile.PL
 MANIFEST
 README
-server.pl
+bin/smeagol-server
 t/Agenda.t
 t/Booking.t
 t/Client.t

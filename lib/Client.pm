@@ -56,13 +56,13 @@ sub listResources {
 
 sub createResource {
     my $self = shift;
-    my ( $des, $gra ) = @_;
+    my ( $des, $info ) = @_;
 
-    return unless defined $des && defined $gra;
+    return unless defined $des && defined $info;
 
     my $res_xml = "<resource>
         <description>$des</description>
-        <granularity>$gra</granularity>
+        <info>" . ( ( defined $info ) ? $info : "" ) . "</info>
         </resource>";
     my $req = HTTP::Request->new( POST => $self->{url} . "/resource" );
     $req->content_type('text/xml');
@@ -200,13 +200,13 @@ sub listBookingsICal {
 
 sub updateResource {
     my $self = shift;
-    my ( $idResource, $des, $gra ) = @_;
+    my ( $idResource, $des, $info ) = @_;
 
-    return unless defined $idResource && defined $des && defined $gra;
+    return unless defined $idResource && defined $des && defined $info;
 
     my $res_xml = "<resource>
         <description>$des</description>
-        <granularity>$gra</granularity>
+        <info>" . ( ( defined $info ) ? $info : "" ) . "</info>
         </resource>";
     my $req = HTTP::Request->new(
         POST => $self->{url} . '/resource/' . $idResource );

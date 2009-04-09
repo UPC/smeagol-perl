@@ -74,7 +74,7 @@ sub id_resource_booking {
 
 # Testing resource creation and retrieving not an empty list
 {
-    push @Resources, $client->createResource( "aula", "hora" );
+    push @Resources, $client->createResource( "aula", "info aula" );
     ok( defined $Resources[0],
         'created resource ' . id_resource( $Resources[0] ) );
 
@@ -83,14 +83,15 @@ sub id_resource_booking {
         'resource ' . id_resource( $Resources[0] ) . ' at list' );
 
     push @Resources,
-        $idRes = $client->createResource( "projector", "minuts" );
+        $idRes = $client->createResource( "projector", "info projector" );
     ok( defined $Resources[1],
         'created resource ' . id_resource( $Resources[1] ) );
 
     @idResources = $client->listResources();
     ok( @idResources == 2, 'list resources 2 element' );
 
-    push @Resources, $idRes = $client->createResource( "projector", "dia" );
+    push @Resources,
+        $idRes = $client->createResource( "projector", "info projector" );
     ok( defined $Resources[2],
         'created resource ' . id_resource( $Resources[2] ) );
 
@@ -108,26 +109,26 @@ sub id_resource_booking {
 #Testing resource updating and getting
 {
     $idRes = $client->updateResource( id_resource( $Resources[0] ),
-        "aulaaaaaa", "hora" );
+        "aulaaaaaa", "info aulaaaaaa" );
     ok( $idRes eq $Resources[0],
         'updated resource ' . id_resource( $Resources[0] ) );
 
     $dataRes = $client->getResource( id_resource( $Resources[0] ) );
-    ok( $dataRes->{granularity} eq 'hora'
-            && $dataRes->{description} eq 'aulaaaaaa'
-            && !defined $dataRes->{agenda},
+    ok( $dataRes->{description} eq 'aulaaaaaa'
+            && !defined $dataRes->{agenda}
+            && $dataRes->{info} eq 'info aulaaaaaa',
         'get resource ' . id_resource( $Resources[0] )
     );
 
     $idRes = $client->updateResource( id_resource( $Resources[0] ),
-        "aula", "hora" );
+        "aula", "info" );
     ok( $idRes eq $Resources[0],
         'updated resource ' . id_resource( $Resources[0] ) );
 
     $dataRes = $client->getResource( id_resource( $Resources[0] ) );
-    ok( $dataRes->{granularity} eq 'hora'
-            && $dataRes->{description} eq 'aula'
-            && !defined $dataRes->{agenda},
+    ok( $dataRes->{description} eq 'aula'
+            && !defined $dataRes->{agenda}
+            && $dataRes->{info} eq 'info',
         'get resource ' . id_resource( $Resources[0] )
     );
 
@@ -136,14 +137,14 @@ sub id_resource_booking {
         'resource ' . id_resource( $Resources[0] ) . ' at list' );
 
     $idRes = $client->updateResource( id_resource( $Resources[1] ),
-        "projector", "hora" );
+        "projector", "info projector" );
     ok( $idRes eq $Resources[1],
         'updated resource ' . id_resource( $Resources[1] ) );
 
     $dataRes = $client->getResource( id_resource( $Resources[1] ) );
-    ok( $dataRes->{granularity} eq 'hora'
-            && $dataRes->{description} eq 'projector'
-            && !defined $dataRes->{agenda},
+    ok( $dataRes->{description} eq 'projector'
+            && !defined $dataRes->{agenda}
+            && $dataRes->{info} eq 'info projector',
         'get resource ' . id_resource( $Resources[1] )
     );
 }

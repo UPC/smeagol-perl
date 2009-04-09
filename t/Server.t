@@ -102,20 +102,21 @@ my $b2 = Booking->new(
 my $ag = Agenda->new();
 $ag->append($b1);
 $ag->append($b2);
-my $resource = Resource->new( 'desc 2 2', 'gra 2 2', $ag );
-my $resource2 = Resource->new( 'desc 2 2', 'gra 2 2' );
+my $resource  = Resource->new( 'desc 2 2', $ag,   'resource info' );
+my $resource2 = Resource->new( 'desc 2 2', undef, 'resource info' );
 
 # Testing resource creation via XML
 {
     my $res = smeagol_request( 'POST', smeagol_url('/resource'),
         $resource->to_xml() );
+
     ok( $res->code == 201,
         "resource creation status " . Dumper( $res->code ) );
 
     my $xmltree = XMLin( $res->content );
 
     ok( $xmltree->{description} eq $resource->description
-            && $xmltree->{granularity} eq $resource->granularity,
+            && $xmltree->{info} eq $resource->info,
         "resource creation content " . Dumper( $res->content )
     );
 
@@ -507,7 +508,7 @@ my $resource2 = Resource->new( 'desc 2 2', 'gra 2 2' );
     isa_ok( $agenda, "Agenda" );
 
     $agenda->append($booking);
-    my $resource = Resource->new( 'desc ical', 'gra ical', $agenda );
+    my $resource = Resource->new( 'desc ical', $agenda );
     isa_ok( $resource, "Resource" );
 
     my $res = smeagol_request( 'POST', smeagol_url('/resource'),

@@ -154,10 +154,10 @@ $USAGE
     . " --server=localhost \n"
     . " --port=8000 \n"
     . " [ --c=listResources [ --r ] \| \n"
-    . "   --c=createResource --des=descripcio --gra=granularitat \| \n"
+    . "   --c=createResource --des=descripcio --gra=granularitat [--info=info] \| \n"
     . "   --c=getResource    --id=idResource \| \n"
     . "   --c=delResource    --id=idResource \| \n"
-    . "   --c=updateResource --id=idResource --des=descripcio --gra=granularitat \| \n"
+    . "   --c=updateResource --id=idResource --des=descripcio --gra=granularitat [--info=info] \| \n"
     . "   --c=createBooking  --id=idResource --des=descripcio --from=2009/12/31_10:00:00 --to=2009/12/31_10:59:00 [--info=info] \| \n"
     . "   --c=getBooking     --id=idResource --idB=idBooking \| \n"
     . "   --c=delBooking     --id=idResource --idB=idBooking \| \n"
@@ -195,14 +195,16 @@ if ( $OPT_COMMAND eq "listResources" ) {
     }
 }
 elsif ( $OPT_COMMAND eq "createResource" ) {
-    $result = $client->createResource( $OPT_PARAM_DES, $OPT_PARAM_GRA );
+    $result = $client->createResource( $OPT_PARAM_DES, $OPT_PARAM_GRA,
+        $OPT_PARAM_INFO );
 }
 elsif ( $OPT_COMMAND eq "getResource" ) {
     my $r = $client->getResource($OPT_PARAM_ID);
     if ( defined $r ) {
         $result = " resource = " . $OPT_PARAM_ID . " ::\n";
         $result .= " description = " . $r->{description} . "\n";
-        $result .= " granularity = " . $r->{granularity} . " .\n";
+        $result .= " granularity = " . $r->{granularity} . "\n";
+        $result .= " info = " . $r->{info} . "\n";
     }
 }
 elsif ( $OPT_COMMAND eq "delResource" ) {
@@ -211,7 +213,7 @@ elsif ( $OPT_COMMAND eq "delResource" ) {
 elsif ( $OPT_COMMAND eq "updateResource" ) {
     print "\n" . $OPT_PARAM_ID . "\n";
     $result = $client->updateResource( $OPT_PARAM_ID, $OPT_PARAM_DES,
-        $OPT_PARAM_GRA );
+        $OPT_PARAM_GRA, $OPT_PARAM_INFO );
 }
 elsif ( $OPT_COMMAND eq "createBooking" ) {
     my @OPT_PARAM_FROM = $OPT_PARAM_FROM =~ /(\d+)/g;

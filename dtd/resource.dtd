@@ -1,14 +1,15 @@
-<!ELEMENT resource (description, granularity, agenda?, tags?)>
+<!ELEMENT resource (description, agenda?, info?, tags?)>
 <!ATTLIST resource
     xmlns:xlink CDATA #IMPLIED
     xlink:href CDATA #IMPLIED
     xlink:xmlns CDATA #IMPLIED
     xlink:type CDATA #IMPLIED>
 <!-- 
-    FIXME: Commented out because booking.dtd includes a 
-        "description" attribute declaration. This conflict
-        could be resolved via namespaces (DTDs are soo limited!).
+    FIXME: Commented out because booking.dtd already includes a 
+        "description" and "info" attribute declaration. This conflict
+        could be resolved via namespaces and XML Schema (DTDs are soo limited!).
 <!ELEMENT description (#PCDATA)>
+<!ELEMENT info ANY>
 -->
 <!ELEMENT granularity (#PCDATA)>
 <!ENTITY % agendadtd SYSTEM "agenda.dtd">

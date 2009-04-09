@@ -14,14 +14,12 @@ use overload q{""} => \&__str__;
 # Create a new resource
 sub new {
     my $class = shift;
-    my ( $description, $granularity, $agenda, $tags ) = @_;
+    my ( $description, $agenda, $info, $tags ) = @_;
 
-    return
-        if ( !defined($description)
-        || !defined($granularity) );    # $ag argument is not mandatory
+    # $agenda and $info arguments are not mandatory
+    return if !defined $description;
 
     my $obj;
-    my $data;
 
     # Load on runtime to get rid of cross-dependency between
     # both Resource and Agenda
@@ -31,8 +29,8 @@ sub new {
     $obj = {
         id          => _next_id(),
         description => $description,
-        granularity => $granularity,
         agenda      => ( defined $agenda ) ? $agenda : Agenda->new(),
+        info        => ( defined $info ) ? $info : "",
         tags        => ( defined $tags ) ? $tags : TagSet->new(),
         _persistent => 0,
     };
@@ -58,20 +56,20 @@ sub description {
     return $self->{description};
 }
 
-sub granularity {
-    my $self = shift;
-
-    if (@_) { $self->{granularity} = shift; }
-
-    return $self->{granularity};
-}
-
 sub agenda {
     my $self = shift;
 
     if (@_) { $self->{agenda} = shift; }
 
     return $self->{agenda};
+}
+
+sub info {
+    my $self = shift;
+
+    if (@_) { $self->{info} = shift; }
+
+    return $self->{info};
 }
 
 sub url {
@@ -135,9 +133,8 @@ sub from_xml {
         id => ( ( defined $id ) ? $id : _next_id() ),
         description =>
             $dom->getElementsByTagName('description')->string_value,
-        granularity =>
-            $dom->getElementsByTagName('granularity')->string_value,
         agenda      => Agenda->new(),
+        info        => "",
         tags        => TagSet->new(),
         _persistent => 0,
     };
@@ -146,10 +143,17 @@ sub from_xml {
         $obj->{agenda} = Agenda->from_xml(
             $dom->getElementsByTagName('agenda')->get_node(1)->toString );
     }
+
+    my $info = $dom->findnodes('//resource/info')->get_node(1)->string_value;
+
+    # FIXME: what if $info == 0 ?
+    $obj->{info} = ($info) ? $info : "";
+
     if ( $dom->getElementsByTagName('tags')->get_node(1) ) {
         $obj->{tags} = TagSet->from_xml(
             $dom->getElementsByTagName('tags')->get_node(1)->toString );
     }
+
     bless $obj, $class;
     return $obj;
 }
@@ -163,12 +167,12 @@ sub __str__ {
 
     my $xmlText = "<resource>";
     $xmlText .= "<description>" . $self->{description} . "</description>";
-    $xmlText .= "<granularity>" . $self->{granularity} . "</granularity>";
 
     $xmlText .= $self->{agenda}->to_xml($url)
         if ( ( defined $self->{agenda} )
         && defined( $self->{agenda}->elements ) );
 
+    $xmlText .= "<info>" . $self->{info} . "</info>";
     $xmlText .= "</resource>";
 
     return $xmlText

@@ -1,5 +1,5 @@
 <!ELEMENT tags (tag*)>
-<!ATTLIST tag 
+<!ATTLIST tags 
     xmlns:xlink CDATA #IMPLIED
     xlink:href CDATA #IMPLIED
     xlink:xmlns CDATA #IMPLIED

@@ -5,7 +5,7 @@
 <h1>Llista de recursos</h1>
 
 <table style="border-spacing:1em">
-<thead><tr><th>Id</th><th>Descripció</th><th>Granularitat</th></tr></thead>
+<thead><tr><th>Id</th><th>Descripció</th><th></th></tr></thead>
 <tbody>
 <xsl:apply-templates select="resource">
     <xsl:sort select="substring-after(@xlink:href, '/resource/')" data-type="number" />
@@ -21,7 +21,6 @@ Sméagol v0.1rc1
         <tr>
         <td><xsl:value-of select="substring-after(@xlink:href, '/resource/')"/></td>
         <td><xsl:value-of select="description"/></td>
-        <td><xsl:value-of select="granularity"/></td>
         <td><a href="{@xlink:href}">Detalls</a></td>
         </tr>
 </xsl:template>

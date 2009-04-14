@@ -11,7 +11,6 @@
 <!ELEMENT description (#PCDATA)>
 <!ELEMENT info ANY>
 -->
-<!ELEMENT granularity (#PCDATA)>
 <!ENTITY % agendadtd SYSTEM "agenda.dtd">
 %agendadtd;
 <!ENTITY % tagsdtd SYSTEM "tagSet.dtd">

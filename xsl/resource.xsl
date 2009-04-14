@@ -9,7 +9,6 @@
 <h2>Característiques</h2>
 <dl>
 <dt style="margin:1em">Descripció:</dt><dd><xsl:value-of select="description"/></dd>
-<dt style="margin:1em">Granularitat:</dt><dd><xsl:value-of select="granularity"/></dd>
 </dl>
 
 <h2>Reserves</h2>

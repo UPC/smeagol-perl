@@ -97,7 +97,6 @@ sub updateAgenda ( $id ) -> $id
 :· tipus of parameters ::
 $id   = "identificador del objecte"
 $des  = "descripció del objecte"
-$gra  = "granularity"
 @from = " data in format dd/mm/aass hh:mm:ss "
 @to   = " data in format dd/mm/aass hh:mm:ss "## sub list_bookings_resource ( $id  ) -> ( @_ ) __tq__ $_[0] = num_status & $_[1] = "xml_result"
 ## sub create_booking_resource ( $id, @from, @to ) -> num_status
@@ -119,7 +118,6 @@ my $OPT_COMMAND;
 my $OPT_PARAM_ID;
 my $OPT_PARAM_ID_B;
 my $OPT_PARAM_DES;
-my $OPT_PARAM_GRA;
 my $OPT_PARAM_FROM;
 my $OPT_PARAM_TO;
 my $OPT_PARAM_INFO;
@@ -136,7 +134,6 @@ my $options = GetOptions(
     "id=i"     => \$OPT_PARAM_ID,      #
     "idB=i"    => \$OPT_PARAM_ID_B,    #
     "des=s"    => \$OPT_PARAM_DES,     #
-    "gra=s"    => \$OPT_PARAM_GRA,     #
     "from=s"   => \$OPT_PARAM_FROM,    #
     "to=s"     => \$OPT_PARAM_TO,      #
     "info=s"   => \$OPT_PARAM_INFO,    #
@@ -154,10 +151,10 @@ $USAGE
     . " --server=localhost \n"
     . " --port=8000 \n"
     . " [ --c=listResources [ --r ] \| \n"
-    . "   --c=createResource --des=descripcio --gra=granularitat [--info=info] \| \n"
+    . "   --c=createResource --des=descripcio [--info=info] \| \n"
     . "   --c=getResource    --id=idResource \| \n"
     . "   --c=delResource    --id=idResource \| \n"
-    . "   --c=updateResource --id=idResource --des=descripcio --gra=granularitat [--info=info] \| \n"
+    . "   --c=updateResource --id=idResource --des=descripcio [--info=info] \| \n"
     . "   --c=createBooking  --id=idResource --des=descripcio --from=2009/12/31_10:00:00 --to=2009/12/31_10:59:00 [--info=info] \| \n"
     . "   --c=getBooking     --id=idResource --idB=idBooking \| \n"
     . "   --c=delBooking     --id=idResource --idB=idBooking \| \n"
@@ -195,15 +192,13 @@ if ( $OPT_COMMAND eq "listResources" ) {
     }
 }
 elsif ( $OPT_COMMAND eq "createResource" ) {
-    $result = $client->createResource( $OPT_PARAM_DES, $OPT_PARAM_GRA,
-        $OPT_PARAM_INFO );
+    $result = $client->createResource( $OPT_PARAM_DES, $OPT_PARAM_INFO );
 }
 elsif ( $OPT_COMMAND eq "getResource" ) {
     my $r = $client->getResource($OPT_PARAM_ID);
     if ( defined $r ) {
         $result = " resource = " . $OPT_PARAM_ID . " ::\n";
         $result .= " description = " . $r->{description} . "\n";
-        $result .= " granularity = " . $r->{granularity} . "\n";
         $result .= " info = " . $r->{info} . "\n";
     }
 }
@@ -213,7 +208,7 @@ elsif ( $OPT_COMMAND eq "delResource" ) {
 elsif ( $OPT_COMMAND eq "updateResource" ) {
     print "\n" . $OPT_PARAM_ID . "\n";
     $result = $client->updateResource( $OPT_PARAM_ID, $OPT_PARAM_DES,
-        $OPT_PARAM_GRA, $OPT_PARAM_INFO );
+        $OPT_PARAM_INFO );
 }
 elsif ( $OPT_COMMAND eq "createBooking" ) {
     my @OPT_PARAM_FROM = $OPT_PARAM_FROM =~ /(\d+)/g;

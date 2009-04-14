@@ -58,7 +58,7 @@ sub createResource {
     my $self = shift;
     my ( $des, $info ) = @_;
 
-    return unless defined $des && defined $info;
+    return unless defined $des;    # $info is not mandatory
 
     my $res_xml = "<resource>
         <description>$des</description>
@@ -202,7 +202,8 @@ sub updateResource {
     my $self = shift;
     my ( $idResource, $des, $info ) = @_;
 
-    return unless defined $idResource && defined $des && defined $info;
+    return
+        unless defined $idResource && defined $des;   # $info is not mandatory
 
     my $res_xml = "<resource>
         <description>$des</description>

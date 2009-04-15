@@ -6,6 +6,7 @@ use warnings;
 use Data::Dumper;
 use File::Path;
 use Carp;
+use Encode;
 
 my $_PATH;
 
@@ -71,7 +72,7 @@ sub load {
         # I mean do EXPR not do SUB, hence the + sign
         $data = do +_full_path($id);
     }
-    return $data;
+    return decode( "UTF-8", $data );
 }
 
 # Save object identified by $id in DataStore
@@ -85,7 +86,7 @@ sub save {
     if ( defined $id && defined $data ) {
         open my $out, ">", _full_path($id)
             or croak "cannot open " . _full_path($id);
-        print $out Dumper($data);
+        print $out Dumper( encode( "UTF-8", $data ) );
         close $out;
     }
 }

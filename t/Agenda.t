@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-use Test::More tests => 19;
+use Test::More tests => 26;
 
 use strict;
 use warnings;
@@ -10,6 +10,7 @@ use Data::Compare;
 use Data::ICal;
 use Data::ICal::Entry::Event;
 use Date::ICal;
+use Encode;
 
 BEGIN {
     use_ok($_) for qw(Booking Booking::ICal Agenda Agenda::ICal DataStore);
@@ -193,6 +194,30 @@ ok( $ag->size == 0, 'remove non-existing b4 from ag' );
         split /\n/, "$agenda";
 
     is_deeply( \@got, \@expected, "looks like an vcalendar" );
+}
+
+# Testing UTF-8
+{
+    my $encoding    = "UTF-8";
+    my $description = decode( $encoding, "àèòéíóú" );
+    my $info        = decode( $encoding, "ïüçñ" );
+    my $booking     = Booking->new(
+        $description,
+        datetime( 2008, 4, 14, 16 ),
+        datetime( 2008, 4, 14, 16, 29 ),
+        $info,
+    );
+    isa_ok( $booking, 'Booking' );
+    is( $booking->description, $description, "description in UTF-8" );
+    is( $booking->info,        $info,        "info in UTF-8" );
+
+    my $agenda = Agenda->new();
+    isa_ok( $agenda, 'Agenda' );
+
+    $agenda->append($booking);
+    ok( $agenda->contains($booking),  'booking added in agenda' );
+    like( "$agenda", qr/$description/, "UTF-8 description found in agenda" );
+    like( "$agenda", qr/$info/, "UTF-8 info found in agenda" );
 }
 
 END { DataStore->clean(); }

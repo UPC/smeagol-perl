@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-use Test::More tests => 33;
+use Test::More tests => 36;
 
 use strict;
 use warnings;
@@ -7,6 +7,7 @@ use warnings;
 use DateTime;
 use XML::Simple;
 use Data::Compare;
+use Encode;
 
 BEGIN { use_ok($_) for qw(Booking Resource Agenda DataStore Tag TagSet) }
 
@@ -292,6 +293,25 @@ my $ag;
             && $values !~ /aula/,
         'resource tagSet retrieved ok'
     );
+}
+
+# Testing UTF-8
+{
+    my $encoding        = "UTF-8";
+    my $description     = decode( $encoding, "àèòéíóúïüçñ" );
+    my $info            = decode( $encoding, "äëöâêîôû" );
+    my $resource_as_xml = <<"EOF";
+<resource>
+<description>$description</description>
+<info>$info</info>
+</resource>
+EOF
+
+    my $r = Resource->from_xml($resource_as_xml);
+    isa_ok( $r, 'Resource' );
+    is( $r->description, $description, "description in UTF-8" );
+    is( $r->info,        $info,        "info in UTF-8" );
+    $r->save;
 }
 
 END {

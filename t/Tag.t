@@ -1,11 +1,12 @@
 #!/usr/bin/perl
-use Test::More tests => 31;
+use Test::More tests => 34;
 
 use strict;
 use warnings;
 
 use XML::Simple;
 use Data::Compare;
+use Encode;
 
 BEGIN {
 
@@ -117,6 +118,16 @@ my $xml;
         'checked tag creation from xml'
     );
 
+}
+
+# Tag in UTF-8
+{
+    my $encoding = "UTF-8";
+    my $text     = decode( $encoding, "àèòéíóúïüçñ" );
+    my $tag      = Tag->new($text);
+    isa_ok( $tag, 'Tag' );
+    is( $tag->value, $text, "value in UTF-8" );
+    like( $tag->toXML, qr/$text/, "XML string in UTF-8" );
 }
 
 END { DataStore->clean() }

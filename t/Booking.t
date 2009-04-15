@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-use Test::More tests => 33;
+use Test::More tests => 36;
 
 use strict;
 use warnings;
@@ -10,6 +10,7 @@ use Data::Compare;
 use Data::ICal;
 use Data::ICal::Entry::Event;
 use Date::ICal;
+use Encode;
 
 BEGIN {
     use_ok($_) for qw(Booking Booking::ICal DataStore);
@@ -283,5 +284,21 @@ ok( !$b10->intersects($b11), 'b11 does not interlace b10' );
 
     is_deeply( \@got, \@expected, "booking->ical works" );
 };
+
+# Testing UTF-8
+{
+    my $encoding    = "UTF-8";
+    my $description = decode( $encoding, "àèòéíóú" );
+    my $info        = decode( $encoding, "ïüñç" );
+    my $b           = Booking->new(
+        $description,
+        datetime( 2008, 4, 14, 17 ),
+        datetime( 2008, 4, 14, 18, 59 ), $info,
+    );
+
+    isa_ok( $b, 'Booking' );
+    is( $b->description, $description, "description in UTF-8" );
+    is( $b->info,        $info,        "info in UTF-8" );
+}
 
 END { DataStore->clean() }

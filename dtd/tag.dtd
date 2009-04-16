@@ -1,4 +1,4 @@
-<!ELEMENT tag ANY >
+<!ELEMENT tag (#PCDATA) >
 <!ATTLIST tag 
     xmlns:xlink CDATA #IMPLIED
     xlink:href CDATA #IMPLIED

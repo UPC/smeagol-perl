@@ -7,6 +7,9 @@ use Set::Object ();
 use base qw(Set::Object);
 use XML::LibXML;
 use Tag;
+use Data::Dumper;
+
+use overload q{""} => \&__str__;
 
 sub new {
     my $class = shift;
@@ -26,17 +29,37 @@ sub append {
     $self->insert($slot);
 }
 
-sub to_xml {
+sub __str__ {
     my $self = shift;
+    my ( $url, $isRootNode ) = @_;
 
-    my $xml = "<tags>";
-
+    my $xmlText = "<tags>";
     for my $slot ( $self->elements ) {
-        $xml .= $slot->toXML();
+        $xmlText .= $slot->toXML($url);
     }
-    $xml .= "</tags>";
+    $xmlText .= "</tags>";
 
-    return $xml;
+    return $xmlText
+        unless defined $url;
+
+    my $xmlDoc = eval { XML->new($xmlText) };
+    croak $@ if $@;
+
+    $xmlDoc->addXLink( "tags", $url . "/tags" );
+    if ($isRootNode) {
+        $xmlDoc->addPreamble("tags");
+        return "$xmlDoc";
+    }
+    else {
+
+        # Take the first node and skip processing instructions
+        my $node = $xmlDoc->doc->getElementsByTagName("tags")->[0];
+        return $node->toString;
+    }
+}
+
+sub to_xml {
+    return shift->__str__(@_);
 }
 
 sub from_xml {
@@ -60,8 +83,8 @@ sub from_xml {
     # $dom variable contains a DOM (Document Object Model)
     # representation of the $xml string
 
-    my $tgs = $class->SUPER::new();
-    bless $tgs, $class;
+    my $tgS = $class->SUPER::new();
+    bless $tgS, $class;
 
     # traverse all '<tag>' elements found in DOM structure.
     # note: all intersecting bookings in the agenda will be ignored,
@@ -70,10 +93,10 @@ sub from_xml {
     # intersections present in the $xml
     for my $tag_dom_node ( $dom->getElementsByTagName('tag') ) {
         my $tg = Tag->from_xml( $tag_dom_node->toString(0) );
-        $tgs->append($tg);
+        $tgS->append($tg);
     }
 
-    return $tgs;
+    return $tgS;
 }
 
 1;

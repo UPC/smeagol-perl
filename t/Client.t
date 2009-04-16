@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-use Test::More tests => 55;
+use Test::More tests => 76;
 
 use strict;
 use warnings;
@@ -42,6 +42,8 @@ my $dataBoo;
 my @idBookings;
 my @Bookings;
 my $idAg;
+my $idTg;
+my @valTg;
 
 # Extracts the Resource ID from a given Resource REST URL
 sub id_resource {
@@ -499,6 +501,97 @@ my $info0 = "info 0";
             && $dataBoo->{to}->{second} == $to->{second},
         'retrieved booking updated' . $Bookings[2]
     );
+
+}
+
+@valTg = (
+    "campus nord",     "aula",
+    "aula multimedia", "campus:nord-aula:multidemia"
+);
+
+#create tag
+{
+    @Resources = ();
+
+    push @Resources, $client->createResource( "aula", "hora" );
+    ok( defined $Resources[0],
+        'created resource ' . id_resource( $Resources[0] ) );
+
+    $idTg = $client->createTag( id_resource( $Resources[0] ), $valTg[0] );
+    ok( !defined $idTg, 'tag not added' );
+
+    $idTg = $client->createTag( -111, $valTg[1] );
+    ok( !defined $idTg, "tag not added, resource doesn't exist" );
+
+    $idTg = $client->createTag( -111, $valTg[0] );
+    ok( !defined $idTg, "tag not added, incorrect tag" );
+
+    $idTg = $client->createTag( id_resource( $Resources[0] ), $valTg[1] );
+    ok( defined $idTg && $idTg eq $Resources[0] . '/tag/' . $valTg[1],
+        'tag added' );
+
+    $idTg = $client->createTag( id_resource( $Resources[0] ), $valTg[3] );
+    ok( defined $idTg && $idTg eq $Resources[0] . '/tag/' . $valTg[3],
+        'tag added' );
+
+    $idTg = $client->createTag( "/resource/-111", "aula" );
+    ok( !defined $idTg, 'tag not added' );
+}
+
+my @tgS;
+
+#Retrieving and deleting tags from a resource
+{
+    @Resources = ();
+
+    push @Resources, $client->createResource( "aulaaaaa", "hora" );
+    ok( defined $Resources[0],
+        'created resource ' . id_resource( $Resources[0] ) );
+
+    push @tgS, $client->listTags( id_resource( $Resources[0] ) );
+    ok( @tgS == 0, 'list with 0 tags ' . $Resources[0] );
+
+    $idTg = $client->createTag( id_resource( $Resources[0] ), $valTg[1] );
+    ok( defined $idTg && $idTg eq $Resources[0] . '/tag/' . $valTg[1],
+        'tag added at ' . $Resources[0] );
+
+    @tgS = $client->listTags( id_resource( $Resources[0] ) );
+    ok( @tgS == 1, 'list with 1 tags en resource ' . $Resources[0] );
+
+    $idTg = $client->createTag( id_resource( $Resources[0] ), $valTg[3] );
+    ok( defined $idTg && $idTg eq $Resources[0] . '/tag/' . $valTg[3],
+        'tag added at ' . $Resources[0] );
+
+    @tgS = $client->listTags( id_resource( $Resources[0] ) );
+    ok( @tgS == 2, 'list with 2 tags in resource ' . $Resources[0] );
+
+    $idTg = $client->delTag( id_resource( $Resources[0] ), $valTg[3] );
+    ok( defined $idTg && $idTg eq $valTg[3],
+        'tag deleted at ' . $Resources[0]
+    );
+
+    @tgS = $client->listTags( id_resource( $Resources[0] ) );
+    ok( @tgS == 1, 'list with 1 tag in resource ' . $Resources[0] );
+    ok( $tgS[0] eq $Resources[0] . '/tag/' . $valTg[1],
+        'correct remining tag at ' . $Resources[0]
+    );
+
+    $idTg = $client->delTag( -111, $valTg[1] );
+    ok( !defined $idTg, "tag not deleted, resource doesn't exist" );
+
+    $idTg = $client->delTag( id_resource( $Resources[0] ), $valTg[1] );
+    ok( defined $idTg && $idTg eq $valTg[1],
+        'tag deleted at ' . $Resources[0]
+    );
+
+    @tgS = $client->listTags( id_resource( $Resources[0] ) );
+    ok( @tgS == 0, 'list with 0 tags in resource ' . $Resources[0] );
+
+    $idTg = $client->delTag( id_resource( $Resources[0] ), $valTg[1] );
+    ok( !defined $idTg, "tag not deleted, it doesn't exist" );
+
+    @tgS = $client->listTags(-111);
+    ok( @tgS == 0, "not listing tags, doen't exit resource" );
 
 }
 

@@ -10,19 +10,7 @@ use XML::LibXML;
 use Carp;
 use Data::Dumper;
 use Resource;
-
-my $XML_HEADER = '<?xml version="1.0" encoding="UTF-8"?>';
-
-# type may be: resources, resource, agenda or booking
-sub _xml_preamble {
-    my ($type) = @_;
-
-    return
-          $XML_HEADER
-        . '<?xml-stylesheet type="application/xml" href="/xsl/'
-        . $type
-        . '.xsl"?>';
-}
+use Resource::List;
 
 # Nota: hauria de funcionar amb "named groups" però només
 # s'implementen a partir de perl 5.10. Quina misèria, no?
@@ -41,7 +29,10 @@ my %crud_for = (
     '/resource/(\d+)/bookings'      => { GET  => \&_list_bookings, },
     '/resource/(\d+)/bookings/ical' => { GET  => \&_list_bookings_ical, },
     '/resource/(\d+)/booking'       => { POST => \&_create_booking, },
-    '/resource/(\d+)/booking/(\d+)' => {
+    '/resource/(\d+)/tag'           => { POST => \&_create_tag, },
+    '/resource/(\d+)/tags'          => { GET  => \&_list_tags, },
+    '/resource/(\d+)/tag/([\w.:_\-]+)' => { DELETE => \&_delete_tag, },
+    '/resource/(\d+)/booking/(\d+)'    => {
         GET    => \&_retrieve_booking,
         POST   => \&_update_booking,
         DELETE => \&_delete_booking,
@@ -149,16 +140,8 @@ sub _send_ical {
 ##############################################################
 
 sub _list_resources {
-    my $xml = _xml_preamble('resources')
-        . '<resources xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="/resources">';
-    foreach my $id ( Resource->list_id ) {
-        my $r = Resource->load($id);
-        if ( defined $r ) {
-            $xml .= $r->to_xml( "", 0 );
-        }
-    }
-    $xml .= "</resources>";
-    _send_xml($xml);
+    my $list = Resource::List->new();
+    _send_xml( $list->to_xml( "/resources", 1 ) );
 }
 
 sub _create_resource {
@@ -470,6 +453,73 @@ sub _update_booking {
     return;
 }
 
+sub _create_tag {
+    my ( $cgi, $idResource ) = @_;
+    if ( !defined $idResource ) {
+        _status(400);
+        return;
+    }
+
+    my $r = Resource->load($idResource);
+    if ( !defined $r ) {
+        _status(404);
+        return;
+    }
+
+    my $tg = Tag->from_xml( $cgi->param('POSTDATA') );
+    if ( !defined $tg ) {
+        _status(400);
+        return;
+    }
+
+    $r->tags->append($tg);
+    $r->save();
+    _status( 201, $tg->toXML( $r->url, 1 ) );
+}
+
+sub _list_tags {
+    my ( $cgi, $idResource ) = @_;
+    my $r = Resource->load($idResource);
+
+    if ( !defined $r ) {
+        _status(404);
+        return;
+    }
+    my $xml = $r->tags->to_xml( $r->url, 1 );
+    _send_xml($xml);
+}
+
+sub _delete_tag {
+    my ( $cgi, $idR, $idT ) = @_;
+
+    if ( !defined $idR || !defined $idT ) {
+        _status(400);
+        return;
+    }
+
+    my $r = Resource->load($idR);
+
+    if ( !defined $r ) {
+        _status(404);
+        return;
+    }
+
+    my $tgS = $r->tags;
+    if ( !defined $tgS ) {
+        _status(404);
+        return;
+    }
+
+    my $tg = ( grep { $_->value eq $idT } $tgS->elements )[0];
+    if ( !defined $tg ) {
+        _status(404);
+        return;
+    }
+
+    $tgS->remove($tg);
+    $r->save();
+    _status( 200, "Tag #$idT deleted" );
+}
 ####################
 # Handlers for CSS #
 ####################

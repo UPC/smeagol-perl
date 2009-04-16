@@ -8,6 +8,7 @@ use XML::LibXML;
 use DataStore;
 use Carp;
 use XML;
+use Data::Dumper;
 
 use overload q{""} => \&__str__;
 
@@ -80,7 +81,6 @@ sub url {
 
 sub tags {
     my $self = shift;
-
     if (@_) { $self->{tags} = shift; }
 
     return $self->{tags};
@@ -173,6 +173,10 @@ sub __str__ {
         && defined( $self->{agenda}->elements ) );
 
     $xmlText .= "<info>" . $self->{info} . "</info>";
+    $xmlText .= $self->{tags}->to_xml($url)
+        if ( ( defined $self->{tags} )
+        && defined( $self->{tags}->elements ) );
+
     $xmlText .= "</resource>";
 
     return $xmlText
@@ -197,12 +201,6 @@ sub __str__ {
 # DEPRECATED
 sub to_xml {
     return shift->__str__(@_);
-}
-
-sub list_id {
-    my $self = shift;
-
-    return DataStore->list_id;
 }
 
 sub remove {

@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-use Test::More tests => 36;
+use Test::More tests => 38;
 
 use strict;
 use warnings;
@@ -8,6 +8,7 @@ use DateTime;
 use XML::Simple;
 use Data::Compare;
 use Encode;
+use Data::Dumper;
 
 BEGIN { use_ok($_) for qw(Booking Resource Agenda DataStore Tag TagSet) }
 
@@ -147,7 +148,7 @@ ok( $res->description eq 'aula' && $res->info eq 'Hola, soc la info',
     'from_xml resource' );
 
 my $r3;
-my ( $tg, $tg1 );
+my ( $tg, $tg1, $tg2 );
 my $tgS;
 my $ag;
 
@@ -276,6 +277,9 @@ my $ag;
     $tgS = TagSet->new();
     ok( defined $tgS, 'tagSet created ok' );
 
+    $tg2 = Tag->new("capacitat:200");
+    ok( defined $tg2 && $tg2->value eq "capacitat:200", 'tag created ok' );
+
     $tgS->append($tg);
     $tgS->append($tg1);
     ok( $tgS->size == 2, 'tagSet with 2 tags' );
@@ -284,12 +288,16 @@ my $ag;
     $r3->tags($tgS);
     ok( $r3->tags->size == 2, 'resource tagSet updated with 2 tags' );
 
+    $r3->tags->append($tg2);
+    ok( $r3->tags->size == 3, 'resource tagSet updated with 3 tags' );
+
     my $values;
     foreach ( $r3->tags->elements ) {
         $values .= " " . $_->value;
     }
-    ok( $values =~ /projector/
+    ok( $values        =~ /projector/
             && $values =~ /campus:nord/
+            && $values =~ /capacitat:200/
             && $values !~ /aula/,
         'resource tagSet retrieved ok'
     );

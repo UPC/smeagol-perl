@@ -27,7 +27,7 @@ Aquesta distribució depèn d'aquests altres mòduls:
   | XML::LibXML               | libxml-libxml-perl         |
   | XML::Simple               | libxml-simple-perl         |
   | HTTP::Server::Simple::CGI | libhttp-server-simple-perl |
-  | Getopt::Long              | perl-base                  |
+  | Getopt::Euclid            | libgetopt-euclid-perl      |
   | Data::Compare             | libdata-compare-perl       |
   | Date::ICal                | libdate-ical-perl          |
   | Data::ICal                | libdata-ical-perl          |

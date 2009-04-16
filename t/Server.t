@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 58;
+use Test::More tests => 84;
 use LWP::UserAgent;
 use HTTP::Request;
 use XML::Simple;
@@ -15,7 +15,8 @@ use Data::ICal::Entry::Event;
 use Date::ICal;
 
 BEGIN {
-    use_ok($_) for qw(Server Resource Agenda Booking DateTime DataStore);
+    use_ok($_)
+        for qw(Server Resource Agenda Booking TagSet Tag DateTime DataStore);
 }
 
 my $server_port = 8000;
@@ -163,7 +164,7 @@ my $resource2 = Resource->new( 'desc 2 2', undef, 'resource info' );
     ok( defined $r, "resource retrieval content " . Dumper( $res->content ) );
 
     # retrieve non-existent Resource
-    $res = smeagol_request( 'GET', smeagol_url('/resource/666') );
+    $res = smeagol_request( 'GET', smeagol_url('/resource/-666') );
     ok( $res->code == 404,
         "non-existent resource retrieval status " . Dumper( $res->code ) );
 
@@ -563,6 +564,113 @@ my $resource2 = Resource->new( 'desc 2 2', undef, 'resource info' );
         split /\n/, $res->content;
 
     is_deeply( \@got, \@expected, "looks like an vcalendar" );
+}
+
+my ( $tg, $tg1, $tg2 );
+my @valTg
+    = ( "campus:nord", "campus nord", "aula", "campus=nord", "projector" );
+my $tgS;
+
+#Testing create tag
+{
+
+    my $res = smeagol_request( 'POST', smeagol_url('/resource'),
+        $resource2->to_xml() );
+    ok( $res->code == '201', 'resource creation status ' . $res->code );
+
+    $tg = Tag->new("aula");
+    ok( defined $tg && $tg->value eq "aula", 'tag created' );
+
+    my $xmltree     = XMLin( $res->content );
+    my $resourceUrl = $xmltree->{'xlink:href'};
+
+    $res = smeagol_request( 'POST', smeagol_url("$resourceUrl/tag"),
+        $tg->toXML() );
+    ok( $res->code == '201' && Tag->from_xml( $res->content ) == $tg,
+        'tag in resource' );
+
+    $tg = Tag->new("campus:nord");
+    ok( defined $tg && $tg->value eq "campus:nord", 'tag created' );
+
+    $res = smeagol_request( 'POST', smeagol_url("$resourceUrl/tag"),
+        $tg->toXML() );
+    ok( $res->code == '201' && Tag->from_xml( $res->content ) == $tg,
+        'tag in resource' );
+
+    $tg = Tag->new("projector");
+    ok( defined $tg && $tg->value eq "projector", 'tag created' );
+
+    $res = smeagol_request( 'POST', smeagol_url("$resourceUrl/tag"),
+        $tg->toXML() );
+    ok( $res->code == '201' && Tag->from_xml( $res->content ) == $tg,
+        'tag in resource' );
+
+    $res = smeagol_request(
+        'POST',
+        smeagol_url("$resourceUrl/tag"),
+        "<tag>campus nord</tag>"
+    );
+    ok( $res->code == '400', 'tag not created, bad request' );
+
+    $res = smeagol_request( 'POST', smeagol_url("/resource/-222/tag"),
+        $tg->toXML() );
+    ok( $res->code == '404', 'tag not created, resource not found' );
+
+}
+
+#Retrieving and deleting tags from a resource
+{
+    my $res = smeagol_request( 'POST', smeagol_url('/resource'),
+        $resource2->to_xml() );
+    ok( $res->code == '201', 'resource creation status ' . $res->code );
+
+    my $xmltree     = XMLin( $res->content );
+    my $resourceUrl = $xmltree->{'xlink:href'};
+
+    $res = smeagol_request( 'GET', smeagol_url( $resourceUrl . '/tags' ) );
+    $tgS = TagSet->from_xml( $res->content );
+    ok( $res->is_success, 'tag list retrieval status ' . $res->code );
+    ok( $tgS->size == 0,  'resource with 0 tags' );
+
+    $tg = Tag->new( $valTg[0] );
+    ok( defined $tg && $tg->value eq $valTg[0], 'tag created' );
+
+    $tg2 = Tag->new( $valTg[2] );
+    ok( defined $tg2 && $tg2->value eq $valTg[2], 'tag created' );
+
+    $res = smeagol_request( 'POST', smeagol_url("$resourceUrl/tag"),
+        $tg->toXML() );
+    ok( $res->code == '201' && Tag->from_xml( $res->content ) == $tg,
+        'tag in resource' );
+
+    $res = smeagol_request( 'GET', smeagol_url( $resourceUrl . '/tags' ) );
+    $tgS = TagSet->from_xml( $res->content );
+    ok( $res->is_success, 'tag list retrieval status ' . $res->code );
+    ok( $tgS->size == 1,  'resource with 1 tag' );
+
+    $res = smeagol_request( 'POST', smeagol_url("$resourceUrl/tag"),
+        $tg2->toXML() );
+    ok( $res->code == '201' && Tag->from_xml( $res->content ) == $tg2,
+        'tag in resource' );
+
+    $res = smeagol_request( 'GET', smeagol_url( $resourceUrl . '/tags' ) );
+    $tgS = TagSet->from_xml( $res->content );
+    ok( $res->is_success, 'tag list retrieval status ' . $res->code );
+    ok( $tgS->size == 2,  'resource with 2 tag' );
+
+    $res = smeagol_request( 'DELETE',
+        smeagol_url( "$resourceUrl/tag/" . $tg2->value ) );
+    ok( $res->is_success, 'tag deleting status ' . $res->code );
+
+    $res = smeagol_request( 'GET', smeagol_url( $resourceUrl . '/tags' ) );
+    my $tgS = TagSet->from_xml( $res->content );
+    ok( $res->is_success, 'tag list retrieval status ' . $res->code );
+    ok( $tgS->size == 1,  'resource with 1 tag' );
+
+    $res = smeagol_request( 'DELETE',
+        smeagol_url( "/resource/-111/tag/" . $tg2->value ) );
+    ok( $res->code == '404', 'deleting tag not found, status ' . $res->code );
+
 }
 
 END {

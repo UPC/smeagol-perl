@@ -121,6 +121,30 @@ sub createBooking {
         ->getAttribute('xlink:href');
 }
 
+sub createTag {
+    my $self = shift;
+    my ( $idR, $description ) = @_;
+
+    return
+        unless defined $idR
+            && defined $description;
+
+    my $req = HTTP::Request->new(
+        POST => $self->{url} . '/resource/' . $idR . '/tag' );
+    $req->content_type('text/xml');
+    my $tag_xml = "<tag>$description</tag>";
+    $req->content($tag_xml);
+
+    my $res = $self->{ua}->request($req);
+    return unless $res->status_line =~ /201/;
+
+    my $dom = eval { XML::LibXML->new->parse_string( $res->content ) };
+    croak $@ if $@;
+
+    return $dom->getElementsByTagName('tag')->get_node(1)
+        ->getAttribute('xlink:href');
+}
+
 sub getResource {
     my $self = shift;
     my ($id) = @_;
@@ -196,6 +220,26 @@ sub listBookings {
 
 sub listBookingsICal {
     return shift->listBookings( @_, "ical" );
+}
+
+sub listTags {
+    my $self = shift;
+    my ($id) = @_;
+
+    return unless defined $id;
+
+    my $url = $self->{url} . '/resource/' . $id . '/tags';
+
+    my $res = $self->{ua}->get($url);
+    return unless $res->status_line =~ /200/;
+
+    my $dom = eval { XML::LibXML->new->parse_string( $res->content ) };
+    croak $@ if $@;
+    my @tags;
+    for my $tagsNode ( $dom->getElementsByTagName('tag') ) {
+        push @tags, $tagsNode->getAttribute('xlink:href');
+    }
+    return @tags;
 }
 
 sub updateResource {
@@ -300,6 +344,22 @@ sub delBooking {
     return unless $res->status_line =~ /200/;
 
     return $idB;
+}
+
+sub delTag {
+    my $self = shift;
+    my ( $idR, $idT ) = @_;
+
+    return unless ( defined $idT && defined $idR );
+
+    my $req = HTTP::Request->new(
+        DELETE => $self->{url} . '/resource/' . $idR . '/tag/' . $idT );
+    $req->content_type('text/xml');
+
+    my $res = $self->{ua}->request($req);
+    return unless $res->status_line =~ /200/;
+
+    return $idT;
 }
 
 1;

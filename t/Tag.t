@@ -75,13 +75,13 @@ my $xml;
     ok( "campus-nord" eq $val, 'tag updated' );
 
     $val = $tg->value("campus nord");
-    ok( "campus nord" ne $val, 'tag not updated, wrong value' );
+    ok( !defined $val, 'tag not updated, wrong value' );
 
     $val = $tg->value("campus:nord");
     ok( "campus:nord" eq $val, 'tag updated' );
 
     $val = $tg->value("cn");
-    ok( "cn" ne $val, 'tag not updated,too short' );
+    ok( !defined $val, 'tag not updated,too short' );
 }
 
 #to_xml

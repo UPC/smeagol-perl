@@ -18,6 +18,7 @@ lib/Booking/ICal.pm
 lib/Client.pm
 lib/DataStore.pm
 lib/Resource.pm
+lib/Resource/List.pm
 lib/Server.pm
 lib/XML.pm
 Makefile.PL

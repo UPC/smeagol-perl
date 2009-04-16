@@ -52,7 +52,7 @@ sub smeagol_url {
 
     like(
         $res->content,
-        qr|<\?xml version="1.0" encoding="UTF-8"\?><\?xml-stylesheet type="application/xml" href="/xsl/resources.xsl"\?><resources xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="/resources"></resources>|,
+        qr|<\?xml version="1.0" encoding="UTF-8"\?>\n<\?xml-stylesheet type="application/xml" href="/xsl/resources.xsl"\?>\n<resources xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="/resources"/>|,
         "resource list content"
     );
 }

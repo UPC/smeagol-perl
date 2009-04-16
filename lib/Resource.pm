@@ -199,12 +199,6 @@ sub to_xml {
     return shift->__str__(@_);
 }
 
-sub list_id {
-    my $self = shift;
-
-    return DataStore->list_id;
-}
-
 sub remove {
     my $self = shift;
 

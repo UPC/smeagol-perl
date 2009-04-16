@@ -10,19 +10,7 @@ use XML::LibXML;
 use Carp;
 use Data::Dumper;
 use Resource;
-
-my $XML_HEADER = '<?xml version="1.0" encoding="UTF-8"?>';
-
-# type may be: resources, resource, agenda or booking
-sub _xml_preamble {
-    my ($type) = @_;
-
-    return
-          $XML_HEADER
-        . '<?xml-stylesheet type="application/xml" href="/xsl/'
-        . $type
-        . '.xsl"?>';
-}
+use Resource::List;
 
 # Nota: hauria de funcionar amb "named groups" però només
 # s'implementen a partir de perl 5.10. Quina misèria, no?
@@ -149,16 +137,8 @@ sub _send_ical {
 ##############################################################
 
 sub _list_resources {
-    my $xml = _xml_preamble('resources')
-        . '<resources xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="/resources">';
-    foreach my $id ( Resource->list_id ) {
-        my $r = Resource->load($id);
-        if ( defined $r ) {
-            $xml .= $r->to_xml( "", 0 );
-        }
-    }
-    $xml .= "</resources>";
-    _send_xml($xml);
+    my $list = Resource::List->new();
+    _send_xml( $list->to_xml( "/resources", 1 ) );
 }
 
 sub _create_resource {

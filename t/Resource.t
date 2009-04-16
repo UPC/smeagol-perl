@@ -311,7 +311,21 @@ my $ag;
     my $resource_as_xml = <<"EOF";
 <resource>
 <description>$description</description>
+<agenda>
+<booking>
+<description>bbbddd</description>
+<from>
+<year>2009</year><month>4</month><day>16</day>
+<hour>19</hour><minute>59</minute><second>0</second>
+</from>
+<to>
+<year>2009</year><month>4</month><day>16</day>
+<hour>19</hour><minute>59</minute><second>59</second>
+</to>
+</booking>
+</agenda>
 <info>$info</info>
+<tags><tag>1111</tag><tag>2222</tag></tags>
 </resource>
 EOF
 

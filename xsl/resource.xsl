@@ -9,6 +9,7 @@
 <h2>Característiques</h2>
 <dl>
 <dt style="margin:1em">Descripció:</dt><dd><xsl:value-of select="description"/></dd>
+<dt style="margin:1em">Etiquetes:</dt><dd><xsl:apply-templates select="tags"/></dd>
 </dl>
 
 <h2>Reserves</h2>
@@ -44,6 +45,14 @@
 <xsl:value-of select="year"/>-<xsl:value-of select="month"/>-<xsl:value-of select="day"/>
 a les
 <xsl:value-of select="hour"/>:<xsl:value-of select="minute"/> h
+</xsl:template>
+
+<xsl:template match="tags">
+<ul><xsl:apply-templates/></ul>
+</xsl:template>
+
+<xsl:template match="tag">
+<li><xsl:apply-templates/></li>
 </xsl:template>
 
 </xsl:stylesheet>

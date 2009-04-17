@@ -1,13 +1,13 @@
 # Resource class definition
-package Resource;
+package Smeagol::Resource;
 
 use strict;
 use warnings;
 
 use XML::LibXML;
-use DataStore;
+use Smeagol::DataStore;
 use Carp;
-use XML;
+use Smeagol::XML;
 use Data::Dumper;
 
 use overload q{""} => \&__str__;
@@ -24,15 +24,15 @@ sub new {
 
     # Load on runtime to get rid of cross-dependency between
     # both Resource and Agenda
-    require Agenda;
-    require TagSet;
+    require Smeagol::Agenda;
+    require Smeagol::TagSet;
 
     $obj = {
         id          => _next_id(),
         description => $description,
-        agenda      => ( defined $agenda ) ? $agenda : Agenda->new(),
+        agenda      => ( defined $agenda ) ? $agenda : Smeagol::Agenda->new(),
         info        => ( defined $info ) ? $info : "",
-        tags        => ( defined $tags ) ? $tags : TagSet->new(),
+        tags        => ( defined $tags ) ? $tags : Smeagol::TagSet->new(),
         _persistent => 0,
     };
 
@@ -76,7 +76,7 @@ sub info {
 sub url {
     my $self = shift;
 
-    return "/" . lc(__PACKAGE__) . "/" . $self->id;
+    return "/resource/" . $self->id;
 }
 
 sub tags {
@@ -94,11 +94,11 @@ sub load {
 
     return if ( !defined($id) );
 
-    my $data = DataStore->load($id);
+    my $data = Smeagol::DataStore->load($id);
 
     return if ( !defined($data) );
 
-    my $resource = Resource->from_xml( $data, $id );
+    my $resource = Smeagol::Resource->from_xml( $data, $id );
 
     return $resource;
 }
@@ -114,8 +114,8 @@ sub from_xml {
 
     # Load on runtime to get rid of cross-dependency between
     # both Resource and Agenda
-    require Agenda;
-    require TagSet;
+    require Smeagol::Agenda;
+    require Smeagol::TagSet;
 
     # validate XML string against the DTD
     my $dtd = XML::LibXML::Dtd->new( "CPL UPC//Resource DTD v0.03",
@@ -133,14 +133,14 @@ sub from_xml {
         id => ( ( defined $id ) ? $id : _next_id() ),
         description =>
             $dom->getElementsByTagName('description')->string_value,
-        agenda      => Agenda->new(),
+        agenda      => Smeagol::Agenda->new(),
         info        => "",
-        tags        => TagSet->new(),
+        tags        => Smeagol::TagSet->new(),
         _persistent => 0,
     };
 
     if ( $dom->getElementsByTagName('agenda')->get_node(1) ) {
-        $obj->{agenda} = Agenda->from_xml(
+        $obj->{agenda} = Smeagol::Agenda->from_xml(
             $dom->getElementsByTagName('agenda')->get_node(1)->toString );
     }
 
@@ -150,7 +150,7 @@ sub from_xml {
     $obj->{info} = ($info) ? $info : "";
 
     if ( $dom->getElementsByTagName('tags')->get_node(1) ) {
-        $obj->{tags} = TagSet->from_xml(
+        $obj->{tags} = Smeagol::TagSet->from_xml(
             $dom->getElementsByTagName('tags')->get_node(1)->toString );
     }
 
@@ -182,7 +182,7 @@ sub __str__ {
     return $xmlText
         unless defined $url && $url ne '';
 
-    my $xmlDoc = eval { XML->new($xmlText) };
+    my $xmlDoc = eval { Smeagol::XML->new($xmlText) };
     croak $@ if $@;
 
     $xmlDoc->addXLink( "resource", $url );
@@ -206,7 +206,7 @@ sub to_xml {
 sub remove {
     my $self = shift;
 
-    DataStore->remove( $self->{id} );
+    Smeagol::DataStore->remove( $self->{id} );
     $self->{_persistent} = 0;
 }
 
@@ -215,7 +215,7 @@ sub save {
     my $self = shift;
 
     $self->{_persistent} = 1;
-    DataStore->save( $self->{id}, $self->to_xml() );
+    Smeagol::DataStore->save( $self->{id}, $self->to_xml() );
 }
 
 sub DESTROY {
@@ -225,7 +225,7 @@ sub DESTROY {
 }
 
 sub _next_id {
-    return DataStore->next_id(__PACKAGE__);
+    return Smeagol::DataStore->next_id(__PACKAGE__);
 }
 
 1;

@@ -1,4 +1,4 @@
-package XML;
+package Smeagol::XML;
 
 use strict;
 use warnings;

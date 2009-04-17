@@ -1,4 +1,4 @@
-package DataStore;
+package Smeagol::DataStore;
 
 use strict;
 use warnings;
@@ -123,7 +123,7 @@ sub remove {
     my $self = shift;
     my ($id) = @_;
 
-    if ( DataStore->exists($id) ) {
+    if ( Smeagol::DataStore->exists($id) ) {
         unlink _full_path($id)
             or croak "Could not remove persistent object " . _full_path($id);
     }

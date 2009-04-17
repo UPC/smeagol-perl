@@ -1,4 +1,4 @@
-package Agenda;
+package Smeagol::Agenda;
 
 use strict;
 use warnings;
@@ -6,7 +6,8 @@ use warnings;
 use Set::Object ();
 use base qw(Set::Object);
 use XML::LibXML;
-use Booking;
+use Smeagol::Booking;
+use Smeagol::XML;
 use Carp;
 
 use overload q{""} => \&__str__;
@@ -53,7 +54,7 @@ sub __str__ {
     return $xmlText
         unless defined $url;
 
-    my $xmlDoc = eval { XML->new($xmlText) };
+    my $xmlDoc = eval { Smeagol::XML->new($xmlText) };
     croak $@ if $@;
 
     $xmlDoc->addXLink( "agenda", $url . "/bookings" );
@@ -104,7 +105,7 @@ sub from_xml {
     # $ag object, so we do not need to worry about eventual
     # intersections present in the $xml
     for my $booking_dom_node ( $dom->getElementsByTagName('booking') ) {
-        my $b = Booking->from_xml( $booking_dom_node->toString(0) );
+        my $b = Smeagol::Booking->from_xml( $booking_dom_node->toString(0) );
         $ag->append($b);
     }
 

@@ -1,4 +1,4 @@
-package TagSet;
+package Smeagol::TagSet;
 
 use strict;
 use warnings;
@@ -6,8 +6,10 @@ use warnings;
 use Set::Object ();
 use base qw(Set::Object);
 use XML::LibXML;
-use Tag;
+use Smeagol::Tag;
 use Data::Dumper;
+use Smeagol::XML;
+use Carp;
 
 use overload q{""} => \&__str__;
 
@@ -42,7 +44,7 @@ sub __str__ {
     return $xmlText
         unless defined $url;
 
-    my $xmlDoc = eval { XML->new($xmlText) };
+    my $xmlDoc = eval { Smeagol::XML->new($xmlText) };
     croak $@ if $@;
 
     $xmlDoc->addXLink( "tags", $url . "/tags" );
@@ -92,7 +94,7 @@ sub from_xml {
     # $tgs object, so we do not need to worry about eventual
     # intersections present in the $xml
     for my $tag_dom_node ( $dom->getElementsByTagName('tag') ) {
-        my $tg = Tag->from_xml( $tag_dom_node->toString(0) );
+        my $tg = Smeagol::Tag->from_xml( $tag_dom_node->toString(0) );
         $tgS->append($tg);
     }
 

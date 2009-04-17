@@ -1,12 +1,12 @@
-package Resource::List;
+package Smeagol::Resource::List;
 
 use strict;
 use warnings;
 
-use DataStore;
-use Resource;
+use Smeagol::DataStore;
+use Smeagol::Resource;
 use XML::LibXML;
-use XML;
+use Smeagol::XML;
 use Carp;
 
 use overload q{""} => \&__str__;
@@ -16,8 +16,8 @@ sub new {
 
     my $obj = [];
 
-    foreach my $id ( DataStore->list_id ) {
-        my $r = Resource->load($id);
+    foreach my $id ( Smeagol::DataStore->list_id ) {
+        my $r = Smeagol::Resource->load($id);
         push @$obj, $r if defined $r;
     }
 
@@ -38,7 +38,7 @@ sub __str__ {
     return $xmlText
         unless defined $url;
 
-    my $xmlDoc = eval { XML->new($xmlText) };
+    my $xmlDoc = eval { Smeagol::XML->new($xmlText) };
     croak $@ if $@;
 
     $xmlDoc->addXLink( "resources", $url );

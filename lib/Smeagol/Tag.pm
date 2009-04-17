@@ -1,4 +1,4 @@
-package Tag;
+package Smeagol::Tag;
 
 use strict;
 use warnings;
@@ -6,7 +6,7 @@ use warnings;
 use XML::Simple;
 use XML::LibXML;
 use Carp;
-use XML;
+use Smeagol::XML;
 use Data::Dumper;
 
 use overload
@@ -40,7 +40,7 @@ sub value {
 sub url {
     my $self = shift;
 
-    return "/" . lc(__PACKAGE__) . "/" . $self->value;
+    return "/tag/" . $self->value;
 }
 
 sub __equal__ {
@@ -66,7 +66,7 @@ sub __str__ {
     return $xmlText
         unless defined $url;
 
-    my $xmlDoc = eval { XML->new($xmlText) };
+    my $xmlDoc = eval { Smeagol::XML->new($xmlText) };
     croak $@ if $@;
 
     $xmlDoc->addXLink( "tag", $url . $self->url );

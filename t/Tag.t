@@ -15,7 +15,7 @@ BEGIN {
     #
     unlink glob "/tmp/smeagol_datastore/*";
 
-    use_ok($_) for qw(Tag DataStore);
+    use_ok($_) for qw(Smeagol::Tag Smeagol::DataStore);
 }
 use Data::Dumper;
 
@@ -25,35 +25,35 @@ my $xml;
 
 #create tag
 {
-    $tg = Tag->new();
+    $tg = Smeagol::Tag->new();
     ok( !defined $tg, 'tag not created' );
 
-    $tg = Tag->new();
+    $tg = Smeagol::Tag->new();
     ok( !defined $tg, 'tag not created' );
 
-    $tg = Tag->new("");
+    $tg = Smeagol::Tag->new("");
     ok( !defined $tg, 'tag not created, is empty' );
 
-    $tg = Tag->new("987dcd  98");
+    $tg = Smeagol::Tag->new("987dcd  98");
     ok( !defined $tg, 'tag not created, there are spaces ' );
 
-    $tg = Tag->new("as");
+    $tg = Smeagol::Tag->new("as");
     ok( !defined $tg, 'tag not created, too short' );
 
-    $tg = Tag->new(
+    $tg = Smeagol::Tag->new(
         "aa333333333333333333333333333333333333333333333333333333asdfsdsaf");
     ok( !defined $tg, 'tag not created, too long' );
 
-    $tg = Tag->new("-87d:c_d.98");
+    $tg = Smeagol::Tag->new("-87d:c_d.98");
     ok( defined $tg, 'tag created' );
 
-    $tg = Tag->new("-87dcd.98");
+    $tg = Smeagol::Tag->new("-87dcd.98");
     ok( defined $tg, 'tag created' );
 
-    $tg = Tag->new("asdf-87d:c_d.98");
+    $tg = Smeagol::Tag->new("asdf-87d:c_d.98");
     ok( defined $tg, 'tag created' );
 
-    $tg = Tag->new("______");
+    $tg = Smeagol::Tag->new("______");
     ok( defined $tg, 'tag created' );
 
 }
@@ -61,7 +61,7 @@ my $xml;
 #value
 {
 
-    $tg = Tag->new("aula");
+    $tg = Smeagol::Tag->new("aula");
     ok( defined $tg, 'tag created' );
     ok( "aula" eq $tg->value(), 'tag retrieved ' );
 
@@ -86,12 +86,12 @@ my $xml;
 
 #to_xml
 {
-    $tg = Tag->new("projector");
+    $tg = Smeagol::Tag->new("projector");
     ok( defined $tg, 'created tag' );
     $xml = $tg->toXML();
     ok( '<tag>projector</tag>' eq $xml, 'Ok toXML' );
 
-    $tg = Tag->new("aula.multimedia");
+    $tg = Smeagol::Tag->new("aula.multimedia");
     ok( defined $tg, 'created tag' );
     $xml = $tg->toXML();
     ok( '<tag>aula.multimedia</tag>' eq $xml, 'Ok toXML' );
@@ -99,20 +99,20 @@ my $xml;
 
 #from_xml
 {
-    $tg = Tag->from_xml("<tag>aula</tag>");
+    $tg = Smeagol::Tag->from_xml("<tag>aula</tag>");
     ok( defined $tg, 'created tag from xml' );
     ok( $tg->value eq "aula", 'checked tag creation from xml' );
 
-    $tg = Tag->from_xml("<tag>au la</tag>");
+    $tg = Smeagol::Tag->from_xml("<tag>au la</tag>");
     ok( !defined $tg, 'not created tag from xml, wrong value' );
 
-    $tg = Tag->from_xml("<tag>aul</tag>");
+    $tg = Smeagol::Tag->from_xml("<tag>aul</tag>");
     ok( !defined $tg, 'not created tag from xml, too short' );
 
-    $tg = Tag->from_xml("<tag>campus+nord</tag>");
+    $tg = Smeagol::Tag->from_xml("<tag>campus+nord</tag>");
     ok( !defined $tg, 'not created tag from xml, wrong value' );
 
-    $tg = Tag->from_xml("<tag>campus:nord-aula:S103</tag>");
+    $tg = Smeagol::Tag->from_xml("<tag>campus:nord-aula:S103</tag>");
     ok( defined $tg, 'created tag from xml' );
     ok( $tg->value eq "campus:nord-aula:S103",
         'checked tag creation from xml'
@@ -124,10 +124,10 @@ my $xml;
 {
     my $encoding = "UTF-8";
     my $text     = decode( $encoding, "àèòéíóúïüçñ" );
-    my $tag      = Tag->new($text);
-    isa_ok( $tag, 'Tag' );
+    my $tag      = Smeagol::Tag->new($text);
+    isa_ok( $tag, 'Smeagol::Tag' );
     is( $tag->value, $text, "value in UTF-8" );
     like( $tag->toXML, qr/$text/, "XML string in UTF-8" );
 }
 
-END { DataStore->clean() }
+END { Smeagol::DataStore->clean() }

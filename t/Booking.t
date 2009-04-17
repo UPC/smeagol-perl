@@ -13,7 +13,11 @@ use Date::ICal;
 use Encode;
 
 BEGIN {
-    use_ok($_) for qw(Booking Booking::ICal DataStore);
+    use_ok($_) for qw(
+        Smeagol::Booking
+        Smeagol::Booking::ICal
+        Smeagol::DataStore
+    );
 }
 
 # Make a DateTime object with some defaults
@@ -30,7 +34,7 @@ sub datetime {
 }
 
 # 17:00 - 18:59
-my $b1 = Booking->new(
+my $b1 = Smeagol::Booking->new(
     "description b1",
     datetime( 2008, 4, 14, 17 ),
     datetime( 2008, 4, 14, 18, 59 ),
@@ -38,7 +42,7 @@ my $b1 = Booking->new(
 );
 
 # 19:00 - 19:59
-my $b2 = Booking->new(
+my $b2 = Smeagol::Booking->new(
     "description b2",
     datetime( 2008, 4, 14, 19 ),
     datetime( 2008, 4, 14, 19, 59 ),
@@ -46,7 +50,7 @@ my $b2 = Booking->new(
 );
 
 # 15:00 - 17:59
-my $b3 = Booking->new(
+my $b3 = Smeagol::Booking->new(
     "description b3",
     datetime( 2008, 4, 14, 15 ),
     datetime( 2008, 4, 14, 17, 59 ),
@@ -54,7 +58,7 @@ my $b3 = Booking->new(
 );
 
 # 15:00 - 17:00
-my $b4 = Booking->new(
+my $b4 = Smeagol::Booking->new(
     "description b4",
     datetime( 2008, 4, 14, 15 ),
     datetime( 2008, 4, 14, 17 ),
@@ -62,7 +66,7 @@ my $b4 = Booking->new(
 );
 
 # 16:00 - 16:29
-my $b5 = Booking->new(
+my $b5 = Smeagol::Booking->new(
     "description b5",
     datetime( 2008, 4, 14, 16 ),
     datetime( 2008, 4, 14, 16, 29 ),
@@ -70,7 +74,7 @@ my $b5 = Booking->new(
 );
 
 # 16:29:00 - 16:29:01
-my $b6 = Booking->new(
+my $b6 = Smeagol::Booking->new(
     "description b6",
     datetime( 2008, 4, 14, 16, 29, 0 ),
     datetime( 2008, 4, 14, 16, 29, 1 ),
@@ -78,7 +82,7 @@ my $b6 = Booking->new(
 );
 
 # 16:29:01 - 16:29:02
-my $b7 = Booking->new(
+my $b7 = Smeagol::Booking->new(
     "description b7",
     datetime( 2008, 4, 14, 16, 29, 1 ),
     datetime( 2008, 4, 14, 16, 29, 2 ),
@@ -86,7 +90,7 @@ my $b7 = Booking->new(
 );
 
 # 17:00:00 - 19:00:00
-my $b8 = Booking->new(
+my $b8 = Smeagol::Booking->new(
     "description b8",
     datetime( 2008, 4, 14, 17, 0, 0 ),
     datetime( 2008, 4, 14, 19, 0, 0 ),
@@ -94,7 +98,7 @@ my $b8 = Booking->new(
 );
 
 # 18:00:00 - 21:00:00
-my $b9 = Booking->new(
+my $b9 = Smeagol::Booking->new(
     "description b9",
     datetime( 2008, 4, 14, 18, 0, 0 ),
     datetime( 2008, 4, 14, 21, 0, 0 ),
@@ -102,7 +106,7 @@ my $b9 = Booking->new(
 );
 
 # 21:00 - 21:00:01
-my $b10 = Booking->new(
+my $b10 = Smeagol::Booking->new(
     "description b10",
     datetime( 2008, 4, 14, 21 ),
     datetime( 2008, 4, 14, 21, 0, 1 ),
@@ -110,7 +114,7 @@ my $b10 = Booking->new(
 );
 
 # 21:00 - 21:00:01
-my $b11 = Booking->new(
+my $b11 = Smeagol::Booking->new(
     "description b11",
     datetime( 2009, 4, 14, 21 ),
     datetime( 2009, 4, 14, 21, 0, 1 ),
@@ -140,11 +144,11 @@ ok( $b1->info eq 'chachi pilongui', 'Booking->info setter' );
 $b1->info('info b1');                  # undo previous modification
 
 # missing parameter(s)
-my $wrong = Booking->new( "wrong", datetime( 2008, 4, 14, 16 ) );
+my $wrong = Smeagol::Booking->new( "wrong", datetime( 2008, 4, 14, 16 ) );
 ok( !defined($wrong), 'Booking->new with missing parameter' );
 
 # Booking->info is optional
-my $good = Booking->new(
+my $good = Smeagol::Booking->new(
     "good",
     datetime( 2008, 4, 14, 16 ),
     datetime( 2008, 4, 14, 17 )
@@ -199,11 +203,11 @@ my $booking_as_xml = '
     <info>' . $b1->info . '</info>
 </booking>';
 
-ok( $b1 == Booking->from_xml( $booking_as_xml, $b1->id ),
+ok( $b1 == Smeagol::Booking->from_xml( $booking_as_xml, $b1->id ),
     'from_xml booking' );
 
 # from_xml booking test (wrong XML)
-my $booking_as_xml_wrong = Booking->from_xml( '
+my $booking_as_xml_wrong = Smeagol::Booking->from_xml( '
 <booking>
     <!-- <id> is missing! -->
     <!-- <description> is missing! -->
@@ -252,13 +256,13 @@ ok( !$b10->intersects($b11), 'b11 does not interlace b10' );
         hour  => 18
     );
 
-    my $booking = Booking::ICal->new(
+    my $booking = Smeagol::Booking::ICal->new(
         "description ical",
         DateTime->new(%dtstart),
         DateTime->new(%dtend),
     );
 
-    isa_ok( $booking, "Booking::ICal" );
+    isa_ok( $booking, "Smeagol::Booking::ICal" );
 
     my $entry = Data::ICal::Entry::Event->new();
     $entry->add_properties(
@@ -274,7 +278,7 @@ ok( !$b10->intersects($b11), 'b11 does not interlace b10' );
 
     is_deeply( \@got, \@expected, "looks like an vcalendar" );
 
-    my $xmlBooking = Booking->from_xml( $booking->parent->to_xml );
+    my $xmlBooking = Smeagol::Booking->from_xml( $booking->parent->to_xml );
     ok( $booking == $xmlBooking, "ical == xml" );
     ok( $booking eq $xmlBooking, "ical eq xml" );
 
@@ -290,15 +294,15 @@ ok( !$b10->intersects($b11), 'b11 does not interlace b10' );
     my $encoding    = "UTF-8";
     my $description = decode( $encoding, "àèòéíóú" );
     my $info        = decode( $encoding, "ïüñç" );
-    my $b           = Booking->new(
+    my $b           = Smeagol::Booking->new(
         $description,
         datetime( 2008, 4, 14, 17 ),
         datetime( 2008, 4, 14, 18, 59 ), $info,
     );
 
-    isa_ok( $b, 'Booking' );
+    isa_ok( $b, 'Smeagol::Booking' );
     is( $b->description, $description, "description in UTF-8" );
     is( $b->info,        $info,        "info in UTF-8" );
 }
 
-END { DataStore->clean() }
+END { Smeagol::DataStore->clean() }

@@ -29,7 +29,7 @@ defined($cli)
     or die
     "Could not create client. Is there a Smeagol server running on \"$host\"?\n";
 verbose("Client created");
-return $cli;
+
 
 # List resources
 if ( defined $ARGV{'listresources'} ) {

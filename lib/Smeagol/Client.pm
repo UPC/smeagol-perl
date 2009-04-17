@@ -1,12 +1,9 @@
-package Client;
+package Smeagol::Client;
 
 use strict;
 use warnings;
 
 use DateTime;
-use Resource;
-use Agenda;
-use Booking;
 use LWP::UserAgent;
 use Carp;
 use Data::Dumper;

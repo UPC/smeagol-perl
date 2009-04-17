@@ -6,20 +6,20 @@ use strict;
 use warnings;
 
 BEGIN {
-    use_ok($_) for qw(XML);
+    use_ok($_) for qw(Smeagol::XML);
 }
 
 # simplest XML tests
 {
-    eval { XML->new() };
+    eval { Smeagol::XML->new() };
     isnt( $@, "", "undef XML fails" );
 
-    eval { XML->new("") };
+    eval { Smeagol::XML->new("") };
     isnt( $@, "", "empty XML fails" );
 
-    my $xml = eval { XML->new("<foobar/>") };
-    is( $@,        "",    "simplest XML works" );
-    is( ref($xml), "XML", "blessed thy XML" );
+    my $xml = eval { Smeagol::XML->new("<foobar/>") };
+    is( $@,        "",             "simplest XML works" );
+    is( ref($xml), "Smeagol::XML", "blessed thy XML" );
 
     my $expected = qq{<?xml version="1.0"?>\n<foobar/>\n};
     is( $xml, $expected, "simplest XML as expected" );
@@ -42,7 +42,7 @@ BEGIN {
 # complex XML tests
 {
     my $xml = eval {
-        XML->new(<<'EndOfXML') };
+        Smeagol::XML->new(<<'EndOfXML') };
 <foobar>
     <foobar>
         <foobar>foobar</foobar>
@@ -54,8 +54,8 @@ BEGIN {
     </foobar>
 </foobar>
 EndOfXML
-    is( $@,        "",    "complex XML works" );
-    is( ref($xml), "XML", "blessed thy XML" );
+    is( $@,        "",             "complex XML works" );
+    is( ref($xml), "Smeagol::XML", "blessed thy XML" );
 
     $xml->addPreamble("foobar");
     $xml->addXLink( "foobar", "http://foobar/foobar" );

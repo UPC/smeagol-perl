@@ -1,4 +1,4 @@
-package Server;
+package Smeagol::Server;
 
 use strict;
 use warnings;
@@ -9,8 +9,11 @@ use CGI qw();
 use XML::LibXML;
 use Carp;
 use Data::Dumper;
-use Resource;
-use Resource::List;
+use Smeagol::Tag;
+use Smeagol::Booking;
+use Smeagol::Agenda;
+use Smeagol::Resource;
+use Smeagol::Resource::List;
 
 # Nota: hauria de funcionar amb "named groups" però només
 # s'implementen a partir de perl 5.10. Quina misèria, no?
@@ -140,14 +143,14 @@ sub _send_ical {
 ##############################################################
 
 sub _list_resources {
-    my $list = Resource::List->new();
+    my $list = Smeagol::Resource::List->new();
     _send_xml( $list->to_xml( "/resources", 1 ) );
 }
 
 sub _create_resource {
     my ($cgi) = @_;
 
-    my $r = Resource->from_xml( $cgi->param('POSTDATA') );
+    my $r = Smeagol::Resource->from_xml( $cgi->param('POSTDATA') );
 
     if ( !defined $r ) {    # wrong XML argument
         _status(400);
@@ -170,7 +173,7 @@ sub _retrieve_resource {
         return;
     }
 
-    my $r = Resource->load($id);
+    my $r = Smeagol::Resource->load($id);
 
     if ( !defined $r ) {
         _status(404);
@@ -188,7 +191,7 @@ sub _delete_resource {
         return;
     }
 
-    my $r = Resource->load($id);
+    my $r = Smeagol::Resource->load($id);
 
     if ( !defined $r ) {
         _status( 404, "Resource #$id does not exist" );
@@ -207,12 +210,13 @@ sub _update_resource {
         return;
     }
 
-    my $updated_resource = Resource->from_xml( $cgi->param('POSTDATA'), $id );
+    my $updated_resource
+        = Smeagol::Resource->from_xml( $cgi->param('POSTDATA'), $id );
 
     if ( !defined $updated_resource ) {
         _status(400);
     }
-    elsif ( !defined Resource->load($id) ) {
+    elsif ( !defined Smeagol::Resource->load($id) ) {
         _status(404);
     }
     else {
@@ -251,7 +255,7 @@ sub _send_dtd {
 sub _list_bookings {
     my ( $cgi, $idResource, undef, $viewAs ) = @_;
 
-    my $r = Resource->load($idResource);
+    my $r = Smeagol::Resource->load($idResource);
 
     if ( !defined $r ) {
         _status(404);
@@ -280,13 +284,13 @@ sub _create_booking {
         return;
     }
 
-    my $r = Resource->load($idResource);
+    my $r = Smeagol::Resource->load($idResource);
     if ( !defined $r ) {
         _status(404);
         return;
     }
 
-    my $b = Booking->from_xml( $cgi->param('POSTDATA') );
+    my $b = Smeagol::Booking->from_xml( $cgi->param('POSTDATA') );
     if ( !defined $b ) {
         _status(400);
         return;
@@ -295,7 +299,7 @@ sub _create_booking {
     my $ag = $r->agenda;
 
     if ( $ag->interlace($b) ) {
-        my $overlapping_agenda = Agenda->new();
+        my $overlapping_agenda = Smeagol::Agenda->new();
         my @overlapping = grep { $_->intersects($b) } $ag->elements;
         foreach my $aux (@overlapping) {
             $overlapping_agenda->append($aux);
@@ -321,7 +325,7 @@ sub _retrieve_booking {
         return;
     }
 
-    my $r = Resource->load($idR);
+    my $r = Smeagol::Resource->load($idR);
     if ( !defined $r ) {
         _status(404);
         return;
@@ -360,7 +364,7 @@ sub _delete_booking {
         return;
     }
 
-    my $r = Resource->load($idR);
+    my $r = Smeagol::Resource->load($idR);
 
     if ( !defined $r ) {
         _status(404);
@@ -396,7 +400,7 @@ sub _update_booking {
         return;
     }
 
-    my $r = Resource->load($idR);
+    my $r = Smeagol::Resource->load($idR);
     if ( !defined $r ) {
         _status(404);
         return;
@@ -414,7 +418,8 @@ sub _update_booking {
         return;
     }
 
-    my $new_booking = Booking->from_xml( $cgi->param('POSTDATA'), $idB );
+    my $new_booking
+        = Smeagol::Booking->from_xml( $cgi->param('POSTDATA'), $idB );
 
     if ( !defined $new_booking ) {
         _status(400);
@@ -431,7 +436,7 @@ sub _update_booking {
         # if overlappings are produced, let's build a new agenda
         # containing affected bookings and return it to the client
         my @overlapping = grep { $_->intersects($new_booking) } $ag->elements;
-        my $overlapping_agenda = Agenda->new();
+        my $overlapping_agenda = Smeagol::Agenda->new();
 
         foreach my $aux (@overlapping) {
             $overlapping_agenda->append($aux);
@@ -460,13 +465,13 @@ sub _create_tag {
         return;
     }
 
-    my $r = Resource->load($idResource);
+    my $r = Smeagol::Resource->load($idResource);
     if ( !defined $r ) {
         _status(404);
         return;
     }
 
-    my $tg = Tag->from_xml( $cgi->param('POSTDATA') );
+    my $tg = Smeagol::Tag->from_xml( $cgi->param('POSTDATA') );
     if ( !defined $tg ) {
         _status(400);
         return;
@@ -479,7 +484,7 @@ sub _create_tag {
 
 sub _list_tags {
     my ( $cgi, $idResource ) = @_;
-    my $r = Resource->load($idResource);
+    my $r = Smeagol::Resource->load($idResource);
 
     if ( !defined $r ) {
         _status(404);
@@ -497,7 +502,7 @@ sub _delete_tag {
         return;
     }
 
-    my $r = Resource->load($idR);
+    my $r = Smeagol::Resource->load($idR);
 
     if ( !defined $r ) {
         _status(404);

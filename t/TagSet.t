@@ -14,7 +14,11 @@ BEGIN {
     #
     unlink glob "/tmp/smeagol_datastore/*";
 
-    use_ok($_) for qw(Tag TagSet DataStore);
+    use_ok($_) for qw(
+        Smeagol::Tag
+        Smeagol::TagSet
+        Smeagol::DataStore
+    );
 }
 use Data::Dumper;
 
@@ -22,36 +26,36 @@ my $tgS;
 my ( $tg1, $tg2, $tg3, $tg4, $tg5 );
 my ( $xmlTg1, $xmlTg5, $xmlTgS );
 
-$tg1 = Tag->new("aula");
+$tg1 = Smeagol::Tag->new("aula");
 ok( defined $tg1, 'tag created' );
 ok( $tg1->value eq "aula", 'tag checked' );
 
-$tg2 = Tag->new("campus:nord");
+$tg2 = Smeagol::Tag->new("campus:nord");
 ok( defined $tg2, 'tag created' );
 ok( $tg2->value eq "campus:nord", 'tag checked' );
 
-$tg3 = Tag->new("S-345");
+$tg3 = Smeagol::Tag->new("S-345");
 ok( defined $tg3, 'tag created' );
 ok( $tg3->value eq "S-345", 'tag checked' );
 
-$tg4 = Tag->new("projeeector");
+$tg4 = Smeagol::Tag->new("projeeector");
 ok( defined $tg4, 'tag created' );
 ok( $tg4->value eq "projeeector", 'tag checked' );
 
-$tg5 = Tag->new("projector");
+$tg5 = Smeagol::Tag->new("projector");
 ok( defined $tg5, 'tag created' );
 ok( $tg5->value eq "projector", 'tag checked' );
 
 #create tagSet
 {
-    $tgS = TagSet->new();
+    $tgS = Smeagol::TagSet->new();
     ok( defined $tgS, 'tagSet created' );
 }
 
 #appending and removing tags
 {
 
-    $tgS = TagSet->new();
+    $tgS = Smeagol::TagSet->new();
     ok( defined $tgS, 'tagSet created' );
 
     ok( $tgS->size == 0, 'tgS contains 0 tags' );
@@ -90,7 +94,7 @@ ok( $tg5->value eq "projector", 'tag checked' );
 
 #to_xml
 {
-    $tgS = TagSet->new();
+    $tgS = Smeagol::TagSet->new();
     ok( defined $tgS, 'tagSet created' );
 
     ok( $tgS->size == 0, 'tgS contains 0 tags' );
@@ -134,7 +138,7 @@ ok( $tg5->value eq "projector", 'tag checked' );
     $xmlTg5 = $tg5->toXML();
     $xmlTgS = "<tags>" . $xmlTg1 . "</tags>";
 
-    $tgS = TagSet->from_xml($xmlTgS);
+    $tgS = Smeagol::TagSet->from_xml($xmlTgS);
     ok( defined $tgS,    'tagSet created' );
     ok( $tgS->size == 1, 'tgS contains 1 tag' );
 
@@ -143,7 +147,7 @@ ok( $tg5->value eq "projector", 'tag checked' );
 
     $xmlTgS = "<tags>" . $xmlTg1 . $xmlTg5 . "</tags>";
 
-    $tgS = TagSet->from_xml($xmlTgS);
+    $tgS = Smeagol::TagSet->from_xml($xmlTgS);
     ok( defined $tgS,    'tagSet created' );
     ok( $tgS->size == 2, 'tgS contains 2 tag' );
 
@@ -157,4 +161,4 @@ ok( $tg5->value eq "projector", 'tag checked' );
     );
 }
 
-END { DataStore->clean() }
+END { Smeagol::DataStore->clean() }

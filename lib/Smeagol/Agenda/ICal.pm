@@ -1,9 +1,9 @@
-package Agenda::ICal;
+package Smeagol::Agenda::ICal;
 
 use strict;
 use warnings;
 
-use base qw(Agenda);
+use base qw(Smeagol::Agenda);
 
 use Data::ICal;
 
@@ -21,7 +21,7 @@ sub new {
 sub parent {
     my $self = shift;
 
-    my $class = "Agenda";
+    my $class = "Smeagol::Agenda";
     return bless $self, $class;
 }
 

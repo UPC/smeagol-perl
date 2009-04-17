@@ -1,4 +1,4 @@
-package Booking;
+package Smeagol::Booking;
 
 use strict;
 use warnings;
@@ -7,7 +7,8 @@ use DateTime::Span ();
 use XML::Simple;
 use XML::LibXML;
 use Carp;
-use XML;
+use Smeagol::XML;
+use Smeagol::DataStore;
 use base qw(DateTime::Span);
 
 use overload
@@ -29,8 +30,8 @@ sub new {
     );
 
     $obj->{ __PACKAGE__ . "::description" } = $description;
-    $obj->{ __PACKAGE__ . "::id" }          = DataStore->next_id(__PACKAGE__);
-    $obj->{ __PACKAGE__ . "::info" }        = defined($info) ? $info : '';
+    $obj->{ __PACKAGE__ . "::id" } = Smeagol::DataStore->next_id(__PACKAGE__);
+    $obj->{ __PACKAGE__ . "::info" } = defined($info) ? $info : '';
 
     bless $obj, $class;
     return $obj;
@@ -66,7 +67,7 @@ sub info {
 sub url {
     my $self = shift;
 
-    return "/" . lc(__PACKAGE__) . "/" . $self->id;
+    return "/booking/" . $self->id;
 }
 
 sub __equal__ {
@@ -144,7 +145,7 @@ sub __str__ {
     return $xmlText
         unless defined $url;
 
-    my $xmlDoc = eval { XML->new($xmlText) };
+    my $xmlDoc = eval { Smeagol::XML->new($xmlText) };
     croak $@ if $@;
 
     $xmlDoc->addXLink( "booking", $url . $self->url );
@@ -208,7 +209,7 @@ sub from_xml {
     $obj->{ __PACKAGE__ . "::id" }
         = ( defined $b->{id} ) ? $b->{id}
         : ( defined $id ) ? $id
-        :                   DataStore->next_id(__PACKAGE__);
+        :                   Smeagol::DataStore->next_id(__PACKAGE__);
 
     $obj->{ __PACKAGE__ . "::description" } = $b->{description};
     $obj->{ __PACKAGE__ . "::info" }

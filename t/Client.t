@@ -11,27 +11,31 @@ use Data::ICal;
 use Data::ICal::Entry::Event;
 
 BEGIN {
-    use_ok($_) for qw(Server Client DataStore);
+    use_ok($_) for qw(
+        Smeagol::Server
+        Smeagol::Client
+        Smeagol::DataStore
+    );
 }
 
 my $server_port = 8000;
 my $server      = "http://localhost:$server_port";
-my $pid         = Server->new($server_port)->background();
+my $pid         = Smeagol::Server->new($server_port)->background();
 
-my $client = Client->new();
+my $client = Smeagol::Client->new();
 ok( !defined $client, 'client not created' );
 
-$client = Client->new("http://bad.example.com");
+$client = Smeagol::Client->new("http://bad.example.com");
 ok( !defined $client, 'client not created, bad DNS record' );
 
-$client = Client->new("://www.example.com");
+$client = Smeagol::Client->new("://www.example.com");
 ok( !defined $client, 'client not created, bad scheme URI' );
 
-$client = Client->new("http://www.example.com");
+$client = Smeagol::Client->new("http://www.example.com");
 ok( !defined $client, 'client not created, server not responding' );
 
-$client = Client->new($server);
-ok( ref $client eq 'Client', 'client created' );
+$client = Smeagol::Client->new($server);
+ok( ref $client eq 'Smeagol::Client', 'client created' );
 
 my @idResources;
 my @Resources;
@@ -597,5 +601,5 @@ my @tgS;
 
 END {
     kill 3, $pid;
-    DataStore->clean();
+    Smeagol::DataStore->clean();
 }

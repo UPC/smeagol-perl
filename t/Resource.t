@@ -10,7 +10,16 @@ use Data::Compare;
 use Encode;
 use Data::Dumper;
 
-BEGIN { use_ok($_) for qw(Booking Resource Agenda DataStore Tag TagSet) }
+BEGIN {
+    use_ok($_) for qw(
+        Smeagol::Booking
+        Smeagol::Resource
+        Smeagol::Agenda
+        Smeagol::DataStore
+        Smeagol::Tag
+        Smeagol::TagSet
+    );
+}
 
 # Make a DateTime object with some defaults
 sub datetime {
@@ -26,7 +35,7 @@ sub datetime {
 }
 
 # 17:00 - 18:59
-my $b1 = Booking->new(
+my $b1 = Smeagol::Booking->new(
     "b1",
     datetime( 2008, 4, 14, 17 ),
     datetime( 2008, 4, 14, 18, 59 ),
@@ -34,7 +43,7 @@ my $b1 = Booking->new(
 );
 
 # 19:00 - 19:59
-my $b2 = Booking->new(
+my $b2 = Smeagol::Booking->new(
     "b2",
     datetime( 2008, 4, 14, 19 ),
     datetime( 2008, 4, 14, 19, 59 ),
@@ -49,7 +58,7 @@ my $resource_as_xml = <<'EOF';
     <info>info de l'aula chachipilongui</info>
 </resource>
 EOF
-my $r1 = Resource->from_xml($resource_as_xml);
+my $r1 = Smeagol::Resource->from_xml($resource_as_xml);
 ok( $r1->description eq "aula chachipilongui"
         && $r1->info eq "info de l'aula chachipilongui",
     'resource r created from XML string'
@@ -60,9 +69,9 @@ my $resource_as_hash = {
     description => "aula chachipilongui",
     info        => "info de l'aula chachipilongui",
 };
-my $r2 = Resource->new( 'aula chachipilongui',
+my $r2 = Smeagol::Resource->new( 'aula chachipilongui',
     undef, "info de l'aula chachipilongui" );
-my $r2bis = Resource->from_xml( $r2->to_xml(), $r2->id );
+my $r2bis = Smeagol::Resource->from_xml( $r2->to_xml(), $r2->id );
 ok( $r2bis->description eq 'aula chachipilongui'
         && $r2bis->info eq "info de l'aula chachipilongui",
     'to_xml resource'
@@ -97,7 +106,7 @@ ok( $r1->to_xml() eq "<resource>"
 $r1->agenda->append($b2);
 ok( $r1->agenda->contains($b2), 'b2 in r->ag' );
 
-my $res = Resource->from_xml( '
+my $res = Smeagol::Resource->from_xml( '
 <resource>
     <description>aula</description>
     <agenda>
@@ -156,37 +165,37 @@ my $ag;
 {
 
     #with agenda
-    $tg = Tag->new("aula");
+    $tg = Smeagol::Tag->new("aula");
     ok( defined $tg && $tg->value eq "aula", 'tag created ok' );
 
-    $tgS = TagSet->new();
+    $tgS = Smeagol::TagSet->new();
     ok( defined $tgS, 'tagSet created ok' );
 
     $tgS->append($tg);
     ok( $tgS->size == 1, 'tgS contains 1 tag' );
 
-    $ag = Agenda->new();
+    $ag = Smeagol::Agenda->new();
     ok( defined $ag, 'ag created ok' );
 
-    $r3 = Resource->new( 'A5123', 'dies', $ag, $tgS );
+    $r3 = Smeagol::Resource->new( 'A5123', 'dies', $ag, $tgS );
     ok( defined $r3 && $r3->tags->to_xml() eq "<tags><tag>aula</tag></tags>",
         'resource created ok from data'
     );
 
     #without agenda
-    $tg = Tag->new("aula");
+    $tg = Smeagol::Tag->new("aula");
     ok( defined $tg && $tg->value eq "aula", 'tag created ok' );
 
-    $tgS = TagSet->new();
+    $tgS = Smeagol::TagSet->new();
     ok( defined $tgS, 'tagSet created ok' );
 
     $tgS->append($tg);
     ok( $tgS->size == 1, 'tgS contains 1 tag' );
 
-    $ag = Agenda->new();
+    $ag = Smeagol::Agenda->new();
     ok( defined $ag, 'ag created ok' );
 
-    $r3 = Resource->new( 'A5123', 'dies', undef, $tgS );
+    $r3 = Smeagol::Resource->new( 'A5123', 'dies', undef, $tgS );
     ok( defined $r3 && $r3->tags->to_xml() eq "<tags><tag>aula</tag></tags>",
         'resource created ok from data'
     );
@@ -196,7 +205,7 @@ my $ag;
 {
 
     #with agenda
-    $r3 = Resource->from_xml( '
+    $r3 = Smeagol::Resource->from_xml( '
 		<resource>
 		    <description>aula</description>
 			<agenda>
@@ -234,7 +243,7 @@ my $ag;
     );
 
     #without agenda
-    $r3 = Resource->from_xml( '
+    $r3 = Smeagol::Resource->from_xml( '
 		<resource>
 		    <description>aula</description>
     		<info>horaria</info>
@@ -253,7 +262,7 @@ my $ag;
 
 #updating tags
 {
-    $r3 = Resource->from_xml( '
+    $r3 = Smeagol::Resource->from_xml( '
 		<resource>
 		    <description>aula</description>
     		<info>horaria</info>
@@ -268,16 +277,16 @@ my $ag;
         'resource created ok'
     );
 
-    $tg = Tag->new("projector");
+    $tg = Smeagol::Tag->new("projector");
     ok( defined $tg && $tg->value eq "projector", 'tag created ok' );
 
-    $tg1 = Tag->new("campus:nord");
+    $tg1 = Smeagol::Tag->new("campus:nord");
     ok( defined $tg1 && $tg1->value eq "campus:nord", 'tag created ok' );
 
-    $tgS = TagSet->new();
+    $tgS = Smeagol::TagSet->new();
     ok( defined $tgS, 'tagSet created ok' );
 
-    $tg2 = Tag->new("capacitat:200");
+    $tg2 = Smeagol::Tag->new("capacitat:200");
     ok( defined $tg2 && $tg2->value eq "capacitat:200", 'tag created ok' );
 
     $tgS->append($tg);
@@ -329,13 +338,13 @@ my $ag;
 </resource>
 EOF
 
-    my $r = Resource->from_xml($resource_as_xml);
-    isa_ok( $r, 'Resource' );
+    my $r = Smeagol::Resource->from_xml($resource_as_xml);
+    isa_ok( $r, 'Smeagol::Resource' );
     is( $r->description, $description, "description in UTF-8" );
     is( $r->info,        $info,        "info in UTF-8" );
     $r->save;
 }
 
 END {
-    DataStore->clean();
+    Smeagol::DataStore->clean();
 }

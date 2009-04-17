@@ -1,9 +1,9 @@
-package Booking::ICal;
+package Smeagol::Booking::ICal;
 
 use strict;
 use warnings;
 
-use base qw(Booking);
+use base qw(Smeagol::Booking);
 
 use overload q{""} => \&__str__;
 
@@ -23,7 +23,7 @@ sub new {
 sub parent {
     my $self = shift;
 
-    my $class = "Booking";
+    my $class = "Smeagol::Booking";
     return bless $self, $class;
 }
 

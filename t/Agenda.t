@@ -13,7 +13,13 @@ use Date::ICal;
 use Encode;
 
 BEGIN {
-    use_ok($_) for qw(Booking Booking::ICal Agenda Agenda::ICal DataStore);
+    use_ok($_) for qw(
+        Smeagol::Booking
+        Smeagol::Booking::ICal
+        Smeagol::Agenda
+        Smeagol::Agenda::ICal
+        Smeagol::DataStore
+    );
 }
 
 # Make a DateTime object with some defaults
@@ -30,7 +36,7 @@ sub datetime {
 }
 
 # 17:00 - 18:59
-my $b1 = Booking->new(
+my $b1 = Smeagol::Booking->new(
     "b1",
     datetime( 2008, 4, 14, 17 ),
     datetime( 2008, 4, 14, 18, 59 ),
@@ -38,7 +44,7 @@ my $b1 = Booking->new(
 );
 
 # 19:00 - 19:59
-my $b2 = Booking->new(
+my $b2 = Smeagol::Booking->new(
     "b2",
     datetime( 2008, 4, 14, 19 ),
     datetime( 2008, 4, 14, 19, 59 ),
@@ -46,7 +52,7 @@ my $b2 = Booking->new(
 );
 
 # 15:00 - 17:59
-my $b3 = Booking->new(
+my $b3 = Smeagol::Booking->new(
     "b3",
     datetime( 2008, 4, 14, 15 ),
     datetime( 2008, 4, 14, 17, 59 ),
@@ -54,7 +60,7 @@ my $b3 = Booking->new(
 );
 
 # 15:00 - 17:00
-my $b4 = Booking->new(
+my $b4 = Smeagol::Booking->new(
     "b4",
     datetime( 2008, 4, 14, 15 ),
     datetime( 2008, 4, 14, 17 ),
@@ -62,7 +68,7 @@ my $b4 = Booking->new(
 );
 
 # 16:00 - 16:29
-my $b5 = Booking->new(
+my $b5 = Smeagol::Booking->new(
     "b5",
     datetime( 2008, 4, 14, 16 ),
     datetime( 2008, 4, 14, 16, 29 ),
@@ -70,7 +76,7 @@ my $b5 = Booking->new(
 );
 
 # Agenda Append Tests
-my $ag = Agenda->new();
+my $ag = Smeagol::Agenda->new();
 
 $ag->append($b1);
 ok( $ag->contains($b1),  'b1 in ag' );
@@ -125,7 +131,7 @@ ok( $ag->size == 0, 'remove non-existing b4 from ag' );
 
 # Testing iCalendar features
 {
-    my $agenda = Agenda::ICal->new();
+    my $agenda = Smeagol::Agenda::ICal->new();
     ok( $agenda->size == 0, "agenda has no ical bookings" );
 
     my %dtstart1 = (
@@ -141,7 +147,7 @@ ok( $ag->size == 0, 'remove non-existing b4 from ag' );
         hour  => 11,
     );
 
-    my $booking1 = Booking::ICal->new(
+    my $booking1 = Smeagol::Booking::ICal->new(
         "1st booking ical",
         DateTime->new(%dtstart1),
         DateTime->new(%dtend1),
@@ -169,7 +175,7 @@ ok( $ag->size == 0, 'remove non-existing b4 from ag' );
         hour  => 16,
     );
 
-    my $booking2 = Booking::ICal->new(
+    my $booking2 = Smeagol::Booking::ICal->new(
         "2nd booking ical",
         DateTime->new(%dtstart2),
         DateTime->new(%dtend2),
@@ -201,17 +207,17 @@ ok( $ag->size == 0, 'remove non-existing b4 from ag' );
     my $encoding    = "UTF-8";
     my $description = decode( $encoding, "àèòéíóú" );
     my $info        = decode( $encoding, "ïüçñ" );
-    my $booking     = Booking->new(
+    my $booking     = Smeagol::Booking->new(
         $description,
         datetime( 2008, 4, 14, 16 ),
         datetime( 2008, 4, 14, 16, 29 ), $info,
     );
-    isa_ok( $booking, 'Booking' );
+    isa_ok( $booking, 'Smeagol::Booking' );
     is( $booking->description, $description, "description in UTF-8" );
     is( $booking->info,        $info,        "info in UTF-8" );
 
-    my $agenda = Agenda->new();
-    isa_ok( $agenda, 'Agenda' );
+    my $agenda = Smeagol::Agenda->new();
+    isa_ok( $agenda, 'Smeagol::Agenda' );
 
     $agenda->append($booking);
     ok( $agenda->contains($booking), 'booking added in agenda' );
@@ -219,4 +225,4 @@ ok( $ag->size == 0, 'remove non-existing b4 from ag' );
     like( "$agenda", qr/$info/,        "UTF-8 info found in agenda" );
 }
 
-END { DataStore->clean(); }
+END { Smeagol::DataStore->clean(); }

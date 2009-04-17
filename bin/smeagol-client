@@ -241,7 +241,7 @@ Show resource with given <resourceid>
 =for Euclid:
     resourceid.type: +integer
 
-=item -cr <description> [<info>] | --createsource <description> [<info>]
+=item -cr <description> [<info>] | --createresource <description> [<info>]
 
 Create a new resource with given <description> and optional <info>
 

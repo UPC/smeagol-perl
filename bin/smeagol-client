@@ -1,0 +1,354 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+my $VERSION = 0.04;
+
+use Getopt::Euclid qw( :minimal_keys );
+use Client;
+
+# global variables
+
+# are we in verbose mode?
+my $VERBOSE = 0;
+
+# the client
+my $client;
+
+if ( $ARGV{verbose} ) {
+    $VERBOSE = 1;
+    verbose("$0 version $VERSION entering verbose mode.");
+}
+
+# Create client
+my $host = "$ARGV{server}:$ARGV{port}";
+verbose("Trying to create client using $host");
+my $cli = Client->new($host);
+defined($cli)
+    or die
+    "Could not create client. Is there a Smeagol server running on \"$host\"?\n";
+verbose("Client created");
+return $cli;
+
+# List resources
+if ( defined $ARGV{'listresources'} ) {
+    verbose("request: list resources");
+    my @ids = $client->listResources();
+    foreach my $i (@ids) {
+        print $i . "\n";
+    }
+    verbose( scalar(@ids) . " resource(s) found" );
+    exit(0);
+}
+
+# Create resource
+if ( defined $ARGV{createresource} ) {
+    verbose(  "request: create resource with"
+            . "\ndescription: $ARGV{description}"
+            . "\n       info: $ARGV{info}\n" );
+    my $result = $client->createResource( $ARGV{description}, $ARGV{info} );
+    defined $result or die "couldn't create resource\n";
+    verbose("resource created successfully");
+    exit(0);
+}
+
+# Get resource
+if ( defined $ARGV{getresource} ) {
+    verbose("request: get resource $ARGV{resourceid}");
+    my $result = $client->getResource( $ARGV{resourceid} );
+    defined $result or die "couldn't retrieve resource\n";
+    showResource($result);
+    verbose("resource retrieved successfully");
+    exit(0);
+}
+
+# Delete resource
+if ( defined $ARGV{delresource} ) {
+    verbose("request: delete resource $ARGV{resourceid}");
+    my $result = $client->delResource( $ARGV{resourceid} );
+    defined($result) or die "couldn't delete resource\n";
+    verbose("resource deleted successfully");
+    exit(0);
+}
+
+# Update resource
+if ( defined $ARGV{updateresource} ) {
+    verbose(  "request: update resource $ARGV{resourceid} with"
+            . "\ndescription: "
+            . $ARGV{description}
+            . "\n start date: "
+            . $ARGV{start}
+            . "\n   end date: "
+            . $ARGV{end}
+            . "\n       info: "
+            . $ARGV{info}
+            . "\n" );
+    my $result
+        = $client->updateResource( $ARGV{resourceid}, $ARGV{description},
+        $ARGV{info} );
+    defined($result) or die "couldn't update resource\n";
+    verbose("resource updated successfully");
+    exit(0);
+}
+
+# Create booking
+if ( defined $ARGV{createbooking} ) {
+    verbose(  "request: create booking for resource $ARGV{resourceid} with"
+            . "\ndescription: "
+            . "\n       info:"
+            . $ARGV{info}
+            . "\n" );
+    my $start = parseDate( $ARGV{start} );
+    my $end   = parseDate( $ARGV{end} );
+    my $result
+        = $client->createBooking( $ARGV{resourceid}, $ARGV{description},
+        $start, $end, $ARGV{info} );
+    defined $result or die "could not create booking\n";
+    verbose("booking created successfully");
+    exit(0);
+}
+
+# Get booking
+if ( defined $ARGV{getbooking} ) {
+    verbose(
+        "request: get booking $ARGV{bookingid} from resource $ARGV{resourceid}"
+    );
+    my $result = $client->getBooking( $ARGV{resourceid}, $ARGV{bookingid} );
+    defined $result or die "could not retrieve booking\n";
+    showBooking($result);
+    verbose("booking retrieved successfully");
+    exit(0);
+}
+
+# Delete booking
+if ( defined $ARGV{deletebooking} ) {
+    verbose(
+        "request: delete booking $ARGV{bookingid} from resource $ARGV{resourceid}"
+    );
+    my $result = client->delBooking( $ARGV{resourceid}, $ARGV{bookingid} );
+    defined $result or die "could not delete booking\n";
+    verbose("booking deleted successfully");
+    exit(0);
+}
+
+# Update booking
+if ( defined $ARGV{updatebooking} ) {
+    verbose(
+        "request: update booking $ARGV{bookingid} from resource $ARGV{resourceid} with"
+            . "\ndescription: "
+            . $ARGV{description}
+            . "\n start date: "
+            . $ARGV{start}
+            . "\n   end date: "
+            . $ARGV{end}
+            . "\n       info: "
+            . $ARGV{info}
+            . "\n" );
+    my $start  = parseDate( $ARGV{start} );
+    my $end    = parseDate( $ARGV{end} );
+    my $result = $client->updateBooking( $ARGV{resourceid}, $ARGV{bookingid},
+        $ARGV{description}, $start, $end, $ARGV{info} );
+    defined $result or die "could not update resource\n";
+    verbose("booking updated successfully");
+    exit(0);
+}
+
+# Program ends here. Auxiliary functions follow.
+
+# Print string only if we are in verbose mode
+sub verbose {
+    my $lin = shift;
+    print "$lin\n" if ($VERBOSE);
+}
+
+# parse a date in YYYYMMDDHHMMSS format
+# FIXME: add error checking!!!
+sub parseDate {
+    my $arg    = shift;
+    my @a      = $arg =~ /(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/g;
+    my $result = {
+        year   => $a[0],
+        month  => $a[1],
+        day    => $a[2],
+        hour   => $a[3],
+        minute => $a[4],
+        second => $a[5],
+    };
+    return $result;
+}
+
+# pretty-print resource
+sub showResource {
+    my $r = shift;
+    print "\ndescription: "
+        . $r->{description}
+        . "\n       info: "
+        . $r->{info} . "\n";
+}
+
+# pretty-print booking
+sub showBooking {
+    my $b = shift;
+    print "\ndescription: "
+        . $b->{description}
+        . "\n       from: "
+        . $b->{from}
+        . "\n         to: "
+        . $b->{to}
+        . "\n       info: "
+        . $b->{info} . "\n";
+}
+
+__END__
+
+=head1 NAME
+
+smeagol-client - Smeagol command-line interface
+
+=head1 VERSION
+
+This documentation refers to version 0.04
+
+=head1 OPTIONS
+
+=over
+
+=item -s <address> | --server <address>
+
+Smeagol server address or DNS name. Default is 'localhost'.
+
+=for Euclid:
+    address.type:    string
+    address.default: 'localhost'
+
+=item -p <port> | --port <port>
+
+Smeagol server port. Default is 8000.
+
+=for Euclid:
+    port.type:    +integer
+    port.default: 8000
+
+=item -lr | --listresources
+
+List all resource ids in server
+
+=item -gr <resourceid> | --getresource <resourceid>
+
+Show resource with given <resourceid>
+
+=for Euclid:
+    resourceid.type: +integer
+
+=item -cr <description> [<info>] | --createsource <description> [<info>]
+
+Create a new resource with given <description> and optional <info>
+
+=for Euclid:
+    description.type: string
+    info.type:        string
+
+=item -ur <resourceid> <description> [<info>] | --updateresource <resourceid> <description> [<info>]
+
+Update resource with id=<resourceid>, using given <description> and <info>. If an <info> value is not present, current resource info will be set to empty.
+
+=for Euclid:
+    resourceid.type:   +integer
+    description.type:  string
+    info.type:         string
+
+=item -dr <resourceid> | --deleteresource <resourceid>
+
+Deletes resource with id=<resourceid>, and all its related information and bookings.
+
+=for Euclid:
+    resourceid.type: +integer
+
+=item -cb <resourceid> <description> <start> <end> [<info>] | --createbooking <resourceid> <description> <start> <end> [<info>]
+
+Create booking for resource <resourceid>, spanning from dates <start> to <end>. Dates must follow the format YYYYMMDDHHMMSS.
+
+=for Euclid:
+    resourceid.type:  +integer
+    description.type: string
+    start.type:       /\d+/
+    start.type.error: <start> must follow the format YYYYMMDDHHMMSS
+    end.type:         /\d+/
+    end.type.error:   <end> must follow the format YYYYMMDDHHMMSS
+    info.type:        string
+
+=item -gb <resourceid> <bookingid> | --getbooking <resourceid> <bookingid>
+
+Retrieve booking <bookingid> from resource <resourceid>.
+
+=for Euclid:
+    resourceid.type: +integer
+    bookingid.type:  +integer
+
+=item -db <resourceid> <bookingid> | --deletebooking <resourceid> <bookingid>
+
+Remove booking <bookingid> from resource <resourceid>.
+
+=for Euclid:
+    resourceid.type: +integer
+    bookingid.type:  +integer
+
+=item -ub <resourceid> <bookingid> <description> <start> <end> [<info>]
+
+Update booking <bookingid> from resource <resourceid>, using <description>, <start>, <end> and (optionally) <info>. Dates <start> and <end> must follow the format YYYYMMDDHHMMSS.
+
+=for Euclid:
+    resourceid.type:  +integer
+    bookingid.type:   +integer
+    description.type: string
+    start.type:       /\d+/
+    start.type.error: <start> must follow the format YYYYMMDDHHMMSS
+    end.type:         /\d+/
+    end.type.error:   <end> must follow the format YYYYMMDDHHMMSS
+    info.type:        string
+
+=item --[no[-]]verbose
+
+[Don't] show verbose messages
+
+=for Euclid:
+    false: --no[-]verbose
+
+=item --help
+
+=item --version
+
+=item --usage
+
+=item --man
+
+=back
+
+=head1 AUTHORS
+
+Angel Aguilera <angel.aguilera@upc.edu>
+Eulalia Formenti <eulalia.formenti@upc.edu>
+Francesc Guasch <frankie@etsetb.upc.edu>
+Francisco Morillas <fmorillas@etsetb.upc.edu>
+Alex Muntada <alexm@alexm.org>
+Isabel Polo <ipolo@etsetb.upc.edu>
+Sebastia Vila <sebas@lsi.upc.edu>
+
+=head1 COPYRIGHT 
+
+Copyright (C) 2008,2009  Universitat Politecnica de Catalunya
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+

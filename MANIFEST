@@ -1,5 +1,4 @@
 Changes
-client.pl
 COPYING
 css/smeagol.css
 doc/diagrams/arquitectura-88.dia
@@ -11,6 +10,8 @@ dtd/agenda.dtd
 dtd/booking.dtd
 dtd/resource-list.dtd
 dtd/resource.dtd
+dtd/tag.dtd
+dtd/tagSet.dtd
 lib/Smeagol/Agenda.pm
 lib/Smeagol/Agenda/ICal.pm
 lib/Smeagol/Booking.pm
@@ -21,10 +22,13 @@ lib/Smeagol/Resource.pm
 lib/Smeagol/Resource/List.pm
 lib/Smeagol/Server.pm
 lib/Smeagol/XML.pm
+lib/Smeagol/Tag.pm
+lib/Smeagol/TagSet.pm
 Makefile.PL
 MANIFEST
 README
 bin/smeagol-server
+bin/smeagol-client
 t/Agenda.t
 t/Booking.t
 t/Client.t
@@ -32,6 +36,8 @@ t/DataStore.t
 t/Resource.t
 t/Server.t
 t/XML.t
+t/Tag.t
+t/TagSet.t
 xsl/agenda.xsl
 xsl/booking.xsl
 xsl/resource.xsl

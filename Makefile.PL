@@ -5,7 +5,7 @@ use ExtUtils::MakeMaker;
 # the contents of the Makefile that is written.
 WriteMakefile(
     NAME      => 'smeagol',
-    VERSION   => '0.03',
+    VERSION   => '0.04',
     PREREQ_PM => {
         'DateTime'                  => undef,
         'DateTime::Span'            => undef,
@@ -13,7 +13,6 @@ WriteMakefile(
         'XML::LibXML'               => undef,
         'XML::Simple'               => undef,
         'HTTP::Server::Simple::CGI' => undef,
-        'Getopt::Long'              => undef,
         'Data::Compare'             => undef,
         'Data::ICal'                => undef,
         'Date::ICal'                => undef,

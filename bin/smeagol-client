@@ -6,15 +6,11 @@ use warnings;
 my $VERSION = 0.04;
 
 use Getopt::Euclid qw( :minimal_keys );
+use Data::Dumper;
 use Client;
-
-# global variables
 
 # are we in verbose mode?
 my $VERBOSE = 0;
-
-# the client
-my $client;
 
 if ( $ARGV{verbose} ) {
     $VERBOSE = 1;
@@ -24,15 +20,14 @@ if ( $ARGV{verbose} ) {
 # Create client
 my $host = "$ARGV{server}:$ARGV{port}";
 verbose("Trying to create client using $host");
-my $cli = Client->new($host);
-defined($cli)
+my $client = Client->new($host);
+defined($client)
     or die
     "Could not create client. Is there a Smeagol server running on \"$host\"?\n";
 verbose("Client created");
 
-
 # List resources
-if ( defined $ARGV{'listresources'} ) {
+if ( defined $ARGV{listresources} ) {
     verbose("request: list resources");
     my @ids = $client->listResources();
     foreach my $i (@ids) {
@@ -44,19 +39,26 @@ if ( defined $ARGV{'listresources'} ) {
 
 # Create resource
 if ( defined $ARGV{createresource} ) {
+    my $desc = $ARGV{createresource}{description};
+    my $info = $ARGV{createresource}{info};
+
+    $info = ( defined $info ) ? $info : '';
     verbose(  "request: create resource with"
-            . "\ndescription: $ARGV{description}"
-            . "\n       info: $ARGV{info}\n" );
-    my $result = $client->createResource( $ARGV{description}, $ARGV{info} );
+            . "\ndescription: $desc"
+            . "\n       info: $info"
+            . "\n" );
+    my $result = $client->createResource( $desc, $info );
     defined $result or die "couldn't create resource\n";
-    verbose("resource created successfully");
+    print "resource $result created successfully\n";
     exit(0);
 }
 
 # Get resource
 if ( defined $ARGV{getresource} ) {
-    verbose("request: get resource $ARGV{resourceid}");
-    my $result = $client->getResource( $ARGV{resourceid} );
+    my $rid = $ARGV{getresource};
+
+    verbose("request: get resource $rid");
+    my $result = $client->getResource($rid);
     defined $result or die "couldn't retrieve resource\n";
     showResource($result);
     verbose("resource retrieved successfully");
@@ -64,9 +66,11 @@ if ( defined $ARGV{getresource} ) {
 }
 
 # Delete resource
-if ( defined $ARGV{delresource} ) {
-    verbose("request: delete resource $ARGV{resourceid}");
-    my $result = $client->delResource( $ARGV{resourceid} );
+if ( defined $ARGV{deleteresource} ) {
+    my $rid = $ARGV{deleteresource};
+
+    verbose("request: delete resource $rid");
+    my $result = $client->delResource($rid);
     defined($result) or die "couldn't delete resource\n";
     verbose("resource deleted successfully");
     exit(0);
@@ -74,19 +78,15 @@ if ( defined $ARGV{delresource} ) {
 
 # Update resource
 if ( defined $ARGV{updateresource} ) {
-    verbose(  "request: update resource $ARGV{resourceid} with"
-            . "\ndescription: "
-            . $ARGV{description}
-            . "\n start date: "
-            . $ARGV{start}
-            . "\n   end date: "
-            . $ARGV{end}
-            . "\n       info: "
-            . $ARGV{info}
+    my $rid  = $ARGV{updateresource}{id};
+    my $desc = $ARGV{updateresource}{description};
+    my $info = $ARGV{updateresource}{info};
+
+    verbose(  "request: update resource $rid with"
+            . "\ndescription: $desc"
+            . "\n       info: $info"
             . "\n" );
-    my $result
-        = $client->updateResource( $ARGV{resourceid}, $ARGV{description},
-        $ARGV{info} );
+    my $result = $client->updateResource( $rid, $desc, $info );
     defined($result) or die "couldn't update resource\n";
     verbose("resource updated successfully");
     exit(0);
@@ -94,27 +94,42 @@ if ( defined $ARGV{updateresource} ) {
 
 # Create booking
 if ( defined $ARGV{createbooking} ) {
-    verbose(  "request: create booking for resource $ARGV{resourceid} with"
-            . "\ndescription: "
-            . "\n       info:"
-            . $ARGV{info}
+    my $rid  = $ARGV{createbooking}{resourceid};
+    my $desc = $ARGV{createbooking}{description};
+    my $info = $ARGV{createbooking}{info};
+
+    verbose(  "request: create booking for resource $rid with"
+            . "\ndescription: $desc"
+            . "\n       info: $info"
             . "\n" );
-    my $start = parseDate( $ARGV{start} );
-    my $end   = parseDate( $ARGV{end} );
-    my $result
-        = $client->createBooking( $ARGV{resourceid}, $ARGV{description},
-        $start, $end, $ARGV{info} );
+    my $start  = parseDate( $ARGV{createbooking}{start} );
+    my $end    = parseDate( $ARGV{createbooking}{end} );
+    my $result = $client->createBooking( $rid, $desc, $start, $end, $info );
     defined $result or die "could not create booking\n";
     verbose("booking created successfully");
     exit(0);
 }
 
+# List bookings
+if ( defined $ARGV{listbookings} ) {
+    my $rid = $ARGV{listbookings};
+
+    verbose("request: list bookings for resource $rid");
+    my @ids = $client->listBookings($rid);
+    foreach my $i (@ids) {
+        print $i . "\n";
+    }
+    verbose( scalar(@ids) . " booking(s) found for resource $rid" );
+    exit(0);
+}
+
 # Get booking
 if ( defined $ARGV{getbooking} ) {
-    verbose(
-        "request: get booking $ARGV{bookingid} from resource $ARGV{resourceid}"
-    );
-    my $result = $client->getBooking( $ARGV{resourceid}, $ARGV{bookingid} );
+    my $rid = $ARGV{getbooking}{resourceid};
+    my $bid = $ARGV{getbooking}{bookingid};
+
+    verbose("request: get booking $bid from resource $rid");
+    my $result = $client->getBooking( $rid, $bid );
     defined $result or die "could not retrieve booking\n";
     showBooking($result);
     verbose("booking retrieved successfully");
@@ -123,10 +138,11 @@ if ( defined $ARGV{getbooking} ) {
 
 # Delete booking
 if ( defined $ARGV{deletebooking} ) {
-    verbose(
-        "request: delete booking $ARGV{bookingid} from resource $ARGV{resourceid}"
-    );
-    my $result = client->delBooking( $ARGV{resourceid}, $ARGV{bookingid} );
+    my $rid = $ARGV{deletebooking}{resourceid};
+    my $bid = $ARGV{deletebooking}{bookingid};
+
+    verbose("request: delete booking $bid from resource $rid");
+    my $result = $client->delBooking( $rid, $bid );
     defined $result or die "could not delete booking\n";
     verbose("booking deleted successfully");
     exit(0);
@@ -134,25 +150,30 @@ if ( defined $ARGV{deletebooking} ) {
 
 # Update booking
 if ( defined $ARGV{updatebooking} ) {
-    verbose(
-        "request: update booking $ARGV{bookingid} from resource $ARGV{resourceid} with"
-            . "\ndescription: "
-            . $ARGV{description}
+    my $rid  = $ARGV{updatebooking}{resourceid};
+    my $bid  = $ARGV{updatebooking}{bookingid};
+    my $desc = $ARGV{updatebooking}{description};
+    my $info = $ARGV{updatebooking}{info};
+
+    verbose(  "request: update booking $bid from resource $rid with"
+            . "\ndescription: $desc"
             . "\n start date: "
-            . $ARGV{start}
+            . $ARGV{updatebooking}{start}
             . "\n   end date: "
-            . $ARGV{end}
-            . "\n       info: "
-            . $ARGV{info}
+            . $ARGV{updatebooking}{end}
+            . "\n       info: $info"
             . "\n" );
-    my $start  = parseDate( $ARGV{start} );
-    my $end    = parseDate( $ARGV{end} );
-    my $result = $client->updateBooking( $ARGV{resourceid}, $ARGV{bookingid},
-        $ARGV{description}, $start, $end, $ARGV{info} );
+    my $start = parseDate( $ARGV{updatebooking}{start} );
+    my $end   = parseDate( $ARGV{updatebooking}{end} );
+    my $result
+        = $client->updateBooking( $rid, $bid, $desc, $start, $end, $info );
     defined $result or die "could not update resource\n";
     verbose("booking updated successfully");
     exit(0);
 }
+
+# No arguments
+print "No arguments provided. Please use '--help' for additional info.\n";
 
 # Program ends here. Auxiliary functions follow.
 
@@ -184,7 +205,7 @@ sub showResource {
     print "\ndescription: "
         . $r->{description}
         . "\n       info: "
-        . $r->{info} . "\n";
+        . $r->{info} . "\n\n";
 }
 
 # pretty-print booking
@@ -197,7 +218,7 @@ sub showBooking {
         . "\n         to: "
         . $b->{to}
         . "\n       info: "
-        . $b->{info} . "\n";
+        . $b->{info} . "\n\n";
 }
 
 __END__
@@ -214,32 +235,34 @@ This documentation refers to version 0.04
 
 =over
 
-=item -s <address> | --server <address>
+=item -s <url> | --server <url>
 
-Smeagol server address or DNS name. Default is 'localhost'.
+Smeagol server url. Default is 'http://localhost'.
 
 =for Euclid:
-    address.type:    string
-    address.default: 'localhost'
+    url.type:    string
+    url.default: 'http://localhost'
 
 =item -p <port> | --port <port>
 
 Smeagol server port. Default is 8000.
 
 =for Euclid:
-    port.type:    +integer
-    port.default: 8000
+    port.type:       +integer
+    port.type.error: <port> must be an integer > 0
+    port.default:    8000
 
 =item -lr | --listresources
 
 List all resource ids in server
 
-=item -gr <resourceid> | --getresource <resourceid>
+=item -gr <id> | --getresource <id>
 
-Show resource with given <resourceid>
+Show resource with given <id>
 
 =for Euclid:
-    resourceid.type: +integer
+    id.type:       +integer
+    id.type.error: <id> must be an integer value
 
 =item -cr <description> [<info>] | --createresource <description> [<info>]
 
@@ -249,58 +272,75 @@ Create a new resource with given <description> and optional <info>
     description.type: string
     info.type:        string
 
-=item -ur <resourceid> <description> [<info>] | --updateresource <resourceid> <description> [<info>]
+=item -ur <id> <description> [<info>] | --updateresource <id> <description> [<info>]
 
-Update resource with id=<resourceid>, using given <description> and <info>. If an <info> value is not present, current resource info will be set to empty.
+Update resource with id=<id>, using given <description> and <info>. If an <info> value is not present, current resource info will be set to empty.
 
 =for Euclid:
-    resourceid.type:   +integer
+    id.type:           +integer
+    id.type.error:     <id> must be an integer > 0
     description.type:  string
     info.type:         string
 
-=item -dr <resourceid> | --deleteresource <resourceid>
+=item -dr <id> | --deleteresource <id>
 
-Deletes resource with id=<resourceid>, and all its related information and bookings.
+Deletes resource with id=<id>, including all related bookings.
 
 =for Euclid:
-    resourceid.type: +integer
+    id.type:       +integer
+    id.type.error: <id> must be an integer > 0
 
 =item -cb <resourceid> <description> <start> <end> [<info>] | --createbooking <resourceid> <description> <start> <end> [<info>]
 
 Create booking for resource <resourceid>, spanning from dates <start> to <end>. Dates must follow the format YYYYMMDDHHMMSS.
 
 =for Euclid:
-    resourceid.type:  +integer
-    description.type: string
-    start.type:       /\d+/
-    start.type.error: <start> must follow the format YYYYMMDDHHMMSS
-    end.type:         /\d+/
-    end.type.error:   <end> must follow the format YYYYMMDDHHMMSS
-    info.type:        string
+    resourceid.type:       +integer
+    resourceid.type.error: <resourceid> must be an integer > 0
+    description.type:      string
+    start.type:            /\d+/
+    start.type.error:      <start> must follow the format YYYYMMDDHHMMSS
+    end.type:              /\d+/
+    end.type.error:        <end> must follow the format YYYYMMDDHHMMSS
+    info.type:             string
+
+=item -lb <id> | --listbookings <id>
+
+Show all booking ids for resource <resourceid>.
+
+=for Euclid:
+    id.type: +integer
+    id.type.error: <id> must be an integer > 0
 
 =item -gb <resourceid> <bookingid> | --getbooking <resourceid> <bookingid>
 
 Retrieve booking <bookingid> from resource <resourceid>.
 
 =for Euclid:
-    resourceid.type: +integer
-    bookingid.type:  +integer
+    resourceid.type:       +integer
+    resourceid.type.error: <resourceid> must be an integer > 0
+    bookingid.type:        +integer
+    bookingid.type.error:  <bookingid> must be an integer > 0
 
 =item -db <resourceid> <bookingid> | --deletebooking <resourceid> <bookingid>
 
 Remove booking <bookingid> from resource <resourceid>.
 
 =for Euclid:
-    resourceid.type: +integer
-    bookingid.type:  +integer
+    resourceid.type:       +integer
+    resourceid.type.error: <resourceid> must be an integer > 0
+    bookingid.type:        +integer
+    bookingid.type.error:  <bookingid> must be an integer > 0
 
-=item -ub <resourceid> <bookingid> <description> <start> <end> [<info>]
+=item -ub <resourceid> <bookingid> <description> <start> <end> [<info>] | --updatebooking <resourceid> <bookingid> <description> <start> <end> [<info>]
 
 Update booking <bookingid> from resource <resourceid>, using <description>, <start>, <end> and (optionally) <info>. Dates <start> and <end> must follow the format YYYYMMDDHHMMSS.
 
 =for Euclid:
-    resourceid.type:  +integer
-    bookingid.type:   +integer
+    resourceid.type:       +integer
+    resourceid.type.error: <resourceid> must be an integer > 0
+    bookingid.type:        +integer
+    bookingid.type.error:  <bookingid> must be an integer > 0
     description.type: string
     start.type:       /\d+/
     start.type.error: <start> must follow the format YYYYMMDDHHMMSS

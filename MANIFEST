@@ -12,6 +12,7 @@ dtd/resource-list.dtd
 dtd/resource.dtd
 dtd/tag.dtd
 dtd/tagSet.dtd
+lib/Smeagol.pm
 lib/Smeagol/Agenda.pm
 lib/Smeagol/Agenda/ICal.pm
 lib/Smeagol/Booking.pm

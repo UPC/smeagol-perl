@@ -95,15 +95,12 @@ Directory where datastore resides
 
 =back
 
-=head1 AUTHORS
+=head1 AUTHOR
 
-Angel Aguilera <angel.aguilera@upc.edu>
-Eulalia Formenti <eulalia.formenti@upc.edu>
-Francesc Guasch <frankie@etsetb.upc.edu>
-Francisco Morillas <fmorillas@etsetb.upc.edu>
-Alex Muntada <alexm@alexm.org>
-Isabel Polo <ipolo@etsetb.upc.edu>
-Sebastia Vila <sebas@lsi.upc.edu>
+Alex Muntada (ALEXM)
+
+See the AUTHORS file for a complete list, this section refers to the
+current maintainer only.
 
 =head1 COPYRIGHT 
 

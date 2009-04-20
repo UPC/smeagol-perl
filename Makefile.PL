@@ -1,29 +1,29 @@
-use 5.008008;
-use ExtUtils::MakeMaker;
+use inc::Module::Install;
 
-# See lib/ExtUtils/MakeMaker.pm for details of how to influence
-# the contents of the Makefile that is written.
-WriteMakefile(
-    NAME      => 'smeagol',
-    VERSION   => '0.04',
-    PREREQ_PM => {
-        'DateTime'                  => undef,
-        'DateTime::Span'            => undef,
-        'Set::Object'               => undef,
-        'XML::LibXML'               => undef,
-        'XML::Simple'               => undef,
-        'HTTP::Server::Simple::CGI' => undef,
-        'Data::Compare'             => undef,
-        'Data::ICal'                => undef,
-        'Date::ICal'                => undef,
-        'Getopt::Euclid'            => undef,
-    },
-    (   $] >= 5.005
-        ?    ## Add these new keywords supported since 5.005
-            (
-            ABSTRACT => 'Sistema de reserves de la UPC',
-            AUTHOR   => 'Alex Muntada <alexm@alexm.org>'
-            )
-        : ()
-    ),
-);
+name 'Smeagol';
+
+all_from 'lib/Smeagol.pm';
+
+license 'agpl';
+
+requires 'DateTime'                  => 0;
+requires 'DateTime::Span'            => 0;
+requires 'Set::Object'               => 0;
+requires 'XML::LibXML'               => 0;
+requires 'XML::Simple'               => 0;
+requires 'HTTP::Server::Simple::CGI' => 0;
+requires 'Data::ICal'                => 0;
+requires 'Date::ICal'                => 0;
+requires 'Getopt::Euclid'            => 0;
+requires 'File::Path'                => 0;
+
+test_requires 'Test::More'           => 0;
+test_requires 'Data::Compare'        => 0;
+
+install_script 'bin/smeagol-client';
+install_script 'bin/smeagol-server';
+
+# t and inc are also added
+no_index directory => qw( doc dtd xsl css );
+
+WriteAll;

@@ -146,7 +146,11 @@ sub from_xml {
 
     my $info = $dom->findnodes('//resource/info')->get_node(1)->string_value;
 
+    #
     # FIXME: what if $info == 0 ?
+    #        (un)definition should be checked using '(defined $info)'
+    #        (ticket:113)
+    #
     $obj->{info} = ($info) ? $info : "";
 
     if ( $dom->getElementsByTagName('tags')->get_node(1) ) {

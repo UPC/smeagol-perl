@@ -150,7 +150,9 @@ sub getResource {
 
     my $res = $self->{ua}->get( $self->{url} . '/resource/' . $id );
 
-    #FIXME: Cal controlar el cas que si/no hi hagi agenda
+    #
+    # FIXME: Cal controlar el cas que si/no hi hagi agenda
+    #
     if ( $res->status_line =~ /200/ ) {
         my $dom = eval { XML::LibXML->new->parse_string( $res->content ) };
         croak $@ if $@;

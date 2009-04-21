@@ -122,6 +122,7 @@ sub _status {
     #
     # FIXME: Since we're returning XML most of the time,
     #        shouldn't we returning errors as XML too?
+    #        (ticket:114)
     #
     _reply( "$code $codes{$code}", 'text/plain', $message || $text );
 }
@@ -253,6 +254,7 @@ sub _send_dtd {
 # FIXME: this call is made as _list_bookings($cgi, $1, $2, ...);
 #        $2 is always undef since this regex captures 1 item only,
 #        thus the undef on the args list below.
+#        (ticket:115)
 #
 sub _list_bookings {
     my ( $cgi, $idResource, undef, $viewAs ) = @_;
@@ -539,6 +541,7 @@ sub _send_css {
 
     # FIXME: make it work from anywhere, now it must run from
     #        the project base dir or won't find dtd dir
+    #        (ticket:116)
     if ( open my $css, "<", "css/$id.css" ) {
 
         # slurp css file
@@ -560,6 +563,7 @@ sub _send_xsl {
 
     # FIXME: make it work from anywhere, now it must run from
     #        the project base dir or won't find dtd dir
+    #        (ticket:116)
     if ( open my $xsl, "<", "xsl/$id.xsl" ) {
 
         # slurp css file

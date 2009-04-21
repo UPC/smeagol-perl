@@ -160,6 +160,7 @@ sub _create_resource {
 
         #
         # FIXME: We're returning XML as plaintext, wrong :/
+        #        (ticket:90)
         #
         _status( 201, $r->to_xml( "", 1 ) );
     }
@@ -235,6 +236,7 @@ sub _send_dtd {
     #
     # FIXME: make it work from anywhere, now it must run from
     #        the project base dir or won't find dtd dir
+    #        (ticket:34)
     #
     if ( open my $dtd, "<", "dtd/$id.dtd" ) {
 
@@ -307,6 +309,7 @@ sub _create_booking {
 
         #
         # FIXME: wrong again, returning XML as plaintext
+        #        (ticket:90)
         #
         _status( 409, $overlapping_agenda->to_xml( $r->url, 1 ) );
         return;
@@ -445,6 +448,7 @@ sub _update_booking {
 
         #
         # FIXME: still wrong, returning XML as plaintext
+        #        (ticket:90)
         #
         _status( 409, $overlapping_agenda->to_xml( $r->url, 1 ) );
         return;

@@ -7,7 +7,7 @@ my $VERSION = 0.02;
 
 use Getopt::Euclid qw( :minimal_keys );
 use Data::Dumper;
-use Client;
+use Smeagol::Client;
 
 # are we in verbose mode?
 my $VERBOSE = 0;
@@ -20,7 +20,7 @@ if ( $ARGV{verbose} ) {
 # Create client
 my $host = "$ARGV{server}:$ARGV{port}";
 verbose("Trying to create client using $host");
-my $client = Client->new($host);
+my $client = Smeagol::Client->new($host);
 defined($client)
     or die
     "Could not create client. Is there a Smeagol server running on \"$host\"?\n";
@@ -82,6 +82,7 @@ if ( defined $ARGV{updateresource} ) {
     my $desc = $ARGV{updateresource}{description};
     my $info = $ARGV{updateresource}{info};
 
+    $info = ( defined $info ) ? $info : "";
     verbose(  "request: update resource $rid with"
             . "\ndescription: $desc"
             . "\n       info: $info"
@@ -98,10 +99,15 @@ if ( defined $ARGV{createbooking} ) {
     my $desc = $ARGV{createbooking}{description};
     my $info = $ARGV{createbooking}{info};
 
+    $info = ( defined $info ) ? $info : "";
     verbose(  "request: create booking for resource $rid with"
             . "\ndescription: $desc"
             . "\n       info: $info"
-            . "\n" );
+            . "\n      start: "
+            . $ARGV{createbooking}{start}
+            . "\n        end: "
+            . $ARGV{createbooking}{end} );
+
     my $start  = parseDate( $ARGV{createbooking}{start} );
     my $end    = parseDate( $ARGV{createbooking}{end} );
     my $result = $client->createBooking( $rid, $desc, $start, $end, $info );
@@ -155,6 +161,7 @@ if ( defined $ARGV{updatebooking} ) {
     my $desc = $ARGV{updatebooking}{description};
     my $info = $ARGV{updatebooking}{info};
 
+    $info = ( defined $info ) ? $info : "";
     verbose(  "request: update booking $bid from resource $rid with"
             . "\ndescription: $desc"
             . "\n start date: "
@@ -191,8 +198,24 @@ sub verbose {
 #        (ticket:112)
 #
 sub parseDate {
-    my $arg    = shift;
-    my @a      = $arg =~ /(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/g;
+    my $arg = shift;
+    my @a = $arg =~ /(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/g;
+
+    my $d = eval {
+        DateTime->new(
+            year   => $a[0],
+            month  => $a[1],
+            day    => $a[2],
+            hour   => $a[3],
+            minute => $a[4],
+            second => $a[5],
+        );
+    };
+
+    defined $d
+        or die
+        "Argument $arg is not a valid date or does not follow the YYYYMMDDHHMMSS format: $@\n";
+
     my $result = {
         year   => $a[0],
         month  => $a[1],

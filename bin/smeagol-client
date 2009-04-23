@@ -179,6 +179,41 @@ if ( defined $ARGV{updatebooking} ) {
     exit(0);
 }
 
+if ( defined $ARGV{createtag} ) {
+    my $rid = $ARGV{createtag}{resourceid};
+    my $tag = $ARGV{createtag}{tag};
+
+    verbose( "request: create tag $tag from resource $rid" );
+    my $result = $client->createTag( $rid, $tag );
+    defined $result or die "could not create tag\n";
+    verbose("tag created successfully");
+    exit(0);
+}
+
+if ( defined $ARGV{listtags} ) {
+    my $rid = $ARGV{listtags};
+
+    verbose("request: list tags for resource $rid");
+    my @tags = $client->listTags($rid);
+    foreach my $t (@tags) {
+        print $t . "\n";
+    }
+    verbose( scalar(@tags) . " tag(s) found for resource $rid" );
+    exit(0);
+}
+
+# Delete tag
+if ( defined $ARGV{deletetag} ) {
+    my $rid = $ARGV{deletetag}{resourceid};
+    my $tag = $ARGV{deletetag}{tag};
+
+    verbose("request: delete tag $tag from resource $rid");
+    my $result = $client->delTag( $rid, $tag );
+    defined $result or die "could not delete tag\n";
+    verbose("tag deleted successfully");
+    exit(0);
+}
+
 # No arguments
 print "No arguments provided. Please use '--help' for additional info.\n";
 
@@ -375,6 +410,32 @@ Update booking <bookingid> from resource <resourceid>, using <description>, <sta
     end.type:         /\d+/
     end.type.error:   <end> must follow the format YYYYMMDDHHMMSS
     info.type:        string
+
+=item -ct <resourceid> <tag> | --createtag <resourceid> <tag>
+
+Create tag for resource <resourceid>.
+
+=for Euclid:
+    resourceid.type:       +integer
+    resourceid.type.error: <resourceid> must be an integer > 0
+    tag.type:              string
+
+=item -lt <resourceid> | --listtags <resourceid>
+
+Show all booking ids for resource <resourceid>.
+
+=for Euclid:
+    resourceid.type: +integer
+    resourceid.type.error: <resourceid> must be an integer > 0
+
+=item -dt <resourceid> <tag> | --deletetag <resourceid> <tag>
+
+Remove tag <tag> from resource <resourceid>.
+
+=for Euclid:
+    resourceid.type:       +integer
+    resourceid.type.error: <resourceid> must be an integer > 0
+    tag.type:              string
 
 =item --[no[-]]verbose
 

@@ -44,3 +44,4 @@ xsl/agenda.xsl
 xsl/booking.xsl
 xsl/resource.xsl
 xsl/resources.xsl
+share/html/server.html

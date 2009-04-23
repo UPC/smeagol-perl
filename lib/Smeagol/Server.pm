@@ -45,6 +45,7 @@ my %crud_for = (
     '/css/(\w+)\.css' => { GET => \&_send_css },
     '/dtd/(\w+)\.dtd' => { GET => \&_send_dtd },
     '/xsl/(\w+)\.xsl' => { GET => \&_send_xsl },
+    '/'               => { GET => sub { _send_html( $_[0], "server" ) } },
 );
 
 # Http request dispatcher. Sends every request to the corresponding
@@ -569,6 +570,27 @@ sub _send_xsl {
         # slurp css file
         local $/;
         _reply( '200 OK', 'application/xml', <$xsl> );
+    }
+    else {
+        _status(400);
+    }
+}
+
+#####################
+# Handler for index #
+#####################
+
+sub _send_html {
+    my ( $cgi, $filename ) = @_;
+
+    # FIXME: make it work from anywhere, now it must run from
+    #        the project base dir or won't find dtd dir
+    #        (ticket:116)
+    if ( open my $html, "<", "share/html/$filename.html" ) {
+
+        # slurp html file
+        local $/;
+        _reply( '200 OK', 'text/html; charset=UTF-8', <$html> );
     }
     else {
         _status(400);

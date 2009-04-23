@@ -7,8 +7,8 @@ my $VERSION = 0.2;
 
 use Getopt::Euclid qw( :minimal_keys );
 
-use Server;
-use DataStore;
+use Smeagol::Server;
+use Smeagol::DataStore;
 
 if ( $ARGV{verbose} ) {
     print "$0 version $VERSION entering verbose mode.\n";
@@ -17,9 +17,9 @@ if ( $ARGV{verbose} ) {
 }
 
 # initialize the datastore singleton
-DataStore::init( $ARGV{storage} );
+Smeagol::DataStore::init( $ARGV{storage} );
 
-my $server = Server->new( $ARGV{port} );
+my $server = Smeagol::Server->new( $ARGV{port} );
 $server->host( $ARGV{host} );
 
 if ( $ARGV{background} ) {

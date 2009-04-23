@@ -13,7 +13,7 @@
 </tbody>
 </table>
 <hr/>
-Sméagol v0.1rc1
+Sméagol demo
 </body></html>
 </xsl:template>
 

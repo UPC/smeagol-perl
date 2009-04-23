@@ -7,7 +7,7 @@ my $VERSION = 0.02;
 
 use Getopt::Euclid qw( :minimal_keys );
 use Data::Dumper;
-use Client;
+use Smeagol::Client;
 
 # are we in verbose mode?
 my $VERBOSE = 0;
@@ -20,7 +20,7 @@ if ( $ARGV{verbose} ) {
 # Create client
 my $host = "$ARGV{server}:$ARGV{port}";
 verbose("Trying to create client using $host");
-my $client = Client->new($host);
+my $client = Smeagol::Client->new($host);
 defined($client)
     or die
     "Could not create client. Is there a Smeagol server running on \"$host\"?\n";

@@ -8,13 +8,6 @@ use XML::Simple;
 use Data::Compare;
 
 BEGIN {
-
-    #
-    # FIXME: Purge the hard way until DataStore does it better
-    #        (ticket:111)
-    #
-    unlink glob "/tmp/smeagol_datastore/*";
-
     use_ok($_) for qw(
         Smeagol::Tag
         Smeagol::TagSet

@@ -3,5 +3,53 @@
     xmlns:xlink CDATA #IMPLIED
     xlink:href CDATA #IMPLIED
     xlink:type CDATA #IMPLIED>
-<!ENTITY % resourcedtd SYSTEM "resource.dtd">
-%resourcedtd;
+
+
+<!ELEMENT resource (description, agenda?, info?, tags?)>
+<!ATTLIST resource
+    xmlns:xlink CDATA #IMPLIED
+    xlink:href CDATA #IMPLIED
+    xlink:xmlns CDATA #IMPLIED
+    xlink:type CDATA #IMPLIED>
+
+
+<!ELEMENT agenda (booking*)>
+<!ATTLIST agenda 
+    xmlns:xlink CDATA #IMPLIED
+    xlink:href CDATA #IMPLIED
+    xlink:xmlns CDATA #IMPLIED
+    xlink:type CDATA #IMPLIED>
+
+
+<!ELEMENT booking (id?, description, from, to, info?)>
+<!ELEMENT id (#PCDATA)>
+<!ELEMENT description (#PCDATA)>
+<!ELEMENT from (year, month, day, hour, minute, second)>
+<!ELEMENT to (year, month, day, hour, minute, second)>
+<!ELEMENT info ANY>
+<!ELEMENT year (#PCDATA)>
+<!ELEMENT month (#PCDATA)>
+<!ELEMENT day (#PCDATA)>
+<!ELEMENT hour (#PCDATA)>
+<!ELEMENT minute (#PCDATA)>
+<!ELEMENT second (#PCDATA)>
+<!ATTLIST booking 
+    xmlns:xlink CDATA #IMPLIED
+    xlink:href CDATA #IMPLIED
+    xlink:type CDATA #IMPLIED>
+
+
+<!ELEMENT tags (tag*)>
+<!ATTLIST tags 
+    xmlns:xlink CDATA #IMPLIED
+    xlink:href CDATA #IMPLIED
+    xlink:xmlns CDATA #IMPLIED
+    xlink:type CDATA #IMPLIED>
+
+
+<!ELEMENT tag (#PCDATA) >
+<!ATTLIST tag 
+    xmlns:xlink CDATA #IMPLIED
+    xlink:href CDATA #IMPLIED
+    xlink:type CDATA #IMPLIED>
+

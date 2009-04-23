@@ -4,17 +4,44 @@
     xlink:href CDATA #IMPLIED
     xlink:xmlns CDATA #IMPLIED
     xlink:type CDATA #IMPLIED>
-<!-- 
 
- FIXME: Commented out because booking.dtd already includes a 
-        "description" and "info" attribute declaration. This conflict
-        could be resolved via namespaces and XML Schema (DTDs are soo limited!).
-        (ticket:102)
 
+<!ELEMENT agenda (booking*)>
+<!ATTLIST agenda 
+    xmlns:xlink CDATA #IMPLIED
+    xlink:href CDATA #IMPLIED
+    xlink:xmlns CDATA #IMPLIED
+    xlink:type CDATA #IMPLIED>
+
+
+<!ELEMENT booking (id?, description, from, to, info?)>
+<!ELEMENT id (#PCDATA)>
 <!ELEMENT description (#PCDATA)>
+<!ELEMENT from (year, month, day, hour, minute, second)>
+<!ELEMENT to (year, month, day, hour, minute, second)>
 <!ELEMENT info ANY>
--->
-<!ENTITY % agendadtd SYSTEM "agenda.dtd">
-%agendadtd;
-<!ENTITY % tagsdtd SYSTEM "tagSet.dtd">
-%tagsdtd;
+<!ELEMENT year (#PCDATA)>
+<!ELEMENT month (#PCDATA)>
+<!ELEMENT day (#PCDATA)>
+<!ELEMENT hour (#PCDATA)>
+<!ELEMENT minute (#PCDATA)>
+<!ELEMENT second (#PCDATA)>
+<!ATTLIST booking 
+    xmlns:xlink CDATA #IMPLIED
+    xlink:href CDATA #IMPLIED
+    xlink:type CDATA #IMPLIED>
+
+
+<!ELEMENT tags (tag*)>
+<!ATTLIST tags 
+    xmlns:xlink CDATA #IMPLIED
+    xlink:href CDATA #IMPLIED
+    xlink:xmlns CDATA #IMPLIED
+    xlink:type CDATA #IMPLIED>
+
+
+<!ELEMENT tag (#PCDATA) >
+<!ATTLIST tag 
+    xmlns:xlink CDATA #IMPLIED
+    xlink:href CDATA #IMPLIED
+    xlink:type CDATA #IMPLIED>

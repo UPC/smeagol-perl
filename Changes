@@ -1,5 +1,10 @@
 Històric de revisions del projecte smeagol.
 
+0.0401 Thu Apr 23 18:05:00 2009
+       - documentats els canvis de la versió anterior
+       - afegit el XSLT per a les etiquetes
+       - corregit el nou espai de noms Smeagol al client i servidor
+
 0.04   Sat Apr 18 01:31:28 2009
        - resolts els problemes amb UTF-8
        - afegit el suport d'etiquetes per als recursos

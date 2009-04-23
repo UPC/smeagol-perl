@@ -23,7 +23,9 @@ test_requires 'Data::Compare'        => 0;
 install_script 'bin/smeagol-client';
 install_script 'bin/smeagol-server';
 
-# t and inc are also added
+install_share;
+
+# share, t and inc are also added
 no_index directory => qw( doc dtd xsl css );
 
 WriteAll;

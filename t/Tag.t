@@ -9,13 +9,6 @@ use Data::Compare;
 use Encode;
 
 BEGIN {
-
-    #
-    # FIXME: Purge the hard way until DataStore does it better
-    #        (ticket:111)
-    #
-    unlink glob "/tmp/smeagol_datastore/*";
-
     use_ok($_) for qw(Smeagol::Tag Smeagol::DataStore);
 }
 use Data::Dumper;

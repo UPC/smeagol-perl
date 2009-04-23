@@ -1,5 +1,11 @@
 Històric de revisions del projecte smeagol.
 
+0.04   Sat Apr 18 01:31:28 2009
+       - resolts els problemes amb UTF-8
+       - afegit el suport d'etiquetes per als recursos
+       - afegit un camp d'informació genèrica als recursos
+       - millora de la gestió de paràmetres al client i al servidor
+
 0.03   Mon Mar 30 10:21:15 2009
        - suport pel format iCalendar
 

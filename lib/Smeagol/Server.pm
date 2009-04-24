@@ -14,6 +14,7 @@ use Smeagol::Booking;
 use Smeagol::Agenda;
 use Smeagol::Resource;
 use Smeagol::Resource::List;
+use Encode;
 
 # Nota: hauria de funcionar amb "named groups" però només
 # s'implementen a partir de perl 5.10. Quina misèria, no?
@@ -45,7 +46,9 @@ my %crud_for = (
     '/css/(\w+)\.css' => { GET => \&_send_css },
     '/dtd/(\w+)\.dtd' => { GET => \&_send_dtd },
     '/xsl/(\w+)\.xsl' => { GET => \&_send_xsl },
-    '/'               => { GET => sub { _send_html( $_[0], "server" ) } },
+    '/'               => {
+        GET => sub { _send_html( $_[0], "server" ) }
+    },
 );
 
 # Http request dispatcher. Sends every request to the corresponding
@@ -137,7 +140,11 @@ sub _send_xml {
 sub _send_ical {
     my ($ical) = @_;
 
-    _reply( '200 OK', 'text/calendar', $ical );
+    _reply(
+        '200 OK',
+        'text/calendar; charset=UTF-8',
+        encode( 'UTF-8', $ical )
+    );
 }
 
 ##############################################################

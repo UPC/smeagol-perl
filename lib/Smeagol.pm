@@ -3,7 +3,7 @@ package Smeagol;
 use strict;
 use warnings;
 
-our $VERSION = '0.04';
+our $VERSION = '0.0499';
 
 1;
 

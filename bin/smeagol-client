@@ -226,12 +226,6 @@ sub verbose {
 }
 
 # parseDate: parse a date in YYYYMMDDHHMMSS format
-#
-# FIXME: add error checking!!!
-#
-#        we must not only reject invalid formats, but invalid dates (ex: 'february 30th')
-#        (ticket:112)
-#
 sub parseDate {
     my $arg = shift;
     my @a = $arg =~ /(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/g;

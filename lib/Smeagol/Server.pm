@@ -17,6 +17,7 @@ use Smeagol::Resource::List;
 use Encode;
 
 sub print_banner {
+
     # dummy banner which prints nothing, because parent class's is buggy
     # (always shows a "listening on http://localhost..." message)
 }

@@ -16,6 +16,11 @@ use Smeagol::Resource;
 use Smeagol::Resource::List;
 use Encode;
 
+sub print_banner {
+    # dummy banner which prints nothing, because parent class's is buggy
+    # (always shows a "listening on http://localhost..." message)
+}
+
 # Nota: hauria de funcionar amb "named groups" però només
 # s'implementen a partir de perl 5.10. Quina misèria, no?
 # A Python fa temps que funcionen...

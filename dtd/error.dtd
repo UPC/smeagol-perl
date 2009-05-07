@@ -1,0 +1,9 @@
+<!ELEMENT error (code, description)>
+<!ATTLIST error
+    xmlns:xlink CDATA #IMPLIED
+    xlink:href CDATA #IMPLIED
+    xlink:xmlns CDATA #IMPLIED
+    xlink:type CDATA #IMPLIED>
+
+<!ELEMENT code (#PCDATA)>
+<!ELEMENT description (#PCDATA)>

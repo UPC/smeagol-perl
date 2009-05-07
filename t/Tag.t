@@ -31,8 +31,8 @@ my $xml;
     $tg = Smeagol::Tag->new("987dcd  98");
     ok( !defined $tg, 'tag not created, there are spaces ' );
 
-    $tg = Smeagol::Tag->new("as");
-    ok( !defined $tg, 'tag not created, too short' );
+    $tg = Smeagol::Tag->new("CN");
+    ok( defined $tg, 'tag created' );
 
     $tg = Smeagol::Tag->new(
         "aa333333333333333333333333333333333333333333333333333333asdfsdsaf");
@@ -74,8 +74,8 @@ my $xml;
     $val = $tg->value("campus:nord");
     ok( "campus:nord" eq $val, 'tag updated' );
 
-    $val = $tg->value("cn");
-    ok( !defined $val, 'tag not updated,too short' );
+    $val = $tg->value("c ");
+    ok( !defined $val, 'tag not updated, bad chars' );
 }
 
 #to_xml
@@ -100,7 +100,7 @@ my $xml;
     $tg = Smeagol::Tag->from_xml("<tag>au la</tag>");
     ok( !defined $tg, 'not created tag from xml, wrong value' );
 
-    $tg = Smeagol::Tag->from_xml("<tag>aul</tag>");
+    $tg = Smeagol::Tag->from_xml("<tag>a</tag>");
     ok( !defined $tg, 'not created tag from xml, too short' );
 
     $tg = Smeagol::Tag->from_xml("<tag>campus+nord</tag>");

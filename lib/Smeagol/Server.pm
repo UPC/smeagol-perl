@@ -9,6 +9,7 @@ use CGI qw();
 use XML::LibXML;
 use Carp;
 use Data::Dumper;
+use Smeagol::DataStore;
 use Smeagol::Tag;
 use Smeagol::Booking;
 use Smeagol::Agenda;
@@ -16,7 +17,23 @@ use Smeagol::Resource;
 use Smeagol::Resource::List;
 use Encode;
 
+# Constructor needs two arguments: port to listen to, and datastore full path.
+# For example:
+#    Smeagol::Server->new( 8000, datastorepath => '/tmp/smeagol_datastore' );
+sub new {
+    my $class = shift;
+    my ( $port, %args ) = @_;
+
+    Smeagol::DataStore::init( $args{'datastorepath'} );
+
+    my $obj = $class->SUPER::new($port);
+
+    bless $obj, $class;
+    return $obj;
+}
+
 sub print_banner {
+
     # dummy banner which prints nothing, because parent class's is buggy
     # (always shows a "listening on http://localhost..." message)
 }

@@ -9,8 +9,7 @@ use Carp;
 use Encode;
 
 my $_PATH;
-
-init('/tmp/smeagol_datastore/');
+my $DEFAULT_DS_PATH = '/tmp/smeagol_datastore/';
 
 # init($path): sets DataStore storage path.
 #       $path argument indicates the directory
@@ -23,7 +22,9 @@ sub init {
         unless defined $path;
 
     if ( $path eq "/" ) {
-        $path = "/tmp/smeagol_datastore/";
+
+        # we should not use the root directory as the datastore path ;-)
+        $path = $DEFAULT_DS_PATH;
     }
 
     # Create the path, if needed
@@ -32,8 +33,13 @@ sub init {
         # DataStore directory already exists
     }
     else {
-        mkdir $path
-            or croak "Could not create DataStore directory $path";
+
+        #mkdir $path
+        #    or croak "Could not create DataStore directory $path";
+        eval { File::Path::mkpath($path) };
+        if ($@) {
+            croak "Could not create DataStore directory $path";
+        }
     }
 
     # Add trailing slash if needed

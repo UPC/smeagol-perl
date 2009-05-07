@@ -25,12 +25,14 @@ BEGIN {
         Smeagol::Tag
         Smeagol::DataStore
     );
+
 }
 
 my $server_port = 8000;
 my $server      = "http://localhost:$server_port";
 
-my $pid = Smeagol::Server->new($server_port)->background();
+my $pid = Smeagol::Server->new( $server_port,
+    datastorepath => '/tmp/smeagol_datastore' )->background();
 
 # Auxiliary routine to encapsulate server requests
 sub smeagol_request {

@@ -20,7 +20,8 @@ BEGIN {
 
 my $server_port = 8000;
 my $server      = "http://localhost:$server_port";
-my $pid         = Smeagol::Server->new($server_port)->background();
+my $pid         = Smeagol::Server->new( $server_port,
+    datastorepath => '/tmp/smeagol_datastore' )->background();
 
 my $client = Smeagol::Client->new();
 ok( !defined $client, 'client not created' );

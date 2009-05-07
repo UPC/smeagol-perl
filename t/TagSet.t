@@ -13,6 +13,9 @@ BEGIN {
         Smeagol::TagSet
         Smeagol::DataStore
     );
+
+    Smeagol::DataStore::init('/tmp/smeagol_datastore');
+
 }
 use Data::Dumper;
 

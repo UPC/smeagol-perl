@@ -16,6 +16,9 @@ use overload
     q{!=} => \&__not_equal__,
     q{ne} => \&__not_equal__;
 
+our $MIN = 2;
+our $MAX = 60;
+
 sub new {
     my $class = shift;
     my ($descr) = @_;
@@ -124,7 +127,7 @@ sub _check_value {
     my ($val) = @_;
     return if ( !defined($val) );
     return if ( $val =~ /[^\w.:_\-]/ );
-    return if ( length($val) < 4 || length($val) > 60 );
+    return if ( length($val) < $MIN || length($val) > $MAX );
     return 1;
 }
 

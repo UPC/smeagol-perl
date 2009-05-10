@@ -19,6 +19,8 @@ BEGIN {
         Smeagol::Tag
         Smeagol::TagSet
     );
+
+    Smeagol::DataStore::init();
 }
 
 # Make a DateTime object with some defaults

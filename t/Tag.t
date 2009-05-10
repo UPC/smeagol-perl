@@ -10,6 +10,8 @@ use Encode;
 
 BEGIN {
     use_ok($_) for qw(Smeagol::Tag Smeagol::DataStore);
+
+    Smeagol::DataStore::init();
 }
 use Data::Dumper;
 

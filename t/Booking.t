@@ -18,6 +18,8 @@ BEGIN {
         Smeagol::Booking::ICal
         Smeagol::DataStore
     );
+
+    Smeagol::DataStore::init();
 }
 
 # Make a DateTime object with some defaults

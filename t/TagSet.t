@@ -13,6 +13,8 @@ BEGIN {
         Smeagol::TagSet
         Smeagol::DataStore
     );
+
+    Smeagol::DataStore::init();
 }
 use Data::Dumper;
 

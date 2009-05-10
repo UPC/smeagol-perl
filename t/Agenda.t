@@ -20,6 +20,8 @@ BEGIN {
         Smeagol::Agenda::ICal
         Smeagol::DataStore
     );
+
+    Smeagol::DataStore::init();
 }
 
 # Make a DateTime object with some defaults

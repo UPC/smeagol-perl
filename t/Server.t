@@ -25,6 +25,7 @@ BEGIN {
         Smeagol::Tag
         Smeagol::DataStore
     );
+
 }
 
 my $server_port = 8000;

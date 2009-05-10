@@ -11,7 +11,7 @@ use Encode;
 BEGIN {
     use_ok($_) for qw(Smeagol::Tag Smeagol::DataStore);
 
-    Smeagol::DataStore::init('/tmp/smeagol_datastore');
+    Smeagol::DataStore::init();
 }
 use Data::Dumper;
 

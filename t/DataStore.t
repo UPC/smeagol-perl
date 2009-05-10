@@ -10,7 +10,7 @@ use Carp;
 BEGIN {
     use_ok($_) for qw(Smeagol::DataStore);
 
-    Smeagol::DataStore::init('/tmp/smeagol_datastore');
+    Smeagol::DataStore::init();
 }
 
 # Testing DataStore->list_id() with empty DataStore

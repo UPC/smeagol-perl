@@ -18,36 +18,25 @@ my $DEFAULT_DS_PATH = '/tmp/smeagol_datastore/';
 sub init {
     my ($path) = @_;
 
-    croak "DataStore->init() needs an argument!"
+    $path = $DEFAULT_DS_PATH
         unless defined $path;
 
-    if ( $path eq "/" ) {
-
-        # we should not use the root directory as the datastore path ;-)
-        $path = $DEFAULT_DS_PATH;
-    }
+    croak "Cannot use the root directory"
+        if $path eq "/";
 
     # Create the path, if needed
-    if ( -d $path ) {
-
-        # DataStore directory already exists
-    }
-    else {
-
-        #mkdir $path
-        #    or croak "Could not create DataStore directory $path";
+    if ( !-d $path ) {
         eval { File::Path::mkpath($path) };
-        if ($@) {
-            croak "Could not create DataStore directory $path";
-        }
+        croak "Could not create DataStore directory $path"
+            if $@;
     }
 
     # Add trailing slash if needed
-    if ( !( $path =~ /(.)\/$/ ) ) {
-        $path .= '/';
-    }
+    $path .= '/'
+        if $path !~ /(.)\/$/;
 
-    $_PATH = $path;    # the path where DataStore will be located
+    # the path where DataStore will be located
+    $_PATH = $path;
 }
 
 # full_path(id):

@@ -21,8 +21,7 @@ BEGIN {
         Smeagol::DataStore
     );
 
-    Smeagol::DataStore::init('/tmp/smeagol_datastore');
-
+    Smeagol::DataStore::init();
 }
 
 # Make a DateTime object with some defaults

@@ -14,8 +14,7 @@ BEGIN {
         Smeagol::DataStore
     );
 
-    Smeagol::DataStore::init('/tmp/smeagol_datastore');
-
+    Smeagol::DataStore::init();
 }
 use Data::Dumper;
 

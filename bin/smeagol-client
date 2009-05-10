@@ -18,12 +18,12 @@ if ( $ARGV{verbose} ) {
 }
 
 # Create client
-my $host = "$ARGV{server}:$ARGV{port}";
-verbose("Trying to create client using $host");
-my $client = Smeagol::Client->new($host);
+my $server = $ARGV{server};
+verbose("Trying to create client using $server");
+my $client = Smeagol::Client->new($server);
 defined($client)
     or die
-    "Could not create client. Is there a Smeagol server running on \"$host\"?\n";
+    "Could not create client. Is there a Smeagol server running on \"$server\"?\n";
 verbose("Client created");
 
 # List resources
@@ -294,20 +294,11 @@ This documentation refers to version 0.02
 
 =item -s <url> | --server <url>
 
-Smeagol server url. Default is 'http://localhost'.
+Smeagol server url. Default is 'http://localhost:8000'.
 
 =for Euclid:
     url.type:    string
-    url.default: 'http://localhost'
-
-=item -p <port> | --port <port>
-
-Smeagol server port. Default is 8000.
-
-=for Euclid:
-    port.type:       +integer
-    port.type.error: <port> must be an integer > 0
-    port.default:    8000
+    url.default: 'http://localhost:8000'
 
 =item -lr | --listresources
 

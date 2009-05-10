@@ -1,5 +1,13 @@
 Històric de revisions del projecte smeagol.
 
+0.05   Sun May 10 23:17:51 2009
+       - canvi de ExtUtils::MakeMaker a Module::Install
+       - afegit l'arxiu AUTHORS
+       - nous DTD autocontinguts, sense dependències
+       - afegit un index al servidor web
+       - afegides les operacions amb etiquetes al client
+       - resolt el problema d'UTF-8 als fitxers iCalendar
+
 0.0401 Thu Apr 23 18:05:00 2009
        - documentats els canvis de la versió anterior
        - afegit el XSLT per a les etiquetes

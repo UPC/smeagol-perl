@@ -173,7 +173,7 @@ sub from_xml {
 
     # validate XML string against the DTD
     my $dtd = XML::LibXML::Dtd->new( "CPL UPC//Booking DTD v0.03",
-        "dtd/booking.dtd" );
+        "share/dtd/booking.dtd" );
 
     my $doc = eval { XML::LibXML->new->parse_string($xml) };
     croak $@ if $@;

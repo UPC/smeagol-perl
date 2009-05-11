@@ -26,6 +26,6 @@ install_script 'bin/smeagol-server';
 install_share;
 
 # share, t and inc are also added
-no_index directory => qw( doc dtd xsl css );
+no_index directory => qw( doc );
 
 WriteAll;

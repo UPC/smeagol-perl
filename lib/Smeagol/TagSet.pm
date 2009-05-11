@@ -70,7 +70,7 @@ sub from_xml {
 
     # validate XML string against the DTD
     my $dtd = XML::LibXML::Dtd->new( "CPL UPC//TagSet DTD v0.01",
-        "dtd/tagSet.dtd" );
+        "share/dtd/tagSet.dtd" );
 
     my $dom = eval { XML::LibXML->new->parse_string($xml) };
 

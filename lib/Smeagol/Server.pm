@@ -275,7 +275,7 @@ sub _send_dtd {
     #        the project base dir or won't find dtd dir
     #        (ticket:34)
     #
-    if ( open my $dtd, "<", "dtd/$id.dtd" ) {
+    if ( open my $dtd, "<", "share/dtd/$id.dtd" ) {
 
         # slurp dtd file
         local $/;
@@ -570,7 +570,7 @@ sub _send_css {
     # FIXME: make it work from anywhere, now it must run from
     #        the project base dir or won't find dtd dir
     #        (ticket:116)
-    if ( open my $css, "<", "css/$id.css" ) {
+    if ( open my $css, "<", "share/css/$id.css" ) {
 
         # slurp css file
         local $/;
@@ -592,7 +592,7 @@ sub _send_xsl {
     # FIXME: make it work from anywhere, now it must run from
     #        the project base dir or won't find dtd dir
     #        (ticket:116)
-    if ( open my $xsl, "<", "xsl/$id.xsl" ) {
+    if ( open my $xsl, "<", "share/xsl/$id.xsl" ) {
 
         # slurp css file
         local $/;

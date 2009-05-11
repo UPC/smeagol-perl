@@ -65,7 +65,7 @@ sub from_xml {
 
     # validate XML string against the DTD
     my $dtd = XML::LibXML::Dtd->new( "CPL UPC//Resources DTD v0.03",
-        "dtd/resoure-list.dtd" );
+        "share/dtd/resoure-list.dtd" );
 
     my $dom = eval { XML::LibXML->new->parse_string($xml) };
 

@@ -95,7 +95,7 @@ sub from_xml {
 
     # validate XML string against the DTD
     my $dtd
-        = XML::LibXML::Dtd->new( "CPL UPC//Tag DTD v0.01", "dtd/tag.dtd" );
+        = XML::LibXML::Dtd->new( "CPL UPC//Tag DTD v0.01", "share/dtd/tag.dtd" );
 
     my $doc = eval { XML::LibXML->new->parse_string($xml) };
     croak $@ if $@;

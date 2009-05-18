@@ -18,7 +18,7 @@ use Smeagol::Resource::List;
 use Encode;
 use HTTP::Status qw(status_message);
 
-use constant { 
+use constant {
     STATUS_OK                 => 200,
     STATUS_CREATED            => 201,
     STATUS_BAD_REQUEST        => 400,
@@ -28,6 +28,29 @@ use constant {
     STATUS_CONFLICT           => 409,
 };
 
+my $REQUEST_TIMEOUT = 60;
+
+# Don't die on SIGALRM, don't do anything, just stop sysreading
+$SIG{ALRM} = sub { };
+
+sub accept_hook {
+
+    # First, let the parent do its magic
+    shift->SUPER::accept_hook(@_);
+
+    # Then, start timer for lazy requests
+    alarm($REQUEST_TIMEOUT);
+}
+
+sub post_setup_hook {
+
+    # Stop timer for lazy requests
+    alarm(0);
+
+    # Then do as parent says
+    shift->SUPER::post_setup_hook(@_);
+}
+
 # Constructor needs two arguments: port to listen to, and datastore full path.
 # For example:
 #    Smeagol::Server->new( 8000, datastorepath => '/tmp/smeagol_datastore' );
@@ -36,6 +59,7 @@ sub new {
     my ( $port, %args ) = @_;
 
     Smeagol::DataStore::init( $args{'datastorepath'} );
+    $REQUEST_TIMEOUT = $args{'timeout'} if defined $args{'timeout'};
 
     my $obj = $class->SUPER::new($port);
 
@@ -345,7 +369,8 @@ sub _create_booking {
             $overlapping_agenda->append($aux);
         }
 
-        _send_xml( $overlapping_agenda->to_xml( $r->url, 1 ), status => STATUS_CONFLICT );
+        _send_xml( $overlapping_agenda->to_xml( $r->url, 1 ),
+            status => STATUS_CONFLICT );
         return;
     }
 
@@ -480,7 +505,8 @@ sub _update_booking {
         }
         $r->agenda($overlapping_agenda);
 
-        _send_xml( $overlapping_agenda->to_xml( $r->url, 1 ), status => STATUS_CONFLICT );
+        _send_xml( $overlapping_agenda->to_xml( $r->url, 1 ),
+            status => STATUS_CONFLICT );
         return;
     }
 

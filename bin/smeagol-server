@@ -15,8 +15,11 @@ if ( $ARGV{verbose} ) {
     print "DataStore in $ARGV{storage}.\n";
 }
 
-my $server
-    = Smeagol::Server->new( $ARGV{port}, datastorepath => $ARGV{storage} );
+my $server = Smeagol::Server->new(
+    $ARGV{port},
+    datastorepath => $ARGV{storage},
+    timeout       => $ARGV{timeout}
+);
 $server->host( $ARGV{host} );
 
 if ( $ARGV{background} ) {
@@ -67,6 +70,14 @@ Directory where datastore resides
 =for Euclid:
     storage.type:    string
     storage.default: '/tmp/smeagol_datastore'
+
+=item --timeout [=] <timeout>
+
+Set request timeout in seconds
+
+=for Euclid:
+    timeout.type:    +integer
+    timeout.default: 60
 
 =item --[no[-]]verbose
 

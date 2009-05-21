@@ -80,13 +80,13 @@ sub print_banner {
 # Dispatcher table. Associates a handler to an URL. Groups in
 # the URL pattern are given as parameters to handler.
 my %crud_for = (
-    '/resources'      => { GET => \&_list_resources, },
+    '/resources'      => { GET => \&_listResources, },
     '/resource/(\d+)' => {
-        GET    => \&_retrieve_resource,
-        DELETE => \&_delete_resource,
-        POST   => \&_update_resource,
+        GET    => \&_retrieveResource,
+        DELETE => \&_deleteResource,
+        POST   => \&_updateResource,
     },
-    '/resource'                     => { POST => \&_create_resource, },
+    '/resource'                     => { POST => \&_createResource, },
     '/resource/(\d+)/bookings'      => { GET  => \&_list_bookings, },
     '/resource/(\d+)/bookings/ical' => { GET  => \&_list_bookings_ical, },
     '/resource/(\d+)/booking'       => { POST => \&_create_booking, },
@@ -208,12 +208,12 @@ sub _send_ical {
 # Handlers for resources
 ##############################################################
 
-sub _list_resources {
+sub _listResources {
     my $list = Smeagol::Resource::List->new();
     _send_xml( $list->to_xml( "/resources", 1 ) );
 }
 
-sub _create_resource {
+sub _createResource {
     my ($cgi) = @_;
 
     my $r = Smeagol::Resource->from_xml( $cgi->param('POSTDATA') );
@@ -227,7 +227,7 @@ sub _create_resource {
     }
 }
 
-sub _retrieve_resource {
+sub _retrieveResource {
     my ( $cgi, $id ) = @_;
 
     if ( !defined $id ) {
@@ -245,7 +245,7 @@ sub _retrieve_resource {
     }
 }
 
-sub _delete_resource {
+sub _deleteResource {
     my ( $cgi, $id ) = @_;
 
     if ( !defined $id ) {
@@ -264,7 +264,7 @@ sub _delete_resource {
     }
 }
 
-sub _update_resource {
+sub _updateResource {
     my ( $cgi, $id ) = @_;
 
     if ( !defined $id ) {

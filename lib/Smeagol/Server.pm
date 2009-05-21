@@ -87,19 +87,19 @@ my %crud_for = (
         POST   => \&_updateResource,
     },
     '/resource'                     => { POST => \&_createResource, },
-    '/resource/(\d+)/bookings'      => { GET  => \&_list_bookings, },
-    '/resource/(\d+)/bookings/ical' => { GET  => \&_list_bookings_ical, },
-    '/resource/(\d+)/booking'       => { POST => \&_create_booking, },
-    '/resource/(\d+)/tag'           => { POST => \&_create_tag, },
-    '/resource/(\d+)/tags'          => { GET  => \&_list_tags, },
-    '/resource/(\d+)/tag/([\w.:_\-]+)' => { DELETE => \&_delete_tag, },
+    '/resource/(\d+)/bookings'      => { GET  => \&_listBookings, },
+    '/resource/(\d+)/bookings/ical' => { GET  => \&_listBookingsIcal, },
+    '/resource/(\d+)/booking'       => { POST => \&_createBooking, },
+    '/resource/(\d+)/tag'           => { POST => \&_createTag, },
+    '/resource/(\d+)/tags'          => { GET  => \&_listTags, },
+    '/resource/(\d+)/tag/([\w.:_\-]+)' => { DELETE => \&_deleteTag, },
     '/resource/(\d+)/booking/(\d+)'    => {
-        GET    => \&_retrieve_booking,
-        POST   => \&_update_booking,
-        DELETE => \&_delete_booking,
+        GET    => \&_retrieveBooking,
+        POST   => \&_updateBooking,
+        DELETE => \&_deleteBooking,
     },
     '/resource/(\d+)/booking/(\d+)/ical' =>
-        { GET => \&_retrieve_booking_ical },
+        { GET => \&_retrieveBookingIcal },
     '/css/(\w+)\.css' => { GET => \&_send_css },
     '/dtd/(\w+)\.dtd' => { GET => \&_send_dtd },
     '/xsl/(\w+)\.xsl' => { GET => \&_send_xsl },
@@ -311,12 +311,12 @@ sub _send_dtd {
 }
 
 #
-# FIXME: this call is made as _list_bookings($cgi, $1, $2, ...);
+# FIXME: this call is made as _listBookings($cgi, $1, $2, ...);
 #        $2 is always undef since this regex captures 1 item only,
 #        thus the undef on the args list below.
 #        (ticket:115)
 #
-sub _list_bookings {
+sub _listBookings {
     my ( $cgi, $idResource, undef, $viewAs ) = @_;
 
     my $r = Smeagol::Resource->load($idResource);
@@ -336,11 +336,11 @@ sub _list_bookings {
     }
 }
 
-sub _list_bookings_ical {
-    _list_bookings( @_, "ical" );
+sub _listBookingsIcal {
+    _listBookings( @_, "ical" );
 }
 
-sub _create_booking {
+sub _createBooking {
     my ( $cgi, $idResource ) = @_;
 
     if ( !defined $idResource ) {
@@ -379,7 +379,7 @@ sub _create_booking {
     _send_xml( $b->to_xml( $r->url, 1 ), status => STATUS_CREATED );
 }
 
-sub _retrieve_booking {
+sub _retrieveBooking {
     my ( $cgi, $idR, $idB, $viewAs ) = @_;
 
     if ( !defined $idR || !defined $idB ) {
@@ -414,11 +414,11 @@ sub _retrieve_booking {
     }
 }
 
-sub _retrieve_booking_ical {
-    _retrieve_booking( @_, "ical" );
+sub _retrieveBookingIcal {
+    _retrieveBooking( @_, "ical" );
 }
 
-sub _delete_booking {
+sub _deleteBooking {
     my ( $cgi, $idR, $idB ) = @_;
 
     if ( !defined $idR || !defined $idB ) {
@@ -450,11 +450,11 @@ sub _delete_booking {
     _send_error( STATUS_OK, "Booking #$idB deleted" );
 }
 
-# NOTE: No race conditions in _update_booking, because
+# NOTE: No race conditions in _updateBooking, because
 #       we're using HTTP::Server::Simple which has no
 #       concurrence management (requests are served
 #       sequentially)
-sub _update_booking {
+sub _updateBooking {
     my ( $cgi, $idR, $idB ) = @_;
 
     if ( !defined $idR || !defined $idB ) {
@@ -518,7 +518,7 @@ sub _update_booking {
     return;
 }
 
-sub _create_tag {
+sub _createTag {
     my ( $cgi, $idResource ) = @_;
     if ( !defined $idResource ) {
         _send_error(STATUS_BAD_REQUEST);
@@ -542,7 +542,7 @@ sub _create_tag {
     _send_xml( $tg->toXML( $r->url, 1 ), status => STATUS_CREATED );
 }
 
-sub _list_tags {
+sub _listTags {
     my ( $cgi, $idResource ) = @_;
     my $r = Smeagol::Resource->load($idResource);
 
@@ -554,7 +554,7 @@ sub _list_tags {
     _send_xml($xml);
 }
 
-sub _delete_tag {
+sub _deleteTag {
     my ( $cgi, $idR, $idT ) = @_;
 
     if ( !defined $idR || !defined $idT ) {

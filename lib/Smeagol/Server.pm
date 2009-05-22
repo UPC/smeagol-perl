@@ -151,6 +151,15 @@ sub handle_request {
         # Requested URL not available
         _send_error(STATUS_NOT_FOUND);
     }
+
+    my $str = POSIX::strftime("%d/%b/%Y:%H:%M:%S - %z",localtime());
+    print STDERR $self->lookup_localhost() . " - - ".
+		"[".$str."] ".
+		"\"".$method. " ". $cgi->request_uri() . " " . up($cgi->protocol()) . "\"".
+		" - ".
+		" \"".$cgi->referer. "\"".
+		" \"".$cgi->user_agent. "\"".
+		"\n"; 
 }
 
 #############################################################
@@ -171,6 +180,7 @@ sub _reply {
         unless defined $text;
 
     print "HTTP/1.0 $status $msg\n", CGI->header($type), $text, "\n";
+    return $status;
 }
 
 # Prints an Http response. Message is optional.

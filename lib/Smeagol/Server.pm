@@ -5,18 +5,12 @@ use warnings;
 
 use base qw(Exporter HTTP::Server::Simple::CGI);
 use CGI qw();
-use XML::LibXML;
 use Carp;
-use Data::Dumper;
 use Smeagol::DataStore;
-use Smeagol::Tag;
-use Smeagol::Booking;
-use Smeagol::Agenda;
-use Smeagol::Resource;
-use Smeagol::Resource::List;
 use Encode;
 use HTTP::Status qw(:constants status_message);
-use Smeagol::Server::Handler qw(listResources retrieveResource deleteResource updateResource createResource listBookings);
+use Smeagol::Server::Handler
+    qw(listResources retrieveResource deleteResource updateResource createResource listBookings listBookingsIcal createBooking createTag listTags deleteTag retrieveBooking updateBooking deleteBooking retrieveBookingIcal);
 
 our @EXPORT_OK = qw(send_xml send_error send_ical);
 
@@ -78,24 +72,23 @@ my %crud_for = (
         DELETE => \&deleteResource,
         POST   => \&updateResource,
     },
-    '/resource'                     => { POST => \&createResource, },
-    '/resource/(\d+)/bookings'      => { GET  => \&listBookings, },
-    '/resource/(\d+)/bookings/ical' => { GET  => \&_listBookingsIcal, },
-    '/resource/(\d+)/booking'       => { POST => \&_createBooking, },
-    '/resource/(\d+)/tag'           => { POST => \&_createTag, },
-    '/resource/(\d+)/tags'          => { GET  => \&_listTags, },
-    '/resource/(\d+)/tag/([\w.:_\-]+)' => { DELETE => \&_deleteTag, },
+    '/resource'                        => { POST   => \&createResource, },
+    '/resource/(\d+)/bookings'         => { GET    => \&listBookings, },
+    '/resource/(\d+)/bookings/ical'    => { GET    => \&listBookingsIcal, },
+    '/resource/(\d+)/booking'          => { POST   => \&createBooking, },
+    '/resource/(\d+)/tag'              => { POST   => \&createTag, },
+    '/resource/(\d+)/tags'             => { GET    => \&listTags, },
+    '/resource/(\d+)/tag/([\w.:_\-]+)' => { DELETE => \&deleteTag, },
     '/resource/(\d+)/booking/(\d+)'    => {
-        GET    => \&_retrieveBooking,
-        POST   => \&_updateBooking,
-        DELETE => \&_deleteBooking,
+        GET    => \&retrieveBooking,
+        POST   => \&updateBooking,
+        DELETE => \&deleteBooking,
     },
-    '/resource/(\d+)/booking/(\d+)/ical' =>
-        { GET => \&_retrieveBookingIcal },
-    '/css/(\w+)\.css' => { GET => \&_send_css },
-    '/dtd/(\w+)\.dtd' => { GET => \&_send_dtd },
-    '/xsl/(\w+)\.xsl' => { GET => \&_send_xsl },
-    '/'               => {
+    '/resource/(\d+)/booking/(\d+)/ical' => { GET => \&retrieveBookingIcal },
+    '/css/(\w+)\.css'                    => { GET => \&_send_css },
+    '/dtd/(\w+)\.dtd'                    => { GET => \&_send_dtd },
+    '/xsl/(\w+)\.xsl'                    => { GET => \&_send_xsl },
+    '/'                                  => {
         GET => sub { _send_html( $_[0], "server" ) }
     },
 );
@@ -196,7 +189,6 @@ sub send_ical {
     );
 }
 
-
 ##############################################################
 # Handlers for DTD
 ##############################################################
@@ -220,256 +212,6 @@ sub _send_dtd {
     }
 }
 
-
-sub _listBookingsIcal {
-    listBookings( @_, "ical" );
-}
-
-sub _createBooking {
-    my ( $cgi, $idResource ) = @_;
-
-    if ( !defined $idResource ) {
-        send_error(HTTP_BAD_REQUEST);
-        return;
-    }
-
-    my $r = Smeagol::Resource->load($idResource);
-    if ( !defined $r ) {
-        send_error(HTTP_NOT_FOUND);
-        return;
-    }
-
-    my $b = Smeagol::Booking->from_xml( $cgi->param('POSTDATA') );
-    if ( !defined $b ) {
-        send_error(HTTP_BAD_REQUEST);
-        return;
-    }
-
-    my $ag = $r->agenda;
-
-    if ( $ag->interlace($b) ) {
-        my $overlapping_agenda = Smeagol::Agenda->new();
-        my @overlapping = grep { $_->intersects($b) } $ag->elements;
-        foreach my $aux (@overlapping) {
-            $overlapping_agenda->append($aux);
-        }
-
-        send_xml( $overlapping_agenda->to_xml( $r->url, 1 ),
-            status => HTTP_CONFLICT );
-        return;
-    }
-
-    $r->agenda->append($b);
-    $r->save();
-    send_xml( $b->to_xml( $r->url, 1 ), status => HTTP_CREATED );
-}
-
-sub _retrieveBooking {
-    my ( $cgi, $idR, $idB, $viewAs ) = @_;
-
-    if ( !defined $idR || !defined $idB ) {
-        send_error(HTTP_BAD_REQUEST);
-        return;
-    }
-
-    my $r = Smeagol::Resource->load($idR);
-    if ( !defined $r ) {
-        send_error(HTTP_NOT_FOUND);
-        return;
-    }
-
-    my $ag = $r->agenda;
-    if ( !defined $ag ) {
-        send_error(HTTP_NOT_FOUND);
-        return;
-    }
-
-    my $b = ( grep { $_->id eq $idB } $ag->elements )[0];
-    if ( !defined $b ) {
-        send_error(HTTP_NOT_FOUND);
-        return;
-    }
-
-    if ( defined $viewAs && $viewAs eq 'ical' ) {
-        my $ics = $b->ical->calendar->as_string;
-        send_ical($ics);
-    }
-    else {
-        send_xml( $b->to_xml( $r->url, 1 ) );
-    }
-}
-
-sub _retrieveBookingIcal {
-    _retrieveBooking( @_, "ical" );
-}
-
-sub _deleteBooking {
-    my ( $cgi, $idR, $idB ) = @_;
-
-    if ( !defined $idR || !defined $idB ) {
-        send_error(HTTP_BAD_REQUEST);
-        return;
-    }
-
-    my $r = Smeagol::Resource->load($idR);
-
-    if ( !defined $r ) {
-        send_error(HTTP_NOT_FOUND);
-        return;
-    }
-
-    my $ag = $r->agenda;
-    if ( !defined $ag ) {
-        send_error(HTTP_NOT_FOUND);
-        return;
-    }
-
-    my $b = ( grep { $_->id eq $idB } $ag->elements )[0];
-    if ( !defined $b ) {
-        send_error(HTTP_NOT_FOUND);
-        return;
-    }
-
-    $ag->remove($b);
-    $r->save();
-    send_error( HTTP_OK, "Booking #$idB deleted" );
-}
-
-# NOTE: No race conditions in _updateBooking, because
-#       we're using HTTP::Server::Simple which has no
-#       concurrence management (requests are served
-#       sequentially)
-sub _updateBooking {
-    my ( $cgi, $idR, $idB ) = @_;
-
-    if ( !defined $idR || !defined $idB ) {
-        send_error(HTTP_BAD_REQUEST);
-        return;
-    }
-
-    my $r = Smeagol::Resource->load($idR);
-    if ( !defined $r ) {
-        send_error(HTTP_NOT_FOUND);
-        return;
-    }
-
-    my $ag = $r->agenda;
-    if ( !defined $ag ) {
-        send_error(HTTP_NOT_FOUND);
-        return;
-    }
-
-    my $old_booking = ( grep { $_->id eq $idB } $ag->elements )[0];
-    if ( !defined $old_booking ) {
-        send_error(HTTP_NOT_FOUND);
-        return;
-    }
-
-    my $new_booking
-        = Smeagol::Booking->from_xml( $cgi->param('POSTDATA'), $idB );
-
-    if ( !defined $new_booking ) {
-        send_error(HTTP_BAD_REQUEST);
-        return;
-    }
-
-    #
-    # Check wether updated booking would produce overlappings
-    #
-    $ag->remove($old_booking);
-
-    if ( $ag->interlace($new_booking) ) {
-
-        # if overlappings are produced, let's build a new agenda
-        # containing affected bookings and return it to the client
-        my @overlapping = grep { $_->intersects($new_booking) } $ag->elements;
-        my $overlapping_agenda = Smeagol::Agenda->new();
-
-        foreach my $aux (@overlapping) {
-            $overlapping_agenda->append($aux);
-        }
-        $r->agenda($overlapping_agenda);
-
-        send_xml( $overlapping_agenda->to_xml( $r->url, 1 ),
-            status => HTTP_CONFLICT );
-        return;
-    }
-
-    $ag->append($new_booking);
-    $r->agenda($ag);
-    $r->save();
-
-    send_xml( $new_booking->to_xml( $r->url, 1 ) );
-    return;
-}
-
-sub _createTag {
-    my ( $cgi, $idResource ) = @_;
-    if ( !defined $idResource ) {
-        send_error(HTTP_BAD_REQUEST);
-        return;
-    }
-
-    my $r = Smeagol::Resource->load($idResource);
-    if ( !defined $r ) {
-        send_error(HTTP_NOT_FOUND);
-        return;
-    }
-
-    my $tg = Smeagol::Tag->from_xml( $cgi->param('POSTDATA') );
-    if ( !defined $tg ) {
-        send_error(HTTP_BAD_REQUEST);
-        return;
-    }
-
-    $r->tags->append($tg);
-    $r->save();
-    send_xml( $tg->toXML( $r->url, 1 ), status => HTTP_CREATED );
-}
-
-sub _listTags {
-    my ( $cgi, $idResource ) = @_;
-    my $r = Smeagol::Resource->load($idResource);
-
-    if ( !defined $r ) {
-        send_error(HTTP_NOT_FOUND);
-        return;
-    }
-    my $xml = $r->tags->to_xml( $r->url, 1 );
-    send_xml($xml);
-}
-
-sub _deleteTag {
-    my ( $cgi, $idR, $idT ) = @_;
-
-    if ( !defined $idR || !defined $idT ) {
-        send_error(HTTP_BAD_REQUEST);
-        return;
-    }
-
-    my $r = Smeagol::Resource->load($idR);
-
-    if ( !defined $r ) {
-        send_error(HTTP_NOT_FOUND);
-        return;
-    }
-
-    my $tgS = $r->tags;
-    if ( !defined $tgS ) {
-        send_error(HTTP_NOT_FOUND);
-        return;
-    }
-
-    my $tg = ( grep { $_->value eq $idT } $tgS->elements )[0];
-    if ( !defined $tg ) {
-        send_error(HTTP_NOT_FOUND);
-        return;
-    }
-
-    $tgS->remove($tg);
-    $r->save();
-    send_error( HTTP_OK, "Tag #$idT deleted" );
-}
 ####################
 # Handlers for CSS #
 ####################

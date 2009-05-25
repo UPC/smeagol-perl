@@ -41,6 +41,7 @@ sub interlace {
     return grep { $slot->intersects($_) } $self->elements;
 }
 
+# no special order is granted in results, because of Set->elements behaviour.
 sub __str__ {
     my $self = shift;
     my ( $url, $isRootNode ) = @_;
@@ -112,6 +113,7 @@ sub from_xml {
     return $ag;
 }
 
+# no special order is granted in results, because of Set->elements behaviour.
 sub ical {
     my $self = shift;
 

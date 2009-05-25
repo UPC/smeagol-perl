@@ -31,6 +31,8 @@ sub append {
     $self->insert($slot);
 }
 
+
+# No special order is granted in results, because of Set->elements behaviour.
 sub __str__ {
     my $self = shift;
     my ( $url, $isRootNode ) = @_;

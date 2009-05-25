@@ -166,8 +166,11 @@ sub _log_request {
     my $strDate = POSIX::strftime( "%d/%b/%Y:%H:%M:%S - %z", localtime() );
     my $rhost   = $cgi->remote_host();
     my $uri     = $cgi->request_uri();
-    my $proto   = defined( $cgi->protocol() ) ? uc( $cgi->protocol() ) : "";
-    my $referer = defined( $cgi->referer() ) ? $cgi->referer() : "";
+    my $proto
+        = defined( $cgi->server_protocol() )
+        ? uc( $cgi->server_protocol() )
+        : "";
+    my $referer = defined( $cgi->referer() )    ? $cgi->referer()    : "";
     my $ua      = defined( $cgi->user_agent() ) ? $cgi->user_agent() : "";
 
     print STDERR

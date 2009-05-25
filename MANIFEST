@@ -35,6 +35,7 @@ lib/Smeagol/DataStore.pm
 lib/Smeagol/Resource.pm
 lib/Smeagol/Resource/List.pm
 lib/Smeagol/Server.pm
+lib/Smeagol/Server/Handler.pm
 lib/Smeagol/Tag.pm
 lib/Smeagol/TagSet.pm
 lib/Smeagol/XML.pm

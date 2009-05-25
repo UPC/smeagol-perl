@@ -17,7 +17,7 @@ use Smeagol::Resource;
 use Smeagol::Resource::List;
 use Encode;
 use HTTP::Status qw(status_message);
-use POSIX;
+use POSIX ();
 
 use constant {
     STATUS_OK                 => 200,
@@ -30,7 +30,7 @@ use constant {
 };
 
 my $REQUEST_TIMEOUT = 60;
-my $VERBOSE_MODE    = 0;    # server logs disabled by default
+my $VERBOSE_MODE;    # server logs disabled by default
 
 # Don't die on SIGALRM, don't do anything, just stop sysreading
 $SIG{ALRM} = sub { };
@@ -62,7 +62,7 @@ sub new {
 
     Smeagol::DataStore::init( $args{'datastorepath'} );
     $REQUEST_TIMEOUT = $args{'timeout'} if defined $args{'timeout'};
-    $VERBOSE_MODE = 1 if defined $args{'verbose'};
+    $VERBOSE_MODE = $args{'verbose'};
 
     my $obj = $class->SUPER::new($port);
 
@@ -155,7 +155,7 @@ sub handle_request {
         _send_error(STATUS_NOT_FOUND);
     }
 
-    _log_request( $method, $cgi ) if ( $VERBOSE_MODE == 1 );
+    _log_request( $method, $cgi ) if $VERBOSE_MODE;
 }
 
 # _log_request(method, cgi):
@@ -171,9 +171,9 @@ sub _log_request {
     my $proto
         = defined( $cgi->server_protocol() )
         ? uc( $cgi->server_protocol() )
-        : "";
-    my $referer = defined( $cgi->referer() )    ? $cgi->referer()    : "";
-    my $ua      = defined( $cgi->user_agent() ) ? $cgi->user_agent() : "";
+        : "-";
+    my $referer = defined( $cgi->referer() )    ? $cgi->referer()    : "-";
+    my $ua      = defined( $cgi->user_agent() ) ? $cgi->user_agent() : "-";
 
     print STDERR
         "$rhost - - [$strDate] \"$method $uri $proto\" - \"$referer\" \"$ua\"\n";

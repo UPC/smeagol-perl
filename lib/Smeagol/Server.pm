@@ -11,10 +11,12 @@ use Encode;
 use HTTP::Status qw(:constants status_message);
 use Smeagol::Server::Handler
     qw(listResources retrieveResource deleteResource updateResource createResource listBookings listBookingsIcal createBooking createTag listTags deleteTag retrieveBooking updateBooking deleteBooking retrieveBookingIcal);
+use POSIX ();
 
 our @EXPORT_OK = qw(send_xml send_error send_ical);
 
 my $REQUEST_TIMEOUT = 60;
+my $VERBOSE_MODE;    # server logs disabled by default
 
 # Don't die on SIGALRM, don't do anything, just stop sysreading
 $SIG{ALRM} = sub { };
@@ -46,6 +48,7 @@ sub new {
 
     Smeagol::DataStore::init( $args{'datastorepath'} );
     $REQUEST_TIMEOUT = $args{'timeout'} if defined $args{'timeout'};
+    $VERBOSE_MODE = $args{'verbose'};
 
     my $obj = $class->SUPER::new($port);
 
@@ -136,6 +139,29 @@ sub handle_request {
         # Requested URL not available
         send_error(HTTP_NOT_FOUND);
     }
+
+    _log_request( $method, $cgi ) if $VERBOSE_MODE;
+}
+
+# _log_request(method, cgi):
+#       generate log messages conforming to Apache Combined Log format,
+#       as defined in http://httpd.apache.org/docs/2.2/logs.html#accesslog
+#       FIXME: Several fields have a hard-coded "-" value (i.e. user ident,
+#              user ID and response object size).
+sub _log_request {
+    my ( $method, $cgi ) = @_;
+    my $strDate = POSIX::strftime( "%d/%b/%Y:%H:%M:%S - %z", localtime() );
+    my $rhost   = $cgi->remote_host();
+    my $uri     = $cgi->request_uri();
+    my $proto
+        = defined( $cgi->server_protocol() )
+        ? uc( $cgi->server_protocol() )
+        : "-";
+    my $referer = defined( $cgi->referer() )    ? $cgi->referer()    : "-";
+    my $ua      = defined( $cgi->user_agent() ) ? $cgi->user_agent() : "-";
+
+    print STDERR
+        "$rhost - - [$strDate] \"$method $uri $proto\" - \"$referer\" \"$ua\"\n";
 }
 
 #############################################################
@@ -156,6 +182,7 @@ sub _reply {
         unless defined $text;
 
     print "HTTP/1.0 $status $msg\n", CGI->header($type), $text, "\n";
+    return $status;
 }
 
 # Prints an Http response. Message is optional.

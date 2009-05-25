@@ -18,8 +18,10 @@ if ( $ARGV{verbose} ) {
 my $server = Smeagol::Server->new(
     $ARGV{port},
     datastorepath => $ARGV{storage},
-    timeout       => $ARGV{timeout}
+    timeout       => $ARGV{timeout},
+    verbose       => $ARGV{verbose},
 );
+
 $server->host( $ARGV{host} );
 
 if ( $ARGV{background} ) {

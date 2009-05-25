@@ -30,6 +30,7 @@ use constant {
 };
 
 my $REQUEST_TIMEOUT = 60;
+my $VERBOSE_MODE    = 0;    # server logs disabled by default
 
 # Don't die on SIGALRM, don't do anything, just stop sysreading
 $SIG{ALRM} = sub { };
@@ -61,6 +62,7 @@ sub new {
 
     Smeagol::DataStore::init( $args{'datastorepath'} );
     $REQUEST_TIMEOUT = $args{'timeout'} if defined $args{'timeout'};
+    $VERBOSE_MODE = 1 if defined $args{'verbose'};
 
     my $obj = $class->SUPER::new($port);
 
@@ -153,7 +155,7 @@ sub handle_request {
         _send_error(STATUS_NOT_FOUND);
     }
 
-    _log_request( $method, $cgi );
+    _log_request( $method, $cgi ) if ( $VERBOSE_MODE == 1 );
 }
 
 # _log_request(method, cgi):

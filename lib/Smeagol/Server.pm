@@ -17,6 +17,7 @@ use Smeagol::Resource;
 use Smeagol::Resource::List;
 use Encode;
 use HTTP::Status qw(status_message);
+use POSIX;
 
 use constant {
     STATUS_OK                 => 200,
@@ -152,14 +153,25 @@ sub handle_request {
         _send_error(STATUS_NOT_FOUND);
     }
 
-    my $str = POSIX::strftime("%d/%b/%Y:%H:%M:%S - %z",localtime());
-    print STDERR $self->lookup_localhost() . " - - ".
-		"[".$str."] ".
-		"\"".$method. " ". $cgi->request_uri() . " " . up($cgi->protocol()) . "\"".
-		" - ".
-		" \"".$cgi->referer. "\"".
-		" \"".$cgi->user_agent. "\"".
-		"\n"; 
+    _log_request( $method, $cgi );
+}
+
+# _log_request(method, cgi):
+#       generate log messages conforming to Apache Combined Log format,
+#       as defined in http://httpd.apache.org/docs/2.2/logs.html#accesslog
+#       FIXME: Several fields have a hard-coded "-" value (i.e. user ident,
+#              user ID and response object size).
+sub _log_request {
+    my ( $method, $cgi ) = @_;
+    my $strDate = POSIX::strftime( "%d/%b/%Y:%H:%M:%S - %z", localtime() );
+    my $rhost   = $cgi->remote_host();
+    my $uri     = $cgi->request_uri();
+    my $proto   = defined( $cgi->protocol() ) ? uc( $cgi->protocol() ) : "";
+    my $referer = defined( $cgi->referer() ) ? $cgi->referer() : "";
+    my $ua      = defined( $cgi->user_agent() ) ? $cgi->user_agent() : "";
+
+    print STDERR
+        "$rhost - - [$strDate] \"$method $uri $proto\" - \"$referer\" \"$ua\"\n";
 }
 
 #############################################################

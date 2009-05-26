@@ -1,5 +1,11 @@
 Històric de revisions del projecte smeagol.
 
+0.07   Tue May 26 11:02:32 2009
+       - afegits logs al servidor
+       - definit un timeout per a les connexions
+       - separats els handlers de les operacions REST a un mòdul nou
+       - aclarit el tema de l'ordre dels resultats
+
 0.06   Mon May 11 20:53:46 2009
        - corregits els problemes amb la localització no predeterminada
          del datastore

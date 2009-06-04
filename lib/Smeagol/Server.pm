@@ -88,17 +88,17 @@ my %crud_for = (
         DELETE => \&deleteBooking,
     },
     '/resource/(\d+)/booking/(\d+)/ical' => { GET => \&retrieveBookingIcal },
-    '(/css/\w+\.css)'                    => {
+    '/(css/\w+\.css)'                    => {
 		GET => sub{_send_file( 'text/css', @_ ) }
 	},
-    '(/dtd/\w+\.dtd)'                    => {
+    '/(dtd/\w+\.dtd)'                    => {
 		GET => sub{_send_file( 'text/sgml', @_ ) }
 	},
-    '(/xsl/\w+\.xsl)'                    => {
+    '/(xsl/\w+\.xsl)'                    => {
 		GET => sub{_send_file( 'application/xml', @_ ) }
 	 },
     '/'                                  => {
-        GET => sub { _send_file( 'text/html; charset=UTF-8', $_[0], "share/html/server.html" ) }
+        GET => sub { _send_file( 'text/html; charset=UTF-8', $_[0], "html/server.html" ) }
     },
 );
 
@@ -232,7 +232,7 @@ sub _send_file {
     # FIXME: make it work from anywhere, now it must run from
     #        the project base dir or won't find file dir
     #        (ticket:116)
-	if ( open my $file, "<", $filename ) {
+	if ( open my $file, "<", "share/$filename" ) {
 
         # slurp html file
         local $/;

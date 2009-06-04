@@ -28,9 +28,19 @@ sub append {
 
     ( defined $slot ) or die "SetTag->append requires one parameter";
 
-    $self->insert($slot);
+    $self->insert($slot)  unless $self->interlace($slot);
 }
 
+
+sub interlace {
+    my $self = shift;
+    my ($slot) = @_;
+
+    croak "TagSet->interlace requires one parameter"
+        unless defined $slot;
+
+    return grep { $slot->intersects($_) } $self->elements;
+}
 
 # No special order is granted in results, because of Set->elements behaviour.
 sub __str__ {

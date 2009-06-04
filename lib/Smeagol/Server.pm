@@ -158,11 +158,11 @@ sub _log_request {
         ? uc( $cgi->server_protocol() )
         : "-";
     my $referer
-        = defined( $cgi->referer() ) ? '"' . $cgi->referer() . '"' : "-";
+        = defined( $cgi->referer() ) ? q["] . $cgi->referer() . q["] : '-';
     my $ua
         = defined( $cgi->user_agent() )
-        ? '"' . $cgi->user_agent() . '"'
-        : "-";
+        ? q["] . $cgi->user_agent() . q["]
+        : '-';
 
     print STDERR
         "$rhost - - [$strDate] \"$method $uri $proto\" - - $referer $ua\n";

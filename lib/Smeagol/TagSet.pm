@@ -28,18 +28,19 @@ sub append {
 
     ( defined $slot ) or die "SetTag->append requires one parameter";
 
-    $self->insert($slot)  unless $self->interlace($slot);
+    $self->insert($slot)  unless $self->findValue($slot->value);
 }
 
 
-sub interlace {
+sub findValue {
     my $self = shift;
-    my ($slot) = @_;
+    my ($value) = @_;
 
-    croak "TagSet->interlace requires one parameter"
-        unless defined $slot;
+    #FIXME: utilitzar caller per obtenir el nom de la funcio
+    croak "TagSet->findValue requires one parameter"
+        unless defined $value;
 
-    return grep { $slot->intersects($_) } $self->elements;
+    return grep { $value eq $_->value } $self->elements;
 }
 
 # No special order is granted in results, because of Set->elements behaviour.

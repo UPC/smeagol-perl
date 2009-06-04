@@ -40,13 +40,6 @@ sub value {
     return $$self;
 }
 
-sub intersects {
-    my $self = shift;
-    my ($tag) = @_;
-
-    return $self->value eq $tag->value;
-}
-
 sub url {
     my $self = shift;
 

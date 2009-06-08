@@ -121,7 +121,7 @@ ok( $tg44->value eq "projeeector", 'tag checked' );
 
 }
 
-#to_xml
+#toXML
 {
     $tgS = Smeagol::TagSet->new();
     ok( defined $tgS, 'tagSet created' );
@@ -134,9 +134,9 @@ ok( $tg44->value eq "projeeector", 'tag checked' );
 
     ok( $tgS->size == 1, 'tgS contains 1 tags' );
 
-    $xmlTgS = $tgS->to_xml();
-    ok( defined $xmlTgS, 'to_xml ok' );
-    ok( $xmlTgS eq "<tags><tag>aula</tag></tags>", 'to_xml checked' );
+    $xmlTgS = $tgS->toXML();
+    ok( defined $xmlTgS, 'toXML ok' );
+    ok( $xmlTgS eq "<tags><tag>aula</tag></tags>", 'toXML checked' );
 
     ok( !$tgS->contains($tg5), 'tg5 not in tgS' );
     $tgS->append($tg5);
@@ -144,30 +144,30 @@ ok( $tg44->value eq "projeeector", 'tag checked' );
 
     ok( $tgS->size == 2, 'tgS contains 2 tags' );
 
-    $xmlTgS = $tgS->to_xml();
-    ok( defined $xmlTgS, 'to_xml ok' );
+    $xmlTgS = $tgS->toXML();
+    ok( defined $xmlTgS, 'toXML ok' );
     ok( $xmlTgS        =~ /<tag>aula<\/tag>/
             && $xmlTgS =~ /<tag>projector<\/tag>/
             && $xmlTgS =~ /^<tags>/
             && $xmlTgS =~ /<\/tags>$/,
-        'to_xml checked'
+        'toXML checked'
     );
 
     $tgS->remove($tg1);
     ok( !$tgS->contains($tg1), 'tg1 not in tgS' );
 
-    $xmlTgS = $tgS->to_xml();
-    ok( defined $xmlTgS, 'to_xml ok' );
-    ok( $xmlTgS eq "<tags><tag>projector</tag></tags>", 'to_xml checked' );
+    $xmlTgS = $tgS->toXML();
+    ok( defined $xmlTgS, 'toXML ok' );
+    ok( $xmlTgS eq "<tags><tag>projector</tag></tags>", 'toXML checked' );
 }
 
-#from_xml
+#newFromXML
 {
     $xmlTg1 = $tg1->toXML();
     $xmlTg5 = $tg5->toXML();
     $xmlTgS = "<tags>" . $xmlTg1 . "</tags>";
 
-    $tgS = Smeagol::TagSet->from_xml($xmlTgS);
+    $tgS = Smeagol::TagSet->newFromXML($xmlTgS);
     ok( defined $tgS,    'tagSet created' );
     ok( $tgS->size == 1, 'tgS contains 1 tag' );
 
@@ -176,17 +176,17 @@ ok( $tg44->value eq "projeeector", 'tag checked' );
 
     $xmlTgS = "<tags>" . $xmlTg1 . $xmlTg5 . "</tags>";
 
-    $tgS = Smeagol::TagSet->from_xml($xmlTgS);
+    $tgS = Smeagol::TagSet->newFromXML($xmlTgS);
     ok( defined $tgS,    'tagSet created' );
     ok( $tgS->size == 2, 'tgS contains 2 tag' );
 
-    $xmlTgS = $tgS->to_xml();
-    ok( defined $xmlTgS, 'to_xml ok' );
+    $xmlTgS = $tgS->toXML();
+    ok( defined $xmlTgS, 'toXML ok' );
     ok( $xmlTgS        =~ /<tag>aula<\/tag>/
             && $xmlTgS =~ /<tag>projector<\/tag>/
             && $xmlTgS =~ /^<tags>/
             && $xmlTgS =~ /<\/tags>$/,
-        'to_xml checked'
+        'toXML checked'
     );
 }
 

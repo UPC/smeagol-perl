@@ -80,7 +80,7 @@ my $xml;
     ok( !defined $val, 'tag not updated, bad chars' );
 }
 
-#to_xml
+#toXML
 {
     $tg = Smeagol::Tag->new("projector");
     ok( defined $tg, 'created tag' );
@@ -93,22 +93,22 @@ my $xml;
     ok( '<tag>aula.multimedia</tag>' eq $xml, 'Ok toXML' );
 }
 
-#from_xml
+#newFromXML
 {
-    $tg = Smeagol::Tag->from_xml("<tag>aula</tag>");
+    $tg = Smeagol::Tag->newFromXML("<tag>aula</tag>");
     ok( defined $tg, 'created tag from xml' );
     ok( $tg->value eq "aula", 'checked tag creation from xml' );
 
-    $tg = Smeagol::Tag->from_xml("<tag>au la</tag>");
+    $tg = Smeagol::Tag->newFromXML("<tag>au la</tag>");
     ok( !defined $tg, 'not created tag from xml, wrong value' );
 
-    $tg = Smeagol::Tag->from_xml("<tag>a</tag>");
+    $tg = Smeagol::Tag->newFromXML("<tag>a</tag>");
     ok( !defined $tg, 'not created tag from xml, too short' );
 
-    $tg = Smeagol::Tag->from_xml("<tag>campus+nord</tag>");
+    $tg = Smeagol::Tag->newFromXML("<tag>campus+nord</tag>");
     ok( !defined $tg, 'not created tag from xml, wrong value' );
 
-    $tg = Smeagol::Tag->from_xml("<tag>campus:nord-aula:S103</tag>");
+    $tg = Smeagol::Tag->newFromXML("<tag>campus:nord-aula:S103</tag>");
     ok( defined $tg, 'created tag from xml' );
     ok( $tg->value eq "campus:nord-aula:S103",
         'checked tag creation from xml'

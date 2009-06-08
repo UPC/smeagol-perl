@@ -10,22 +10,22 @@ use Smeagol::XML;
 use Data::Dumper;
 
 use overload
-    q{""} => \&__str__,
-    q{==} => \&__equal__,
-    q{eq} => \&__equal__,
-    q{!=} => \&__not_equal__,
-    q{ne} => \&__not_equal__;
+    q{""} => \&toString,
+    q{==} => \&isEqual,
+    q{eq} => \&isEqual,
+    q{!=} => \&isNotEqual,
+    q{ne} => \&isNotEqual;
 
 our $MIN = 2;
 our $MAX = 60;
 
 sub new {
     my $class = shift;
-    my ($descr) = @_;
+    my ($value) = @_;
 
-    return if ( !defined _check_value($descr) );
+    return if ( !defined _checkValue($value) );
 
-    my $obj = \$descr;
+    my $obj = \$value;
 
     bless $obj, $class;
     return $obj;
@@ -34,8 +34,8 @@ sub new {
 sub value {
     my $self = shift;
 
-    return if ( @_ && !_check_value(@_) );
-    $$self = shift if ( @_ && _check_value(@_) );
+    return if ( @_ && !_checkValue(@_) );
+    $$self = shift if ( @_ && _checkValue(@_) );
 
     return $$self;
 }
@@ -46,7 +46,7 @@ sub url {
     return "/tag/" . $self->value;
 }
 
-sub __equal__ {
+sub isEqual {
     my $self = shift;
     my ($tag) = @_;
 
@@ -56,11 +56,11 @@ sub __equal__ {
     return $self->value eq $tag->value;
 }
 
-sub __not_equal__ {
-    return !shift->__equal__(@_);
+sub isNotEqual {
+    return !shift->isEqual(@_);
 }
 
-sub __str__ {
+sub toString {
     my $self = shift;
     my ( $url, $isRootNode ) = @_;
 
@@ -86,10 +86,10 @@ sub __str__ {
 }
 
 sub toXML {
-    return shift->__str__(@_);
+    return shift->toString(@_);
 }
 
-sub from_xml {
+sub newFromXML {
     my $class = shift;
     my ($xml) = @_;
 
@@ -107,27 +107,27 @@ sub from_xml {
     }
 
     # XML is valid.
-    my $tg;
+    my $tagValue;
     if ( ref( XMLin($xml) ) eq 'HASH' ) {
-        $tg = XMLin( $xml, SuppressEmpty => '' )->{content};
+        $tagValue = XMLin( $xml, SuppressEmpty => '' )->{content};
     }
     else {
-        $tg = XMLin( $xml, SuppressEmpty => '' );
+        $tagValue = XMLin( $xml, SuppressEmpty => '' );
     }
 
-    return if ( !_check_value($tg) );
+    return if ( !_checkValue($tagValue) );
 
-    my $obj = \$tg;
+    my $obj = \$tagValue;
 
     bless $obj, $class;
     return $obj;
 }
 
-sub _check_value {
-    my ($val) = @_;
-    return if ( !defined($val) );
-    return if ( $val =~ /[^\w.:_\-]/ );
-    return if ( length($val) < $MIN || length($val) > $MAX );
+sub _checkValue {
+    my ($value) = @_;
+    return if ( !defined($value) );
+    return if ( $value =~ /[^\w.:_\-]/ );
+    return if ( length($value) < $MIN || length($value) > $MAX );
     return 1;
 }
 

@@ -7,7 +7,7 @@ use base qw(Smeagol::Agenda);
 
 use Data::ICal;
 
-use overload q{""} => \&__str__;
+use overload q{""} => \&toString;
 
 sub new {
     my $class = shift;
@@ -25,7 +25,7 @@ sub parent {
     return bless $self, $class;
 }
 
-sub __str__ {
+sub toString {
     my $self = shift;
 
     my $iCal = Data::ICal->new();

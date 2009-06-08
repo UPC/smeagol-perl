@@ -84,8 +84,8 @@ $ag->append($b1);
 ok( $ag->contains($b1),  'b1 in ag' );
 ok( !$ag->contains($b2), 'b2 not in ag' );
 
-#to_xml agenda test
-my $agenda_as_hash = {
+#toXML agenda test
+my $agendaAsHash = {
     booking => {
         id          => $b1->id,
         description => $b1->description,
@@ -108,7 +108,7 @@ my $agenda_as_hash = {
         info => $b1->info,
     },
 };
-ok( Compare( XMLin( $ag->to_xml() ), $agenda_as_hash ), 'to_xml agenda' );
+ok( Compare( XMLin( $ag->toXML() ), $agendaAsHash ), 'toXML agenda' );
 
 $ag->append($b2);
 ok( $ag->size == 2 && $ag->contains($b2), 'b2 also in ag' );

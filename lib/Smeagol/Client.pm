@@ -53,17 +53,18 @@ sub listResources {
 
 sub createResource {
     my $self = shift;
-    my ( $des, $info ) = @_;
+    my ( $description, $info ) = @_;
 
-    return unless defined $des;    # $info is not mandatory
+    # $info is not mandatory
+    return unless defined $description;
 
-    my $res_xml = "<resource>
-        <description>$des</description>
+    my $respXML = "<resource>
+        <description>$description</description>
         <info>" . ( ( defined $info ) ? $info : "" ) . "</info>
         </resource>";
     my $req = HTTP::Request->new( POST => $self->{url} . "/resource" );
     $req->content_type('text/xml');
-    $req->content($res_xml);
+    $req->content($respXML);
 
     my $res = $self->{ua}->request($req);
     return unless $res->status_line =~ /201/;
@@ -76,18 +77,18 @@ sub createResource {
 
 sub createBooking {
     my $self = shift;
-    my ( $idR, $description, $from, $to, $info ) = @_;
+    my ( $id, $description, $from, $to, $info ) = @_;
 
     return
-        unless defined $idR
+        unless defined $id
             && defined $description
             && ref($from) eq 'HASH'
             && ref($to)   eq 'HASH';
 
     my $req = HTTP::Request->new(
-        POST => $self->{url} . '/resource/' . $idR . '/booking' );
+        POST => $self->{url} . '/resource/' . $id . '/booking' );
     $req->content_type('text/xml');
-    my $booking_xml = "<booking>
+    my $bookingXML = "<booking>
         <description>$description</description>
         <from>
             <year>" . $from->{year} . "</year>
@@ -107,7 +108,7 @@ sub createBooking {
         </to>
         <info>" . ( ( defined $info ) ? $info : "" ) . "</info>
         </booking>";
-    $req->content($booking_xml);
+    $req->content($bookingXML);
 
     my $res = $self->{ua}->request($req);
     return unless $res->status_line =~ /201/;
@@ -120,17 +121,17 @@ sub createBooking {
 
 sub createTag {
     my $self = shift;
-    my ( $idR, $description ) = @_;
+    my ( $id, $description ) = @_;
 
     return
-        unless defined $idR
+        unless defined $id
             && defined $description;
 
     my $req = HTTP::Request->new(
-        POST => $self->{url} . '/resource/' . $idR . '/tag' );
+        POST => $self->{url} . '/resource/' . $id . '/tag' );
     $req->content_type('text/xml');
-    my $tag_xml = "<tag>$description</tag>";
-    $req->content($tag_xml);
+    my $tagXML = "<tag>$description</tag>";
+    $req->content($tagXML);
 
     my $res = $self->{ua}->request($req);
     return unless $res->status_line =~ /201/;
@@ -169,11 +170,11 @@ sub getResource {
 
 sub getBooking {
     my $self = shift;
-    my ( $idR, $idB, $viewAs ) = @_;
+    my ( $rid, $bid, $viewAs ) = @_;
 
-    return unless ( defined $idB && defined $idR );
+    return unless ( defined $bid && defined $rid );
 
-    my $url = $self->{url} . '/resource/' . $idR . '/booking/' . $idB;
+    my $url = $self->{url} . '/resource/' . $rid . '/booking/' . $bid;
     $url .= "/" . $viewAs
         if defined $viewAs;
 
@@ -211,8 +212,8 @@ sub listBookings {
     my $dom = eval { XML::LibXML->new->parse_string( $res->content ) };
     croak $@ if $@;
     my @bookings;
-    for my $booksNode ( $dom->getElementsByTagName('booking') ) {
-        push @bookings, $booksNode->getAttribute('xlink:href');
+    for my $node ( $dom->getElementsByTagName('booking') ) {
+        push @bookings, $node->getAttribute('xlink:href');
     }
     return @bookings;
 }
@@ -235,28 +236,27 @@ sub listTags {
     my $dom = eval { XML::LibXML->new->parse_string( $res->content ) };
     croak $@ if $@;
     my @tags;
-    for my $tagsNode ( $dom->getElementsByTagName('tag') ) {
-        push @tags, $tagsNode->getAttribute('xlink:href');
+    for my $node ( $dom->getElementsByTagName('tag') ) {
+        push @tags, $node->getAttribute('xlink:href');
     }
     return @tags;
 }
 
 sub updateResource {
     my $self = shift;
-    my ( $idResource, $des, $info ) = @_;
+    my ( $id, $description, $info ) = @_;
 
-    return
-        unless defined $idResource && defined $des;   # $info is not mandatory
+    # $info is not mandatory
+    return unless defined $id && defined $description;
 
-    my $res_xml = "<resource>
-        <description>$des</description>
+    my $respXML = "<resource>
+        <description>$description</description>
         <info>" . ( ( defined $info ) ? $info : "" ) . "</info>
         </resource>";
-    my $req = HTTP::Request->new(
-        POST => $self->{url} . '/resource/' . $idResource );
+    my $req = HTTP::Request->new( POST => $self->{url} . '/resource/' . $id );
 
     $req->content_type('text/xml');
-    $req->content($res_xml);
+    $req->content($respXML);
 
     my $res = $self->{ua}->request($req);
     return unless $res->status_line =~ /200/;
@@ -269,16 +269,16 @@ sub updateResource {
 
 sub updateBooking {
     my $self = shift;
-    my ( $idR, $idB, $description, $from, $to, $info ) = @_;
+    my ( $rid, $bid, $description, $from, $to, $info ) = @_;
 
     return
-        unless defined $idR
-            && defined $idB
+        unless defined $rid
+            && defined $bid
             && defined $description
             && ref($from) eq 'HASH'
             && ref($to)   eq 'HASH';
 
-    my $booking_xml = "<booking>
+    my $bookingXML = "<booking>
         <description>$description</description>
         <from>
             <year>" . $from->{year} . "</year>
@@ -300,9 +300,9 @@ sub updateBooking {
         </booking>";
 
     my $req = HTTP::Request->new(
-        POST => $self->{url} . '/resource/' . $idR . '/booking/' . $idB );
+        POST => $self->{url} . '/resource/' . $rid . '/booking/' . $bid );
     $req->content_type('text/xml');
-    $req->content($booking_xml);
+    $req->content($bookingXML);
 
     my $res = $self->{ua}->request($req);
     return unless $res->status_line =~ /200/;
@@ -331,34 +331,34 @@ sub delResource {
 
 sub delBooking {
     my $self = shift;
-    my ( $idR, $idB ) = @_;
+    my ( $rid, $bid ) = @_;
 
-    return unless ( defined $idB && defined $idR );
+    return unless defined $rid && defined $bid;
 
     my $req = HTTP::Request->new(
-        DELETE => $self->{url} . '/resource/' . $idR . '/booking/' . $idB );
+        DELETE => $self->{url} . '/resource/' . $rid . '/booking/' . $bid );
     $req->content_type('text/xml');
 
     my $res = $self->{ua}->request($req);
     return unless $res->status_line =~ /200/;
 
-    return $idB;
+    return $bid;
 }
 
 sub delTag {
     my $self = shift;
-    my ( $idR, $idT ) = @_;
+    my ( $rid, $tid ) = @_;
 
-    return unless ( defined $idT && defined $idR );
+    return unless ( defined $rid && defined $tid );
 
     my $req = HTTP::Request->new(
-        DELETE => $self->{url} . '/resource/' . $idR . '/tag/' . $idT );
+        DELETE => $self->{url} . '/resource/' . $rid . '/tag/' . $tid );
     $req->content_type('text/xml');
 
     my $res = $self->{ua}->request($req);
     return unless $res->status_line =~ /200/;
 
-    return $idT;
+    return $tid;
 }
 
 1;

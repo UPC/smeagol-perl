@@ -9,14 +9,14 @@ use XML::LibXML;
 use Smeagol::XML;
 use Carp;
 
-use overload q{""} => \&__str__;
+use overload q{""} => \&toString;
 
 sub new {
     my $class = shift;
 
     my $obj = [];
 
-    foreach my $id ( Smeagol::DataStore->list_id ) {
+    foreach my $id ( Smeagol::DataStore->getIDList ) {
         my $r = Smeagol::Resource->load($id);
         push @$obj, $r if defined $r;
     }
@@ -25,13 +25,13 @@ sub new {
     return $obj;
 }
 
-sub __str__ {
+sub toString {
     my $self = shift;
     my ( $url, $isRootNode ) = @_;
 
     my $xmlText = "<resources>";
     for my $slot (@$self) {
-        $xmlText .= $slot->to_xml("");
+        $xmlText .= $slot->toXML("");
     }
     $xmlText .= "</resources>";
 
@@ -54,12 +54,11 @@ sub __str__ {
     }
 }
 
-# DEPRECATED
-sub to_xml {
-    return shift->__str__(@_);
+sub toXML {
+    return shift->toString(@_);
 }
 
-sub from_xml {
+sub newFromXML {
     my $class = shift;
     my ($xml) = @_;
 
@@ -79,7 +78,7 @@ sub from_xml {
     bless $obj, $class;
 
     for my $domResource ( $dom->getElementsByTagName('resource') ) {
-        push @$obj, Resouce->from_xml( $domResource->toString(0) );
+        push @$obj, Resouce->newFromXML( $domResource->toString(0) );
     }
 
     return $obj;

@@ -10,7 +10,7 @@ use Smeagol::Booking;
 use Smeagol::XML;
 use Carp;
 
-use overload q{""} => \&__str__;
+use overload q{""} => \&toString;
 
 sub new {
     my $class = shift;
@@ -23,32 +23,32 @@ sub new {
 
 sub append {
     my $self = shift;
-    my ($slot) = @_;
+    my ($booking) = @_;
 
     croak "Agenda->append requires one parameter"
-        unless defined $slot;
+        unless defined $booking;
 
-    $self->insert($slot) unless $self->interlace($slot);
+    $self->insert($booking) unless $self->interlace($booking);
 }
 
 sub interlace {
     my $self = shift;
-    my ($slot) = @_;
+    my ($booking) = @_;
 
     croak "Agenda->interlace requires one parameter"
-        unless defined $slot;
+        unless defined $booking;
 
-    return grep { $slot->intersects($_) } $self->elements;
+    return grep { $booking->intersects($_) } $self->elements;
 }
 
 # no special order is granted in results, because of Set->elements behaviour.
-sub __str__ {
+sub toString {
     my $self = shift;
     my ( $url, $isRootNode ) = @_;
 
     my $xmlText = "<agenda>";
     for my $slot ( $self->elements ) {
-        $xmlText .= $slot->to_xml($url);
+        $xmlText .= $slot->toXML($url);
     }
     $xmlText .= "</agenda>";
 
@@ -72,11 +72,11 @@ sub __str__ {
 }
 
 # DEPRECATED
-sub to_xml {
-    return shift->__str__(@_);
+sub toXML {
+    return shift->toString(@_);
 }
 
-sub from_xml {
+sub newFromXML {
     my $class = shift;
     my ($xml) = @_;
 
@@ -97,20 +97,20 @@ sub from_xml {
     # $dom variable contains a DOM (Document Object Model)
     # representation of the $xml string
 
-    my $ag = $class->SUPER::new();
-    bless $ag, $class;
+    my $agenda = $class->SUPER::new();
+    bless $agenda, $class;
 
     # traverse all '<booking>' elements found in DOM structure.
     # note: all intersecting bookings in the agenda will be ignored,
     # because we use the "append" method to store bookings in the
     # $ag object, so we do not need to worry about eventual
     # intersections present in the $xml
-    for my $booking_dom_node ( $dom->getElementsByTagName('booking') ) {
-        my $b = Smeagol::Booking->from_xml( $booking_dom_node->toString(0) );
-        $ag->append($b);
+    for my $node ( $dom->getElementsByTagName('booking') ) {
+        my $booking = Smeagol::Booking->newFromXML( $node->toString(0) );
+        $agenda->append($booking);
     }
 
-    return $ag;
+    return $agenda;
 }
 
 # no special order is granted in results, because of Set->elements behaviour.

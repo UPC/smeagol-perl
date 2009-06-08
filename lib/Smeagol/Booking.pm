@@ -12,11 +12,11 @@ use Smeagol::DataStore;
 use base qw(DateTime::Span);
 
 use overload
-    q{""} => \&__str__,
-    q{==} => \&__equal__,
-    q{eq} => \&__equal__,
-    q{!=} => \&__not_equal__,
-    q{ne} => \&__not_equal__;
+    q{""} => \&toString,
+    q{==} => \&isEqual,
+    q{eq} => \&isEqual,
+    q{!=} => \&isNotEqual,
+    q{ne} => \&isNotEqual;
 
 sub new {
     my $class = shift;
@@ -30,7 +30,7 @@ sub new {
     );
 
     $obj->{ __PACKAGE__ . "::description" } = $description;
-    $obj->{ __PACKAGE__ . "::id" } = Smeagol::DataStore->next_id(__PACKAGE__);
+    $obj->{ __PACKAGE__ . "::id" } = Smeagol::DataStore->getNextID(__PACKAGE__);
     $obj->{ __PACKAGE__ . "::info" } = defined($info) ? $info : '';
 
     bless $obj, $class;
@@ -70,7 +70,7 @@ sub url {
     return "/booking/" . $self->id;
 }
 
-sub __equal__ {
+sub isEqual {
     my $self = shift;
     my ($booking) = @_;
 
@@ -84,11 +84,11 @@ sub __equal__ {
         && $self->info eq $booking->info;
 }
 
-sub __not_equal__ {
-    return !shift->__equal__(@_);
+sub isNotEqual {
+    return !shift->isEqual(@_);
 }
 
-sub __str__ {
+sub toString {
     my $self = shift;
     my ( $url, $isRootNode ) = @_;
 
@@ -163,11 +163,11 @@ sub __str__ {
 }
 
 # DEPRECATED
-sub to_xml {
-    return shift->__str__(@_);
+sub toXML {
+    return shift->toString(@_);
 }
 
-sub from_xml {
+sub newFromXML {
     my $class = shift;
     my ( $xml, $id ) = @_;
 
@@ -185,35 +185,35 @@ sub from_xml {
     }
 
     # XML is valid. Build empty elements as ''
-    my $b = XMLin( $xml, SuppressEmpty => '' );
+    my $xmlTree = XMLin( $xml, SuppressEmpty => '' );
 
     my $obj = $class->SUPER::from_datetimes(
         start => DateTime->new(
-            year   => $b->{from}->{year},
-            month  => $b->{from}->{month},
-            day    => $b->{from}->{day},
-            hour   => $b->{from}->{hour},
-            minute => $b->{from}->{minute},
-            second => $b->{from}->{second}
+            year   => $xmlTree->{from}->{year},
+            month  => $xmlTree->{from}->{month},
+            day    => $xmlTree->{from}->{day},
+            hour   => $xmlTree->{from}->{hour},
+            minute => $xmlTree->{from}->{minute},
+            second => $xmlTree->{from}->{second}
         ),
         end => DateTime->new(
-            year   => $b->{to}->{year},
-            month  => $b->{to}->{month},
-            day    => $b->{to}->{day},
-            hour   => $b->{to}->{hour},
-            minute => $b->{to}->{minute},
-            second => $b->{to}->{second}
+            year   => $xmlTree->{to}->{year},
+            month  => $xmlTree->{to}->{month},
+            day    => $xmlTree->{to}->{day},
+            hour   => $xmlTree->{to}->{hour},
+            minute => $xmlTree->{to}->{minute},
+            second => $xmlTree->{to}->{second}
         )
     );
 
     $obj->{ __PACKAGE__ . "::id" }
-        = ( defined $b->{id} ) ? $b->{id}
+        = ( defined $xmlTree->{id} ) ? $xmlTree->{id}
         : ( defined $id ) ? $id
-        :                   Smeagol::DataStore->next_id(__PACKAGE__);
+        :                   Smeagol::DataStore->getNextID(__PACKAGE__);
 
-    $obj->{ __PACKAGE__ . "::description" } = $b->{description};
+    $obj->{ __PACKAGE__ . "::description" } = $xmlTree->{description};
     $obj->{ __PACKAGE__ . "::info" }
-        = defined( $b->{info} ) ? $b->{info} : '';
+        = defined( $xmlTree->{info} ) ? $xmlTree->{info} : '';
 
     bless $obj, $class;
     return $obj;

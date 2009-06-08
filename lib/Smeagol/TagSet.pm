@@ -11,7 +11,7 @@ use Data::Dumper;
 use Smeagol::XML;
 use Carp;
 
-use overload q{""} => \&__str__;
+use overload q{""} => \&toString;
 
 sub new {
     my $class = shift;
@@ -24,11 +24,11 @@ sub new {
 
 sub append {
     my $self = shift;
-    my ($slot) = @_;
+    my ($tag) = @_;
 
-    ( defined $slot ) or die "SetTag->append requires one parameter";
+    ( defined $tag ) or die "SetTag->append requires one parameter";
 
-    $self->insert($slot)  unless $self->findValue($slot->value);
+    $self->insert($tag) unless $self->findValue($tag->value);
 }
 
 
@@ -44,7 +44,7 @@ sub findValue {
 }
 
 # No special order is granted in results, because of Set->elements behaviour.
-sub __str__ {
+sub toString {
     my $self = shift;
     my ( $url, $isRootNode ) = @_;
 
@@ -73,11 +73,11 @@ sub __str__ {
     }
 }
 
-sub to_xml {
-    return shift->__str__(@_);
+sub toXML {
+    return shift->toString(@_);
 }
 
-sub from_xml {
+sub newFromXML {
     my $class = shift;
     my ($xml) = @_;
 
@@ -98,20 +98,20 @@ sub from_xml {
     # $dom variable contains a DOM (Document Object Model)
     # representation of the $xml string
 
-    my $tgS = $class->SUPER::new();
-    bless $tgS, $class;
+    my $tagSet = $class->SUPER::new();
+    bless $tagSet, $class;
 
     # traverse all '<tag>' elements found in DOM structure.
     # note: all intersecting bookings in the agenda will be ignored,
     # because we use the "append" method to store tags in the
     # $tgs object, so we do not need to worry about eventual
     # intersections present in the $xml
-    for my $tag_dom_node ( $dom->getElementsByTagName('tag') ) {
-        my $tg = Smeagol::Tag->from_xml( $tag_dom_node->toString(0) );
-        $tgS->append($tg);
+    for my $node ( $dom->getElementsByTagName('tag') ) {
+        my $tag = Smeagol::Tag->newFromXML( $node->toString(0) );
+        $tagSet->append($tag);
     }
 
-    return $tgS;
+    return $tagSet;
 }
 
 1;

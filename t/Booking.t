@@ -157,8 +157,8 @@ my $good = Smeagol::Booking->new(
 );
 ok( defined($good), 'Booking->new with missing info' );
 
-#to_xml booking test
-my $booking1_as_hash = {
+#toXML booking test
+my $booking1AsHash = {
     id          => $b1->id,
     description => $b1->description,
     from        => {
@@ -179,10 +179,10 @@ my $booking1_as_hash = {
     },
     info => $b1->info,
 };
-ok( Compare( $booking1_as_hash, XMLin( $b1->to_xml() ) ), 'to_xml booking' );
+ok( Compare( $booking1AsHash, XMLin( $b1->toXML() ) ), 'toXML booking' );
 
-# from_xml booking test
-my $booking_as_xml = '
+# newFromXML booking test
+my $bookingAsXML = '
 <booking>
     <id>' . $b1->id . '</id>
     <description>' . $b1->description . '</description>
@@ -205,11 +205,11 @@ my $booking_as_xml = '
     <info>' . $b1->info . '</info>
 </booking>';
 
-ok( $b1 == Smeagol::Booking->from_xml( $booking_as_xml, $b1->id ),
-    'from_xml booking' );
+ok( $b1 == Smeagol::Booking->newFromXML( $bookingAsXML, $b1->id ),
+    'newFromXML booking' );
 
-# from_xml booking test (wrong XML)
-my $booking_as_xml_wrong = Smeagol::Booking->from_xml( '
+# newFromXML booking test (wrong XML)
+my $bookingAsWrongXML = Smeagol::Booking->newFromXML( '
 <booking>
     <!-- <id> is missing! -->
     <!-- <description> is missing! -->
@@ -224,7 +224,7 @@ my $booking_as_xml_wrong = Smeagol::Booking->from_xml( '
     <!-- <to> is missing! -->
     <info>Lalalala</info>
 </booking>', $b1->id );
-ok( !defined($booking_as_xml_wrong), 'from_xml booking (with wrong XML)' );
+ok( !defined($bookingAsWrongXML), 'newFromXML booking (with wrong XML)' );
 
 # Booking Equality Tests
 ok( $b1 != $b2, 'b1 != b2' );
@@ -280,7 +280,7 @@ ok( !$b10->intersects($b11), 'b11 does not interlace b10' );
 
     is_deeply( \@got, \@expected, "looks like an vcalendar" );
 
-    my $xmlBooking = Smeagol::Booking->from_xml( $booking->parent->to_xml );
+    my $xmlBooking = Smeagol::Booking->newFromXML( $booking->parent->toXML );
     ok( $booking == $xmlBooking, "ical == xml" );
     ok( $booking eq $xmlBooking, "ical eq xml" );
 

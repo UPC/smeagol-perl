@@ -43,7 +43,7 @@ sub init {
 #       Auxiliary function to get the full path of the file where
 #       object identified by $id may be stored.
 #       This method should not be called from outside this class.
-sub _full_path {
+sub _getFullPath {
     my ($id) = @_;
 
     defined($id) or confess "Error in call to full_path()";
@@ -52,7 +52,7 @@ sub _full_path {
 }
 
 # Returns an instance of object identified by $id.
-# Object existence may be checked using exists($id) or list_id()
+# Object existence may be checked using exists($id) or getIDList()
 # prior to calling load().
 sub load {
     my $self = shift;
@@ -62,10 +62,10 @@ sub load {
         unless defined $id;
 
     my $data;
-    if ( defined $id && -e _full_path($id) ) {
+    if ( defined $id && -e _getFullPath($id) ) {
 
         # I mean do EXPR not do SUB, hence the + sign
-        $data = do +_full_path($id);
+        $data = do +_getFullPath($id);
     }
     return decode( "UTF-8", $data );
 }
@@ -79,8 +79,8 @@ sub save {
         unless defined $id;
 
     if ( defined $id && defined $data ) {
-        open my $out, ">", _full_path($id)
-            or croak "cannot open " . _full_path($id);
+        open my $out, ">", _getFullPath($id)
+            or croak "cannot open " . _getFullPath($id);
         print $out Dumper( encode( "UTF-8", $data ) );
         close $out;
     }
@@ -91,14 +91,14 @@ sub exists {
     my $self = shift;
     my ($id) = shift;
 
-    if ( -e _full_path($id) ) {
+    if ( -e _getFullPath($id) ) {
         return 1;
     }
     return 0;
 }
 
 # Returns a list of all object id's stored in DataStore
-sub list_id {
+sub getIDList {
     my $self = shift;
 
     my @list;
@@ -106,9 +106,11 @@ sub list_id {
 
     foreach ( glob "$path*.db" ) {
         my $id = $_;
+        # FIXME: regex should be more specific, fails if $path contains
+        #        numbers, e.g. /home/datastore/2009
+        #        (ticket:138)
         $id =~ s/\D//g;
 
-       #my ( $id, $dummy ) = split( /\./, $_ );   # remove ".db" from filename
         push @list, $id;
     }
     return @list;
@@ -119,12 +121,12 @@ sub remove {
     my ($id) = @_;
 
     if ( Smeagol::DataStore->exists($id) ) {
-        unlink _full_path($id)
-            or croak "Could not remove persistent object " . _full_path($id);
+        unlink _getFullPath($id)
+            or croak "Could not remove persistent object " . _getFullPath($id);
     }
 }
 
-sub next_id {
+sub getNextID {
     my $self = shift;
     my ($kind) = @_;
 

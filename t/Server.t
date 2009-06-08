@@ -28,13 +28,13 @@ BEGIN {
 
 }
 
-my $server_port = 8000;
-my $server      = "http://localhost:$server_port";
+my $serverPort = 8000;
+my $server      = "http://localhost:$serverPort";
 
-my $pid = Smeagol::Server->new($server_port)->background();
+my $pid = Smeagol::Server->new($serverPort)->background();
 
 # Auxiliary routine to encapsulate server requests
-sub smeagol_request {
+sub smeagolRequest {
     my ( $method, $url, $xml ) = @_;
 
     my $req = HTTP::Request->new( $method => $url );
@@ -49,14 +49,14 @@ sub smeagol_request {
 }
 
 # Auxiliary routine to generate smeagol absolute URLs
-sub smeagol_url {
+sub smeagolURL {
     my $suffix = shift;
     return $server . $suffix;
 }
 
 # Testing retrieve empty resource list
 {
-    my $res = smeagol_request( 'GET', "$server/resources" );
+    my $res = smeagolRequest( 'GET', "$server/resources" );
     ok( $res->is_success,
         'resource list retrieval status ' . Dumper( $res->code ) );
 
@@ -117,75 +117,75 @@ my $resource2 = Smeagol::Resource->new( 'desc 2 2', undef, 'resource info' );
 
 # Testing resource creation via XML
 {
-    my $res = smeagol_request( 'POST', smeagol_url('/resource'),
-        $resource->to_xml() );
+    my $res = smeagolRequest( 'POST', smeagolURL('/resource'),
+        $resource->toXML() );
 
     ok( $res->code == 201,
         "resource creation status " . Dumper( $res->code ) );
 
-    my $xmltree = XMLin( $res->content );
+    my $xmlTree = XMLin( $res->content );
 
-    ok( $xmltree->{description} eq $resource->description
-            && $xmltree->{info} eq $resource->info,
+    ok( $xmlTree->{description} eq $resource->description
+            && $xmlTree->{info} eq $resource->info,
         "resource creation content " . Dumper( $res->content )
     );
 
 }
 
-# Testing list_id with non-empty DataStore
+# Testing getIDList with non-empty DataStore
 {
 
     # Count number of resources before test
-    my @ids             = Smeagol::DataStore->list_id;
-    my $id_count_before = @ids;
+    my @ids             = Smeagol::DataStore->getIDList;
+    my $idCountBefore = @ids;
 
     # Create several resources
     my $quants = 3;
     for ( my $i = 0; $i < $quants; $i++ ) {
-        my $res = smeagol_request( 'POST', smeagol_url('/resource'),
-            $resource->to_xml() );
+        my $res = smeagolRequest( 'POST', smeagolURL('/resource'),
+            $resource->toXML() );
     }
 
     # Count number of  after test
-    @ids = Smeagol::DataStore->list_id;
-    my $id_count_after = @ids;
+    @ids = Smeagol::DataStore->getIDList;
+    my $idCountAfter = @ids;
 
-    ok( $id_count_after == $id_count_before + $quants,
-        'list_id with non-empty datastore' );
+    ok( $idCountAfter == $idCountBefore + $quants,
+        'getIDList with non-empty datastore' );
 }
 
 # Testing resource retrieval and removal
 {
 
     # first, we create a new resource
-    my $res = smeagol_request( 'POST', smeagol_url('/resource'),
-        $resource->to_xml() );
-    my $xmltree = XMLin( $res->content );
+    my $res = smeagolRequest( 'POST', smeagolURL('/resource'),
+        $resource->toXML() );
+    my $xmlTree = XMLin( $res->content );
 
     # retrieve the resource just created
-    $res = smeagol_request( 'GET', smeagol_url( $xmltree->{'xlink:href'} ) );
+    $res = smeagolRequest( 'GET', smeagolURL( $xmlTree->{'xlink:href'} ) );
     ok( $res->code == 200,
-        "resource $xmltree->{'xlink:href'} retrieval, code "
+        "resource $xmlTree->{'xlink:href'} retrieval, code "
             . Dumper( $res->code )
     );
 
-    my $r = Smeagol::Resource->from_xml( $res->content, 1000 );
+    my $r = Smeagol::Resource->newFromXML( $res->content, 1000 );
     ok( defined $r, "resource retrieval content " . Dumper( $res->content ) );
 
     # retrieve non-existent Resource
-    $res = smeagol_request( 'GET', smeagol_url('/resource/-666') );
+    $res = smeagolRequest( 'GET', smeagolURL('/resource/-666') );
     ok( $res->code == 404,
         "non-existent resource retrieval status " . Dumper( $res->code ) );
 
     # delete the resource just created
-    $res = smeagol_request( 'DELETE',
-        smeagol_url( $xmltree->{'xlink:href'} ) );
-    ok( $res->code == 200, "resource removal $xmltree->{'xlink:href'}" );
+    $res = smeagolRequest( 'DELETE',
+        smeagolURL( $xmlTree->{'xlink:href'} ) );
+    ok( $res->code == 200, "resource removal $xmlTree->{'xlink:href'}" );
 
     # try to retrieve the deleted resource
-    $res = smeagol_request( 'GET', smeagol_url( $xmltree->{'xlink:href'} ) );
+    $res = smeagolRequest( 'GET', smeagolURL( $xmlTree->{'xlink:href'} ) );
     ok( $res->code == 404,
-        "retrieval of $xmltree->{'xlink:href'} deleted resource "
+        "retrieval of $xmlTree->{'xlink:href'} deleted resource "
             . Dumper( $res->code )
     );
 }
@@ -194,25 +194,25 @@ my $resource2 = Smeagol::Resource->new( 'desc 2 2', undef, 'resource info' );
 {
 
     # first, create a new resource
-    my $res = smeagol_request( 'POST', smeagol_url('/resource'),
-        $resource->to_xml() );
+    my $res = smeagolRequest( 'POST', smeagolURL('/resource'),
+        $resource->toXML() );
 
     ok( $res->code == '201',
         'resource creation status ' . Dumper( $res->code ) );
-    my $xmltree = XMLin( $res->content );
-    my $r = Smeagol::Resource->from_xml( $res->content, 1000 );
+    my $xmlTree = XMLin( $res->content );
+    my $r = Smeagol::Resource->newFromXML( $res->content, 1000 );
 
     # modify description
-    my $nova_desc = 'He canviat la descripcio';
-    $r->description($nova_desc);
+    my $novaDesc = 'He canviat la descripcio';
+    $r->description($novaDesc);
 
     # update resource
 
-    $res = smeagol_request( 'POST', smeagol_url( $xmltree->{'xlink:href'} ),
-        $resource->to_xml );
+    $res = smeagolRequest( 'POST', smeagolURL( $xmlTree->{'xlink:href'} ),
+        $resource->toXML );
 
     ok( $res->code == 200,
-        "resource $xmltree->{'xlink:href'} update code: "
+        "resource $xmlTree->{'xlink:href'} update code: "
             . Dumper( $res->code )
     );
 
@@ -222,25 +222,25 @@ my $resource2 = Smeagol::Resource->new( 'desc 2 2', undef, 'resource info' );
 {
 
     # first, create a new resource
-    my $res = smeagol_request( 'POST', smeagol_url('/resource'),
-        $resource->to_xml() );
+    my $res = smeagolRequest( 'POST', smeagolURL('/resource'),
+        $resource->toXML() );
 
     ok( $res->code == '201',
         'resource creation status ' . Dumper( $res->code ) );
 
-    my $xmltree = XMLin( $res->content );
+    my $xmlTree = XMLin( $res->content );
 
-    $res = smeagol_request( 'GET',
-        smeagol_url( $xmltree->{agenda}->{'xlink:href'} ) );
+    $res = smeagolRequest( 'GET',
+        smeagolURL( $xmlTree->{agenda}->{'xlink:href'} ) );
 
     ok( $res->code == 200,
         "list bookings "
-            . $xmltree->{agenda}->{'xlink:href'}
+            . $xmlTree->{agenda}->{'xlink:href'}
             . " status "
             . Dumper( $res->code )
     );
 
-    my $ag = Smeagol::Agenda->from_xml( $res->content );
+    my $ag = Smeagol::Agenda->newFromXML( $res->content );
 
     ok( defined $ag, "list bookings content " . Dumper($ag) );
 }
@@ -249,35 +249,35 @@ my $resource2 = Smeagol::Resource->new( 'desc 2 2', undef, 'resource info' );
 {
 
     # first, create a new resource without agenda, therefore neither bookings
-    my $res = smeagol_request( 'POST', smeagol_url('/resource'),
-        $resource2->to_xml() );
+    my $res = smeagolRequest( 'POST', smeagolURL('/resource'),
+        $resource2->toXML() );
 
     ok( $res->code == '201',
         'resource creation status ' . Dumper( $res->code ) );
 
-    my $xmltree      = XMLin( $res->content );
-    my $resource_url = $xmltree->{'xlink:href'};
+    my $xmlTree      = XMLin( $res->content );
+    my $resourceURL = $xmlTree->{'xlink:href'};
 
-    $res = smeagol_request( 'POST', smeagol_url("$resource_url/booking"),
-        $b1->to_xml() );
+    $res = smeagolRequest( 'POST', smeagolURL("$resourceURL/booking"),
+        $b1->toXML() );
     ok( $res->code == '201'
-            && Smeagol::Booking->from_xml( $res->content, $b1->id ) == $b1,
+            && Smeagol::Booking->newFromXML( $res->content, $b1->id ) == $b1,
         'created booking ' . $res->code
     );
 
-    $res = smeagol_request( 'POST', smeagol_url("$resource_url/booking"),
-        $b2->to_xml() );
+    $res = smeagolRequest( 'POST', smeagolURL("$resourceURL/booking"),
+        $b2->toXML() );
     ok( $res->code == '201'
-            && Smeagol::Booking->from_xml( $res->content, $b2->id ) == $b2,
+            && Smeagol::Booking->newFromXML( $res->content, $b2->id ) == $b2,
         'created booking ' . $res->code
     );
 
-    $res = smeagol_request( 'POST', smeagol_url("$resource_url/booking"),
-        $b2->to_xml() );
+    $res = smeagolRequest( 'POST', smeagolURL("$resourceURL/booking"),
+        $b2->toXML() );
     ok( $res->code == '409',
         'update overlapping booking status ' . $res->code );
 
-    my $ag = Smeagol::Agenda->from_xml( $res->content );
+    my $ag = Smeagol::Agenda->newFromXML( $res->content );
 
     ok( $ag->size == 1 && ( $ag->elements )[0] == $b2,
         'update overlapping booking content: ' . Dumper( $res->content ) );
@@ -288,74 +288,74 @@ my $resource2 = Smeagol::Resource->new( 'desc 2 2', undef, 'resource info' );
 {
 
     # first, create a new resource without bookings
-    my $res = smeagol_request( 'POST', smeagol_url('/resource'),
-        $resource2->to_xml() );
+    my $res = smeagolRequest( 'POST', smeagolURL('/resource'),
+        $resource2->toXML() );
 
     ok( $res->code == '201',
         'resource creation status ' . Dumper( $res->code ) );
 
-    my $xmltree      = XMLin( $res->content );
-    my $resource_url = $xmltree->{'xlink:href'};
+    my $xmlTree     = XMLin( $res->content );
+    my $resourceURL = $xmlTree->{'xlink:href'};
 
     #and try to retrieve non-existent booking
-    $res = smeagol_request( 'GET',
-        smeagol_url( $resource_url . '/booking/1' ) );
+    $res = smeagolRequest( 'GET',
+        smeagolURL( $resourceURL . '/booking/1' ) );
     ok( $res->code == '404',
         'not retrieved booking because there isn t agenda' );
 
     # second, add one booking
-    $res = smeagol_request( 'POST', smeagol_url( $resource_url . '/booking' ),
-        $b1->to_xml() );
+    $res = smeagolRequest( 'POST', smeagolURL( $resourceURL . '/booking' ),
+        $b1->toXML() );
 
     ok( $res->code == '201'
-            && Smeagol::Booking->from_xml( $res->content, 1000 ) == $b1,
+            && Smeagol::Booking->newFromXML( $res->content, 1000 ) == $b1,
         'created booking status: ' . Dumper( $res->code )
     );
 
-    $xmltree = XMLin( $res->content );
-    my $booking_url = $xmltree->{'xlink:href'};
+    $xmlTree = XMLin( $res->content );
+    my $bookingURL = $xmlTree->{'xlink:href'};
 
     #third, retrieve it, remove it, etc
-    $res = smeagol_request( 'GET', smeagol_url($booking_url) );
-    ok( Smeagol::Booking->from_xml( $res->content, 1000 ) == $b1,
+    $res = smeagolRequest( 'GET', smeagolURL($bookingURL) );
+    ok( Smeagol::Booking->newFromXML( $res->content, 1000 ) == $b1,
         'retrieved booking' );
 
-    $res = smeagol_request( 'GET',
-        smeagol_url( $resource_url . '/booking/1000' ) );
+    $res = smeagolRequest( 'GET',
+        smeagolURL( $resourceURL . '/booking/1000' ) );
     ok( $res->code == '404', 'not retrieved booking, booking not existent' );
 
-    $res = smeagol_request( 'GET', smeagol_url('/resource/1000/booking/1') );
+    $res = smeagolRequest( 'GET', smeagolURL('/resource/1000/booking/1') );
     ok( $res->code == '404', 'not retrieved booking, resource not existent' );
 
-    $res = smeagol_request( 'POST', smeagol_url( $resource_url . '/booking' ),
-        $b2->to_xml() );
+    $res = smeagolRequest( 'POST', smeagolURL( $resourceURL . '/booking' ),
+        $b2->toXML() );
     ok( $res->code == '201'
-            && Smeagol::Booking->from_xml( $res->content, 1000 ) == $b2,
+            && Smeagol::Booking->newFromXML( $res->content, 1000 ) == $b2,
         'created booking ' . $res->code
     );
 
-    $xmltree     = XMLin( $res->content );
-    $booking_url = $xmltree->{'xlink:href'};
+    $xmlTree    = XMLin( $res->content );
+    $bookingURL = $xmlTree->{'xlink:href'};
 
-    $res = smeagol_request( 'GET', smeagol_url($booking_url) );
+    $res = smeagolRequest( 'GET', smeagolURL($bookingURL) );
     ok( $res->code == 200,
         'retrieve booking status ' . Dumper( $res->code ) );
-    ok( Smeagol::Booking->from_xml( $res->content, 1000 ) == $b2,
+    ok( Smeagol::Booking->newFromXML( $res->content, 1000 ) == $b2,
         'retrieved booking content' );
 
-    $res = smeagol_request( 'DELETE',
-        smeagol_url('/resource/1000/booking/1') );
+    $res = smeagolRequest( 'DELETE',
+        smeagolURL('/resource/1000/booking/1') );
     ok( $res->code == '404',
         'not deleted booking, resource not existent ' . $res->code );
 
-    $res = smeagol_request( 'DELETE', smeagol_url($booking_url) );
+    $res = smeagolRequest( 'DELETE', smeagolURL($bookingURL) );
     ok( $res->code == '200', 'deleted booking ' . $res->code );
 
-    $res = smeagol_request( 'GET', smeagol_url($booking_url) );
+    $res = smeagolRequest( 'GET', smeagolURL($bookingURL) );
     ok( $res->code == '404',
         'not retrieved booking, booking not existent ' . $res->code );
 
-    $res = smeagol_request( 'DELETE', smeagol_url($booking_url) );
+    $res = smeagolRequest( 'DELETE', smeagolURL($bookingURL) );
     ok( $res->code == '404',
         'not deleted booking, booking not existent ' . $res->code );
 
@@ -363,23 +363,23 @@ my $resource2 = Smeagol::Resource->new( 'desc 2 2', undef, 'resource info' );
 
 # Testing update booking
 {
-    my $res = smeagol_request( 'POST', smeagol_url('/resource'),
-        $resource->to_xml );
+    my $res = smeagolRequest( 'POST', smeagolURL('/resource'),
+        $resource->toXML );
 
     ok( $res->code == 201,
         'created resource for booking_update tests: ' . Dumper( $res->code )
     );
 
-    my $xmltree      = XMLin( $res->content );
-    my $resource_url = $xmltree->{'xlink:href'};
+    my $xmlTree      = XMLin( $res->content );
+    my $resourceURL = $xmlTree->{'xlink:href'};
 
-    $res = smeagol_request( 'GET',
-        smeagol_url( $resource_url . '/bookings' ) );
+    $res = smeagolRequest( 'GET',
+        smeagolURL( $resourceURL . '/bookings' ) );
 
     ok( $res->code == 200,
         'retrieve bookings list: ' . Dumper( $res->code ) );
 
-    my $ag = Smeagol::Agenda->from_xml( $res->content );
+    my $ag = Smeagol::Agenda->newFromXML( $res->content );
 
     ok( $ag->size == 2, 'agenda size: ' . Dumper( $ag->size ) );
 
@@ -387,9 +387,9 @@ my $resource2 = Smeagol::Resource->new( 'desc 2 2', undef, 'resource info' );
 
     # update first booking with non-existent resource #1000
     $res
-        = smeagol_request( 'POST',
-        smeagol_url( '/resource/1000/booking/' . $booking1->id ),
-        $booking1->to_xml );
+        = smeagolRequest( 'POST',
+        smeagolURL( '/resource/1000/booking/' . $booking1->id ),
+        $booking1->toXML );
     ok( $res->code == 404,
         'trying to update booking for non-existent resource: '
             . Dumper( $res->code )
@@ -397,16 +397,16 @@ my $resource2 = Smeagol::Resource->new( 'desc 2 2', undef, 'resource info' );
 
     # update with existent resource, non-existent booking #2222
     $res
-        = smeagol_request( 'POST',
-        smeagol_url( $resource_url . '/booking/2222' ),
-        $booking1->to_xml );
+        = smeagolRequest( 'POST',
+        smeagolURL( $resourceURL . '/booking/2222' ),
+        $booking1->toXML );
     ok( $res->code == 404,
         'trying to update non-existent booking: ' . Dumper( $res->code ) );
 
     # existent resource, existent booking, non-valid new booking
-    $res = smeagol_request(
+    $res = smeagolRequest(
         'POST',
-        smeagol_url( $resource_url . '/booking/' . $booking1->id ),
+        smeagolURL( $resourceURL . '/booking/' . $booking1->id ),
         '<booking>I am not a valid booking :-P</booking>'
     );
 
@@ -417,8 +417,8 @@ my $resource2 = Smeagol::Resource->new( 'desc 2 2', undef, 'resource info' );
     # new booking producing overlaps with both existent bookings:
     #    booking1: 10:00 - 10:59
     #    booking2: 11:00 - 11:59
-    # new_booking: 10:30 - 11:30  (overlaps booking1, booking2)
-    my $new_booking = Smeagol::Booking->new(
+    #  newBooking: 10:30 - 11:30  (overlaps booking1, booking2)
+    my $newBooking = Smeagol::Booking->new(
         "new booking",
         DateTime->new(
             year   => 2008,
@@ -440,20 +440,20 @@ my $resource2 = Smeagol::Resource->new( 'desc 2 2', undef, 'resource info' );
     );
 
     $res
-        = smeagol_request( 'POST',
-        smeagol_url( $resource_url . '/booking/' . $booking1->id ),
-        $new_booking->to_xml );
+        = smeagolRequest( 'POST',
+        smeagolURL( $resourceURL . '/booking/' . $booking1->id ),
+        $newBooking->toXML );
 
     ok( $res->code == 409,
         'producing overlappings when updating booking '
-            . $resource_url
+            . $resourceURL
             . '/booking/'
             . $booking1->id . ': '
             . Dumper( $res->content )
     );
 
     # update booking, no overlapping
-    my $new_booking2 = Smeagol::Booking->new(
+    my $newBooking2 = Smeagol::Booking->new(
         "new booking 2",
         DateTime->new(
             year   => 2008,
@@ -475,21 +475,21 @@ my $resource2 = Smeagol::Resource->new( 'desc 2 2', undef, 'resource info' );
     );
 
     $res
-        = smeagol_request( 'POST',
-        smeagol_url( $resource_url . '/booking/' . $booking2->id ),
-        $new_booking2->to_xml );
+        = smeagolRequest( 'POST',
+        smeagolURL( $resourceURL . '/booking/' . $booking2->id ),
+        $newBooking2->toXML );
 
     ok( $res->code == 200,
-        "update booking $resource_url/booking/"
+        "update booking $resourceURL/booking/"
             . $booking1->id
             . ' status: '
             . Dumper( $res->code )
     );
 
-    my $result = Smeagol::Booking->from_xml( $res->content, $booking2->id );
+    my $result = Smeagol::Booking->newFromXML( $res->content, $booking2->id );
 
-    ok( $result == $new_booking2 && ( $result->info eq $new_booking2->info ),
-        'update booking content: ' . Dumper( $result->to_xml )
+    ok( $result == $newBooking2 && ( $result->info eq $newBooking2->info ),
+        'update booking content: ' . Dumper( $result->toXML )
     );
 }
 
@@ -521,14 +521,14 @@ my $resource2 = Smeagol::Resource->new( 'desc 2 2', undef, 'resource info' );
     my $resource = Smeagol::Resource->new( 'desc ical', $agenda );
     isa_ok( $resource, "Smeagol::Resource" );
 
-    my $res = smeagol_request( 'POST', smeagol_url('/resource'),
-        $resource->to_xml() );
+    my $res = smeagolRequest( 'POST', smeagolURL('/resource'),
+        $resource->toXML() );
     ok( $res->code == 201, "resource creation (ical)" );
 
-    my $xmltree = XMLin( $res->content );
-    my $xlink   = $xmltree->{agenda}{booking}{"xlink:href"};
+    my $xmlTree = XMLin( $res->content );
+    my $xlink   = $xmlTree->{agenda}{booking}{"xlink:href"};
 
-    $res = smeagol_request( 'GET', smeagol_url("$xlink/ical") );
+    $res = smeagolRequest( 'GET', smeagolURL("$xlink/ical") );
     is( $res->code, 200, "booking retrieved (ical)" );
 
     my @expected = sort grep { !/^(?:PRODID)/ }
@@ -557,13 +557,13 @@ my $resource2 = Smeagol::Resource->new( 'desc 2 2', undef, 'resource info' );
     );
     isa_ok( $booking2, "Smeagol::Booking" );
 
-    my $resourceUrl = $xmltree->{'xlink:href'};
-    $res = smeagol_request( 'POST', smeagol_url("$resourceUrl/booking"),
-        $booking2->to_xml() );
+    my $resourceURL = $xmlTree->{'xlink:href'};
+    $res = smeagolRequest( 'POST', smeagolURL("$resourceURL/booking"),
+        $booking2->toXML() );
     ok( $res->code == 201, "booking2 added (ical)" );
 
     $res
-        = smeagol_request( 'GET', smeagol_url("$resourceUrl/bookings/ical") );
+        = smeagolRequest( 'GET', smeagolURL("$resourceURL/bookings/ical") );
     is( $res->code, 200, "resource bookings retrieved (ical)" );
 
     @expected = sort grep { !/^(?:PRODID)/ }
@@ -583,48 +583,48 @@ my $tgS;
 #Testing create tag
 {
 
-    my $res = smeagol_request( 'POST', smeagol_url('/resource'),
-        $resource2->to_xml() );
+    my $res = smeagolRequest( 'POST', smeagolURL('/resource'),
+        $resource2->toXML() );
     ok( $res->code == '201', 'resource creation status ' . $res->code );
 
     $tg = Smeagol::Tag->new("aula");
     ok( defined $tg && $tg->value eq "aula", 'tag created' );
 
-    my $xmltree     = XMLin( $res->content );
-    my $resourceUrl = $xmltree->{'xlink:href'};
+    my $xmlTree     = XMLin( $res->content );
+    my $resourceURL = $xmlTree->{'xlink:href'};
 
-    $res = smeagol_request( 'POST', smeagol_url("$resourceUrl/tag"),
+    $res = smeagolRequest( 'POST', smeagolURL("$resourceURL/tag"),
         $tg->toXML() );
-    ok( $res->code == '201' && Smeagol::Tag->from_xml( $res->content ) == $tg,
+    ok( $res->code == '201' && Smeagol::Tag->newFromXML( $res->content ) == $tg,
         'tag in resource'
     );
 
     $tg = Smeagol::Tag->new("campus:nord");
     ok( defined $tg && $tg->value eq "campus:nord", 'tag created' );
 
-    $res = smeagol_request( 'POST', smeagol_url("$resourceUrl/tag"),
+    $res = smeagolRequest( 'POST', smeagolURL("$resourceURL/tag"),
         $tg->toXML() );
-    ok( $res->code == '201' && Smeagol::Tag->from_xml( $res->content ) == $tg,
+    ok( $res->code == '201' && Smeagol::Tag->newFromXML( $res->content ) == $tg,
         'tag in resource'
     );
 
     $tg = Smeagol::Tag->new("projector");
     ok( defined $tg && $tg->value eq "projector", 'tag created' );
 
-    $res = smeagol_request( 'POST', smeagol_url("$resourceUrl/tag"),
+    $res = smeagolRequest( 'POST', smeagolURL("$resourceURL/tag"),
         $tg->toXML() );
-    ok( $res->code == '201' && Smeagol::Tag->from_xml( $res->content ) == $tg,
+    ok( $res->code == '201' && Smeagol::Tag->newFromXML( $res->content ) == $tg,
         'tag in resource'
     );
 
-    $res = smeagol_request(
+    $res = smeagolRequest(
         'POST',
-        smeagol_url("$resourceUrl/tag"),
+        smeagolURL("$resourceURL/tag"),
         "<tag>campus nord</tag>"
     );
     ok( $res->code == '400', 'tag not created, bad request' );
 
-    $res = smeagol_request( 'POST', smeagol_url("/resource/-222/tag"),
+    $res = smeagolRequest( 'POST', smeagolURL("/resource/-222/tag"),
         $tg->toXML() );
     ok( $res->code == '404', 'tag not created, resource not found' );
 
@@ -632,15 +632,15 @@ my $tgS;
 
 #Retrieving and deleting tags from a resource
 {
-    my $res = smeagol_request( 'POST', smeagol_url('/resource'),
-        $resource2->to_xml() );
+    my $res = smeagolRequest( 'POST', smeagolURL('/resource'),
+        $resource2->toXML() );
     ok( $res->code == '201', 'resource creation status ' . $res->code );
 
-    my $xmltree     = XMLin( $res->content );
-    my $resourceUrl = $xmltree->{'xlink:href'};
+    my $xmlTree     = XMLin( $res->content );
+    my $resourceURL = $xmlTree->{'xlink:href'};
 
-    $res = smeagol_request( 'GET', smeagol_url( $resourceUrl . '/tags' ) );
-    $tgS = Smeagol::TagSet->from_xml( $res->content );
+    $res = smeagolRequest( 'GET', smeagolURL( $resourceURL . '/tags' ) );
+    $tgS = Smeagol::TagSet->newFromXML( $res->content );
     ok( $res->is_success, 'tag list retrieval status ' . $res->code );
     ok( $tgS->size == 0,  'resource with 0 tags' );
 
@@ -650,40 +650,40 @@ my $tgS;
     $tg2 = Smeagol::Tag->new( $valTg[2] );
     ok( defined $tg2 && $tg2->value eq $valTg[2], 'tag created' );
 
-    $res = smeagol_request( 'POST', smeagol_url("$resourceUrl/tag"),
+    $res = smeagolRequest( 'POST', smeagolURL("$resourceURL/tag"),
         $tg->toXML() );
-    ok( $res->code == '201' && Smeagol::Tag->from_xml( $res->content ) == $tg,
+    ok( $res->code == '201' && Smeagol::Tag->newFromXML( $res->content ) == $tg,
         'tag in resource'
     );
 
-    $res = smeagol_request( 'GET', smeagol_url( $resourceUrl . '/tags' ) );
-    $tgS = Smeagol::TagSet->from_xml( $res->content );
+    $res = smeagolRequest( 'GET', smeagolURL( $resourceURL . '/tags' ) );
+    $tgS = Smeagol::TagSet->newFromXML( $res->content );
     ok( $res->is_success, 'tag list retrieval status ' . $res->code );
     ok( $tgS->size == 1,  'resource with 1 tag' );
 
-    $res = smeagol_request( 'POST', smeagol_url("$resourceUrl/tag"),
+    $res = smeagolRequest( 'POST', smeagolURL("$resourceURL/tag"),
         $tg2->toXML() );
     ok( $res->code == '201'
-            && Smeagol::Tag->from_xml( $res->content ) == $tg2,
+            && Smeagol::Tag->newFromXML( $res->content ) == $tg2,
         'tag in resource'
     );
 
-    $res = smeagol_request( 'GET', smeagol_url( $resourceUrl . '/tags' ) );
-    $tgS = Smeagol::TagSet->from_xml( $res->content );
+    $res = smeagolRequest( 'GET', smeagolURL( $resourceURL . '/tags' ) );
+    $tgS = Smeagol::TagSet->newFromXML( $res->content );
     ok( $res->is_success, 'tag list retrieval status ' . $res->code );
     ok( $tgS->size == 2,  'resource with 2 tag' );
 
-    $res = smeagol_request( 'DELETE',
-        smeagol_url( "$resourceUrl/tag/" . $tg2->value ) );
+    $res = smeagolRequest( 'DELETE',
+        smeagolURL( "$resourceURL/tag/" . $tg2->value ) );
     ok( $res->is_success, 'tag deleting status ' . $res->code );
 
-    $res = smeagol_request( 'GET', smeagol_url( $resourceUrl . '/tags' ) );
-    my $tgS = Smeagol::TagSet->from_xml( $res->content );
+    $res = smeagolRequest( 'GET', smeagolURL( $resourceURL . '/tags' ) );
+    my $tgS = Smeagol::TagSet->newFromXML( $res->content );
     ok( $res->is_success, 'tag list retrieval status ' . $res->code );
     ok( $tgS->size == 1,  'resource with 1 tag' );
 
-    $res = smeagol_request( 'DELETE',
-        smeagol_url( "/resource/-111/tag/" . $tg2->value ) );
+    $res = smeagolRequest( 'DELETE',
+        smeagolURL( "/resource/-111/tag/" . $tg2->value ) );
     ok( $res->code == '404', 'deleting tag not found, status ' . $res->code );
 
 }

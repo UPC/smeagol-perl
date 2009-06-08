@@ -53,27 +53,27 @@ my $b2 = Smeagol::Booking->new(
 );
 
 # Resource creation Tests
-my $resource_as_xml = <<'EOF';
+my $resourceAsXML = <<'EOF';
 <?xml version="1.0" encoding="UTF-8"?>
 <resource>
     <description>aula chachipilongui</description>
     <info>info de l'aula chachipilongui</info>
 </resource>
 EOF
-my $r1 = Smeagol::Resource->from_xml($resource_as_xml);
+my $r1 = Smeagol::Resource->newFromXML($resourceAsXML);
 ok( $r1->description eq "aula chachipilongui"
         && $r1->info eq "info de l'aula chachipilongui",
     'resource r created from XML string'
 );
 
-# to_xml Resource test
-my $resource_as_hash = {
+# toXML Resource test
+my $resourceAsHash = {
     description => "aula chachipilongui",
     info        => "info de l'aula chachipilongui",
 };
 my $r2 = Smeagol::Resource->new( 'aula chachipilongui',
     undef, "info de l'aula chachipilongui" );
-my $r2bis = Smeagol::Resource->from_xml( $r2->to_xml(), $r2->id );
+my $r2bis = Smeagol::Resource->newFromXML( $r2->toXML(), $r2->id );
 ok( $r2bis->description eq 'aula chachipilongui'
         && $r2bis->info eq "info de l'aula chachipilongui",
     'to_xml resource'
@@ -83,7 +83,7 @@ $r1->agenda->append($b1);
 my $ident = $r1->id;
 ok( $r1->agenda->contains($b1),  'b1 in r1->ag' );
 ok( !$r1->agenda->contains($b2), 'b2 not in r1->ag' );
-ok( $r1->to_xml() eq "<resource>"
+ok( $r1->toXML() eq "<resource>"
         . "<description>"
         . $r1->description
         . "</description>"
@@ -103,12 +103,12 @@ ok( $r1->to_xml() eq "<resource>"
         . $r1->info
         . "</info>"
         . "</resource>",
-    'to_xml resource with agenda and 1 booking: ' . $r1->to_xml()
+    'to_xml resource with agenda and 1 booking: ' . $r1->toXML()
 );
 $r1->agenda->append($b2);
 ok( $r1->agenda->contains($b2), 'b2 in r->ag' );
 
-my $res = Smeagol::Resource->from_xml( '
+my $res = Smeagol::Resource->newFromXML( '
 <resource>
     <description>aula</description>
     <agenda>
@@ -180,7 +180,7 @@ my $ag;
     ok( defined $ag, 'ag created ok' );
 
     $r3 = Smeagol::Resource->new( 'A5123', 'dies', $ag, $tgS );
-    ok( defined $r3 && $r3->tags->to_xml() eq "<tags><tag>aula</tag></tags>",
+    ok( defined $r3 && $r3->tags->toXML() eq "<tags><tag>aula</tag></tags>",
         'resource created ok from data'
     );
 
@@ -198,16 +198,16 @@ my $ag;
     ok( defined $ag, 'ag created ok' );
 
     $r3 = Smeagol::Resource->new( 'A5123', 'dies', undef, $tgS );
-    ok( defined $r3 && $r3->tags->to_xml() eq "<tags><tag>aula</tag></tags>",
+    ok( defined $r3 && $r3->tags->toXML() eq "<tags><tag>aula</tag></tags>",
         'resource created ok from data'
     );
 }
 
-#create resource with tags from_xml
+#create resource with tags newFromXML
 {
 
     #with agenda
-    $r3 = Smeagol::Resource->from_xml( '
+    $r3 = Smeagol::Resource->newFromXML( '
 		<resource>
 		    <description>aula</description>
 			<agenda>
@@ -240,12 +240,12 @@ my $ag;
     ok( defined $r3
             && $r3->description  eq 'aula'
             && $r3->info         eq 'horaria'
-            && $r3->tags->to_xml eq "<tags><tag>aula</tag></tags>",
-        'resource created ok from_xml, with agenda'
+            && $r3->tags->toXML eq "<tags><tag>aula</tag></tags>",
+        'resource created ok newFromXML, with agenda'
     );
 
     #without agenda
-    $r3 = Smeagol::Resource->from_xml( '
+    $r3 = Smeagol::Resource->newFromXML( '
 		<resource>
 		    <description>aula</description>
     		<info>horaria</info>
@@ -256,15 +256,15 @@ my $ag;
     ok( defined $r3
             && $r3->description  eq 'aula'
             && $r3->info         eq 'horaria'
-            && $r3->tags->to_xml eq "<tags><tag>aula</tag></tags>",
-        'resource created ok from_xml, without agenda'
+            && $r3->tags->toXML eq "<tags><tag>aula</tag></tags>",
+        'resource created ok newFromXML, without agenda'
     );
 
 }
 
 #updating tags
 {
-    $r3 = Smeagol::Resource->from_xml( '
+    $r3 = Smeagol::Resource->newFromXML( '
 		<resource>
 		    <description>aula</description>
     		<info>horaria</info>
@@ -275,7 +275,7 @@ my $ag;
     ok( defined $r3
             && $r3->description  eq 'aula'
             && $r3->info         eq 'horaria'
-            && $r3->tags->to_xml eq "<tags><tag>aula</tag></tags>",
+            && $r3->tags->toXML eq "<tags><tag>aula</tag></tags>",
         'resource created ok'
     );
 
@@ -340,7 +340,7 @@ my $ag;
 </resource>
 EOF
 
-    my $r = Smeagol::Resource->from_xml($resource_as_xml);
+    my $r = Smeagol::Resource->newFromXML($resource_as_xml);
     isa_ok( $r, 'Smeagol::Resource' );
     is( $r->description, $description, "description in UTF-8" );
     is( $r->info,        $info,        "info in UTF-8" );

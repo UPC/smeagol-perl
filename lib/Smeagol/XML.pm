@@ -6,7 +6,7 @@ use warnings;
 use XML::LibXML;
 use Carp;
 
-use overload q{""} => \&__str__;
+use overload q{""} => \&toString;
 
 sub new {
     my $class = shift;
@@ -60,7 +60,7 @@ sub addXLink {
     }
 }
 
-sub __str__ {
+sub toString {
     return shift->{xmldoc}->toString();
 }
 

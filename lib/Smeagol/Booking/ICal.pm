@@ -5,7 +5,7 @@ use warnings;
 
 use base qw(Smeagol::Booking);
 
-use overload q{""} => \&__str__;
+use overload q{""} => \&toString;
 
 use Date::ICal;
 use Data::ICal::Entry::Event;
@@ -65,7 +65,7 @@ sub calendar {
     return $agenda;
 }
 
-sub __str__ {
+sub toString {
     my $self = shift;
 
     return $self->event->as_string;

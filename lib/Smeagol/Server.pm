@@ -13,7 +13,7 @@ use Smeagol::Server::Handler
     qw(listResources retrieveResource deleteResource updateResource createResource listBookings listBookingsIcal createBooking createTag listTags deleteTag retrieveBooking updateBooking deleteBooking retrieveBookingIcal);
 use POSIX ();
 
-our @EXPORT_OK = qw(send_xml send_error send_ical);
+our @EXPORT_OK = qw(sendXML sendError sendICal);
 
 my $REQUEST_TIMEOUT = 60;
 my $VERBOSE_MODE;    # server logs disabled by default
@@ -68,7 +68,7 @@ sub print_banner {
 #
 # Dispatcher table. Associates a handler to an URL. Groups in
 # the URL pattern are given as parameters to handler.
-my %crud_for = (
+my %crudFor = (
     '/resources'      => { GET => \&listResources, },
     '/resource/(\d+)' => {
         GET    => \&retrieveResource,
@@ -89,17 +89,17 @@ my %crud_for = (
     },
     '/resource/(\d+)/booking/(\d+)/ical' => { GET => \&retrieveBookingIcal },
     '/(css/\w+\.css)'                    => {
-        GET => sub { _send_file( 'text/css', @_ ) }
+        GET => sub { _sendFile( 'text/css', @_ ) }
     },
     '/(dtd/\w+\.dtd)' => {
-        GET => sub { _send_file( 'text/sgml', @_ ) }
+        GET => sub { _sendFile( 'text/sgml', @_ ) }
     },
     '/(xsl/\w+\.xsl)' => {
-        GET => sub { _send_file( 'application/xml', @_ ) }
+        GET => sub { _sendFile( 'application/xml', @_ ) }
     },
     '/' => {
         GET => sub {
-            _send_file( 'text/html; charset=UTF-8',
+            _sendFile( 'text/html; charset=UTF-8',
                 $_[0], "html/server.html" );
             }
     },
@@ -113,51 +113,51 @@ sub handle_request {
     my $self = shift;
     my $cgi  = shift;
 
-    my $path_info = $cgi->path_info();
-    my $method    = $cgi->request_method();
+    my $pathInfo = $cgi->path_info();
+    my $method   = $cgi->request_method();
 
     # Find the corresponding action
-    my $url_key = 'default_action';
+    my $urlKey = 'default_action';
     my @ids;
 
-    foreach my $url_pattern ( keys(%crud_for) ) {
+    foreach my $urlPattern ( keys(%crudFor) ) {
 
         # Anchor pattern and allow URLs ending in '/'
-        my $pattern = '^' . $url_pattern . '/?$';
-        if ( $path_info =~ m{$pattern} ) {
+        my $pattern = '^' . $urlPattern . '/?$';
+        if ( $pathInfo =~ m{$pattern} ) {
             @ids = ( $1, $2 );
-            $url_key = $url_pattern;
+            $urlKey = $urlPattern;
             last;
         }
     }
 
     # Dispatch to the corresponding action.
     # Pass parameters obtained from the pattern to action
-    if ( exists $crud_for{$url_key} ) {
-        if ( exists $crud_for{$url_key}->{$method} ) {
-            $crud_for{$url_key}->{$method}->( $cgi, $ids[0], $ids[1] );
+    if ( exists $crudFor{$urlKey} ) {
+        if ( exists $crudFor{$urlKey}->{$method} ) {
+            $crudFor{$urlKey}->{$method}->( $cgi, $ids[0], $ids[1] );
         }
         else {
 
             # Requested HTTP method not available
-            send_error(HTTP_METHOD_NOT_ALLOWED);
+            sendError(HTTP_METHOD_NOT_ALLOWED);
         }
     }
     else {
 
         # Requested URL not available
-        send_error(HTTP_NOT_FOUND);
+        sendError(HTTP_NOT_FOUND);
     }
 
-    _log_request( $method, $cgi ) if $VERBOSE_MODE;
+    _logRequest( $method, $cgi ) if $VERBOSE_MODE;
 }
 
-# _log_request(method, cgi):
+# _logRequest(method, cgi):
 #       generate log messages conforming to Apache Combined Log format,
 #       as defined in http://httpd.apache.org/docs/2.2/logs.html#accesslog
 #       FIXME: Several fields have a hard-coded "-" value (i.e. user ident,
 #              user ID and response object size).
-sub _log_request {
+sub _logRequest {
     my ( $method, $cgi ) = @_;
     my $strDate = POSIX::strftime( "%d/%b/%Y:%H:%M:%S %z", localtime() );
     my $rhost   = $cgi->remote_host();
@@ -199,7 +199,7 @@ sub _reply {
 }
 
 # Prints an Http response. Message is optional.
-sub send_error {
+sub sendError {
     my ( $status, $text ) = @_;
 
     #
@@ -210,7 +210,7 @@ sub send_error {
     _reply( $status, 'text/plain', $text );
 }
 
-sub send_xml {
+sub sendXML {
     my ( $xml, %args ) = @_;
 
     # default status for XML is OK
@@ -219,7 +219,7 @@ sub send_xml {
     _reply( $args{status}, 'text/xml', $xml );
 }
 
-sub send_ical {
+sub sendICal {
     my ($ical) = @_;
 
     _reply(
@@ -233,7 +233,7 @@ sub send_ical {
 # Handler for index #
 #####################
 
-sub _send_file {
+sub _sendFile {
     my ( $mime, $cgi, $filename ) = @_;
 
     # FIXME: make it work from anywhere, now it must run from
@@ -246,7 +246,7 @@ sub _send_file {
         _reply( HTTP_OK, $mime, <$file> );
     }
     else {
-        send_error(HTTP_BAD_REQUEST);
+        sendError(HTTP_BAD_REQUEST);
     }
 }
 

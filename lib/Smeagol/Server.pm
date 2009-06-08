@@ -150,18 +150,22 @@ sub handle_request {
 #              user ID and response object size).
 sub _log_request {
     my ( $method, $cgi ) = @_;
-    my $strDate = POSIX::strftime( "%d/%b/%Y:%H:%M:%S - %z", localtime() );
+    my $strDate = POSIX::strftime( "%d/%b/%Y:%H:%M:%S %z", localtime() );
     my $rhost   = $cgi->remote_host();
     my $uri     = $cgi->request_uri();
     my $proto
         = defined( $cgi->server_protocol() )
         ? uc( $cgi->server_protocol() )
         : "-";
-    my $referer = defined( $cgi->referer() )    ? $cgi->referer()    : "-";
-    my $ua      = defined( $cgi->user_agent() ) ? $cgi->user_agent() : "-";
+    my $referer
+        = defined( $cgi->referer() ) ? q["] . $cgi->referer() . q["] : '-';
+    my $ua
+        = defined( $cgi->user_agent() )
+        ? q["] . $cgi->user_agent() . q["]
+        : '-';
 
     print STDERR
-        "$rhost - - [$strDate] \"$method $uri $proto\" - \"$referer\" \"$ua\"\n";
+        "$rhost - - [$strDate] \"$method $uri $proto\" - - $referer $ua\n";
 }
 
 #############################################################

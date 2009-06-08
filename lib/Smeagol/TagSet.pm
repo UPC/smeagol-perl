@@ -28,9 +28,8 @@ sub append {
 
     ( defined $tag ) or die "SetTag->append requires one parameter";
 
-    $self->insert($tag) unless $self->findValue($tag->value);
+    $self->insert($tag) unless $self->findValue( $tag->value );
 }
-
 
 sub findValue {
     my $self = shift;

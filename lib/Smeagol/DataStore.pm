@@ -106,6 +106,7 @@ sub getIDList {
 
     foreach ( glob "$path*.db" ) {
         my $id = $_;
+
         # FIXME: regex should be more specific, fails if $path contains
         #        numbers, e.g. /home/datastore/2009
         #        (ticket:138)
@@ -122,7 +123,8 @@ sub remove {
 
     if ( Smeagol::DataStore->exists($id) ) {
         unlink _getFullPath($id)
-            or croak "Could not remove persistent object " . _getFullPath($id);
+            or croak "Could not remove persistent object "
+            . _getFullPath($id);
     }
 }
 

@@ -253,8 +253,7 @@ sub updateResource {
         <description>$description</description>
         <info>" . ( ( defined $info ) ? $info : "" ) . "</info>
         </resource>";
-    my $req = HTTP::Request->new(
-        POST => $self->{url} . '/resource/' . $id );
+    my $req = HTTP::Request->new( POST => $self->{url} . '/resource/' . $id );
 
     $req->content_type('text/xml');
     $req->content($respXML);

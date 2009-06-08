@@ -144,7 +144,7 @@ sub newFromXML {
 
     my $info = $dom->findnodes('//resource/info')->get_node(1)->string_value;
 
-    $obj->{info} = (defined $info) ? $info : "";
+    $obj->{info} = ( defined $info ) ? $info : "";
 
     if ( $dom->getElementsByTagName('tags')->get_node(1) ) {
         $obj->{tags} = Smeagol::TagSet->newFromXML(

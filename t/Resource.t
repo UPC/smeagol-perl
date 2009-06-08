@@ -181,8 +181,7 @@ my $ag;
 
     $r3 = Smeagol::Resource->new( 'A5123', 'dies', $ag, $tgS );
     ok( defined $r3 && $r3->tags->toXML() eq "<tags><tag>aula</tag></tags>",
-        'resource created ok from data'
-    );
+        'resource created ok from data' );
 
     #without agenda
     $tg = Smeagol::Tag->new("aula");
@@ -199,8 +198,7 @@ my $ag;
 
     $r3 = Smeagol::Resource->new( 'A5123', 'dies', undef, $tgS );
     ok( defined $r3 && $r3->tags->toXML() eq "<tags><tag>aula</tag></tags>",
-        'resource created ok from data'
-    );
+        'resource created ok from data' );
 }
 
 #create resource with tags newFromXML
@@ -238,8 +236,8 @@ my $ag;
 			</tags>
 		</resource>' );
     ok( defined $r3
-            && $r3->description  eq 'aula'
-            && $r3->info         eq 'horaria'
+            && $r3->description eq 'aula'
+            && $r3->info        eq 'horaria'
             && $r3->tags->toXML eq "<tags><tag>aula</tag></tags>",
         'resource created ok newFromXML, with agenda'
     );
@@ -254,8 +252,8 @@ my $ag;
 			</tags>
 		</resource>' );
     ok( defined $r3
-            && $r3->description  eq 'aula'
-            && $r3->info         eq 'horaria'
+            && $r3->description eq 'aula'
+            && $r3->info        eq 'horaria'
             && $r3->tags->toXML eq "<tags><tag>aula</tag></tags>",
         'resource created ok newFromXML, without agenda'
     );
@@ -273,8 +271,8 @@ my $ag;
 			</tags>
 		</resource>' );
     ok( defined $r3
-            && $r3->description  eq 'aula'
-            && $r3->info         eq 'horaria'
+            && $r3->description eq 'aula'
+            && $r3->info        eq 'horaria'
             && $r3->tags->toXML eq "<tags><tag>aula</tag></tags>",
         'resource created ok'
     );

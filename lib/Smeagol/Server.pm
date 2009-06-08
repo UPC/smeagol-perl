@@ -99,8 +99,8 @@ my %crudFor = (
     },
     '/' => {
         GET => sub {
-            _sendFile( 'text/html; charset=UTF-8',
-                $_[0], "html/server.html" );
+            _sendFile( 'text/html; charset=UTF-8', $_[0],
+                "html/server.html" );
             }
     },
 );

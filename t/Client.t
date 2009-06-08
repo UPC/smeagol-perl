@@ -19,8 +19,8 @@ BEGIN {
 }
 
 my $serverPort = 8000;
-my $server      = "http://localhost:$serverPort";
-my $pid         = Smeagol::Server->new($serverPort)->background();
+my $server     = "http://localhost:$serverPort";
+my $pid        = Smeagol::Server->new($serverPort)->background();
 
 my $client = Smeagol::Client->new();
 ok( !defined $client, 'client not created' );
@@ -284,8 +284,7 @@ my $info0 = "info 0";
     ok( defined $Bookings[2],
         'booking created ' . _idResource( $Bookings[2] ) );
 
-    my $ical1
-        = $client->getBookingICal( _idResourceBooking( $Bookings[0] ) );
+    my $ical1 = $client->getBookingICal( _idResourceBooking( $Bookings[0] ) );
     my $ical2 = $client->listBookingsICal( _idResource( $Resources[1] ) );
 
     my $entry = Data::ICal::Entry::Event->new();

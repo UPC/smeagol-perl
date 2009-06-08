@@ -30,7 +30,8 @@ sub new {
     );
 
     $obj->{ __PACKAGE__ . "::description" } = $description;
-    $obj->{ __PACKAGE__ . "::id" } = Smeagol::DataStore->getNextID(__PACKAGE__);
+    $obj->{ __PACKAGE__ . "::id" }
+        = Smeagol::DataStore->getNextID(__PACKAGE__);
     $obj->{ __PACKAGE__ . "::info" } = defined($info) ? $info : '';
 
     bless $obj, $class;

@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-use Test::More tests => 53;
+use Test::More tests => 67;
 
 use strict;
 use warnings;
@@ -19,7 +19,7 @@ BEGIN {
 use Data::Dumper;
 
 my $tgS;
-my ( $tg1, $tg2, $tg3, $tg4, $tg5 );
+my ( $tg1, $tg2, $tg3, $tg4, $tg5, $tg11, $tg44 );
 my ( $xmlTg1, $xmlTg5, $xmlTgS );
 
 $tg1 = Smeagol::Tag->new("aula");
@@ -41,6 +41,14 @@ ok( $tg4->value eq "projeeector", 'tag checked' );
 $tg5 = Smeagol::Tag->new("projector");
 ok( defined $tg5, 'tag created' );
 ok( $tg5->value eq "projector", 'tag checked' );
+
+$tg11 = Smeagol::Tag->new("aula");
+ok( defined $tg11, 'tag created' );
+ok( $tg11->value eq "aula", 'tag checked' );
+
+$tg44 = Smeagol::Tag->new("projeeector");
+ok( defined $tg44, 'tag created' );
+ok( $tg44->value eq "projeeector", 'tag checked' );
 
 #create tagSet
 {
@@ -86,6 +94,31 @@ ok( $tg5->value eq "projector", 'tag checked' );
     $tgS->remove($tg1);
     ok( !$tgS->contains($tg1), 'tg1 not in tgS' );
     ok( $tgS->size == 3,       'tgS contains 3 tags' );
+}
+
+#adding duplicated tags, not posible
+{
+    $tgS = Smeagol::TagSet->new();
+    ok( defined $tgS, 'tagSet created' );
+
+    ok( $tgS->size == 0, 'tgS contains 0 tags' );
+
+    ok( !$tgS->contains($tg1), 'tg1 not in tgS' );
+    $tgS->append($tg1);
+    ok( $tgS->contains($tg1), 'tg1 in tgS' );
+
+    ok( !$tgS->contains($tg11), 'tg11 not in tgS' );
+    $tgS->append($tg11);
+    ok( !$tgS->contains($tg11), 'tg11 not in tgS, tag duplicatted' );
+
+    ok( !$tgS->contains($tg44), 'tg44 not in tgS' );
+    $tgS->append($tg44);
+    ok( $tgS->contains($tg44), 'tg44 in tgS' );
+
+    ok( !$tgS->contains($tg4), 'tg4 not in tgS' );
+    $tgS->append($tg4);
+    ok( !$tgS->contains($tg4), 'tg4 not in tgS, tag duplicatted' );
+
 }
 
 #to_xml

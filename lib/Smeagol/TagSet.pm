@@ -28,9 +28,20 @@ sub append {
 
     ( defined $slot ) or die "SetTag->append requires one parameter";
 
-    $self->insert($slot);
+    $self->insert($slot)  unless $self->findValue($slot->value);
 }
 
+
+sub findValue {
+    my $self = shift;
+    my ($value) = @_;
+
+    #FIXME 136: utilitzar caller per obtenir el nom de la funcio
+    croak "TagSet->findValue requires one parameter"
+        unless defined $value;
+
+    return grep { $value eq $_->value } $self->elements;
+}
 
 # No special order is granted in results, because of Set->elements behaviour.
 sub __str__ {

@@ -17,8 +17,8 @@ requires 'Date::ICal'                => 0;
 requires 'Getopt::Euclid'            => 0;
 requires 'File::Path'                => 0;
 
-test_requires 'Test::More'           => 0;
-test_requires 'Data::Compare'        => 0;
+test_requires 'Test::More'    => 0;
+test_requires 'Data::Compare' => 0;
 
 install_script 'bin/smeagol-client';
 install_script 'bin/smeagol-server';
@@ -29,3 +29,13 @@ install_share;
 no_index directory => qw( doc dtd );
 
 WriteAll;
+
+# FIXME: symlink may not exist on this platform but it is used
+#        as a work-around until File::ShareDir support is added
+#        (ticket:34)
+my $dtd = "dtd";
+( unlink $dtd or die "cannot remove $dtd: $!" )
+    if -e $dtd;
+
+symlink "share/$dtd", $dtd
+    or die "cannot symlink $dtd: $!";

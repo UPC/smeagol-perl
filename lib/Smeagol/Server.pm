@@ -88,11 +88,20 @@ my %crud_for = (
         DELETE => \&deleteBooking,
     },
     '/resource/(\d+)/booking/(\d+)/ical' => { GET => \&retrieveBookingIcal },
-    '/css/(\w+)\.css'                    => { GET => \&_send_css },
-    '/dtd/(\w+)\.dtd'                    => { GET => \&_send_dtd },
-    '/xsl/(\w+)\.xsl'                    => { GET => \&_send_xsl },
-    '/'                                  => {
-        GET => sub { _send_html( $_[0], "server" ) }
+    '/(css/\w+\.css)'                    => {
+        GET => sub { _send_file( 'text/css', @_ ) }
+    },
+    '/(dtd/\w+\.dtd)' => {
+        GET => sub { _send_file( 'text/sgml', @_ ) }
+    },
+    '/(xsl/\w+\.xsl)' => {
+        GET => sub { _send_file( 'application/xml', @_ ) }
+    },
+    '/' => {
+        GET => sub {
+            _send_file( 'text/html; charset=UTF-8',
+                $_[0], "html/server.html" );
+            }
     },
 );
 
@@ -220,88 +229,21 @@ sub send_ical {
     );
 }
 
-##############################################################
-# Handlers for DTD
-##############################################################
-
-sub _send_dtd {
-    my ( $cgi, $id ) = @_;
-
-    #
-    # FIXME: make it work from anywhere, now it must run from
-    #        the project base dir or won't find dtd dir
-    #        (ticket:34)
-    #
-    if ( open my $dtd, "<", "dtd/$id.dtd" ) {
-
-        # slurp dtd file
-        local $/;
-        _reply( HTTP_OK, 'text/sgml', <$dtd> );
-    }
-    else {
-        send_error(HTTP_BAD_REQUEST);
-    }
-}
-
-####################
-# Handlers for CSS #
-####################
-
-# id should contain the CSS file name (without the ".css" extension)
-sub _send_css {
-    my ( $cgi, $id ) = @_;
-
-    # FIXME: make it work from anywhere, now it must run from
-    #        the project base dir or won't find dtd dir
-    #        (ticket:116)
-    if ( open my $css, "<", "css/$id.css" ) {
-
-        # slurp css file
-        local $/;
-        _reply( HTTP_OK, 'text/css', <$css> );
-    }
-    else {
-        send_error(HTTP_BAD_REQUEST);
-    }
-}
-
-####################
-# Handlers for XSL #
-####################
-
-# id should contain the XSL file name (without the ".xsl" extension)
-sub _send_xsl {
-    my ( $cgi, $id ) = @_;
-
-    # FIXME: make it work from anywhere, now it must run from
-    #        the project base dir or won't find dtd dir
-    #        (ticket:116)
-    if ( open my $xsl, "<", "xsl/$id.xsl" ) {
-
-        # slurp css file
-        local $/;
-        _reply( HTTP_OK, 'application/xml', <$xsl> );
-    }
-    else {
-        send_error(HTTP_BAD_REQUEST);
-    }
-}
-
 #####################
 # Handler for index #
 #####################
 
-sub _send_html {
-    my ( $cgi, $filename ) = @_;
+sub _send_file {
+    my ( $mime, $cgi, $filename ) = @_;
 
     # FIXME: make it work from anywhere, now it must run from
-    #        the project base dir or won't find dtd dir
+    #        the project base dir or won't find file dir
     #        (ticket:116)
-    if ( open my $html, "<", "share/html/$filename.html" ) {
+    if ( open my $file, "<", "share/$filename" ) {
 
         # slurp html file
         local $/;
-        _reply( HTTP_OK, 'text/html; charset=UTF-8', <$html> );
+        _reply( HTTP_OK, $mime, <$file> );
     }
     else {
         send_error(HTTP_BAD_REQUEST);

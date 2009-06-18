@@ -28,6 +28,19 @@ sub datetime {
 
 # weekly, on thursdays from 9:30 to 14:00
 {
+    my $ds = DateTime::Set->from_recurrence(
+        span => DateTime::Infinite::Future->new, # until the end of the universe!!! ;-)
+        recurrence => sub {
+            my $dt = shift;
+            if ($dt->day_of_week <= 4) {
+                # this week's thursday
+                return $dt->truncate(to => 'week')->add( days => 4);
+            } else {
+                # next week's thursday
+                return $dt->truncate(to => 'week')->add( weeks => 1, days => 4);
+            };
+        }
+    );
     ok(1 == 1, "weekly, on thursdays from 9:30 to 14:00");
 }
 

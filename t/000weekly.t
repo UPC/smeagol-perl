@@ -28,8 +28,10 @@ sub datetime {
 
 # weekly, on thursdays from 9:30 to 14:00
 {
+    my $dt_start = DateTime->now->truncate(to => 'day');
+    my $dt_end = DateTime::Infinite::Future->new; # until the end of the universe! :-)
     my $ds = DateTime::Set->from_recurrence(
-        span => DateTime::Infinite::Future->new, # until the end of the universe!!! ;-)
+        span => DateTime::Span->from_datetimes(start=>$dt_start, end=>$dt_end),
         recurrence => sub {
             my $dt = shift;
             if ($dt->day_of_week <= 4) {
@@ -41,6 +43,7 @@ sub datetime {
             };
         }
     );
+
     ok(1 == 1, "weekly, on thursdays from 9:30 to 14:00");
 }
 

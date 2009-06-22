@@ -32,6 +32,8 @@ sub datetime {
     my $dt_end = DateTime::Infinite::Future->new; # until the end of the universe! :-)
     my $ds = DateTime::Set->from_recurrence(
         span => DateTime::Span->from_datetimes(start=>$dt_start, end=>$dt_end),
+        # another method to specify the span would be (for this example):
+        # after => $dt_start,
         recurrence => sub {
             my $dt = shift;
             if ($dt->day_of_week <= 4) {

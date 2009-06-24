@@ -30,7 +30,7 @@ sub datetime {
 {
 
   # build an interval (DateTime::Span) to be used in DateTime::Set constructor
-    my $begin = DateTime->now->truncate( to => 'day' );
+    my $begin = DateTime->from_epoch( epoch=> 0 );
     my $end = DateTime::Infinite::Future->new;
     my $interval
         = DateTime::Span->from_datetimes( start => $begin, end => $end );
@@ -84,9 +84,49 @@ sub datetime {
 }
 
 # weekly, on monday, wednesday, friday, from 15:00 to 17:00
-TODO: {
-    todo_skip 'not implemented', 1;
-    ok( 1 == 1, "weekly, on mon, we, fri from 15:00 to 17:00" );
+{
+    my @selectedDays = ( 1, 3, 5 );    # monday, wednesday, friday
+    my $begin    = DateTime->from_epoch( epoch => 0 );
+    my $end      = DateTime::Infinite::Future->new;
+    my $interval = DateTime::Span->from_datetimes( start => $begin, end => $end );
+
+    warn "Hola\n";
+    my $set = DateTime::Set->from_recurrence(
+        span       => $interval,
+        recurrence => sub {
+            my $dt = shift;
+            $dt = $dt->truncate(to => 'day');
+            while ( !(grep {$_ == $dt->day_of_week} @selectedDays) ) {
+                $dt = $dt->add( days => 1 );
+            }
+            return $dt->add( hours => 15, minutes => 0 );
+        }
+    );
+
+    my $duration = DateTime->new( year => 1970, hour => 17, minute => 0 )
+        - DateTime->new( year => 1970, hour => 15, minute => 0 );
+
+    warn "Hola\n";
+    my $spanSet = DateTime::SpanSet->from_set_and_duration(
+        set      => $set,
+        duration => $duration
+    );
+
+    warn "Hola\n";
+
+    my $iter = $spanSet->iterator;
+    my @got;
+    for ( my $i = 0; $i < 10; $i++) {
+        push @got, $iter->next->start->day_of_week;
+    }
+    #push @got, $iter->next->start->day_of_week for 1 .. 10;
+    # Jan 1, 1970 was thursday, so first day matching 
+    # recurrence in @selectedDays must be friday (day_of_week = 5)
+    print @got;
+    my @expected = (5, 1, 3, 5, 1, 3, 5, 1, 3, 5);
+
+    is_deeply(\@got, \@expected, "Recurrence matches selected days");
+    #ok( 1 == 1, "weekly, on mon, we, fri from 15:00 to 17:00" );
 }
 
 # weekly, every 4 mondays

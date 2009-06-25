@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-use Test::More tests => 12;
+use Test::More tests => 15;
 
 use strict;
 use warnings;
@@ -119,17 +119,80 @@ sub datetime {
     );
 
     my $iter = $spanSet->iterator;
-    my @got;
-    push @got, $iter->next->start->day_of_week for 1 .. 10;
+    my @gotDayOfWeek;
+    my @gotTimeStart;
+    my @gotTimeEnd;
+    push @gotDayOfWeek, $iter->next->start->day_of_week for 1 .. 10;
+    push @gotTimeStart, $iter->next->start->hms for 1 .. 3;
+    push @gotTimeEnd, $iter->next->end->hms for 1 .. 3;
     # Jan 1, 1970 was thursday, so first day matching 
     # recurrence in @selectedDays must be friday (day_of_week = 5)
-    my @expected = (5, 1, 3, 5, 1, 3, 5, 1, 3, 5);
-
-    is_deeply(\@got, \@expected, "Recurrence matches selected days");
+    my @expectedDayOfWeek = (5, 1, 3, 5, 1, 3, 5, 1, 3, 5);
+    my @expectedTimeStart = qw(
+        15:00:00
+        15:00:00
+        15:00:00
+    );
+    my @expectedTimeEnd = qw(
+        17:00:00
+        17:00:00
+        17:00:00
+    );
+    is_deeply(\@gotDayOfWeek, \@expectedDayOfWeek, "Recurrence matches selected days");
+    is_deeply(\@gotTimeStart, \@expectedTimeStart, "Recurrence matches selected start time");
+    is_deeply(\@gotTimeEnd, \@expectedTimeEnd, "Recurrence matches selected end time");
 }
 
 # weekly, every 4 mondays
-TODO: {
-    todo_skip 'not implemented', 1;
-    ok( 1 == 1, "weekly, every 4 mondays" );
+{
+    my $multiplier = 4; # every 4 weeks
+    my $begin    = DateTime->from_epoch( epoch => 0 );
+    my $end      = DateTime::Infinite::Future->new;
+    my $interval = DateTime::Span->from_datetimes( start => $begin, end => $end );
+
+    my $set = DateTime::Set->from_recurrence(
+        span => $interval,
+        recurrence => sub {
+            my $dt = shift;
+            $dt = $dt->truncate( to => 'day' );
+            if ( $dt->day_of_week > 1 ) {
+                $dt = $dt->truncate( to => 'week' )->add( weeks=> 1 );
+            } else {
+                $dt->truncate( to => 'week' )->add( weeks => $multiplier );
+            }
+            return $dt;
+        }
+    );
+
+    # when no start and end times are specified, 
+    # a duration of 1 day is assumed
+    my $duration = DateTime::Duration->new( days => 1 );
+    my $dset = DateTime::SpanSet->from_set_and_duration(
+        set => $set,
+        duration => $duration
+    );
+
+    my @gotStart;
+    my @gotEnd;
+    my $iter = $dset->iterator;
+    push @gotStart, $iter->next->start for 1 .. 5;
+    $iter = $dset->iterator;
+    push @gotEnd, $iter->next->end for 1 .. 5;
+    my @expectedStart = qw(
+        1970-01-05T00:00:00
+        1970-02-02T00:00:00
+        1970-03-02T00:00:00
+        1970-03-30T00:00:00
+        1970-04-27T00:00:00
+    );
+    my @expectedEnd = qw(
+        1970-01-06T00:00:00
+        1970-02-03T00:00:00
+        1970-03-03T00:00:00
+        1970-03-31T00:00:00
+        1970-04-28T00:00:00
+    );
+    is_deeply( \@gotStart, \@expectedStart, "recurrence matches selected start times" );
+    is_deeply( \@gotEnd, \@expectedEnd, "recurrence matches selected end times" );
+
 }

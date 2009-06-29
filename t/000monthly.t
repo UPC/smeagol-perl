@@ -11,25 +11,26 @@ use DateTime::Set;
 TODO: {
     local $TODO = "working in progress";
 
+    # Thursday
+    my $dayOfWeek = 4;
+
     my $recurrence = sub {
-        my ($dt) = @_;
+        my ($dtOrig) = @_;
 
-        my $currentThu = $dt->clone
-                         ->add( weeks => 1 )
-                         ->truncate( to => 'week' )
-                         ->add( days=> 3 );
-        warn ">>> currentThu: " . $currentThu->ymd . "\n";
-        my $nextThu = $currentThu->clone->add( weeks => 1 );
-        warn ">>> nextThu: " . $nextThu->ymd . "\n";
+        my $dt;
+        for my $step ( 1 .. 2 ) {
+            $dt = $dtOrig->clone;
+            $dt->truncate( to => 'month' );
+            $dt->add( months => $step );
+            $dt->add( days => -1 );
 
-        # test whether it is the last Thu of the month and set step
-        my $step = $currentThu->month == $nextThu->month ? 1 : 2;
+            my $offset = ( $dt->day_of_week - $dayOfWeek + 7 ) % 7;
+            $dt->add( days => -$offset );
 
-        return $dt->add( months => $step )
-                  ->truncate( to => 'month' )
-                  ->subtract( weeks => 1 )
-                  ->truncate( to => 'week' )
-                  ->add( days => 3 );
+            last if DateTime->compare( $dt, $dtOrig );
+        }
+
+        return $dt;
     };
 
     my $dtSpan = DateTime::Span->from_datetimes(
@@ -42,10 +43,24 @@ TODO: {
         recurrence => $recurrence,
     );
 
+    my @got;
     my $dtIter = $dtSet->iterator;
-    warn $dtIter->next->ymd . "\n" for 1 .. 10;
+    push @got, $dtIter->next->ymd for 1 .. 10;
 
-    ok(0);
+    my @expected = qw(
+        1970-01-29
+        1970-02-26
+        1970-03-26
+        1970-04-30
+        1970-05-28
+        1970-06-25
+        1970-07-30
+        1970-08-27
+        1970-09-24
+        1970-10-29
+    );
+
+    is_deeply( \@got, \@expected, "last Thu of month (test 7)" );
 }
 
 # each day 10 of the month, 10:00-14:00

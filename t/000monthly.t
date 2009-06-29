@@ -9,13 +9,41 @@ use DateTime::Set;
 
 # last Thu of the month
 TODO: {
-    local $TODO = "pending";
+    local $TODO = "working in progress";
 
-    #my $set = DateTime::Set->from_recurrence(
-    #    recurrence => sub {
-    #        #return $_[0]->truncate( to => 'month' )->add
-    #    },
-    #);
+    my $recurrence = sub {
+        my ($dt) = @_;
+
+        my $currentThu = $dt->clone
+                         ->add( weeks => 1 )
+                         ->truncate( to => 'week' )
+                         ->add( days=> 3 );
+        warn ">>> currentThu: " . $currentThu->ymd . "\n";
+        my $nextThu = $currentThu->clone->add( weeks => 1 );
+        warn ">>> nextThu: " . $nextThu->ymd . "\n";
+
+        # test whether it is the last Thu of the month and set step
+        my $step = $currentThu->month == $nextThu->month ? 1 : 2;
+
+        return $dt->add( months => $step )
+                  ->truncate( to => 'month' )
+                  ->subtract( weeks => 1 )
+                  ->truncate( to => 'week' )
+                  ->add( days => 3 );
+    };
+
+    my $dtSpan = DateTime::Span->from_datetimes(
+        start => DateTime->from_epoch( epoch => 0 ),
+        end   => DateTime::Infinite::Future->new,
+    );
+
+    my $dtSet = DateTime::Set->from_recurrence(
+        span => $dtSpan,
+        recurrence => $recurrence,
+    );
+
+    my $dtIter = $dtSet->iterator;
+    warn $dtIter->next->ymd . "\n" for 1 .. 10;
 
     ok(0);
 }

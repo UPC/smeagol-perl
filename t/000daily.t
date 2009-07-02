@@ -27,7 +27,6 @@ my ($start, $end, $span, $set, $duration, $spanSet );
       		dtstart => $start,
       		dtend => $end,
       		freq =>    'daily',
-		interval => 1,
       		byhour =>  [ 8 ]
  	);
 	

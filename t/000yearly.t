@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-use Test::More tests => 15;
+use Test::More tests => 16;
 use strict;
 use warnings;
 use Data::Dumper;
@@ -11,78 +11,61 @@ BEGIN {
         DateTime::Span
         DateTime::Set
         DateTime::SpanSet
+	DateTime::Event::ICal
     );
 }
 
 my ($start, $end, $span, $set, $duration, $spanSet , @localtime);
 
-
-
-#cada agost anualment
 {
 	$start	= DateTime->from_epoch( epoch=> 0 );
-    $end	= DateTime::Infinite::Future->new;
-#	$end = DateTime->new( year => 2009, month => 12 , day => 1);
-
-	$span	= DateTime::Span->from_datetimes( start => $start, end => $end );
-
-	$set = DateTime::Set->from_recurrence(
-		span => $span,
-		recurrence => sub {
-				my $dt = shift;
-				return $dt->add(years => 1);
-		}
+	$set = DateTime::Event::ICal->recur( 
+      		dtstart => $start,
+      		freq =>    'yearly',
+		bymonth => [ 8 ],
+ 	);
+	
+	my $spanSet = DateTime::SpanSet->from_set_and_duration(
+	        set      => $set,
+		months => 1,
 	);
 
-	$duration = DateTime->new( year => 1970, month => 8 , day => 31, hour => 23, minute => 59 , second => 59 )
-				 - DateTime->new( year => 1970, month => 8 , day => 1,  hour => 0, minute => 0 );
-	
-	$spanSet = DateTime::SpanSet->from_set_and_duration(
-	        set      => $set,
-	        duration => $duration
-	    );
-=pod
-	while (my $dt = $spanSet->next ) {
-        	# $dt is a DateTime::Span
-        	print $dt->min->ymd." ".$dt->min->hms." ";   # first date of span
-       		print $dt->max->ymd." ".$dt->max->hms." \n";   # last date of span
-    	}
-=cut
-}
+	#while (my $dt = $spanSet->next ) {
+        	#print $dt->min->ymd." ".$dt->min->hms." ";   # first date of span
+       		#print $dt->max->ymd." ".$dt->max->hms." \n";   # last date of span
+   	#}
 
-#cada agost anualment, a partir de avui
-{
-	@localtime = localtime();
-    $start	= DateTime->new( year => $localtime[5]+1900, month => $localtime[4]+1, day => $localtime[3], hour => $localtime[2], minute => $localtime[1]);
-	$end = DateTime->new( year => 2010, month => 12 , day => 1);
+	my $d31_7 = DateTime->new( year => 2009, month => 7, day => 31);
+	ok(!$spanSet->contains($d31_7), 'no conte el dia 31 del 7 del 2009');
 
-	$span	= DateTime::Span->from_datetimes( start => $start, end => $end );
+	my $d1_8 = DateTime->new( year => 2009, month => 8, day => 01);
+	ok($spanSet->contains($d1_8), 'conte el dia 1 del 8 del 2009');
 
-	$set = DateTime::Set->from_recurrence(
-		span => $span,
-		recurrence => sub {
-				my $dt = shift;
-				if($dt->month < 8){
-					$dt->truncate( to => 'year' );
-					return $dt->add(months => 7);
-				}else{
-					$dt->truncate( to => 'year' );
-					return $dt->add(years => 1);
-				}
-		}
-	);
+	my $d31_8 = DateTime->new( year => 2009, month => 8, day => 31);
+	ok($spanSet->contains($d31_8), 'conte el dia 31 del 8 del 2009');
 
-	$duration = DateTime->new( year => 1970, month => 8 , day => 31, hour => 23, minute => 59 , second => 59 )
-				 - DateTime->new( year => 1970, month => 8 , day => 1,  hour => 0, minute => 0 );
-	
-	$spanSet = DateTime::SpanSet->from_set_and_duration(
-	        set      => $set,
-	        duration => $duration
-	    );
+	my $d1_9 = DateTime->new( year => 2009, month => 9, day => 1);
+	ok(!$spanSet->contains($d1_9), 'no conte el dia 1 del 9 del 2009');
 
-	while (my $dt = $spanSet->next ) {
-        	# $dt is a DateTime::Span
-        	print $dt->min->ymd." ".$dt->min->hms." ";   # first date of span
-       		print $dt->max->ymd." ".$dt->max->hms." \n";   # last date of span
-   	}
+	my $d10_8 = DateTime->new( year => 2009, month => 8, day => 10);
+	ok($spanSet->contains($d10_8), 'conte el dia 10 del 8 del 2009');
+
+	my $d10_9 = DateTime->new( year => 2009, month => 9, day => 10);
+	ok(!$spanSet->contains($d10_9), 'no conte el dia 10 del 9 del 2009');
+
+	$d1_8 = DateTime->new( year => 1970, month => 8, day => 01);
+	ok($spanSet->contains($d1_8), 'conte el dia 1 del 8 del 1970');
+
+	$d31_8 = DateTime->new( year => 1970, month => 8, day => 31);
+	ok($spanSet->contains($d31_8), 'conte el dia 31 del 8 del 1970');
+
+	$d1_9 = DateTime->new( year => 1970, month => 9, day => 1);
+	ok(!$spanSet->contains($d1_9), 'no conte el dia 1 del 9 del 1970');
+
+	$d10_8 = DateTime->new( year => 1970, month => 8, day => 10);
+	ok($spanSet->contains($d10_8), 'conte el dia 10 del 8 del 1970');
+
+	$d10_9 = DateTime->new( year => 1970, month => 9, day => 10);
+	ok(!$spanSet->contains($d10_9), 'no conte el dia 10 del 9 del 1970');
+
 }

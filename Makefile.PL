@@ -16,6 +16,7 @@ requires 'Data::ICal'                => 0;
 requires 'Date::ICal'                => 0;
 requires 'Getopt::Euclid'            => 0;
 requires 'File::Path'                => 0;
+requires 'HTTP::Status'              => 5.817;
 
 test_requires 'Test::More'    => 0;
 test_requires 'Data::Compare' => 0;

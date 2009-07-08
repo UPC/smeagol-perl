@@ -25,7 +25,9 @@ my $pid        = Smeagol::Server->new($serverPort)->background();
 my $client = Smeagol::Client->new();
 ok( !defined $client, 'client not created' );
 
-$client = Smeagol::Client->new("http://bad.example.com");
+# bad.example.com was failing with DNS hijackers,
+# so we converted it into a "bat" ;)
+$client = Smeagol::Client->new("http://^^o^^.example.com");
 ok( !defined $client, 'client not created, bad DNS record' );
 
 $client = Smeagol::Client->new("://www.example.com");

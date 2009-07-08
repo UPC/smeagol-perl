@@ -9,7 +9,7 @@ use XML::LibXML;
 use Carp;
 use Smeagol::XML;
 use Smeagol::DataStore;
-use base qw(DateTime::Span);
+use base qw(DateTime::SpanSet);
 
 use overload
     q{""} => \&toString,
@@ -24,10 +24,11 @@ sub new {
 
     return if ( !defined($description) || !defined($from) || !defined($to) );
 
-    my $obj = $class->SUPER::from_datetimes(
+    my $span = DateTime::Span->from_datetimes(
         start => $from,
         end   => $to,
     );
+    my $obj = $class->SUPER::from_spans( spans => [$span], );
 
     $obj->{ __PACKAGE__ . "::description" } = $description;
     $obj->{ __PACKAGE__ . "::id" }
@@ -80,8 +81,8 @@ sub isEqual {
 
     return
            $self->description eq $booking->description
-        && $self->start == $booking->start
-        && $self->end == $booking->end
+        && $self->contains($booking)
+        && $booking->contains($self)
         && $self->info eq $booking->info;
 }
 
@@ -93,8 +94,8 @@ sub toString {
     my $self = shift;
     my ( $url, $isRootNode ) = @_;
 
-    my $from = $self->start;
-    my $to   = $self->end;
+    my $from = $self->span->start;
+    my $to   = $self->span->end;
 
     my $xmlText
         = "<booking>" . "<id>"
@@ -188,7 +189,7 @@ sub newFromXML {
     # XML is valid. Build empty elements as ''
     my $xmlTree = XMLin( $xml, SuppressEmpty => '' );
 
-    my $obj = $class->SUPER::from_datetimes(
+    my $span = DateTime::Span->from_datetimes(
         start => DateTime->new(
             year   => $xmlTree->{from}->{year},
             month  => $xmlTree->{from}->{month},
@@ -206,6 +207,8 @@ sub newFromXML {
             second => $xmlTree->{to}->{second}
         )
     );
+
+    my $obj = $class->SUPER::from_spans( spans => [$span], );
 
     $obj->{ __PACKAGE__ . "::id" }
         = ( defined $xmlTree->{id} ) ? $xmlTree->{id}

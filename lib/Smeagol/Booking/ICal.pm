@@ -30,8 +30,8 @@ sub parent {
 sub event {
     my $self = shift;
 
-    my $from = $self->start;
-    my $to   = $self->end;
+    my $from = $self->span->start;
+    my $to   = $self->span->end;
 
     my $event = Data::ICal::Entry::Event->new();
     $event->add_properties(

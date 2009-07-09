@@ -8,8 +8,7 @@ use Test::More tests => 3;
 use DateTime::Set;
 
 # last Thu of the month
-TODO: {
-    local $TODO = "working in progress";
+{
 
     # Thursday
     my $dayOfWeek = 4;
@@ -64,8 +63,7 @@ TODO: {
 }
 
 # each day 10 of the month, 10:00-14:00
-TODO: {
-    local $TODO = "work in progress";
+{
 
     # XXX: weird things happen with day 31
     my $monthDay = 10;
@@ -76,18 +74,16 @@ TODO: {
         $dt = $dt->truncate( to => 'month' );
 
         if ( $day < $monthDay ) {
-            return $dt->add( days => $monthDay - 1 );
+            $dt->add( days => $monthDay - 1 );
         }
         else {
-            return $dt->add( months => 1, days => $monthDay - 1 );
+            $dt->add( months => 1, days => $monthDay - 1 );
         }
+
+        return $dt->add( hours => 10 );
     };
 
-    #my $now = DateTime->now;
-    #my $oneYearLater = DateTime::Duration->new( years => 1 );
     my $dtSpan = DateTime::Span->from_datetimes(
-        #start => $now,
-        #end   => $now + $oneYearLater,
         start => DateTime->from_epoch( epoch => 0 ),
         end   => DateTime::Infinite::Future->new,
     );
@@ -97,33 +93,42 @@ TODO: {
         recurrence => $recurrence,
     );
 
-    my @got;
-    my $dtIter = $dtSet->iterator;
-    push @got, $dtIter->next->ymd for 1 .. 13;
+    my $dtSpanSet = DateTime::SpanSet->from_set_and_duration(
+        set => $dtSet,
+        hours => 4,
+    );
 
-    my @expected = qw(
-        1970-01-10
-        1970-02-10
-        1970-03-10
-        1970-04-10
-        1970-05-10
-        1970-06-10
-        1970-07-10
-        1970-08-10
-        1970-09-10
-        1970-10-10
-        1970-11-10
-        1970-12-10
-        1971-01-10
+    my @got;
+    my $dtIter = $dtSpanSet->iterator;
+    for ( 1 .. 13 ) {
+        my $dtSpan = $dtIter->next;
+        my $start  = $dtSpan->start->datetime;
+        my $end    = $dtSpan->end->datetime;
+
+        push @got, [ $start, $end ];
+    }
+
+    my @expected = (
+        [qw( 1970-01-10T10:00:00 1970-01-10T14:00:00 )],
+        [qw( 1970-02-10T10:00:00 1970-02-10T14:00:00 )],
+        [qw( 1970-03-10T10:00:00 1970-03-10T14:00:00 )],
+        [qw( 1970-04-10T10:00:00 1970-04-10T14:00:00 )],
+        [qw( 1970-05-10T10:00:00 1970-05-10T14:00:00 )],
+        [qw( 1970-06-10T10:00:00 1970-06-10T14:00:00 )],
+        [qw( 1970-07-10T10:00:00 1970-07-10T14:00:00 )],
+        [qw( 1970-08-10T10:00:00 1970-08-10T14:00:00 )],
+        [qw( 1970-09-10T10:00:00 1970-09-10T14:00:00 )],
+        [qw( 1970-10-10T10:00:00 1970-10-10T14:00:00 )],
+        [qw( 1970-11-10T10:00:00 1970-11-10T14:00:00 )],
+        [qw( 1970-12-10T10:00:00 1970-12-10T14:00:00 )],
+        [qw( 1971-01-10T10:00:00 1971-01-10T14:00:00 )],
     );
 
     is_deeply( \@got, \@expected, "10th day recurrences since epoch (test 8)" );
 }
 
 # last day of the month
-TODO: {
-    local $TODO = "work in progress";
-
+{
     my $recurrence = sub {
         my ($dt) = @_;
 

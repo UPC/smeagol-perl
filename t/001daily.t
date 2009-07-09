@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-use Test::More tests => 15;
+use Test::More tests => 17;
 use strict;
 use warnings;
 use Data::Dumper;
@@ -11,6 +11,8 @@ BEGIN {
         DateTime::Span
         DateTime::Set
         DateTime::SpanSet
+	DateTime::Event::ICal
+	DateTime::Event::Recurrence
     );
 }
 
@@ -18,20 +20,17 @@ my ($start, $end, $span, $set, $duration, $spanSet );
 
 #de 01-07-09 a 06-07-09, de 8h-10h	 
 {
-	$start = DateTime->new( year => 2009, month => 07, day => 01, hour => 8 , minute => 0  );
-	$end = DateTime->new( year => 2009, month => 07, day => 06, hour => 10 , minute => 0  );
-	$span = DateTime::Span->from_datetimes( start => $start, end => $end );
-	
-	$set = DateTime::Set->from_recurrence(
-		span => $span,
-		recurrence => sub {
-			my $dt = shift;
-			return $dt->add(days => 1);
-		}
-	);
+	$start = DateTime->new( year => 2009, month  => 7, day => 1);
+	$end = DateTime->new( year => 2009, month => 7, day => 7);
+
+	$set = DateTime::Event::ICal->recur( 
+      		dtstart => $start,
+      		dtend => $end,
+      		freq =>    'daily',
+      		byhour =>  [ 8 ]
+ 	);
 	
 	$duration = DateTime->new( year => 1970, hour => 10, minute => 0 ) - DateTime->new( year => 1970, hour => 8, minute => 0 );
-	
 	my $spanSet = DateTime::SpanSet->from_set_and_duration(
 	        set      => $set,
 	        duration => $duration
@@ -61,9 +60,11 @@ my ($start, $end, $span, $set, $duration, $spanSet );
 	ok(!$spanSet->contains($d7_10), 'no conte el dia 7 a les 10h.');
 	ok(!$spanSet->contains($d8), 'no conte el dia 8');
 
+
 	while (my $dt = $spanSet->next ) {
         	# $dt is a DateTime::Span
         	print $dt->min->ymd." ".$dt->min->hms." ";   # first date of span
        		print $dt->max->ymd." ".$dt->max->hms." \n";   # last date of span
     	}
+
 }

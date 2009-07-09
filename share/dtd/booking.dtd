@@ -1,16 +1,33 @@
-<!ELEMENT booking (id?, description, from, to, info?)>
+<!ELEMENT booking (id?, description, ( ( from, to ) | recurrence ), info?)>
 <!ELEMENT id (#PCDATA)>
 <!ELEMENT description (#PCDATA)>
 <!ELEMENT from (year, month, day, hour, minute, second)>
 <!ELEMENT to (year, month, day, hour, minute, second)>
-<!ELEMENT info ANY>
 <!ELEMENT year (#PCDATA)>
 <!ELEMENT month (#PCDATA)>
 <!ELEMENT day (#PCDATA)>
 <!ELEMENT hour (#PCDATA)>
 <!ELEMENT minute (#PCDATA)>
 <!ELEMENT second (#PCDATA)>
-<!ATTLIST booking 
+
+
+<!-- Elements related to booking recurrence -->
+<!ELEMENT recurrence (freq, interval?, duration, dtstart?, dtend?, (byminute | byhour | byday | bymonthday | bymonth)*)>
+<!ELEMENT freq (#PCDATA)> <!-- one of "minutely", "hourly", "daily", "weekly", "monthly", "yearly" -->
+<!ELEMENT interval (#PCDATA)> <!-- The interval between recurrences. This is a multiplier for the value specified by "freq".  It defaults to 1 when <interval> element is not present. -->
+<!ELEMENT duration (#PCDATA)> <!-- duration in minutes -->
+<!ELEMENT dtstart (year, month, day, hour, minute, second)>
+<!ELEMENT dtend (year, month, day, hour, minute, second)>
+<!ELEMENT byminute (by+)> <!-- integers between 0 and 59 -->
+<!ELEMENT byhour (by+)> <!-- integers between 0 and 23 -->
+<!ELEMENT byday (by+)> <!-- "mo", "tu", "we", "th", "fr", "sa", "su". A prefix can be prepend to indicate i.e. "2fr" (second friday of month or year), "-1we" (last wednesday of month or year), etc -->
+<!ELEMENT bymonthday (by+)> <!-- integers between 1 and 31, or negative integers between -31 and -1. "-1" is last day of month, etc -->
+<!ELEMENT bymonth (by+)> <!-- integers between 1 and 12, or negative integers between -12 and -1 to indicate "last month of year", etc -->
+
+<!ELEMENT by (#PCDATA)>
+
+<!ELEMENT info ANY>
+<!ATTLIST booking
     xmlns:xlink CDATA #IMPLIED
     xlink:href CDATA #IMPLIED
     xlink:type CDATA #IMPLIED>

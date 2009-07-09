@@ -8,29 +8,44 @@
 <booking xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="/resource/30/booking/4">
     <id>4</id>
     <description>Reunió projecte Sméagol</description>
-    
-    <!-- En el cas de reserves recurrents, els elements <from> i <to> que pengen      -->
-    <!-- de l'arrel indiquen la DURACIÓ del període reservat                          -->
-    <!-- En aquest cas, la duració seria de 4 hores i 30 minuts (de 9:30 a 14 hores), -->
-    <!-- ja que el dia el mes i l'any són els mateixos en el from i en el <to>        -->
-    <from>
-        <year>2009</year><month>7</month><day>9</day><hour>9</hour><minute>30</minute><second>0</second>
-    </from>
-    <to>
-        <year>2009</year><month>7</month><day>9</day><hour>14</hour><minute>0</minute><second>0</second>
-    </to>
-    <recurrence freq="weekly">
+    <recurrence>
+        <!-- repetir cada setmana -->
+        <freq>weekly</freq>
+
+        <!-- L'element <interval> seria redundant en aquest exemple,  -->
+        <!-- ja que per defecte val 1 quan no està present.           -->
+        <!-- Per reservar una setmana sí i una no, caldria interval 2 -->
+        <interval>1</interval>
+
+        <!-- duration: de 9:30 a 14:00 van 4 hores + 30 minuts = 270 minuts -->
+        <duration>270</duration>
+
+        <!-- Comencem a partir del dijous 9 de juliol de 2009 -->
         <dtstart>
             <year>2009</year><month>7</month><day>9</day><hour>9</hour><minute>30</minute><second>0</second>
         </dtstart>
         <!-- No hi ha element <dtend> (la reserva no acaba mai) -->
-        <byminute value="30"/>
-        <byhour value="9"/>
-        <byday value="th"/>
+
+        <!-- El període reservat comença a les 9:30 -->
+        <byhour>
+            <by>9</by>
+        </byhour>
+        <byminute>
+            <by>30</by>
+        </byminute>
+
+        <!-- Es reserven els dijous (thursday => th) -->
+        <byday>
+            <by>th</by>
+        </byday>
     </recurrence>
     <info>
         <![CDATA[
         Reunió setmanal de l'equip Sméagol. Consulteu la llista de correu bla, bla, bla...
+        L'element <info> pot contenir qualsevol tipus de dades 
+        (per exemple, un altre document XML, una fotografia codificada 
+        amb UUENCODE, etc). És tasca del client codificar, descodificar i interpretar
+        el contingut d'aquest element, segons el format que s'hagi acordat prèviament.
         ]]>
     </info>
 </booking>

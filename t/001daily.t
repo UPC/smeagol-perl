@@ -60,11 +60,4 @@ my ($start, $end, $span, $set, $duration, $spanSet );
 	ok(!$spanSet->contains($d7_10), 'no conte el dia 7 a les 10h.');
 	ok(!$spanSet->contains($d8), 'no conte el dia 8');
 
-
-	while (my $dt = $spanSet->next ) {
-        	# $dt is a DateTime::Span
-        	print $dt->min->ymd." ".$dt->min->hms." ";   # first date of span
-       		print $dt->max->ymd." ".$dt->max->hms." \n";   # last date of span
-    	}
-
 }

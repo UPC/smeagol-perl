@@ -71,7 +71,7 @@ sub new {
     $obj->{ __PACKAGE__ . "::id" }
         = Smeagol::DataStore->getNextID(__PACKAGE__);
     $obj->{ __PACKAGE__ . "::info" } = defined($info) ? $info : '';
-    $obj->{ __PACKAGE__ . "::recurrence" } = %recurrence;
+    $obj->{ __PACKAGE__ . "::recurrence" } = \%recurrence;
 
     bless $obj, $class;
     return $obj;

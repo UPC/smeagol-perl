@@ -1,4 +1,4 @@
-<!ELEMENT booking (id?, description, ( ( from, to ) | recurrence ), info?)>
+<!ELEMENT booking (id?, description, ( ( from, to ) | (recurrence, duration) ), info?)>
 <!ELEMENT id (#PCDATA)>
 <!ELEMENT description (#PCDATA)>
 <!ELEMENT from (year, month, day, hour, minute, second)>
@@ -12,7 +12,7 @@
 
 
 <!-- Elements related to booking recurrence -->
-<!ELEMENT recurrence (freq, interval?, duration, dtstart?, dtend?, (byminute | byhour | byday | bymonthday | bymonth)*)>
+<!ELEMENT recurrence (freq, interval?, dtstart?, dtend?, byminute?, byhour?, byday?, bymonthday?, bymonth?)>
 <!ELEMENT freq (#PCDATA)> <!-- one of "minutely", "hourly", "daily", "weekly", "monthly", "yearly" -->
 <!ELEMENT interval (#PCDATA)> <!-- The interval between recurrences. This is a multiplier for the value specified by "freq".  It defaults to 1 when <interval> element is not present. -->
 <!ELEMENT duration (#PCDATA)> <!-- duration in minutes -->

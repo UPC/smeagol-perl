@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-use Test::More tests => 36;
+use Test::More tests => 37;
 
 use strict;
 use warnings;
@@ -17,6 +17,7 @@ BEGIN {
         Smeagol::Booking
         Smeagol::Booking::ICal
         Smeagol::DataStore
+        DateTime::Event::ICal
     );
 
     Smeagol::DataStore::init();
@@ -306,5 +307,20 @@ ok( !$b10->intersects($b11), 'b11 does not interlace b10' );
     is( $b->description, $description, "description in UTF-8" );
     is( $b->info,        $info,        "info in UTF-8" );
 }
+
+# Recurrence tests
+
+# new from recurrence
+my %recurrence = (
+    freq => 'weekly',
+    dtstart => DateTime->from_epoch( epoch => 0 ),
+    dtend => DateTime->new( year => 1970, month => 1, day => 31 ),
+    byday => [ 'th' ],
+    byhour => [ 9 ],
+    byminute => [ 30 ],
+    duration => 270,
+);
+my $br1 = Smeagol::Booking->new("Reunions equip smeagol", undef, undef, "No hi ha info que valgui", %recurrence);
+
 
 END { Smeagol::DataStore->clean() }

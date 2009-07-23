@@ -22,10 +22,32 @@ my @VALID_FREQ
     = ( 'minutely', 'hourly', 'daily', 'weekly', 'monthly', 'yearly' );
 my @VALID_BYDAY = ( 'mo', 'tu', 'we', 'th', 'fr', 'sa', 'su' );
 
+sub new {
+    my $class = shift;
+    my ( $description, $from, $to, $info ) = @_;
+
+    return if ( !defined($description) || !defined($from) || !defined($to) );
+
+    my $span = DateTime::Span->from_datetimes(
+        start => $from,
+        end   => $to,
+    );
+    my $obj = $class->SUPER::from_spans( spans => [$span], );
+
+    $obj->{ __PACKAGE__ . "::description" } = $description;
+    $obj->{ __PACKAGE__ . "::id" }
+        = Smeagol::DataStore->getNextID(__PACKAGE__);
+    $obj->{ __PACKAGE__ . "::info" }       = defined($info) ? $info : '';
+    $obj->{ __PACKAGE__ . "::recurrence" } = undef;
+    $obj->{ __PACKAGE__ . "::duration" }   = undef;
+
+    bless $obj, $class;
+    return $obj;
+}
+
 # %recurrence = (
 #            freq     => string (required: 'weekly', 'monthly', see @VALID_FREQ)
 #            interval => positive integer (optional, default 1)
-#            duration => positive integer (required)
 #            dtstart  => DateTime (optional, default DateTime::Infinite::Past)
 #            dtend    => DateTime (optional, default DateTime::Infinite::Future)
 #            byminute => array of positive integers between 0 and 59 (optional, default () )
@@ -34,47 +56,16 @@ my @VALID_BYDAY = ( 'mo', 'tu', 'we', 'th', 'fr', 'sa', 'su' );
 #                        i.e. "2th", "-1mo", etc. (optional, default ())
 #            bymonthday => list integers between -31 and 1, or between 1 and 31 (optional, default () )
 #            )
-sub new {
+sub newFromRecurrence {
     my $class = shift;
-    my ( $description, $from, $to, $info, %recurrence ) = @_;
+    my ( $description, $info, $duration, %recurrence ) = @_;
 
-    return if ( !defined($description) );
-
-    # must specify (from AND to) XOR (recurrence)
     return
-        unless ( ( defined($from) && defined($to) && !(%recurrence) )
-        || ( !defined($from) && !defined($to) && (%recurrence) ) );
+        unless ( ( defined $description )
+        && ( defined $duration )
+        && %recurrence );
 
-    my $obj;
-
-    if (%recurrence) {
-        my $set = DateTime::Event::ICal->recur(%recurrence);
-
-        $obj = $class->SUPER::from_set_and_duration(
-            set     => $set,
-            minutes => defined( $recurrence{'duration'} )
-            ? $recurrence{'duration'}
-            : ( 60 * 24 ),
-        );
-
-    }
-    else {
-        my $span = DateTime::Span->from_datetimes(
-            start => $from,
-            end   => $to,
-        );
-
-        $obj = $class->SUPER::from_spans( spans => [$span], );
-    }
-
-    $obj->{ __PACKAGE__ . "::description" } = $description;
-    $obj->{ __PACKAGE__ . "::id" }
-        = Smeagol::DataStore->getNextID(__PACKAGE__);
-    $obj->{ __PACKAGE__ . "::info" } = defined($info) ? $info : '';
-    $obj->{ __PACKAGE__ . "::recurrence" } = \%recurrence if (%recurrence);
-
-    bless $obj, $class;
-    return $obj;
+    # TODO: Implementar el que falta
 }
 
 sub id {

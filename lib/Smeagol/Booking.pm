@@ -42,12 +42,12 @@ sub new {
 
     # must specify (from AND to) XOR (recurrence)
     return
-        unless ( ( defined($from) && defined($to) && !defined(%recurrence) )
-        || ( !defined($from) && !defined($to) && defined(%recurrence) ) );
+        unless ( ( defined($from) && defined($to) && !(%recurrence) )
+        || ( !defined($from) && !defined($to) && (%recurrence) ) );
 
     my $obj;
 
-    if ( defined(%recurrence) ) {
+    if (%recurrence) {
         my $set = DateTime::Event::ICal->recur(%recurrence);
 
         $obj = $class->SUPER::from_set_and_duration(
@@ -71,7 +71,7 @@ sub new {
     $obj->{ __PACKAGE__ . "::id" }
         = Smeagol::DataStore->getNextID(__PACKAGE__);
     $obj->{ __PACKAGE__ . "::info" } = defined($info) ? $info : '';
-    $obj->{ __PACKAGE__ . "::recurrence" } = \%recurrence;
+    $obj->{ __PACKAGE__ . "::recurrence" } = \%recurrence if (%recurrence);
 
     bless $obj, $class;
     return $obj;
@@ -99,6 +99,15 @@ sub info {
     my $self = shift;
 
     my $field = __PACKAGE__ . "::info";
+    if (@_) { $self->{$field} = shift; }
+
+    return $self->{$field};
+}
+
+sub recurrence {
+    my $self = shift;
+
+    my $field = __PACKAGE__ . "::recurrence";
     if (@_) { $self->{$field} = shift; }
 
     return $self->{$field};
@@ -134,53 +143,141 @@ sub toString {
 
     my $from = $self->span->start;
     my $to   = $self->span->end;
+    my $xmlText;
 
-    my $xmlText
-        = "<booking>" . "<id>"
-        . $self->id . "</id>"
-        . "<description>"
-        . $self->description
-        . "</description>"
-        . "<from>"
-        . "<year>"
-        . $from->year
-        . "</year>"
-        . "<month>"
-        . $from->month
-        . "</month>" . "<day>"
-        . $from->day
-        . "</day>"
-        . "<hour>"
-        . $from->hour
-        . "</hour>"
-        . "<minute>"
-        . $from->minute
-        . "</minute>"
-        . "<second>"
-        . $from->second
-        . "</second>"
-        . "</from><to>"
-        . "<year>"
-        . $to->year
-        . "</year>"
-        . "<month>"
-        . $to->month
-        . "</month>" . "<day>"
-        . $to->day
-        . "</day>"
-        . "<hour>"
-        . $to->hour
-        . "</hour>"
-        . "<minute>"
-        . $to->minute
-        . "</minute>"
-        . "<second>"
-        . $to->second
-        . "</second>" . "</to>"
-        . "<info>"
-        . $self->info
-        . "</info>"
-        . "</booking>";
+    if ( !$self->recurrence ) {
+        $xmlText
+            = "<booking>" . "<id>"
+            . $self->id . "</id>"
+            . "<description>"
+            . $self->description
+            . "</description>"
+            . "<from>"
+            . "<year>"
+            . $from->year
+            . "</year>"
+            . "<month>"
+            . $from->month
+            . "</month>" . "<day>"
+            . $from->day
+            . "</day>"
+            . "<hour>"
+            . $from->hour
+            . "</hour>"
+            . "<minute>"
+            . $from->minute
+            . "</minute>"
+            . "<second>"
+            . $from->second
+            . "</second>"
+            . "</from><to>"
+            . "<year>"
+            . $to->year
+            . "</year>"
+            . "<month>"
+            . $to->month
+            . "</month>" . "<day>"
+            . $to->day
+            . "</day>"
+            . "<hour>"
+            . $to->hour
+            . "</hour>"
+            . "<minute>"
+            . $to->minute
+            . "</minute>"
+            . "<second>"
+            . $to->second
+            . "</second>" . "</to>"
+            . "<info>"
+            . $self->info
+            . "</info>"
+            . "</booking>";
+    }
+    else {
+        my $dtstart = $self->recurrence->{'dtstart'};
+        my $dtend   = $self->recurrence->{'dtend'};
+
+        $xmlText
+            = "<booking>" . "<id>"
+            . $self->id . "</id>"
+            . "<description>"
+            . $self->description
+            . "</description>"
+            . "<recurrence>"
+            . "<freq>"
+            . $self->recurrence->{'freq'}
+            . "</freq>"
+            . "<interval>"
+            . $self->recurrence->{'interval'}
+            . "</interval>"
+            . "<duration>"
+            . $self->recurrence->{'duration'}
+            . "</duration>"
+            . (
+            defined $dtstart
+            ? ( "<dtstart>" 
+                    . "<year>"
+                    . $dtstart->{'year'}
+                    . "</year>"
+                    . "<month>"
+                    . $dtstart->{'month'}
+                    . "</month>" . "<day>"
+                    . $dtstart->{'day'}
+                    . "</day>"
+                    . "<hour>"
+                    . $dtstart->{'hour'}
+                    . "</hour>"
+                    . "<minute>"
+                    . $dtstart->{'minute'}
+                    . "</minute>"
+                    . "<second>"
+                    . $dtstart->{'second'}
+                    . "</second>"
+                    . "</dtstart>" )
+            : ""
+            )
+            . (
+            defined $dtend
+            ? ( "<dtend>" 
+                    . "<year>"
+                    . $dtend->{'year'}
+                    . "</year>"
+                    . "<month>"
+                    . $dtend->{'month'}
+                    . "</month>" . "<day>"
+                    . $dtend->{'day'}
+                    . "</day>"
+                    . "<hour>"
+                    . $dtend->{'hour'}
+                    . "</hour>"
+                    . "<minute>"
+                    . $dtend->{'minute'}
+                    . "</minute>"
+                    . "<second>"
+                    . $dtend->{'second'}
+                    . "</second>"
+                    . "</dtend>" )
+            : ""
+            )
+            . (
+            defined $self->recurrence->{'byminute'}
+            ? "<byminute>" . print do {
+                my $aux;
+                foreach ( $self->recurrence->{'byminute'} ) {
+                    $aux .= "<by>" . $_ . "</by>";
+                }
+                $aux;
+                }
+                . "</byminute>"
+            : ""
+            )
+            . "</recurrence>"
+            . "<info>"
+            . $self->info
+            . "</info>"
+            . "</booking>";
+
+    }
 
     return $xmlText
         unless defined $url;

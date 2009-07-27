@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-use Test::More tests => 37;
+use Test::More tests => 41;
 
 use strict;
 use warnings;
@@ -309,18 +309,54 @@ ok( !$b10->intersects($b11), 'b11 does not interlace b10' );
 }
 
 # Recurrence tests
+{
 
-# new from recurrence
-my %recurrence = (
-    freq => 'weekly',
-    dtstart => DateTime->from_epoch( epoch => 0 ),
-    dtend => DateTime->new( year => 1970, month => 1, day => 31 ),
-    byday => [ 'th' ],
-    byhour => [ 9 ],
-    byminute => [ 30 ],
-    duration => 270,
-);
-my $br1 = Smeagol::Booking->new("Reunions equip smeagol", undef, undef, "No hi ha info que valgui", %recurrence);
+    # new from recurrence
+    my %recurrence = (
+        freq     => 'weekly',
+        dtstart  => DateTime->from_epoch( epoch => 0 ),
+        dtend    => DateTime->new( year => 1970, month => 1, day => 31 ),
+        byday    => ['th'],
+        byhour   => [9],
+        byminute => [30],
+    );
+    my $duration = 270;                                 # 4h + 30min = 270 min
+    my $br1      = Smeagol::Booking->newFromRecurrence(
+        "Reunions equip smeagol",
+        "No hi ha info que valgui",
+        $duration, %recurrence
+    );
 
+    my @gotStart;
+    my @gotEnd;
+    my $dt;
+    my $iter = $br1->iterator;
+    push @gotStart, $dt->start while $dt = $iter->next;
+    $iter = $br1->iterator;
+    push @gotEnd, $dt->end while $dt = $iter->next;
+    my @expectedStart = qw(
+        1970-01-01T09:30:00
+        1970-01-08T09:30:00
+        1970-01-15T09:30:00
+        1970-01-22T09:30:00
+        1970-01-29T09:30:00
+    );
+    my @expectedEnd = qw(
+        1970-01-01T14:00:00
+        1970-01-08T14:00:00
+        1970-01-15T14:00:00
+        1970-01-22T14:00:00
+        1970-01-29T14:00:00
+    );
+    is_deeply( \@gotStart, \@expectedStart,
+        "recurrence matches selected start times" );
+    is_deeply( \@gotEnd, \@expectedEnd,
+        "recurrence matches selected end times" );
 
+    my $d = $br1->duration;
+    is_deeply( $d, $duration, 'duration getter test ' );
+
+    my $rec = $br1->recurrence;
+    is_deeply( $rec, \%recurrence, 'recurrence getter test' );
+}
 END { Smeagol::DataStore->clean() }

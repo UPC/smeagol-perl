@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-use Test::More tests => 41;
+use Test::More tests => 42;
 
 use strict;
 use warnings;
@@ -11,6 +11,7 @@ use Data::ICal;
 use Data::ICal::Entry::Event;
 use Date::ICal;
 use Encode;
+use Data::Dumper;
 
 BEGIN {
     use_ok($_) for qw(
@@ -309,23 +310,25 @@ ok( !$b10->intersects($b11), 'b11 does not interlace b10' );
 }
 
 # Recurrence tests
+my %recurrence = (
+    freq     => 'weekly',
+    dtstart  => DateTime->from_epoch( epoch => 0 ),
+    dtend    => DateTime->new( year => 1970, month => 1, day => 31 ),
+    byday    => ['th'],
+    byhour   => [9],
+    byminute => [30],
+);
+my $duration    = 270;                # 4h + 30min = 270 min
+my $description = "una descripcio";
+my $info        = "una info";
+
 {
 
-    # new from recurrence
-    my %recurrence = (
-        freq     => 'weekly',
-        dtstart  => DateTime->from_epoch( epoch => 0 ),
-        dtend    => DateTime->new( year => 1970, month => 1, day => 31 ),
-        byday    => ['th'],
-        byhour   => [9],
-        byminute => [30],
-    );
-    my $duration = 270;                                 # 4h + 30min = 270 min
-    my $br1      = Smeagol::Booking->newFromRecurrence(
-        "Reunions equip smeagol",
-        "No hi ha info que valgui",
-        $duration, %recurrence
-    );
+    # testing newFromRecurrence
+
+    my $br1
+        = Smeagol::Booking->newFromRecurrence( $description, $info, $duration,
+        %recurrence );
 
     my @gotStart;
     my @gotEnd;
@@ -352,6 +355,15 @@ ok( !$b10->intersects($b11), 'b11 does not interlace b10' );
         "recurrence matches selected start times" );
     is_deeply( \@gotEnd, \@expectedEnd,
         "recurrence matches selected end times" );
+}
+
+{
+
+    # testing duration and recurrence getters
+
+    my $br1
+        = Smeagol::Booking->newFromRecurrence( $description, $info, $duration,
+        %recurrence );
 
     my $d = $br1->duration;
     is_deeply( $d, $duration, 'duration getter test ' );
@@ -359,4 +371,64 @@ ok( !$b10->intersects($b11), 'b11 does not interlace b10' );
     my $rec = $br1->recurrence;
     is_deeply( $rec, \%recurrence, 'recurrence getter test' );
 }
+
+{
+
+    # testing toXML (with recurrence)
+    my $br1
+        = Smeagol::Booking->newFromRecurrence( $description, $info, $duration,
+        %recurrence );
+
+    my $ds = $recurrence{'dtstart'};
+    my $de = $recurrence{'dtend'};
+
+    my $xmlStr
+        = '<booking><id>'
+        . $br1->id
+        . '</id><description>'
+        . $description
+        . '</description>'
+        . '<recurrence><freq>'
+        . $recurrence{'freq'}
+        . '</freq><!-- interval is not defined -->'
+        . '<dtstart><year>'
+        . $ds->year
+        . '</year><month>'
+        . $ds->month
+        . '</month><day>'
+        . $ds->day
+        . '</day><hour>'
+        . $ds->hour
+        . '</hour><minute>'
+        . $ds->minute
+        . '</minute><second>'
+        . $ds->second
+        . '</second></dtstart>'
+        . '<dtend><year>'
+        . $de->year
+        . '</year><month>'
+        . $de->month
+        . '</month><day>'
+        . $de->day
+        . '</day><hour>'
+        . $de->hour
+        . '</hour><minute>'
+        . $de->minute
+        . '</minute><second>'
+        . $de->second
+        . '</second></dtend>'
+        . '<byminute><by>30</by></byminute>'
+        . '<byhour><by>9</by></byhour>'
+        . '<byday><by>th</by></byday>'
+        . '</recurrence>'
+        . '<duration>'
+        . $duration
+        . '</duration><info>'
+        . $info
+        . '</info></booking>';
+
+    is_deeply( XMLin($xmlStr), XMLin( $br1->toXML() ), 'toXML booking' );
+
+}
+
 END { Smeagol::DataStore->clean() }

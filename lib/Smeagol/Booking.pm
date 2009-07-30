@@ -10,6 +10,7 @@ use Carp;
 use Smeagol::XML;
 use Smeagol::DataStore;
 use base qw(DateTime::SpanSet);
+use Data::Dumper;
 
 =head1 NAME
 
@@ -415,43 +416,36 @@ sub toString {
             . "</second>" . "</to>";
     }
     else {
-        $xmlText
-            = "<booking>" . "<id>"
-            . $self->id . "</id>"
-            . "<description>"
-            . $self->description
-            . "</description>"
-            . "<recurrence>"
+        $xmlText .= "<recurrence>"
             . "<freq>"
             . $self->recurrence->{'freq'}
-            . "</freq>"
-            . "<interval>"
-            . $self->recurrence->{'interval'}
-            . "</interval>"
-            . "<duration>"
-            . $self->recurrence->{'duration'}
-            . "</duration>";
+            . "</freq>";
+
+        if (defined $self->recurrence->{'interval'}) {
+            $xmlText .= "<interval>" . $self->recurrence->{'interval'} . "</interval>";
+        }
 
         if ( $self->recurrence->{'dtstart'} ) {
             my $dt = $self->recurrence->{'dtstart'};
             $xmlText
                 .= "<dtstart>" 
                 . "<year>"
-                . $dt->{'year'}
+                . $dt->year
                 . "</year>"
                 . "<month>"
-                . $dt->{'month'}
-                . "</month>" . "<day>"
-                . $dt->{'day'}
+                . $dt->month
+                . "</month>" 
+                . "<day>"
+                . $dt->day
                 . "</day>"
                 . "<hour>"
-                . $dt->{'hour'}
+                . $dt->hour
                 . "</hour>"
                 . "<minute>"
-                . $dt->{'minute'}
+                . $dt->minute
                 . "</minute>"
                 . "<second>"
-                . $dt->{'second'}
+                . $dt->second
                 . "</second>"
                 . "</dtstart>";
         }
@@ -461,28 +455,29 @@ sub toString {
             $xmlText
                 .= "<dtend>" 
                 . "<year>"
-                . $dt->{'year'}
+                . $dt->year
                 . "</year>"
                 . "<month>"
-                . $dt->{'month'}
-                . "</month>" . "<day>"
-                . $dt->{'day'}
+                . $dt->month
+                . "</month>" 
+                . "<day>"
+                . $dt->day
                 . "</day>"
                 . "<hour>"
-                . $dt->{'hour'}
+                . $dt->hour
                 . "</hour>"
                 . "<minute>"
-                . $dt->{'minute'}
+                . $dt->minute
                 . "</minute>"
                 . "<second>"
-                . $dt->{'second'}
+                . $dt->second
                 . "</second>"
                 . "</dtend>";
         }
 
         if ( defined $self->recurrence->{'byminute'} ) {
             $xmlText .= "<byminute>";
-            foreach ( $self->recurrence->{'byminute'} ) {
+            foreach ( @{$self->recurrence->{'byminute'}} ) {
                 $xmlText .= "<by>" . $_ . "</by>";
             }
             $xmlText .= "</byminute>";
@@ -490,7 +485,7 @@ sub toString {
 
         if ( defined $self->recurrence->{'byhour'} ) {
             $xmlText .= "<byhour>";
-            foreach ( $self->recurrence->{'byhour'} ) {
+            foreach ( @{$self->recurrence->{'byhour'}} ) {
                 $xmlText .= "<by>" . $_ . "</by>";
             }
             $xmlText .= "</byhour>";
@@ -498,7 +493,7 @@ sub toString {
 
         if ( defined $self->recurrence->{'byday'} ) {
             $xmlText .= "<byday>";
-            foreach ( $self->recurrence->{'byday'} ) {
+            foreach ( @{$self->recurrence->{'byday'}} ) {
                 $xmlText .= "<by>" . $_ . "</by>";
             }
             $xmlText .= "</byday>";
@@ -506,7 +501,7 @@ sub toString {
 
         if ( defined $self->recurrence->{'bymonthday'} ) {
             $xmlText .= "<bymonthday>";
-            foreach ( $self->recurrence->{'bymonthday'} ) {
+            foreach ( @{$self->recurrence->{'bymonthday'}} ) {
                 $xmlText .= "<by>" . $_ . "</by>";
             }
             $xmlText .= "</bymonthday>";
@@ -514,14 +509,14 @@ sub toString {
 
         if ( defined $self->recurrence->{'bymonth'} ) {
             $xmlText .= "<bymonth>";
-            foreach ( $self->recurrence->{'bymonth'} ) {
+            foreach ( @{$self->recurrence->{'bymonth'}} ) {
                 $xmlText .= "<by>" . $_ . "</by>";
             }
             $xmlText .= "</bymonth>";
         }
 
-        $xmlText .= "<duration>" . $self->duration . "</duration>";
         $xmlText .= "</recurrence>";
+        $xmlText .= "<duration>" . $self->duration . "</duration>";
     }
 
     $xmlText .= "<info>" . $self->info . "</info>" . "</booking>";

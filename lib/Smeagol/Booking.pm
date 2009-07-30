@@ -139,7 +139,7 @@ sub newFromXML {
     }
 
     # XML is valid. Build empty elements as ''
-    my $xmlTree = XMLin( $xml, SuppressEmpty => '' );
+    my $xmlTree = XMLin( $xml, SuppressEmpty => '', ForceArray => ['by'] );
 
     my $obj;
     my %recurrence;
@@ -152,7 +152,7 @@ sub newFromXML {
                 day    => $xmlTree->{from}->{day},
                 hour   => $xmlTree->{from}->{hour},
                 minute => $xmlTree->{from}->{minute},
-                second => $xmlTree->{from}->{second}
+                second => $xmlTree->{from}->{second},
             ),
             end => DateTime->new(
                 year   => $xmlTree->{to}->{year},
@@ -160,7 +160,7 @@ sub newFromXML {
                 day    => $xmlTree->{to}->{day},
                 hour   => $xmlTree->{to}->{hour},
                 minute => $xmlTree->{to}->{minute},
-                second => $xmlTree->{to}->{second}
+                second => $xmlTree->{to}->{second},
             )
         );
 
@@ -171,7 +171,7 @@ sub newFromXML {
         # Recurrent booking
         my $dtstart
             = defined $xmlTree->{recurrence}->{dtstart}
-            ? DateTime::new(
+            ? DateTime->new(
             year   => $xmlTree->{recurrence}->{dtstart}->{year},
             month  => $xmlTree->{recurrence}->{dtstart}->{month},
             day    => $xmlTree->{recurrence}->{dtstart}->{day},
@@ -183,7 +183,7 @@ sub newFromXML {
 
         my $dtend
             = defined $xmlTree->{recurrence}->{dtend}
-            ? DateTime::new(
+            ? DateTime->new(
             year   => $xmlTree->{recurrence}->{dtend}->{year},
             month  => $xmlTree->{recurrence}->{dtend}->{month},
             day    => $xmlTree->{recurrence}->{dtend}->{day},
@@ -192,6 +192,8 @@ sub newFromXML {
             second => $xmlTree->{recurrence}->{dtend}->{second}
             )
             : DateTime::Infinite::Future->new;
+
+        warn Dumper( $xmlTree->{recurrence}->{byday} );
 
         %recurrence = (
             freq     => $xmlTree->{recurrence}->{freq},
@@ -219,7 +221,7 @@ sub newFromXML {
             : (),
         );
 
-        my $set   = DateTime::Set->from_recurrence(%recurrence);
+        my $set   = DateTime::Event::ICal->recur(%recurrence);
         my $spans = DateTime::SpanSet->from_set_and_duration(
             set     => $set,
             minutes => $xmlTree->{duration},

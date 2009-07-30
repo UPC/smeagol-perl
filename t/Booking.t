@@ -323,7 +323,6 @@ my $description = "una descripcio";
 my $info        = "una info";
 
 {
-
     # testing newFromRecurrence
 
     my $br1
@@ -373,7 +372,6 @@ my $info        = "una info";
 }
 
 {
-
     # testing toXML (with recurrence)
     my $br1
         = Smeagol::Booking->newFromRecurrence( $description, $info, $duration,
@@ -428,6 +426,64 @@ my $info        = "una info";
         . '</info></booking>';
 
     is_deeply( XMLin($xmlStr), XMLin( $br1->toXML() ), 'toXML booking' );
+
+}
+
+{
+    my $ds = $recurrence{'dtstart'};
+    my $de = $recurrence{'dtend'};
+
+       my $xmlStr
+        = '<booking>'
+        . '<description>'
+        . $description
+        . '</description>'
+        . '<recurrence><freq>'
+        . $recurrence{'freq'}
+        . '</freq><!-- interval is not defined -->'
+        . '<dtstart><year>'
+        . $ds->year
+        . '</year><month>'
+        . $ds->month
+        . '</month><day>'
+        . $ds->day
+        . '</day><hour>'
+        . $ds->hour
+        . '</hour><minute>'
+        . $ds->minute
+        . '</minute><second>'
+        . $ds->second
+        . '</second></dtstart>'
+        . '<dtend><year>'
+        . $de->year
+        . '</year><month>'
+        . $de->month
+        . '</month><day>'
+        . $de->day
+        . '</day><hour>'
+        . $de->hour
+        . '</hour><minute>'
+        . $de->minute
+        . '</minute><second>'
+        . $de->second
+        . '</second></dtend>'
+        . '<byminute><by>30</by></byminute>'
+        . '<byhour><by>9</by></byhour>'
+        . '<byday><by>th</by></byday>'
+        . '</recurrence>'
+        . '<duration>'
+        . $duration
+        . '</duration><info>'
+        . $info
+        . '</info></booking>';
+
+    my $book = Smeagol::Booking->newFromXML($xmlStr);
+
+    my $got = XMLin($book->toXML());
+    my $expected = XMLin( $xmlStr );
+    $expected->{'id'} = $book->id;
+ 
+    is_deep($expected, $got, 'testing newFromXml');
 
 }
 

@@ -34,8 +34,10 @@ sub run_llista_recursos{
   my $self = shift;
   if(defined $client){
     my @res = $client->listResources();
+	print "Identificador\tDescripció\n";
     foreach(@res){
-      print _idResource($_)."\n";
+	  my $resAux = $client->getResource(_idResource($_));
+      print _idResource($_)."\t\t".$resAux->{description}."\n";
     }
   }else{
     print "ERROR: No es poden llistar els recursos, no hi ha connexió amb cap servidor smeagol\n";
@@ -190,10 +192,8 @@ sub run_esborra_etiqueta{
   }
 }
 
-
-
 sub smry_esborra_etiqueta { "Esborra una etiqueta pel recurs escollit" }
-sub help_esborra_etiqueta { "Abans de poder esborrar una etiqueta a un recurs, cal que aquest hagi estat triat previament (veure comanda tria_recurs \"identificador\")\n"; }
+sub help_esborra_etiqueta { "Abans de poder esborrar una etiqueta a un recurs, cal que aquest hagi estat triat previament (veure comanda tria_recurs \"identificador\")\n Per esborrar una etiqueta cal introduir el nom d'aquesta"; }
 sub comp_esborra_etiqueta { my $self = shift;}
 
 ####ALIAS

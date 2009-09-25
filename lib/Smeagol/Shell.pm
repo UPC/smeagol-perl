@@ -243,6 +243,29 @@ sub help_crea_reserva { "Abans de poder crear una reserva per un recurs, cal que
 sub comp_crea_reserva { my $self = shift;}
 
 
+####ESBORRAR RESERVA
+sub run_esborra_reserva{
+  my $self = shift;
+  my ($id) = @_;
+  if(!defined $idResource){
+    print "ERROR: No hi ha recurs triat.\n";
+  }elsif($id){
+	my $res = $client->delBooking( $idResource, $id );
+    if(defined $res){
+      print "Reserva amb identificador $res esborrada del recurs $idResource correctament!\n";
+	}else{
+      print "ERROR: No s'ha pogut esborrar la reserva $id correctament\n";
+	}
+  }else{
+    print "ERROR: No hi ha cap identificador de recurs introduit.\n";
+  }
+}
+
+sub smry_esborra_reserva { "Esborra una etiqueta pel recurs escollit" }
+sub help_esborra_reserva { "Abans de poder esborrar una etiqueta a un recurs, cal que aquest hagi estat triat previament (veure comanda tria_recurs \"identificador\")\n Per esborrar una etiqueta cal introduir el nom d'aquesta\n"; }
+sub comp_esborra_reserva { my $self = shift;}
+
+
 
 ####ALIAS
 sub run_surt{

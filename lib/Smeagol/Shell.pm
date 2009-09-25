@@ -261,8 +261,8 @@ sub run_esborra_reserva{
   }
 }
 
-sub smry_esborra_reserva { "Esborra una etiqueta pel recurs escollit" }
-sub help_esborra_reserva { "Abans de poder esborrar una etiqueta a un recurs, cal que aquest hagi estat triat previament (veure comanda tria_recurs \"identificador\")\n Per esborrar una etiqueta cal introduir el nom d'aquesta\n"; }
+sub smry_esborra_reserva { "Esborra una reserva pel recurs escollit" }
+sub help_esborra_reserva { "Abans de poder esborrar una reserva d'un recurs, cal que aquest hagi estat triat previament (veure comanda tria_recurs \"identificador\")\n Per esborrar una reserva cal introduir l'identificador d'aquesta\n"; }
 sub comp_esborra_reserva { my $self = shift;}
 
 

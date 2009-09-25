@@ -193,8 +193,56 @@ sub run_esborra_etiqueta{
 }
 
 sub smry_esborra_etiqueta { "Esborra una etiqueta pel recurs escollit" }
-sub help_esborra_etiqueta { "Abans de poder esborrar una etiqueta a un recurs, cal que aquest hagi estat triat previament (veure comanda tria_recurs \"identificador\")\n Per esborrar una etiqueta cal introduir el nom d'aquesta"; }
+sub help_esborra_etiqueta { "Abans de poder esborrar una etiqueta a un recurs, cal que aquest hagi estat triat previament (veure comanda tria_recurs \"identificador\")\n Per esborrar una etiqueta cal introduir el nom d'aquesta\n"; }
 sub comp_esborra_etiqueta { my $self = shift;}
+
+
+####CREAR RESERVA
+sub run_crea_reserva{
+  my $self = shift;
+  my ($desc, $f, $t ) = @_;
+  if(!defined $idResource){
+    print "ERROR: No hi ha recurs triat.\n";
+  }elsif($desc && $f && $t){
+    if($f =~ /(\d+)\-(\d+)\-(\d+)\-(\d+):(\d+)/){
+      my $from;
+      $from->{year}	= $1;
+      $from->{month}  = $2;
+      $from->{day}    = $3;
+      $from->{hour}   = $4;
+      $from->{minute} = $5;
+      $from->{second} = 01;
+      if($t =~ /(\d+)\-(\d+)\-(\d+)\-(\d+):(\d+)/){
+        my $to;
+        $to->{year}   = $1;
+        $to->{month}  = $2;
+        $to->{day}    = $3;
+        $to->{hour}   = $4;
+        $to->{minute} = $5;
+        $to->{second} = 00;
+        my $res = $client->createBooking($idResource, $desc, $from, $to);
+        if(defined $res){
+          my @ids = _idResourceBooking($res);
+          print "Reserva ".$ids[1]." creada pel recurs ".$ids[0]." correctament!\n";
+        }else{
+          print "ERROR: No s'ha pogut crear la reserva correctament\n";
+	    }
+	  }else{
+        print "ERROR: Moment de fi amb format incorrecte (veure ajuda comanda crea_reserva)\n";
+      }
+    }else{
+      print "ERROR: Moment d'inici amb format incorrecte (veure ajuda comanda crea_reserva)\n";
+    }
+  }else{
+    print "ERROR: les dades no han estat bé introduides (veure ajuda comanda crea_reserva).\n";
+  }
+}
+
+sub smry_crea_reserva { "Crea una reserva pel recurs escollit" }
+sub help_crea_reserva { "Abans de poder crear una reserva per un recurs, cal que aquest hagi estat triat previament (veure comanda tria_recurs \"identificador\")\nPer esborrar una etiqueta cal introduir una descripcio, un moment d'inici (aaaa-mm-dd-hh:mimi), i un altre de fi\n\tp.e. \"presentació tesis\" 2007-12-01-20:00   2007-12-01-21:00\n"; }
+sub comp_crea_reserva { my $self = shift;}
+
+
 
 ####ALIAS
 sub run_surt{

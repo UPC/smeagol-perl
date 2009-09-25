@@ -15,24 +15,34 @@ our $idResource;
 
 sub init {
   my $self = shift;
-  my $serverPort = 8000;
-  my $server     = "http://localhost:$serverPort";
-  $pid        = Smeagol::Server->new($serverPort)->background();
-  $client = Smeagol::Client->new($server);
-  Smeagol::DataStore::init();
 }
+
+####CONNECTA
+sub run_connecta {
+  my $self = shift;
+  my ($server) = @_;
+  $client = Smeagol::Client->new($server);
+  print "Connexió creada amb $server correctament!\n" if (ref $client eq 'Smeagol::Client');
+  print "No s'ha pogut establir connexió amb $server!\n" if (ref $client ne 'Smeagol::Client');
+}
+sub smry_connecta { "Estableix connexió amb un servidor smeagol" }
+sub help_connecta { "Cal introduir l'adreça del servidor, p.e. connecta http://localhost:8000 \n"; }
 
 ####LISTAR RECURSOS
 sub run_llista_recursos{
   my $self = shift;
-  my @res = $client->listResources();
-  foreach(@res){
-    print " $_\n";
+  if(defined $client){
+    my @res = $client->listResources();
+    foreach(@res){
+      print " $_\n";
+    }
+  }else{
+    print "No es poden llistar els recursos, no hi ha connexió amb cap servidor smeagol\n";
   }
 }
 
 sub smry_llista_recursos { "Selecciona un recurs d'entre tots els existents. Aquest serà escollit per realitzar accions relacionades amb ell" }
-sub help_llista_recursos { "()\n"; }
+sub help_llista_recursos { "Abans de poder llistar els recursos, cal que s'hagi connectat a un servidor smeagol previament (amb la comanda connecta)\n"; }
 sub comp_llista_recursos {
   my $self = shift;
 }
@@ -82,7 +92,7 @@ sub help_tria_recurs { "()\n"; }
 sub comp_tria_recurs { my $self = shift;}
 
 ####CONSULTA RECURS
-sub run_consulta_recurs{
+sub run_mostra_recurs{
   my $self = shift;
   if(!defined $idResource){
     print "ERROR: No hi ha recurs triat.\n";
@@ -97,9 +107,9 @@ sub run_consulta_recurs{
   }
 }
 
-sub smry_consulta_recurs { "Mostra les dades del recurs escollit" }
-sub help_consulta_recurs { "Abans de poder consultar un recurs, cal que aquest hagi estat triat previament (amb la comanda tria_recurs \"identificador\")\n"; }
-sub comp_consulta_recurs { my $self = shift;}
+sub smry_mostra_recurs { "Mostra les dades del recurs escollit" }
+sub help_mostra_recurs { "Abans de poder mostrar un recurs, cal que aquest hagi estat triat previament (amb la comanda tria_recurs \"identificador\")\n"; }
+sub comp_mostra_recurs { my $self = shift;}
 
 ####ESBORRAR RECURS
 #Al'hora d'esborrar s'ha de posar $idResource=undef
@@ -146,6 +156,20 @@ sub smry_afegeix_etiqueta { "Afegeix una etiqueta pel recurs escollit" }
 sub help_afegeix_etiqueta { "Abans de poder afegir una etiqueta a un recurs, cal que aquest hagi estat triat previament (amb la comanda tria_recurs \"identificador\"). Una etiqueta ha de tenir entre 2 i 60 caràcters i només pot contenir lletres, números, '.', ':', '_' i '-' \n"; }
 sub comp_afegeix_etiqueta { my $self = shift;}
 
+####ALIAS
+sub run_surt{
+  my $self = shift;
+  $self->run_exit(); 
+}
+sub smry_surt { "Surt del shell" }
+sub help_surt { "\n"; }
+
+sub run_ajuda{
+  my $self = shift; 
+  $self->run_help();
+}
+sub smry_ajuda { "Mostra ajuda" }
+sub help_ajuda { " \n"; }
 
 
 ####COMANDA DESCONEGUDA
@@ -155,10 +179,5 @@ sub msg_unknown_cmd {
   print "Comanda '$cmd' desconeguda; escriu 'help' per obtenir ajuda.\n";
 }
 
-sub run_exit{
-  my $self = shift;
-  kill 3, $pid;
-  $self->stoploop();
-}
 
 1;

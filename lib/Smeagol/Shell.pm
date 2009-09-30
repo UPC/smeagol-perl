@@ -15,6 +15,7 @@ our $idResource;
 
 sub init {
   my $self = shift;
+  $self->run_connecta();
 }
 
 ####CONNECTA
@@ -33,18 +34,20 @@ sub help_connecta { "Cal introduir l'adreça del servidor, p.e. connecta http://
 sub run_llista_recursos{
   my $self = shift;
   if(defined $client){
+	my $idAux = $idResource;
     my @res = $client->listResources();
-	print "Identificador\tDescripció\n";
     foreach(@res){
-	  my $resAux = $client->getResource(_idResource($_));
-      print _idResource($_)."\t\t".$resAux->{description}."\n";
+      $idResource=_idResource($_);
+      $self->run_mostra_recurs();
+      print "------------------------------------\n";
     }
+    $idResource = $idAux;
   }else{
     print "ERROR: No es poden llistar els recursos, no hi ha connexió amb cap servidor smeagol\n";
   }
 }
 
-sub smry_llista_recursos { "Selecciona un recurs d'entre tots els existents. Aquest serà escollit per realitzar accions relacionades amb ell" }
+sub smry_llista_recursos { "Llista tots els recursos existents i mostra les seves dades" }
 sub help_llista_recursos { "Abans de poder llistar els recursos, cal que s'hagi connectat a un servidor smeagol previament (veure comanda connecta)\n"; }
 sub comp_llista_recursos {
   my $self = shift;
@@ -103,25 +106,34 @@ sub run_tria_recurs{
     print "ERROR: No es pot triar un recurs, no hi ha connexió amb cap servidor smeagol\n";
   }
 }
-
 sub smry_tria_recurs { "Selecciona un recurs d'entre tots els existents. Aquest serà escollit per realitzar accions relacionades amb ell" }
 sub help_tria_recurs { "()\n"; }
 sub comp_tria_recurs { my $self = shift;}
 
-####CONSULTA RECURS
+
+####DESTRIAR RECURS
+sub run_destria_recurs{
+  my $self = shift;
+  if(defined $client){
+    $idResource = undef;
+  }else{
+    print "ERROR: No es pot triar un recurs, no hi ha connexió amb cap servidor smeagol\n";
+  }
+}
+sub smry_destria_recurs { "Deselecciona un recurs previament triat." }
+sub help_destria_recurs { "()\n"; }
+sub comp_destria_recurs { my $self = shift;}
+
+####MOSTRAR RECURS
 sub run_mostra_recurs{
   my $self = shift;
   if(!defined $idResource){
     print "ERROR: No hi ha recurs triat.\n";
   }else{
     my $res = $client->getResource($idResource);
-    my @tags = $client->listTags($idResource);
-    print "Dades del recurs $idResource:\nDescripcio: $res->{description}\nTags      : ";
-    foreach(@tags){
-      my @ids = _idResourceTag($_);
-	  print $ids[1]."  ";
-    }
-	print "\n";
+    print "Dades del recurs $idResource\nDescripcio: $res->{description}\n";
+    $self->run_mostra_etiquetes();
+    $self->run_mostra_reserves();
   }
 }
 
@@ -196,6 +208,25 @@ sub smry_esborra_etiqueta { "Esborra una etiqueta pel recurs escollit" }
 sub help_esborra_etiqueta { "Abans de poder esborrar una etiqueta a un recurs, cal que aquest hagi estat triat previament (veure comanda tria_recurs \"identificador\")\n Per esborrar una etiqueta cal introduir el nom d'aquesta\n"; }
 sub comp_esborra_etiqueta { my $self = shift;}
 
+####MOSTRAR ETIQUETES
+sub run_mostra_etiquetes{
+  my $self = shift;
+  if(!defined $idResource){
+    print "ERROR: No hi ha recurs triat.\n";
+  }else{
+    my @tags = $client->listTags($idResource);
+    print "Etiquetes : ";
+    foreach(@tags){
+      my @ids = _idResourceTag($_);
+	  print $ids[1]."  ";
+    }
+    print "\n";
+  }
+}
+
+sub smry_mostra_etiquetes { "Mostra les etiquetes del recurs escollit" }
+sub help_mostra_etiquetes { "Abans de poder mostrar les etiquetes d'un recurs, cal que aquest hagi estat triat previament (amb la comanda tria_recurs \"identificador\")\n"; }
+sub comp_mostra_etiquetes { my $self = shift;}
 
 ####CREAR RESERVA
 sub run_crea_reserva{
@@ -257,14 +288,57 @@ sub run_esborra_reserva{
       print "ERROR: No s'ha pogut esborrar la reserva $id correctament\n";
 	}
   }else{
-    print "ERROR: No hi ha cap identificador de recurs introduit.\n";
+    print "ERROR: No hi ha cap identificador de reserva introduida.\n";
   }
 }
 
 sub smry_esborra_reserva { "Esborra una reserva pel recurs escollit" }
-sub help_esborra_reserva { "Abans de poder esborrar una reserva d'un recurs, cal que aquest hagi estat triat previament (veure comanda tria_recurs \"identificador\")\n Per esborrar una reserva cal introduir l'identificador d'aquesta\n"; }
+sub help_esborra_reserva { "Abans de poder esborrar una reserva d'un recurs, cal que aquest hagi estat triat previament (veure comanda tria_recurs \"identificador\")\nPer esborrar una reserva cal introduir l'identificador d'aquesta\n"; }
 sub comp_esborra_reserva { my $self = shift;}
 
+
+#### MOSTRA RESERVA
+sub run_mostra_reserva{
+  my $self = shift;
+  my ($id) = @_;
+  if(!defined $idResource){
+    print "ERROR: No hi ha recurs triat.\n";
+  }elsif($id){
+    my @bookings = $client->getBooking($idResource, $id);
+    foreach(@bookings){
+	  print "Identificador: ".$_->{id}."  \n";
+	  print "Descripció   : ".$_->{description}."  \n";
+	  print "Inici        : ".$_->{from}->{year}."-".$_->{from}->{month}."-".$_->{from}->{day}."-".$_->{from}->{hour}.":".$_->{from}->{minute}."\n";
+	  print "Fi           : ".$_->{to}->{year}."-".$_->{to}->{month}."-".$_->{to}->{day}."-".$_->{to}->{hour}.":".$_->{to}->{minute}."\n";
+    }
+	print "\n";
+  }else{
+    print "ERROR: No hi ha cap identificador de reserva introduida.\n";
+  }
+}
+
+sub smry_mostra_reserva { "Mostra les dades d'una reserva" }
+sub help_mostra_reserva { "Abans de poder mostrar una reserva d'un recurs, cal que aquest hagi estat triat previament (amb la comanda tria_recurs \"identificador\")\nPer mostrar una reserva cal introduir l'identificador d'aquesta\n"; }
+sub comp_mostra_reserva { my $self = shift;}
+
+####MOSTRAR RESERVES
+sub run_mostra_reserves{
+  my $self = shift;
+  if(!defined $idResource){
+    print "ERROR: No hi ha recurs triat.\n";
+  }else{
+    my @bookings = $client->listBookings($idResource);
+    print "Reserves  : \n";
+    foreach(@bookings){
+      my @ids = _idResourceBooking($_);
+      $self->run_mostra_reserva($ids[1]);
+    }
+  }
+}
+
+sub smry_mostra_reserves { "Mostra les reserves del recurs escollit" }
+sub help_mostra_reserves { "Abans de poder mostrar les reserves d'un recurs, cal que aquest hagi estat triat previament (amb la comanda tria_recurs \"identificador\")\n"; }
+sub comp_mostra_reserves { my $self = shift;}
 
 
 ####ALIAS

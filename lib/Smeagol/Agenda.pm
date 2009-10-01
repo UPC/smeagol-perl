@@ -46,14 +46,20 @@ sub toString {
     my $self = shift;
     my ( $url, $isRootNode ) = @_;
 
-    my $xmlText = "<agenda>";
-    for my $slot ( $self->elements ) {
-        $xmlText .= $slot->toXML($url);
-    }
-    $xmlText .= "</agenda>";
+    # build XML document
+    my $dom = XML::LibXML::Document->new('1.0','UTF-8');
+    my $agendaNode = $dom->createElement('agenda');
+    $dom->setDocumentElement( $agendaNode );
 
-    return $xmlText
-        unless defined $url;
+    for my $slot ( $self->elements ) {
+        my $bookingNode = $slot->toDOM->documentElement();
+        $dom->adoptNode( $bookingNode );
+        $agendaNode->appendChild( $bookingNode );
+    }
+
+    my $xmlText = $dom->toString;
+
+    return $xmlText unless defined $url;
 
     my $xmlDoc = eval { Smeagol::XML->new($xmlText) };
     croak $@ if $@;

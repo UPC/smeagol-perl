@@ -11,6 +11,7 @@ use Data::ICal;
 use Data::ICal::Entry::Event;
 use Date::ICal;
 use Encode;
+use Data::Dumper;
 
 BEGIN {
     use_ok($_) for qw(
@@ -179,6 +180,7 @@ my $booking1AsHash = {
     },
     info => $b1->info,
 };
+
 ok( Compare( $booking1AsHash, XMLin( $b1->toXML() ) ), 'toXML booking' );
 
 # newFromXML booking test

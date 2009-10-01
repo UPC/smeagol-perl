@@ -90,78 +90,67 @@ sub isNotEqual {
     return !shift->isEqual(@_);
 }
 
-sub toString {
+# Returns an XML::LibXML::Document representing the Booking
+sub toDOM {
     my $self = shift;
-    my ( $url, $isRootNode ) = @_;
 
     my $from = $self->span->start;
     my $to   = $self->span->end;
 
-    my $xmlText
-        = "<booking>" . "<id>"
-        . $self->id . "</id>"
-        . "<description>"
-        . $self->description
-        . "</description>"
-        . "<from>"
-        . "<year>"
-        . $from->year
-        . "</year>"
-        . "<month>"
-        . $from->month
-        . "</month>" . "<day>"
-        . $from->day
-        . "</day>"
-        . "<hour>"
-        . $from->hour
-        . "</hour>"
-        . "<minute>"
-        . $from->minute
-        . "</minute>"
-        . "<second>"
-        . $from->second
-        . "</second>"
-        . "</from><to>"
-        . "<year>"
-        . $to->year
-        . "</year>"
-        . "<month>"
-        . $to->month
-        . "</month>" . "<day>"
-        . $to->day
-        . "</day>"
-        . "<hour>"
-        . $to->hour
-        . "</hour>"
-        . "<minute>"
-        . $to->minute
-        . "</minute>"
-        . "<second>"
-        . $to->second
-        . "</second>" . "</to>"
-        . "<info>"
-        . $self->info
-        . "</info>"
-        . "</booking>";
+    # build XML document
+    my $dom = XML::LibXML::Document->new('1.0','UTF-8');
+    my $bookingNode = $dom->createElement('booking');
+    $dom->setDocumentElement($bookingNode);
 
-    return $xmlText
-        unless defined $url;
+    # FIXME: refactor this into Smeagol::XML->dateTimeNode('from', $from);
+    my $fromNode = $dom->createElement('from');
+    $fromNode->appendTextChild('year', $from->year);
+    $fromNode->appendTextChild('month', $from->month);
+    $fromNode->appendTextChild('day', $from->day);
+    $fromNode->appendTextChild('hour', $from->hour);
+    $fromNode->appendTextChild('minute', $from->minute);
+    $fromNode->appendTextChild('second', $from->second);
 
-    my $xmlDoc = eval { Smeagol::XML->new($xmlText) };
+    # FIXME: refactor this into Smeagol::XML->dateTimeNode('to', $to);
+    my $toNode = $dom->createElement('to');
+    $toNode->appendTextChild('year', $to->year);
+    $toNode->appendTextChild('month', $to->month);
+    $toNode->appendTextChild('day', $to->day);
+    $toNode->appendTextChild('hour', $to->hour);
+    $toNode->appendTextChild('minute', $to->minute);
+    $toNode->appendTextChild('second', $to->second);
+
+    $bookingNode->appendTextChild('id', $self->id);
+    $bookingNode->appendTextChild('description', $self->description);
+    $bookingNode->appendChild($fromNode);
+    $bookingNode->appendChild($toNode);
+    $bookingNode->appendTextChild('info', $self->info);
+
+    return $dom;
+}
+
+sub toString {
+    my $self = shift;
+    my ($url, $isRootNode) = @_;
+
+    my $dom = $self->toDOM;
+
+    return $dom->toString unless defined $url;
+
+    my $xmlDoc = eval { Smeagol::XML->new($dom->toString) };
     croak $@ if $@;
 
     $xmlDoc->addXLink( "booking", $url . $self->url );
+
     if ($isRootNode) {
         $xmlDoc->addPreamble("booking");
         return "$xmlDoc";
     }
     else {
-
         # Take the first node and skip processing instructions
         my $node = $xmlDoc->doc->getElementsByTagName("booking")->[0];
         return $node->toString;
     }
-
 }
 
 # DEPRECATED

@@ -11,6 +11,7 @@ use Data::ICal;
 use Data::ICal::Entry::Event;
 use Date::ICal;
 use Encode;
+use Data::Dumper;
 
 BEGIN {
     use_ok($_) for qw(

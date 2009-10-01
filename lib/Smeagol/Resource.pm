@@ -162,6 +162,18 @@ sub toString {
     $url .= $self->url
         if defined $url;
 
+    my $dom = XML::LibXML::Document->new( '1.0', 'UTF-8' );
+    my $resourceNode = $dom->createElement('resource');
+    $dom->setDocumentElement($resourceNode);
+    $dom->appendTextChild( 'description', $self->{description} );
+    if ( defined $self->{agenda} ) {
+        my $agendaNode = $self->{agenda}->toDOM->documentElement();
+        $dom->adoptNode($agendaNode);
+    }
+    $dom->appendTextChild( 'info', $self->{info} );
+
+    # TODO: append resource tags
+
     my $xmlText = "<resource>";
     $xmlText .= "<description>" . $self->{description} . "</description>";
 

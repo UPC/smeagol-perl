@@ -41,40 +41,50 @@ sub interlace {
     return grep { $booking->intersects($_) } $self->elements;
 }
 
+sub toDOM {
+    my $self = shift;
+
+    my $dom = XML::LibXML::Document->new( '1.0', 'UTF-8' );
+    my $agendaNode = $dom->createElement('agenda');
+    $dom->setDocumentElement($agendaNode);
+
+    for my $slot ( $self->elements ) {
+        my $bookingNode = $slot->toDOM->documentElement();
+        $dom->adoptNode($bookingNode);
+        $agendaNode->appendChild($bookingNode);
+    }
+
+    return $dom;
+}
+
 # no special order is granted in results, because of Set->elements behaviour.
 sub toString {
     my $self = shift;
     my ( $url, $isRootNode ) = @_;
 
     # build XML document
-    my $dom = XML::LibXML::Document->new('1.0','UTF-8');
-    my $agendaNode = $dom->createElement('agenda');
-    $dom->setDocumentElement( $agendaNode );
+    my $dom = $self->toDOM;
 
-    for my $slot ( $self->elements ) {
-        my $bookingNode = $slot->toDOM->documentElement();
-        $dom->adoptNode( $bookingNode );
-        $agendaNode->appendChild( $bookingNode );
-    }
+    return $dom->toString unless defined $url;
 
-    my $xmlText = $dom->toString;
+    $dom->addXLink( "agenda", $url . "/bookings" );
+    return $dom->toString;
 
-    return $xmlText unless defined $url;
+    # FIXME: Perhaps the $isRootNode variable is superfluous when using
+    #        XML::LibXML (see comment in "toString" method, in
+    #        Smeagol/Booking.pm source file), so the following lines
+    #        could be definively removed
 
-    my $xmlDoc = eval { Smeagol::XML->new($xmlText) };
-    croak $@ if $@;
+    #if ($isRootNode) {
+    #    $xmlDoc->addPreamble("agenda");
+    #    return "$xmlDoc";
+    #}
+    #else {
 
-    $xmlDoc->addXLink( "agenda", $url . "/bookings" );
-    if ($isRootNode) {
-        $xmlDoc->addPreamble("agenda");
-        return "$xmlDoc";
-    }
-    else {
-
-        # Take the first node and skip processing instructions
-        my $node = $xmlDoc->doc->getElementsByTagName("agenda")->[0];
-        return $node->toString;
-    }
+    # Take the first node and skip processing instructions
+    #    my $node = $xmlDoc->doc->getElementsByTagName("agenda")->[0];
+    #    return $node->toString;
+    #}
 }
 
 # DEPRECATED

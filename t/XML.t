@@ -21,7 +21,7 @@ BEGIN {
     is( $@,        "",             "simplest XML works" );
     is( ref($xml), "Smeagol::XML", "blessed thy XML" );
 
-    my $expected = qq{<?xml version="1.0"?>\n<foobar/>\n};
+    my $expected = qq{<?xml version="1.0" encoding="UTF-8"?>\n<foobar/>\n};
     is( $xml, $expected, "simplest XML as expected" );
 
     $xml->addPreamble("foobar");

@@ -3,7 +3,6 @@ package Smeagol::Tag;
 use strict;
 use warnings;
 
-use XML::LibXML;
 use Carp;
 use Smeagol::XML;
 
@@ -58,44 +57,31 @@ sub isNotEqual {
     return !shift->isEqual(@_);
 }
 
-# Build XML DOM tree representation of tag
-sub toDOM {
-    my $self = shift;
+sub toSmeagolXML {
+    my $self        = shift;
+    my $xlinkPrefix = shift;
 
-    my $dom = XML::LibXML::Document->new( '1.0', 'UTF-8' );
-    my $tagNode = $dom->createElement('tag');
+    my $result = eval { Smeagol::XML->new('<tag/>') };
+    croak $@ if $@;
+
+    my $dom     = $result->doc;
+    my $tagNode = $dom->documentElement();
     $tagNode->appendText( $self->value );
-    $dom->setDocumentElement($tagNode);
 
-    return $dom;
+    if ( defined $xlinkPrefix ) {
+        $result->addXLink( "tag", $xlinkPrefix . $self->url );
+    }
+
+    return $result;
 }
 
 sub toString {
     my $self = shift;
-    my ( $url, $isRootNode ) = @_;
+    my $url  = shift;
 
-    my $dom = $self->toDOM;
+    my $xmlTag = $self->toSmeagolXML($url);
 
-    return $dom->toString unless defined $url;
-
-    $dom->addXLink( "tag", $url . $self->url );
-
-    return "$dom";
-
- # TODO: I believe that the $isRootNode variable is superfluous when
- #       using XML::LibXML methods, because the toString method in that module
- #       automagically adds the XML preamble when needed, so I'll leave the
- #       following lines commented out, but won't remove them for now. (angel)
-
-    #if ($isRootNode) {
-    #    $xmlDoc->addPreamble("tag");
-    #    return "$xmlDoc";
-    #}
-    #else {
-    # Take the first node and skip processing instructions
-    #    my $node = $xmlDoc->doc->getElementsByTagName("tag")->[0];
-    #    return $node->toString;
-    #}
+    return $xmlTag->toString;
 }
 
 sub toXML {

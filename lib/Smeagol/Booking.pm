@@ -4,7 +4,6 @@ use strict;
 use warnings;
 
 use DateTime::Span ();
-use XML::LibXML;
 use Carp;
 use Smeagol::XML;
 use Smeagol::DataStore;
@@ -89,20 +88,22 @@ sub isNotEqual {
     return !shift->isEqual(@_);
 }
 
-# Returns an XML::LibXML::Document representing the Booking
+# Returns an Smeagol::XML object representing the Booking
 # The following method is useful when building DOMs from wrapper
-# classes (agenda, resource), which can call toDOM() without
+# classes (agenda, resource), which can call toSmeagolXML() without
 # having to call toString and parse the result again.
-sub toDOM {
-    my $self = shift;
+sub toSmeagolXML {
+    my $self        = shift;
+    my $xlinkPrefix = shift;
 
     my $from = $self->span->start;
     my $to   = $self->span->end;
 
-    # build XML document
-    my $dom = XML::LibXML::Document->new( '1.0', 'UTF-8' );
-    my $bookingNode = $dom->createElement('booking');
-    $dom->setDocumentElement($bookingNode);
+    my $result = eval { Smeagol::XML->new('<booking/>') };
+    croak $@ if $@;
+
+    my $dom         = $result->doc;
+    my $bookingNode = $dom->documentElement();
 
     my $fromNode = $dom->createElement('from');
     $fromNode->appendTextChild( 'year',   $from->year );
@@ -126,35 +127,20 @@ sub toDOM {
     $bookingNode->appendChild($toNode);
     $bookingNode->appendTextChild( 'info', $self->info );
 
-    return $dom;
+    if ( defined $xlinkPrefix ) {
+        $result->addXLink( "booking", $xlinkPrefix . $self->url );
+    }
+
+    return $result;
 }
 
 sub toString {
     my $self = shift;
-    my ( $url, $isRootNode ) = @_;
+    my $url  = shift;
 
-    my $dom = $self->toDOM;
+    my $xmlBooking = $self->toSmeagolXML($url);
 
-    return $dom->toString unless defined $url;
-
-    $dom->addXLink( "booking", $url . $self->url );
-
-    return "$dom";
-
- # TODO: I believe that the $isRootNode variable is superfluous when
- #       using XML::LibXML methods, because the toString method in that module
- #       automagically adds the XML preamble when needed, so I'll leave the
- #       following lines commented out, but won't remove them for now. (angel)
-
-    #if ($isRootNode) {
-    #    $xmlDoc->addPreamble("booking");
-    #    return "$xmlDoc";
-    #}
-    #else {
-    # Take the first node and skip processing instructions
-    #    my $node = $xmlDoc->doc->getElementsByTagName("booking")->[0];
-    #    return $node->toString;
-    #}
+    return $xmlBooking->toString;
 }
 
 # DEPRECATED

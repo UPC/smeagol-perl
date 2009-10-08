@@ -17,6 +17,8 @@ sub new {
     croak "cannot parse XML document: $@"
         if $@;
 
+    $doc->setEncoding('UTF-8');
+
     my $obj = {
         parser => $parser,
         xmldoc => $doc,

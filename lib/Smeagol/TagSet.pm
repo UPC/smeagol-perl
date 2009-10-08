@@ -50,7 +50,7 @@ sub toDOM {
     $dom->setDocumentElement($tagSetNode);
 
     for my $tag ( $self->elements ) {
-        my $tagNode = $tag->toDOM->documentElement();
+        my $tagNode = $tag->toSmeagolXML->doc->documentElement();
         $dom->adoptNode($tagNode);
         $tagSetNode->appendChild($tagNode);
     }

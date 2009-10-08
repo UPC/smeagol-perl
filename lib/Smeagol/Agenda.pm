@@ -41,50 +41,42 @@ sub interlace {
     return grep { $booking->intersects($_) } $self->elements;
 }
 
-sub toDOM {
-    my $self = shift;
+sub toSmeagolXML {
+    my $self     = shift;
+    my $xlinkUrl = shift;
 
-    my $dom = XML::LibXML::Document->new( '1.0', 'UTF-8' );
-    my $agendaNode = $dom->createElement('agenda');
-    $dom->setDocumentElement($agendaNode);
+    my $result = eval { Smeagol::XML->new('<agenda/>') };
+    croak $@ if $@;
+
+    my $dom        = $result->doc;
+    my $agendaNode = $dom->documentElement();
+
+    #my $dom = XML::LibXML::Document->new( '1.0', 'UTF-8' );
+    #my $agendaNode = $dom->createElement('agenda');
+    #$dom->setDocumentElement($agendaNode);
 
     for my $slot ( $self->elements ) {
-        my $bookingNode = $slot->toDOM->documentElement();
+        my $bookingNode
+            = $slot->toSmeagolXML($xlinkUrl)->doc->documentElement();
         $dom->adoptNode($bookingNode);
         $agendaNode->appendChild($bookingNode);
     }
 
-    return $dom;
+    if ( defined $xlinkUrl ) {
+        $result->addXLink( "agenda", $xlinkUrl . "/bookings" );
+    }
+
+    return $result;
 }
 
 # no special order is granted in results, because of Set->elements behaviour.
 sub toString {
     my $self = shift;
-    my ( $url, $isRootNode ) = @_;
+    my $url  = shift;
 
-    # build XML document
-    my $dom = $self->toDOM;
+    my $xmlAgenda = $self->toSmeagolXML($url);
 
-    return $dom->toString unless defined $url;
-
-    $dom->addXLink( "agenda", $url . "/bookings" );
-    return $dom->toString;
-
-    # FIXME: Perhaps the $isRootNode variable is superfluous when using
-    #        XML::LibXML (see comment in "toString" method, in
-    #        Smeagol/Booking.pm source file), so the following lines
-    #        could be definively removed
-
-    #if ($isRootNode) {
-    #    $xmlDoc->addPreamble("agenda");
-    #    return "$xmlDoc";
-    #}
-    #else {
-
-    # Take the first node and skip processing instructions
-    #    my $node = $xmlDoc->doc->getElementsByTagName("agenda")->[0];
-    #    return $node->toString;
-    #}
+    return $xmlAgenda->toString;
 }
 
 # DEPRECATED
@@ -122,7 +114,7 @@ sub newFromXML {
     # $ag object, so we do not need to worry about eventual
     # intersections present in the $xml
     for my $node ( $dom->getElementsByTagName('booking') ) {
-        my $booking = Smeagol::Booking->newFromXML( $node->toString(0) );
+        my $booking = Smeagol::Booking->newFromXML( $node->toString );
         $agenda->append($booking);
     }
 

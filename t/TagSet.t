@@ -136,7 +136,8 @@ ok( $tg44->value eq "projeeector", 'tag checked' );
 
     $xmlTgS = $tgS->toXML();
     ok( defined $xmlTgS, 'toXML ok' );
-    ok( $xmlTgS eq "<tags><tag>aula</tag></tags>", 'toXML checked' );
+    ok( Compare( XMLin("<tags><tag>aula</tag></tags>"), XMLin($xmlTgS) ),
+        'toXML checked' );
 
     ok( !$tgS->contains($tg5), 'tg5 not in tgS' );
     $tgS->append($tg5);
@@ -148,7 +149,7 @@ ok( $tg44->value eq "projeeector", 'tag checked' );
     ok( defined $xmlTgS, 'toXML ok' );
     ok( $xmlTgS        =~ /<tag>aula<\/tag>/
             && $xmlTgS =~ /<tag>projector<\/tag>/
-            && $xmlTgS =~ /^<tags>/
+            && $xmlTgS =~ /<tags>/
             && $xmlTgS =~ /<\/tags>$/,
         'toXML checked'
     );
@@ -158,34 +159,35 @@ ok( $tg44->value eq "projeeector", 'tag checked' );
 
     $xmlTgS = $tgS->toXML();
     ok( defined $xmlTgS, 'toXML ok' );
-    ok( $xmlTgS eq "<tags><tag>projector</tag></tags>", 'toXML checked' );
+    is_deeply(
+        XMLin($xmlTgS),
+        XMLin('<tags><tag>projector</tag></tags>'),
+        'toXML checked'
+    );
 }
 
 #newFromXML
 {
-    $xmlTg1 = $tg1->toXML();
-    $xmlTg5 = $tg5->toXML();
-    $xmlTgS = "<tags>" . $xmlTg1 . "</tags>";
+    my $ts = Smeagol::TagSet->new();
+    $ts->append($tg1);
 
-    $tgS = Smeagol::TagSet->newFromXML($xmlTgS);
-    ok( defined $tgS,    'tagSet created' );
-    ok( $tgS->size == 1, 'tgS contains 1 tag' );
+    my $got = Smeagol::TagSet->newFromXML( $ts->toXML );
+    isa_ok( $got, 'Smeagol::TagSet' );
+    ok( $got->size == 1, 'tgS contains 1 tag' );
+    ok( $got->elements->value eq $tg1->value, 'tag checked' );
 
-    my ($tg) = $tgS->elements;
-    ok( $tg->value eq $tg1->value, 'tag checked' );
+    $ts->append($tg5);
 
-    $xmlTgS = "<tags>" . $xmlTg1 . $xmlTg5 . "</tags>";
+    $got = Smeagol::TagSet->newFromXML( $ts->toXML );
+    isa_ok( $got, 'Smeagol::TagSet' );
+    ok( $got->size == 2, 'tgS contains 2 tag' );
 
-    $tgS = Smeagol::TagSet->newFromXML($xmlTgS);
-    ok( defined $tgS,    'tagSet created' );
-    ok( $tgS->size == 2, 'tgS contains 2 tag' );
-
-    $xmlTgS = $tgS->toXML();
-    ok( defined $xmlTgS, 'toXML ok' );
-    ok( $xmlTgS        =~ /<tag>aula<\/tag>/
-            && $xmlTgS =~ /<tag>projector<\/tag>/
-            && $xmlTgS =~ /^<tags>/
-            && $xmlTgS =~ /<\/tags>$/,
+    my $xml = $got->toXML;
+    ok( defined $xml, 'toXML ok' );
+    ok( $xml        =~ /<tag>aula<\/tag>/
+            && $xml =~ /<tag>projector<\/tag>/
+            && $xml =~ /<tags>/
+            && $xml =~ /<\/tags>$/,
         'toXML checked'
     );
 }

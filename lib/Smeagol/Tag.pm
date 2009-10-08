@@ -3,11 +3,9 @@ package Smeagol::Tag;
 use strict;
 use warnings;
 
-use XML::Simple;
 use XML::LibXML;
 use Carp;
 use Smeagol::XML;
-use Data::Dumper;
 
 use overload
     q{""} => \&toString,
@@ -60,29 +58,44 @@ sub isNotEqual {
     return !shift->isEqual(@_);
 }
 
+# Build XML DOM tree representation of tag
+sub toDOM {
+    my $self = shift;
+
+    my $dom = XML::LibXML::Document->new( '1.0', 'UTF-8' );
+    my $tagNode = $dom->createElement('tag');
+    $tagNode->appendText( $self->value );
+    $dom->setDocumentElement($tagNode);
+
+    return $dom;
+}
+
 sub toString {
     my $self = shift;
     my ( $url, $isRootNode ) = @_;
 
-    my $xmlText = "<tag>" . $self->value . "</tag>";
+    my $dom = $self->toDOM;
 
-    return $xmlText
-        unless defined $url;
+    return $dom->toString unless defined $url;
 
-    my $xmlDoc = eval { Smeagol::XML->new($xmlText) };
-    croak $@ if $@;
+    $dom->addXLink( "tag", $url . $self->url );
 
-    $xmlDoc->addXLink( "tag", $url . $self->url );
-    if ($isRootNode) {
-        $xmlDoc->addPreamble("tag");
-        return "$xmlDoc";
-    }
-    else {
+    return "$dom";
 
-        # Take the first node and skip processing instructions
-        my $node = $xmlDoc->doc->getElementsByTagName("tag")->[0];
-        return $node->toString;
-    }
+ # TODO: I believe that the $isRootNode variable is superfluous when
+ #       using XML::LibXML methods, because the toString method in that module
+ #       automagically adds the XML preamble when needed, so I'll leave the
+ #       following lines commented out, but won't remove them for now. (angel)
+
+    #if ($isRootNode) {
+    #    $xmlDoc->addPreamble("tag");
+    #    return "$xmlDoc";
+    #}
+    #else {
+    # Take the first node and skip processing instructions
+    #    my $node = $xmlDoc->doc->getElementsByTagName("tag")->[0];
+    #    return $node->toString;
+    #}
 }
 
 sub toXML {
@@ -106,14 +119,7 @@ sub newFromXML {
         return;
     }
 
-    # XML is valid.
-    my $tagValue;
-    if ( ref( XMLin($xml) ) eq 'HASH' ) {
-        $tagValue = XMLin( $xml, SuppressEmpty => '' )->{content};
-    }
-    else {
-        $tagValue = XMLin( $xml, SuppressEmpty => '' );
-    }
+    my $tagValue = $doc->findvalue('/tag');
 
     return if ( !_checkValue($tagValue) );
 

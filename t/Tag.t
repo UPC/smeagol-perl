@@ -7,6 +7,7 @@ use warnings;
 use XML::Simple;
 use Data::Compare;
 use Encode;
+use Data::Dumper;
 
 BEGIN {
     use_ok($_) for qw(Smeagol::Tag Smeagol::DataStore);
@@ -84,13 +85,14 @@ my $xml;
 {
     $tg = Smeagol::Tag->new("projector");
     ok( defined $tg, 'created tag' );
-    $xml = $tg->toXML();
-    ok( '<tag>projector</tag>' eq $xml, 'Ok toXML' );
+    ok( Compare( XMLin('<tag>projector</tag>'), XMLin( $tg->toXML() ) ),
+        'testing toXML' );
 
     $tg = Smeagol::Tag->new("aula.multimedia");
     ok( defined $tg, 'created tag' );
-    $xml = $tg->toXML();
-    ok( '<tag>aula.multimedia</tag>' eq $xml, 'Ok toXML' );
+    ok( Compare( XMLin('<tag>aula.multimedia</tag>'), XMLin( $tg->toXML() ) ),
+        'Ok toXML'
+    );
 }
 
 #newFromXML

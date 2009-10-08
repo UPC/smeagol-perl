@@ -44,10 +44,25 @@ sub listResources {
     my $dom = eval { XML::LibXML->new->parse_string( $res->content ) };
     croak $@ if $@;
     my @idResources;
-    for my $resNode ( $dom->getElementsByTagName('resource') ) {
-        my $idRes = $resNode->getAttribute('xlink:href');
-        push @idResources, $idRes;
-    }
+
+	my $resources = XMLin( $res->content );
+	if( ref ($resources->{resource}) eq 'HASH'){
+			 push @idResources, { 
+					id => _idResource($resources->{resource}->{'xlink:href'}),
+					url => $self->{url}.$resources->{resource}->{'xlink:href'} ,
+					description => $resources->{resource}->{'description'},
+					agenda => $self->{url}.$resources->{resource}->{'xlink:href'}."/bookings" ,
+			};
+	}elsif( ref ($resources->{resource}) eq 'ARRAY'){
+		foreach my $node (@{$resources->{resource}}){
+			 push @idResources, { 
+					id => _idResource($node->{'xlink:href'}),
+					url => $self->{url}.$node->{'xlink:href'} ,
+					description => $node->{'description'},
+					agenda => $self->{url}.$node->{'xlink:href'}."/bookings" ,
+			};
+		}
+	}
     return @idResources;
 }
 
@@ -69,10 +84,17 @@ sub createResource {
     my $res = $self->{ua}->request($req);
     return unless $res->status_line =~ /201/;
 
+	my $result = XMLin( $res->content );
+
     my $dom = eval { XML::LibXML->new->parse_string( $res->content ) };
     croak $@ if $@;
-    return $dom->getElementsByTagName('resource')->get_node(1)
-        ->getAttribute('xlink:href');
+
+	return {
+			id => _idResource($result->{'xlink:href'}),
+			url => $self->{url}.$result->{'xlink:href'} ,
+			description => $result->{'description'},
+			agenda => $self->{url}.$result->{'xlink:href'}."/bookings" };
+
 }
 
 sub createBooking {
@@ -360,5 +382,30 @@ sub delTag {
 
     return $tid;
 }
+
+
+# Extracts the Resource ID from a given Resource REST URL
+sub _idResource {
+    my ($url) = shift;
+
+    if ( $url =~ /\/resource\/(\w+)/ ) {
+        return $1;
+    }
+    else {
+        return;
+    }
+}
+
+sub _idResourceBooking {
+    my ($url) = shift;
+
+    if ( $url =~ /resource\/(\d+)\/booking\/(\d+)/ ) {
+        return ( $1, $2 );
+    }
+    else {
+        return;
+    }
+}
+
 
 1;

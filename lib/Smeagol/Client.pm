@@ -47,20 +47,17 @@ sub listResources {
 
 	my $resources = XMLin( $res->content );
 	if( ref ($resources->{resource}) eq 'HASH'){
-			 push @idResources, { 
-					id => _idResource($resources->{resource}->{'xlink:href'}),
-					url => $self->{url}.$resources->{resource}->{'xlink:href'} ,
-					description => $resources->{resource}->{'description'},
-					agenda => $self->{url}.$resources->{resource}->{'xlink:href'}."/bookings" ,
-			};
+		my $node= $resources->{resource};
+		$node->{id} = _idResource($node->{'xlink:href'});
+		$node->{url} = $self->{url}.$node->{'xlink:href'};
+		$node->{agenda} = $self->{url}.$node->{'xlink:href'}."/bookings" if ( defined $node->{idAgenda} );
+		push @idResources, $node;
 	}elsif( ref ($resources->{resource}) eq 'ARRAY'){
 		foreach my $node (@{$resources->{resource}}){
-			 push @idResources, { 
-					id => _idResource($node->{'xlink:href'}),
-					url => $self->{url}.$node->{'xlink:href'} ,
-					description => $node->{'description'},
-					agenda => $self->{url}.$node->{'xlink:href'}."/bookings" ,
-			};
+			$node->{id} = _idResource($node->{'xlink:href'});
+			$node->{url} = $self->{url}.$node->{'xlink:href'};
+			$node->{agenda} = $self->{url}.$node->{'xlink:href'}."/bookings" if ( defined $node->{idAgenda} );
+			push @idResources, $node;
 		}
 	}
     return @idResources;
@@ -84,16 +81,14 @@ sub createResource {
     my $res = $self->{ua}->request($req);
     return unless $res->status_line =~ /201/;
 
-	my $result = XMLin( $res->content );
-
     my $dom = eval { XML::LibXML->new->parse_string( $res->content ) };
     croak $@ if $@;
 
-	return {
-			id => _idResource($result->{'xlink:href'}),
-			url => $self->{url}.$result->{'xlink:href'} ,
-			description => $result->{'description'},
-			agenda => $self->{url}.$result->{'xlink:href'}."/bookings" };
+	my $result = XMLin( $res->content );
+	$result->{id} = _idResource($result->{'xlink:href'});
+	$result->{url} = $self->{url}.$result->{'xlink:href'};
+	
+	return $result;
 
 }
 
@@ -137,8 +132,10 @@ sub createBooking {
 
     my $dom = eval { XML::LibXML->new->parse_string( $res->content ) };
     croak $@ if $@;
-    return $dom->getElementsByTagName('booking')->get_node(1)
-        ->getAttribute('xlink:href');
+    my $result = XMLin($res->content);
+	$result->{idR} = _idResource($result->{'xlink:href'});
+	$result->{url} = $self->{url}.$result->{'xlink:href'};
+    return $result;
 }
 
 sub createTag {
@@ -161,8 +158,10 @@ sub createTag {
     my $dom = eval { XML::LibXML->new->parse_string( $res->content ) };
     croak $@ if $@;
 
-    return $dom->getElementsByTagName('tag')->get_node(1)
-        ->getAttribute('xlink:href');
+	my $result = XMLin($res->content);
+	$result->{url} = $self->{url}.$result->{'xlink:href'};
+	$result->{idR} = _idResource($result->{'xlink:href'});
+	return $result;
 }
 
 sub getResource {
@@ -179,13 +178,11 @@ sub getResource {
     if ( $res->status_line =~ /200/ ) {
         my $dom = eval { XML::LibXML->new->parse_string( $res->content ) };
         croak $@ if $@;
-        my $resource = XMLin( $res->content );
-        if ( defined $resource->{idAgenda} ) {
-            $resource->{agenda}
-                = $dom->getElementsByTagName('agenda')->get_node(1)
-                ->getAttribute('xlink:href');
-        }
-        return $resource;
+        my $result = XMLin( $res->content );
+		$result->{agenda} = $self->{url}.$result->{'xlink:href'}."/bookings" if ( defined $result->{idAgenda} );
+		$result->{id} = _idResource($result->{'xlink:href'});
+		$result->{url} = $self->{url}.$result->{'xlink:href'};
+		return $result;
     }
     return;
 }
@@ -208,7 +205,10 @@ sub getBooking {
 
     my $dom = eval { XML::LibXML->new->parse_string( $res->content ) };
     croak $@ if $@;
-    return XMLin( $res->content );
+	my $result = XMLin( $res->content );
+	$result->{idR} = _idResource($result->{'xlink:href'});
+	$result->{url} = $self->{url}.$result->{'xlink:href'};
+    return $result;
 }
 
 sub getBookingICal {
@@ -233,11 +233,18 @@ sub listBookings {
 
     my $dom = eval { XML::LibXML->new->parse_string( $res->content ) };
     croak $@ if $@;
-    my @bookings;
-    for my $node ( $dom->getElementsByTagName('booking') ) {
-        push @bookings, $node->getAttribute('xlink:href');
-    }
-    return @bookings;
+    my @idBookings;
+	my $bookings = XMLin( $res->content );
+	if( defined  ($bookings->{booking}) ){
+		foreach my $id (keys %{$bookings->{booking}}){
+			my $result = $bookings->{booking}->{$id};
+			$result->{id} = $id;
+			$result->{idR} = _idResource($result->{'xlink:href'});
+			$result->{url} = $self->{url}.$result->{'xlink:href'};
+			push @idBookings, $result;
+		}
+	}
+    return @idBookings;
 }
 
 sub listBookingsICal {
@@ -254,14 +261,26 @@ sub listTags {
 
     my $res = $self->{ua}->get($url);
     return unless $res->status_line =~ /200/;
-
     my $dom = eval { XML::LibXML->new->parse_string( $res->content ) };
     croak $@ if $@;
-    my @tags;
-    for my $node ( $dom->getElementsByTagName('tag') ) {
-        push @tags, $node->getAttribute('xlink:href');
-    }
-    return @tags;
+    my @idTags;
+	my $tags = XMLin( $res->content );
+	if( ref ($tags->{tag}) eq 'HASH'){
+			 push @idTags, { 
+					content => $tags->{tag}->{'content'},
+					idR => _idResource($tags->{tag}->{'xlink:href'}),
+					url => $self->{url}.$tags->{tag}->{'xlink:href'} ,
+			};
+	}elsif( ref ($tags->{tag}) eq 'ARRAY'){
+		foreach my $node (@{$tags->{tag}}){
+			 push @idTags, { 
+					content => $node->{'content'},
+					idR => _idResource($node->{'xlink:href'}),
+					url => $self->{url}.$node->{'xlink:href'} ,
+			};
+		}
+	}
+    return @idTags;
 }
 
 sub updateResource {
@@ -285,8 +304,12 @@ sub updateResource {
 
     my $dom = eval { XML::LibXML->new->parse_string( $res->content ) };
     croak $@ if $@;
-    return $dom->getElementsByTagName('resource')->get_node(1)
-        ->getAttribute('xlink:href');
+
+	my $result = XMLin($res->content);
+	$result->{id} = _idResource($result->{'xlink:href'});
+	$result->{url} = $self->{url}.$result->{'xlink:href'};
+	return $result;
+
 }
 
 sub updateBooking {
@@ -328,11 +351,12 @@ sub updateBooking {
 
     my $res = $self->{ua}->request($req);
     return unless $res->status_line =~ /200/;
-
     my $dom = eval { XML::LibXML->new->parse_string( $res->content ) };
     croak $@ if $@;
-    return $dom->getElementsByTagName('booking')->get_node(1)
-        ->getAttribute('xlink:href');
+	my $result = XMLin($res->content);
+	$result->{url} = $self->{url}.$result->{'xlink:href'};
+	$result->{idR} = _idResource($result->{'xlink:href'});
+	return $result;
 }
 
 sub delResource {
@@ -348,7 +372,7 @@ sub delResource {
     my $res = $self->{ua}->request($req);
     return unless $res->status_line =~ /200/;
 
-    return $id;
+    return {id=>$id};
 }
 
 sub delBooking {
@@ -364,7 +388,7 @@ sub delBooking {
     my $res = $self->{ua}->request($req);
     return unless $res->status_line =~ /200/;
 
-    return $bid;
+    return {id => $bid};
 }
 
 sub delTag {
@@ -380,7 +404,7 @@ sub delTag {
     my $res = $self->{ua}->request($req);
     return unless $res->status_line =~ /200/;
 
-    return $tid;
+    return {content => $tid};
 }
 
 
@@ -406,6 +430,5 @@ sub _idResourceBooking {
         return;
     }
 }
-
 
 1;

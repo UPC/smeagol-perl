@@ -51,28 +51,7 @@ my $idAg;
 my $idTg;
 my @valTg;
 
-# Extracts the Resource ID from a given Resource REST URL
-sub _idResource {
-    my ($url) = shift;
 
-    if ( $url =~ /\/resource\/(\w+)/ ) {
-        return $1;
-    }
-    else {
-        return;
-    }
-}
-
-sub _idResourceBooking {
-    my ($url) = shift;
-
-    if ( $url =~ /resource\/(\d+)\/booking\/(\d+)/ ) {
-        return ( $1, $2 );
-    }
-    else {
-        return;
-    }
-}
 
 # Testing retrieve empty resource list
 {
@@ -112,47 +91,45 @@ sub _idResourceBooking {
     ok( $idResources[2]->{id} eq $Resources[2]->{id},
         'resource ' . $Resources[2]->{id} . ' end' );
 }
-=pod
 #Testing resource updating and getting
 {
-    $idRes = $client->updateResource( _idResource( $Resources[0] ),
+    $idRes = $client->updateResource( $Resources[0]->{id} ,
         "aulaaaaaa", "info aulaaaaaa" );
-    ok( $idRes eq $Resources[0],
-        'updated resource ' . _idResource( $Resources[0] ) );
-
-    $dataRes = $client->getResource( _idResource( $Resources[0] ) );
+    ok( $idRes->{id} eq $Resources[0]->{id},
+        'updated resource ' . $Resources[0]->{id} );
+    $dataRes = $client->getResource( $Resources[0]->{id}  );
     ok( $dataRes->{description} eq 'aulaaaaaa'
             && !defined $dataRes->{agenda}
             && $dataRes->{info} eq 'info aulaaaaaa',
-        'get resource ' . _idResource( $Resources[0] )
+        'get resource ' . $Resources[0]->{id}
     );
 
-    $idRes = $client->updateResource( _idResource( $Resources[0] ),
+    $idRes = $client->updateResource( $Resources[0]->{id} ,
         "aula", "info" );
-    ok( $idRes eq $Resources[0],
-        'updated resource ' . _idResource( $Resources[0] ) );
+    ok( $idRes->{id} eq $Resources[0]->{id},
+        'updated resource ' . $Resources[0]->{id} );
 
-    $dataRes = $client->getResource( _idResource( $Resources[0] ) );
+    $dataRes = $client->getResource( $Resources[0]->{id}  );
     ok( $dataRes->{description} eq 'aula'
             && !defined $dataRes->{agenda}
             && $dataRes->{info} eq 'info',
-        'get resource ' . _idResource( $Resources[0] )
+        'get resource ' . $Resources[0]->{id}
     );
 
     @idResources = $client->listResources();
-    ok( $idResources[0] eq $Resources[0],
-        'resource ' . _idResource( $Resources[0] ) . ' at list' );
+    ok( $idResources[0]->{id} eq $Resources[0]->{id},
+        'resource ' . $Resources[0]->{id} . ' at list' );
 
-    $idRes = $client->updateResource( _idResource( $Resources[1] ),
+    $idRes = $client->updateResource( $Resources[1]->{id},
         "projector", "info projector" );
-    ok( $idRes eq $Resources[1],
-        'updated resource ' . _idResource( $Resources[1] ) );
+    ok( $idRes->{id} eq $Resources[1]->{id},
+        'updated resource ' . $Resources[1]->{id} );
 
-    $dataRes = $client->getResource( _idResource( $Resources[1] ) );
+    $dataRes = $client->getResource( $Resources[1]->{id} );
     ok( $dataRes->{description} eq 'projector'
             && !defined $dataRes->{agenda}
             && $dataRes->{info} eq 'info projector',
-        'get resource ' . _idResource( $Resources[1] )
+        'get resource ' . $Resources[1]->{id}
     );
 }
 
@@ -161,21 +138,21 @@ sub _idResourceBooking {
     @idResources = $client->listResources();
     ok( @idResources == 3, 'list resources not empty' );
 
-    $idRes = $client->delResource( _idResource( $Resources[0] ) );
-    ok( $idRes eq _idResource( $Resources[0] ),
-        'deleted resource ' . _idResource( $Resources[0] ) );
+    $idRes = $client->delResource( $Resources[0]->{id} );
+    ok( $idRes->{id} eq $Resources[0]->{id},
+        'deleted resource ' . $Resources[0]->{id} );
 
     @idResources = $client->listResources();
     ok( @idResources == 2, 'list resources not empty' );
 
-    $idRes = $client->delResource( _idResource( $Resources[2] ) );
-    ok( $idRes eq _idResource( $Resources[2] ),
-        'deleted resource ' . _idResource( $Resources[2] ) );
+    $idRes = $client->delResource( $Resources[2]->{id} );
+    ok( $idRes->{id} eq $Resources[2]->{id} ,
+        'deleted resource ' . $Resources[2]->{id} );
 
     @idResources = $client->listResources();
     ok( @idResources == 1, 'list resources not empty' );
-    ok( $idResources[0] eq $Resources[1],
-        'remining resource is ' . _idResource( $Resources[1] ) );
+    ok( $idResources[0]->{id} eq $Resources[1]->{id},
+        'remining resource is ' . $Resources[1]->{id} );
 }
 
 my $desc = "description 1";
@@ -256,37 +233,37 @@ my $info0 = "info 0";
 
 #Testing retrieve Agenda empty
 {
-    @idBookings = $client->listBookings( _idResource( $Resources[1] ) );
-    ok( @idBookings == 0, 'empty Agenda at ' . _idResource( $Resources[1] ) );
+    @idBookings = $client->listBookings( $Resources[1]->{id} );
+    ok( @idBookings == 0, 'empty Agenda at ' . $Resources[1]->{id} );
 }
 
 #Testing create booking
 {
     push @Bookings,
-        $client->createBooking( _idResource( $Resources[1] ),
+        $client->createBooking( $Resources[1]->{id} ,
         $desc, $from, $to, $info );
     ok( defined $Bookings[0],
-        'booking created ' . _idResource( $Bookings[0] ) );
+        'booking created ' . $Bookings[0]->{id} );
 
     push @Bookings,
-        $client->createBooking( _idResource( $Resources[1] ),
+        $client->createBooking( $Resources[1]->{id} ,
         $desc2, $from2, $to2, $info2 );
     ok( defined $Bookings[1],
-        'booking created ' . _idResource( $Bookings[1] ) );
+        'booking created ' . $Bookings[1]->{id} );
 
     push @Bookings,
-        $client->createBooking( _idResource( $Resources[1] ),
+        $client->createBooking( $Resources[1]->{id} ,
         $desc, $from, $to, $info );
     ok( !exists $Bookings[2], 'booking not created, intersection' );
 
     push @Bookings,
-        $client->createBooking( _idResource( $Resources[1] ),
+        $client->createBooking( $Resources[1]->{id} ,
         $desc3, $from3, $to3, $info3 );
     ok( defined $Bookings[2],
-        'booking created ' . _idResource( $Bookings[2] ) );
+        'booking created ' . $Bookings[2]->{id} );
 
-    my $ical1 = $client->getBookingICal( _idResourceBooking( $Bookings[0] ) );
-    my $ical2 = $client->listBookingsICal( _idResource( $Resources[1] ) );
+    my $ical1 = $client->getBookingICal( $Bookings[0]->{idR},$Bookings[0]->{id} );
+    my $ical2 = $client->listBookingsICal( $Resources[1]->{id} );
 
     my $entry = Data::ICal::Entry::Event->new();
     $entry->add_properties(
@@ -371,19 +348,20 @@ my $info0 = "info 0";
 
 #Testing retrieve Agenda not empty
 {
-    @idBookings = $client->listBookings( _idResource( $Resources[1] ) );
-    ok( @idBookings == 3,
-        'not empty Agenda at ' . _idResource( $Resources[1] ) );
+    @idBookings = $client->listBookings( $Resources[1]->{id} );
+    ok( @idBookings == 3 &&
+		$idBookings[2]->{idR} == $Resources[1]->{id},
+        'not empty Agenda at ' . $Resources[1]->{id} );
 
-    @idBookings = $client->listBookings( _idResource( $Resources[0] ) );
+    @idBookings = $client->listBookings( $Resources[0]->{id} );
     ok( !defined $idBookings[0],
-        'not empty Agenda at ' . _idResource( $Resources[0] ) );
+        'empty Agenda at ' . $Resources[0]->{id} );
 
 }
 
 #Testing retrieve and delete booking
 {
-    $dataBoo = $client->getBooking( _idResourceBooking( $Bookings[1] ) );
+    $dataBoo = $client->getBooking( $Bookings[1]->{idR}, $Bookings[1]->{id});
     ok( $dataBoo->{from}->{year} == 2008
             && $dataBoo->{from}->{month} == 4
             && $dataBoo->{from}->{day} == 15
@@ -397,13 +375,13 @@ my $info0 = "info 0";
             && $dataBoo->{to}->{minute} == 0
             && $dataBoo->{to}->{second} == 0,
         'resource '
-            . _idResource( $Bookings[1] )
+            . $Bookings[1]->{idR}
             . ' booking '
-            . _idResourceBooking( $Bookings[1] )
+            . $Bookings[1]->{id}
             . '-> retrieved'
     );
 
-    $dataBoo = $client->getBooking( _idResourceBooking( $Bookings[0] ) );
+    $dataBoo = $client->getBooking( $Bookings[0]->{idR}, $Bookings[0]->{id});
     ok( $dataBoo->{from}->{year} == 2008
             && $dataBoo->{from}->{month} == 4
             && $dataBoo->{from}->{day} == 14
@@ -417,53 +395,53 @@ my $info0 = "info 0";
             && $dataBoo->{to}->{minute} == 0
             && $dataBoo->{to}->{second} == 0,
         'resource '
-            . _idResource( $Bookings[0] )
+            . $Bookings[0]->{idR}
             . ' booking '
-            . _idResourceBooking( $Bookings[0] )
+            . $Bookings[0]->{id}
             . '-> retrieved'
     );
 
-    $idBook = $client->delBooking( _idResourceBooking( $Bookings[0] ) );
-    ok( $idBook eq _idResourceBooking( $Bookings[0] ),
-        'deleted booking ' . _idResourceBooking( $Bookings[0] )
+    $idBook = $client->delBooking( $Bookings[0]->{idR}, $Bookings[0]->{id} );
+    ok( $idBook->{id} eq $Bookings[0]->{id},
+        'deleted booking ' . $Bookings[0]->{id}
     );
 
-    $dataBoo = $client->getBooking( _idResourceBooking( $Bookings[0] ) );
+    $dataBoo = $client->getBooking( $Bookings[0]->{idR}, $Bookings[0]->{id} );
     ok( !defined $dataBoo, 'retrieving booking not existent' );
 
-    $idBook = $client->delBooking( $Resources[0], 1 );
+    $idBook = $client->delBooking( $Resources[0]->{idR}, 1 );
     ok( !defined $idBook, 'not deleted booking, resource not existent' );
 
-    $idBook = $client->delBooking( $Resources[1], -100 );
+    $idBook = $client->delBooking( $Resources[1]->{idR}, -100 );
     ok( !defined $idBook, 'not deleted booking, booking not existent' );
 }
 
 #Testing retrieve Agenda not empty after deleting
 {
-    @idBookings = $client->listBookings( _idResource( $Resources[1] ) );
+    @idBookings = $client->listBookings( $Resources[1]->{id} );
     ok( @idBookings == 2,
-        'not empty Agenda at ' . _idResource( $Resources[1] ) );
+        'not empty Agenda at ' . $Resources[1]->{id} );
 }
 
 #Testing update Booking
 {
-    $idBook = $client->updateBooking( _idResourceBooking( $Bookings[0] ),
+    $idBook = $client->updateBooking( $Bookings[0]->{idR}, $Bookings[0]->{id} ,
         $desc, $from, $to );
     ok( !defined $idBook, 'not updated booking, not existent resource' );
 
-    $idBook = $client->updateBooking( _idResource( $Resources[2] ),
+    $idBook = $client->updateBooking( $Resources[2]->{id},
         1, $desc, $from, $to );
     ok( !defined $idBook, 'not updated booking, not existent resource' );
 
-    $idBook = $client->updateBooking( _idResource( $Resources[1] ),
+    $idBook = $client->updateBooking( $Resources[1]->{id},
         -555, $desc, $from, $to );
     ok( !defined $idBook, 'not updated booking, not existent booking' );
 
-    $idBook = $client->updateBooking( _idResourceBooking( $Bookings[1] ),
+    $idBook = $client->updateBooking( $Bookings[1]->{idR}, $Bookings[1]->{id},
         $desc2, $from2, $to2 );
-    ok( defined $idBook, 'updated booking ' . $Bookings[1] );
+    ok( defined $idBook, 'updated booking ' . $Bookings[1]->{id} );
 
-    $dataBoo = $client->getBooking( _idResourceBooking( $Bookings[1] ) );
+    $dataBoo = $client->getBooking( $Bookings[1]->{idR}, $Bookings[1]->{id} );
     ok( $dataBoo->{from}->{year} == $from2->{year}
             && $dataBoo->{from}->{month} == $from2->{month}
             && $dataBoo->{from}->{day} == $from2->{day}
@@ -476,21 +454,21 @@ my $info0 = "info 0";
             && $dataBoo->{to}->{hour} == $to2->{hour}
             && $dataBoo->{to}->{minute} == $to2->{minute}
             && $dataBoo->{to}->{second} == $to2->{second},
-        'retrieved booking updated' . $Bookings[1]
+        'retrieved booking updated' . $Bookings[1]->{id}
     );
 
-    $idBook = $client->updateBooking( _idResourceBooking( $Bookings[2] ),
+    $idBook = $client->updateBooking( $Bookings[2]->{idR}, $Bookings[2]->{id},
         $desc2, $from2, $to2 );
     ok( !defined $idBook,
         'not updated booking, intersection '
-            . _idResourceBooking( $Bookings[2] )
+            . $Bookings[2]->{idR} .' '. $Bookings[2]->{id}
     );
 
-    $idBook = $client->updateBooking( _idResourceBooking( $Bookings[2] ),
+    $idBook = $client->updateBooking( $Bookings[2]->{idR}, $Bookings[2]->{id},
         $desc, $from, $to );
-    ok( defined $idBook, 'updated booking ' . $idBook );
+    ok( defined $idBook, 'updated booking ' . $idBook->{id} );
 
-    $dataBoo = $client->getBooking( _idResourceBooking( $Bookings[2] ) );
+    $dataBoo = $client->getBooking( $Bookings[2]->{idR}, $Bookings[2]->{id} );
     ok( $dataBoo->{from}->{year} == $from->{year}
             && $dataBoo->{from}->{month} == $from->{month}
             && $dataBoo->{from}->{day} == $from->{day}
@@ -503,7 +481,7 @@ my $info0 = "info 0";
             && $dataBoo->{to}->{hour} == $to->{hour}
             && $dataBoo->{to}->{minute} == $to->{minute}
             && $dataBoo->{to}->{second} == $to->{second},
-        'retrieved booking updated' . $Bookings[2]
+        'retrieved booking updated ' . $Bookings[2]->{id}
     );
 
 }
@@ -519,9 +497,8 @@ my $info0 = "info 0";
 
     push @Resources, $client->createResource( "aula", "hora" );
     ok( defined $Resources[0],
-        'created resource ' . _idResource( $Resources[0] ) );
-
-    $idTg = $client->createTag( _idResource( $Resources[0] ), $valTg[0] );
+        'created resource ' . $Resources[0]->{id} );
+    $idTg = $client->createTag( $Resources[0]->{id}, $valTg[0] );
     ok( !defined $idTg, 'tag not added' );
 
     $idTg = $client->createTag( -111, $valTg[1] );
@@ -530,12 +507,12 @@ my $info0 = "info 0";
     $idTg = $client->createTag( -111, $valTg[0] );
     ok( !defined $idTg, "tag not added, incorrect tag" );
 
-    $idTg = $client->createTag( _idResource( $Resources[0] ), $valTg[1] );
-    ok( defined $idTg && $idTg eq $Resources[0] . '/tag/' . $valTg[1],
+    $idTg = $client->createTag( $Resources[0]->{id}, $valTg[1] );
+    ok( defined $idTg && $idTg->{content} eq $valTg[1],
         'tag added' );
 
-    $idTg = $client->createTag( _idResource( $Resources[0] ), $valTg[3] );
-    ok( defined $idTg && $idTg eq $Resources[0] . '/tag/' . $valTg[3],
+    $idTg = $client->createTag( $Resources[0]->{id}, $valTg[3] );
+    ok( defined $idTg && $idTg->{content} eq $valTg[3],
         'tag added' );
 
     $idTg = $client->createTag( "/resource/-111", "aula" );
@@ -550,55 +527,54 @@ my @tgS;
 
     push @Resources, $client->createResource( "aulaaaaa", "hora" );
     ok( defined $Resources[0],
-        'created resource ' . _idResource( $Resources[0] ) );
+        'created resource ' . $Resources[0]->{id} );
 
-    push @tgS, $client->listTags( _idResource( $Resources[0] ) );
-    ok( @tgS == 0, 'list with 0 tags ' . $Resources[0] );
+    push @tgS, $client->listTags( $Resources[0]->{id} );
+    ok( @tgS == 0, 'list with 0 tags ' . $Resources[0]->{id} );
 
-    $idTg = $client->createTag( _idResource( $Resources[0] ), $valTg[1] );
-    ok( defined $idTg && $idTg eq $Resources[0] . '/tag/' . $valTg[1],
-        'tag added at ' . $Resources[0] );
+    $idTg = $client->createTag( $Resources[0]->{id}, $valTg[1] );
+    ok( defined $idTg && $idTg->{content} eq $valTg[1],
+        'tag added at ' . $Resources[0]->{id} );
 
-    @tgS = $client->listTags( _idResource( $Resources[0] ) );
-    ok( @tgS == 1, 'list with 1 tags en resource ' . $Resources[0] );
+    @tgS = $client->listTags( $Resources[0]->{id} );
+    ok( @tgS == 1, 'list with 1 tags en resource ' . $Resources[0]->{id} );
 
-    $idTg = $client->createTag( _idResource( $Resources[0] ), $valTg[3] );
-    ok( defined $idTg && $idTg eq $Resources[0] . '/tag/' . $valTg[3],
-        'tag added at ' . $Resources[0] );
+    $idTg = $client->createTag( $Resources[0]->{id}, $valTg[3] );
+    ok( defined $idTg && $idTg->{content} eq $valTg[3],
+        'tag added at ' . $Resources[0]->{id} );
 
-    @tgS = $client->listTags( _idResource( $Resources[0] ) );
-    ok( @tgS == 2, 'list with 2 tags in resource ' . $Resources[0] );
+    @tgS = $client->listTags( $Resources[0]->{id} );
+    ok( @tgS == 2, 'list with 2 tags in resource ' . $Resources[0]->{id} );
 
-    $idTg = $client->delTag( _idResource( $Resources[0] ), $valTg[3] );
-    ok( defined $idTg && $idTg eq $valTg[3],
-        'tag deleted at ' . $Resources[0]
+    $idTg = $client->delTag( $Resources[0]->{id}, $valTg[3] );
+    ok( defined $idTg && $idTg->{content} eq $valTg[3],
+        'tag deleted at ' . $Resources[0]->{id}
     );
 
-    @tgS = $client->listTags( _idResource( $Resources[0] ) );
-    ok( @tgS == 1, 'list with 1 tag in resource ' . $Resources[0] );
-    ok( $tgS[0] eq $Resources[0] . '/tag/' . $valTg[1],
-        'correct remining tag at ' . $Resources[0]
+    @tgS = $client->listTags( $Resources[0]->{id} );
+    ok( @tgS == 1, 'list with 1 tag in resource ' . $Resources[0]->{id} );
+    ok( $tgS[0]->{content} eq $valTg[1],
+        'correct remining tag at ' . $Resources[0]->{id}
     );
 
     $idTg = $client->delTag( -111, $valTg[1] );
     ok( !defined $idTg, "tag not deleted, resource doesn't exist" );
 
-    $idTg = $client->delTag( _idResource( $Resources[0] ), $valTg[1] );
-    ok( defined $idTg && $idTg eq $valTg[1],
-        'tag deleted at ' . $Resources[0]
+    $idTg = $client->delTag( $Resources[0]->{id}, $valTg[1] );
+    ok( defined $idTg && $idTg->{content} eq $valTg[1],
+        'tag deleted at ' . $Resources[0]->{id}
     );
 
-    @tgS = $client->listTags( _idResource( $Resources[0] ) );
-    ok( @tgS == 0, 'list with 0 tags in resource ' . $Resources[0] );
+    @tgS = $client->listTags( $Resources[0]->{id} );
+    ok( @tgS == 0, 'list with 0 tags in resource ' . $Resources[0]->{id} );
 
-    $idTg = $client->delTag( _idResource( $Resources[0] ), $valTg[1] );
+    $idTg = $client->delTag( $Resources[0]->{id}, $valTg[1] );
     ok( !defined $idTg, "tag not deleted, it doesn't exist" );
 
     @tgS = $client->listTags(-111);
     ok( @tgS == 0, "not listing tags, doen't exit resource" );
-
 }
-=cut
+
 END {
     kill 3, $pid;
     Smeagol::DataStore->clean();

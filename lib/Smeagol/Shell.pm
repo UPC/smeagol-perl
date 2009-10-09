@@ -42,7 +42,7 @@ sub run_llista_recursos {
         my $idAux = $idResource;
         my @res   = $client->listResources();
         foreach (@res) {
-            $idResource = _idResource($_);
+            $idResource = $_->{id};
             $self->run_mostra_recurs();
             print "------------------------------------\n";
         }
@@ -78,8 +78,8 @@ sub run_crea_recurs {
             my $res = $client->createResource($desc);
             if ( defined $res ) {
                 print "Recurs creat correctament! Dades del recurs:\n";
-                print "Identificador: " . _idResource($res) . "\n";
-                print "Descripció   : $desc \n";
+                print "Identificador: " . $res->{id} . "\n";
+                print "Descripció   : ".$res->{description} ."\n";
             }
             else {
                 print "ERROR: El recurs no s'ha pogut crear correctament\n";
@@ -124,7 +124,7 @@ sub run_tria_recurs {
                 }
             }
             else {
-                $idResource = $id;
+                $idResource = $res->{id};
                 print "Recurs $idResource triat correctament\n";
             }
         }
@@ -165,9 +165,10 @@ sub run_mostra_recurs {
     else {
         my $res = $client->getResource($idResource);
         print
-            "Dades del recurs $idResource\nDescripcio: $res->{description}\n";
+            "Dades del recurs $res->{id}\nDescripcio: $res->{description}\n";
+		(defined $res->{agenda})? print "Agenda: ".$res->{agenda}."\n" : print "Agenda:\n";
         $self->run_mostra_etiquetes();
-        $self->run_mostra_reserves();
+#        $self->run_mostra_reserves();
     }
 }
 
@@ -191,7 +192,7 @@ sub run_esborra_recurs {
             print "ERROR: No s'ha esborrat cap recurs\n";
         }
         else {
-            print "Recurs $idResource esborrat correctament!\n";
+            print "Recurs $res->{id} esborrat correctament!\n";
             $idResource = undef;
         }
     }
@@ -217,11 +218,10 @@ sub run_afegeix_etiqueta {
     elsif ($tag) {
         my $res = $client->createTag( $idResource, $tag );
         if ( defined $res ) {
-            my @ids = _idResourceTag($res);
             print "Etiqueta "
-                . $ids[1]
+                . $res->{content}
                 . " afegida al recurs "
-                . $ids[0]
+                . $res->{idR}
                 . " correctament!\n";
         }
         else {
@@ -250,7 +250,7 @@ sub run_esborra_etiqueta {
         my $res = $client->delTag( $idResource, $tag );
         if ( defined $res ) {
             print
-                "Etiqueta $res esborrada del recurs $idResource correctament!\n";
+                "Etiqueta $res->{content} esborrada del recurs $idResource correctament!\n";
         }
         else {
             print
@@ -279,8 +279,7 @@ sub run_mostra_etiquetes {
         my @tags = $client->listTags($idResource);
         print "Etiquetes : ";
         foreach (@tags) {
-            my @ids = _idResourceTag($_);
-            print $ids[1] . "  ";
+            print $_->{content} . "  ";
         }
         print "\n";
     }
@@ -323,9 +322,9 @@ sub run_crea_reserva {
                 if ( defined $res ) {
                     my @ids = _idResourceBooking($res);
                     print "Reserva "
-                        . $ids[1]
+                        . $res->{id}
                         . " creada pel recurs "
-                        . $ids[0]
+                        . $res->{idR}
                         . " correctament!\n";
                 }
                 else {
@@ -367,7 +366,7 @@ sub run_esborra_reserva {
         my $res = $client->delBooking( $idResource, $id );
         if ( defined $res ) {
             print
-                "Reserva amb identificador $res esborrada del recurs $idResource correctament!\n";
+                "Reserva amb identificador $res->{id} esborrada del recurs $idResource correctament!\n";
         }
         else {
             print
@@ -435,8 +434,7 @@ sub run_mostra_reserves {
         my @bookings = $client->listBookings($idResource);
         print "Reserves  : \n";
         foreach (@bookings) {
-            my @ids = _idResourceBooking($_);
-            $self->run_mostra_reserva( $ids[1] );
+            $self->run_mostra_reserva( $_->{id} );
         }
     }
 }
@@ -470,38 +468,5 @@ sub msg_unknown_cmd {
     print "Comanda '$cmd' desconeguda; escriu 'help' per obtenir ajuda.\n";
 }
 
-####Metodes interns
-sub _idResource {
-    my ($url) = shift;
-
-    if ( $url =~ /\/resource\/(\w+)/ ) {
-        return $1;
-    }
-    else {
-        return;
-    }
-}
-
-sub _idResourceBooking {
-    my ($url) = shift;
-
-    if ( $url =~ /resource\/(\d+)\/booking\/(\d+)/ ) {
-        return ( $1, $2 );
-    }
-    else {
-        return;
-    }
-}
-
-sub _idResourceTag {
-    my ($url) = shift;
-
-    if ( $url =~ /resource\/(\d+)\/tag\/([\w.:_\-]+)/ ) {
-        return ( $1, $2 );
-    }
-    else {
-        return;
-    }
-}
 
 1;

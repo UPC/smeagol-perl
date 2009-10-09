@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-use Test::More tests => 76;
+use Test::More tests => 77;
 
 use strict;
 use warnings;
@@ -244,6 +244,9 @@ my $info0 = "info 0";
         $desc, $from, $to, $info );
     ok( defined $Bookings[0],
         'booking created ' . $Bookings[0]->{id} );
+
+	$dataRes = $client->getResource($Resources[1]->{id});
+	ok($dataRes->{agenda} eq $client->{url}."/resource/".$Resources[1]->{id}."/bookings", "retrieving a resource with agenda");
 
     push @Bookings,
         $client->createBooking( $Resources[1]->{id} ,

@@ -179,7 +179,7 @@ sub getResource {
         my $dom = eval { XML::LibXML->new->parse_string( $res->content ) };
         croak $@ if $@;
         my $result = XMLin( $res->content );
-		$result->{agenda} = $self->{url}.$result->{'xlink:href'}."/bookings" if ( defined $result->{idAgenda} );
+		$result->{agenda} = $self->{url}.$result->{'xlink:href'}."/bookings" if ( defined $result->{agenda} );
 		$result->{id} = _idResource($result->{'xlink:href'});
 		$result->{url} = $self->{url}.$result->{'xlink:href'};
 		return $result;

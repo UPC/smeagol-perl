@@ -51,6 +51,81 @@ my $idAg;
 my $idTg;
 my @valTg;
 
+my $desc = "description 1";
+my $from = {
+    year   => 2008,
+    month  => 4,
+    day    => 14,
+    hour   => 17,
+    minute => 0,
+    second => 0,
+};
+my $to = {
+    year   => 2008,
+    month  => 4,
+    day    => 14,
+    hour   => 19,
+    minute => 0,
+    second => 0,
+};
+my $info = "info 1";
+
+my $desc2 = "description 2";
+my $from2 = {
+    year   => 2008,
+    month  => 4,
+    day    => 15,
+    hour   => 19,
+    minute => 0,
+    second => 0,
+};
+my $to2 = {
+    year   => 2008,
+    month  => 4,
+    day    => 15,
+    hour   => 20,
+    minute => 0,
+    second => 0,
+};
+my $info2 = "info 2";
+
+my $desc3 = "description 3";
+my $from3 = {
+    year   => 2008,
+    month  => 4,
+    day    => 15,
+    hour   => 9,
+    minute => 0,
+    second => 0,
+};
+my $to3 = {
+    year   => 2008,
+    month  => 4,
+    day    => 15,
+    hour   => 11,
+    minute => 0,
+    second => 0,
+};
+my $info3 = "info 3";
+
+my $desc0 = "description 0";
+my $from0 = {
+    year   => 2008,
+    month  => 4,
+    day    => 14,
+    hour   => 16,
+    minute => 0,
+    second => 0,
+};
+my $to0 = {
+    year   => 2008,
+    month  => 4,
+    day    => 14,
+    hour   => 17,
+    minute => 0,
+    second => 0,
+};
+my $info0 = "info 0";
 
 
 # Testing retrieve empty resource list
@@ -58,6 +133,26 @@ my @valTg;
     @idResources = $client->listResources();
     ok( @idResources == 0, 'list resources empty' );
 }
+
+# Testing list of bookings with only one
+{
+    push @Resources, $client->createResource( "aula", "info aula" );
+    ok( defined $Resources[0],
+        'created resource ' . $Resources[0]->{id}  );
+
+    push @Bookings,
+        $client->createBooking( $Resources[0]->{id} ,
+        $desc, $from, $to, $info );
+    ok( defined $Bookings[0],
+        'booking created ' . $Bookings[0]->{id} );
+    
+    my @books = $client->listBookings($Resources[0]->{id});
+   warn Dumper(@books);
+
+    @Resources=();
+    @Bookings = ();
+}
+
 
 # Testing resource creation and retrieving not an empty list
 {
@@ -155,81 +250,6 @@ my @valTg;
         'remining resource is ' . $Resources[1]->{id} );
 }
 
-my $desc = "description 1";
-my $from = {
-    year   => 2008,
-    month  => 4,
-    day    => 14,
-    hour   => 17,
-    minute => 0,
-    second => 0,
-};
-my $to = {
-    year   => 2008,
-    month  => 4,
-    day    => 14,
-    hour   => 19,
-    minute => 0,
-    second => 0,
-};
-my $info = "info 1";
-
-my $desc2 = "description 2";
-my $from2 = {
-    year   => 2008,
-    month  => 4,
-    day    => 15,
-    hour   => 19,
-    minute => 0,
-    second => 0,
-};
-my $to2 = {
-    year   => 2008,
-    month  => 4,
-    day    => 15,
-    hour   => 20,
-    minute => 0,
-    second => 0,
-};
-my $info2 = "info 2";
-
-my $desc3 = "description 3";
-my $from3 = {
-    year   => 2008,
-    month  => 4,
-    day    => 15,
-    hour   => 9,
-    minute => 0,
-    second => 0,
-};
-my $to3 = {
-    year   => 2008,
-    month  => 4,
-    day    => 15,
-    hour   => 11,
-    minute => 0,
-    second => 0,
-};
-my $info3 = "info 3";
-
-my $desc0 = "description 0";
-my $from0 = {
-    year   => 2008,
-    month  => 4,
-    day    => 14,
-    hour   => 16,
-    minute => 0,
-    second => 0,
-};
-my $to0 = {
-    year   => 2008,
-    month  => 4,
-    day    => 14,
-    hour   => 17,
-    minute => 0,
-    second => 0,
-};
-my $info0 = "info 0";
 
 #Testing retrieve Agenda empty
 {

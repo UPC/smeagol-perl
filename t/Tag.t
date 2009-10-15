@@ -125,7 +125,7 @@ my $xml;
     my $tag      = Smeagol::Tag->new($text);
     isa_ok( $tag, 'Smeagol::Tag' );
     is( $tag->value, $text, "value in UTF-8" );
-    like( $tag->toXML, qr/$text/, "XML string in UTF-8" );
+    like( decode($encoding, $tag->toXML), qr/$text/, "XML string in UTF-8" );
 }
 
 END { Smeagol::DataStore->clean() }

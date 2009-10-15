@@ -5,7 +5,6 @@ use warnings;
 
 use Set::Object ();
 use base qw(Set::Object);
-use XML::LibXML;
 use Smeagol::Booking;
 use Smeagol::XML;
 use Carp;

@@ -59,7 +59,7 @@ sub smeagolURL {
     my $res = smeagolRequest( 'GET', "$server/resources" );
     ok( $res->is_success,
         'resource list retrieval status ' . Dumper( $res->code ) );
-
+    print Dumper( $res->content );
     like(
         $res->content,
         qr|<\?xml version="1.0" encoding="UTF-8"\?>\n<\?xml-stylesheet type="application/xml" href="/xsl/resources.xsl"\?>\n<resources xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="/resources"/>|,

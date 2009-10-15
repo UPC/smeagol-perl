@@ -157,38 +157,36 @@ sub newFromXML {
 }
 
 sub toSmeagolXML {
-    my $self = shift;
+    my $self        = shift;
     my $xlinkPrefix = shift;
 
-    my $smeagolXML = eval { Smeagol::XML->new('<resource/>')};
+    my $smeagolXML = eval { Smeagol::XML->new('<resource/>') };
     croak $@ if $@;
     my $dom = $smeagolXML->doc;
-    #my $dom = XML::LibXML::Document->new( '1.0', 'UTF-8' );
-    #my $resourceNode = $dom->createElement('resource');
-    #$dom->setDocumentElement($resourceNode);
-    
+
     my $resourceNode = $dom->documentElement;
 
     $resourceNode->appendTextChild( 'description', $self->{description} );
 
-    if ( defined $self->{agenda} ) {
-        my $agendaNode = $self->{agenda}->toSmeagolXML->doc->documentElement();
+    if ( $self->{agenda}->size > 0 ) {
+        my $agendaNode
+            = $self->{agenda}->toSmeagolXML->doc->documentElement();
         $dom->adoptNode($agendaNode);
         $resourceNode->appendChild($agendaNode);
     }
 
-    if ( defined $self->{info} ) {
+    if ( $self->{info} ne "" ) {
         $resourceNode->appendTextChild( 'info', $self->{info} );
     }
 
-    if ( defined $self->{tags} ) {
+    if ( $self->{tags}->size > 0 ) {
         my $tagSetNode = $self->{tags}->toDOM->documentElement();
         $dom->adoptNode($tagSetNode);
         $resourceNode->appendChild($tagSetNode);
     }
 
-    if (defined $xlinkPrefix) {
-        $dom->addXLink( "resource", $xlinkPrefix . $self->url);
+    if ( defined $xlinkPrefix ) {
+        $dom->addXLink( "resource", $xlinkPrefix . $self->url );
     }
 
     return $dom;
@@ -196,7 +194,7 @@ sub toSmeagolXML {
 
 sub toString {
     my $self = shift;
-    my $url = shift;
+    my $url  = shift;
 
     my $dom = $self->toSmeagolXML($url);
 

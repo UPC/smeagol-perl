@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-use Test::More tests => 77;
+use Test::More tests => 78;
 
 use strict;
 use warnings;
@@ -134,26 +134,6 @@ my $info0 = "info 0";
     ok( @idResources == 0, 'list resources empty' );
 }
 
-# Testing list of bookings with only one
-{
-    push @Resources, $client->createResource( "aula", "info aula" );
-    ok( defined $Resources[0],
-        'created resource ' . $Resources[0]->{id}  );
-
-    push @Bookings,
-        $client->createBooking( $Resources[0]->{id} ,
-        $desc, $from, $to, $info );
-    ok( defined $Bookings[0],
-        'booking created ' . $Bookings[0]->{id} );
-    
-    my @books = $client->listBookings($Resources[0]->{id});
-   warn Dumper(@books);
-
-    @Resources=();
-    @Bookings = ();
-}
-
-
 # Testing resource creation and retrieving not an empty list
 {
     push @Resources, $client->createResource( "aula", "info aula" );
@@ -264,6 +244,9 @@ my $info0 = "info 0";
         $desc, $from, $to, $info );
     ok( defined $Bookings[0],
         'booking created ' . $Bookings[0]->{id} );
+
+    my @books = $client->listBookings($Resources[1]->{id});
+    ok( $books[0]->{idR} eq $Resources[1]->{id}, 'list with only one booking');
 
 	$dataRes = $client->getResource($Resources[1]->{id});
 	ok($dataRes->{agenda} eq $client->{url}."/resource/".$Resources[1]->{id}."/bookings", "retrieving a resource with agenda");

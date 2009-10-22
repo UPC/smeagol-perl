@@ -320,7 +320,6 @@ sub run_crea_reserva {
                     $to );
 
                 if ( defined $res ) {
-                    my @ids = _idResourceBooking($res);
                     print "Reserva "
                         . $res->{id}
                         . " creada pel recurs "

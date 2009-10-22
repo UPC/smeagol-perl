@@ -235,15 +235,14 @@ sub listBookings {
     croak $@ if $@;
     my @idBookings;
 	my $bookings = XMLin( $res->content , ForceArray => 1);
-	warn Dumper($bookings);
-	if( defined  ($bookings->{booking}) && (scalar($bookings->{booking}) == 1) ){
+	if( defined  ($bookings->{booking}) && !(defined $bookings->{booking}->[1]) ){
 		$bookings = XMLin( $res->content );
 		my $result = $bookings->{booking};
 		$result->{idR} = _idResource($result->{'xlink:href'});
 		$result->{url} = $self->{url}.$result->{'xlink:href'};
 		push @idBookings, $result;
 
-	}elsif( defined  ($bookings->{booking}) && (scalar($bookings->{booking}) > 1)){
+	}elsif( defined  ($bookings->{booking}) && (defined $bookings->{booking}->[1]) ){
 		$bookings = XMLin( $res->content );
 		foreach my $id (keys %{$bookings->{booking}}){
 			my $result = $bookings->{booking}->{$id};
@@ -429,15 +428,5 @@ sub _idResource {
     }
 }
 
-sub _idResourceBooking {
-    my ($url) = shift;
-
-    if ( $url =~ /resource\/(\d+)\/booking\/(\d+)/ ) {
-        return ( $1, $2 );
-    }
-    else {
-        return;
-    }
-}
 
 1;

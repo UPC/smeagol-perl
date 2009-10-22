@@ -41,29 +41,25 @@ sub interlace {
 }
 
 sub toSmeagolXML {
-    my $self     = shift;
-    my $xlinkUrl = shift;
+    my $self        = shift;
+    my $xlinkPrefix = shift;
 
-    my $result = eval { Smeagol::XML->new('<agenda/>') };
+    my $url;
+    $url = ( $xlinkPrefix . $self->url ) if defined $xlinkPrefix;
+
+    my $result = eval { Smeagol::XML->new("<agenda/>") };
     croak $@ if $@;
 
-    my $dom        = $result->doc;
-    my $agendaNode = $dom->documentElement();
-
-    #my $dom = XML::LibXML::Document->new( '1.0', 'UTF-8' );
-    #my $agendaNode = $dom->createElement('agenda');
-    #$dom->setDocumentElement($agendaNode);
+    my $agendaNode = $result->doc->documentElement();
 
     for my $slot ( $self->elements ) {
         my $bookingNode
-            = $slot->toSmeagolXML($xlinkUrl)->doc->documentElement();
-        $dom->adoptNode($bookingNode);
+            = $slot->toSmeagolXML($xlinkPrefix)->doc->documentElement();
+        $result->doc->adoptNode($bookingNode);
         $agendaNode->appendChild($bookingNode);
     }
 
-    if ( defined $xlinkUrl ) {
-        $result->addXLink( "agenda", $xlinkUrl . "/bookings" );
-    }
+    $result->addXLink( "agenda", $url ) if defined $xlinkPrefix;
 
     return $result;
 }
@@ -81,6 +77,10 @@ sub toString {
 # DEPRECATED
 sub toXML {
     return shift->toString(@_);
+}
+
+sub url {
+    return "/bookings";
 }
 
 sub newFromXML {

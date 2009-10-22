@@ -32,12 +32,12 @@ sub toSmeagolXML {
     my $result = eval { Smeagol::XML->new('<resources/>') };
     croak $@ if $@;
 
+    $result->addPreamble('resources');
     my $dom           = $result->doc;
     my $resourcesNode = $dom->documentElement;
 
     for my $slot (@$self) {
-        my $resourceNode
-            = $slot->toSmeagolXML($xlinkPrefix)->doc->documentElement;
+        my $resourceNode = $slot->toSmeagolXML($xlinkPrefix)->documentElement;
         $dom->adoptNode($resourceNode);
         $resourceNode->appendChild($resourceNode);
     }

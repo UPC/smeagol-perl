@@ -96,10 +96,13 @@ sub toSmeagolXML {
     my $self        = shift;
     my $xlinkPrefix = shift;
 
+    my $url;
+    $url = ( $xlinkPrefix . $self->url ) if defined $xlinkPrefix;
+
     my $from = $self->span->start;
     my $to   = $self->span->end;
 
-    my $result = eval { Smeagol::XML->new('<booking/>') };
+    my $result = eval { Smeagol::XML->new("<booking/>") };
     croak $@ if $@;
 
     my $dom         = $result->doc;
@@ -127,9 +130,7 @@ sub toSmeagolXML {
     $bookingNode->appendChild($toNode);
     $bookingNode->appendTextChild( 'info', $self->info );
 
-    if ( defined $xlinkPrefix ) {
-        $result->addXLink( "booking", $xlinkPrefix . $self->url );
-    }
+    $result->addXLink( "booking", $url ) if defined $xlinkPrefix;
 
     return $result;
 }

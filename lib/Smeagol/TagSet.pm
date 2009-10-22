@@ -5,7 +5,6 @@ use warnings;
 
 use Set::Object ();
 use base qw(Set::Object);
-use XML::LibXML;
 use Smeagol::Tag;
 use Data::Dumper;
 use Smeagol::XML;
@@ -42,28 +41,37 @@ sub findValue {
     return grep { $value eq $_->value } $self->elements;
 }
 
-sub toDOM {
-    my $self = shift;
+sub toSmeagolXML {
+    my $self        = shift;
+    my $xlinkPrefix = shift;
 
-    my $dom = XML::LibXML::Document->new( '1.0', 'UTF-8' );
-    my $tagSetNode = $dom->createElement('tags');
-    $dom->setDocumentElement($tagSetNode);
+    my $url;
+    $url = $xlinkPrefix . $self->url if defined $xlinkPrefix;
+
+    my $result = eval { Smeagol::XML->new("<tags/>") };
+    croak @_ if @_;
+
+    my $tagSetNode = $result->doc->documentElement;
 
     for my $tag ( $self->elements ) {
-        my $tagNode = $tag->toSmeagolXML->doc->documentElement();
-        $dom->adoptNode($tagNode);
+        my $tagNode = $tag->toSmeagolXML($url)->doc->documentElement();
+        $result->doc->adoptNode($tagNode);
         $tagSetNode->appendChild($tagNode);
     }
 
-    return $dom;
+    return $result;
+}
+
+sub url {
+    return "/tags";
 }
 
 # No special order is granted in results, because of Set->elements behaviour.
 sub toString {
     my $self = shift;
-    my ( $url, $isRootNode ) = @_;
+    my $url  = shift;
 
-    my $dom = $self->toDOM;
+    my $dom = $self->toSmeagolXML($url);
 
     if ( defined $url ) {
         $dom->addXLink( "tags", $url . "/tags" );

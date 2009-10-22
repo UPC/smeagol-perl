@@ -11,6 +11,7 @@ use Smeagol::Agenda;
 use Smeagol::Booking;
 use Smeagol::Tag;
 use HTTP::Status qw(:constants);
+use Data::Dumper;
 
 our @EXPORT_OK
     = qw(listResources retrieveResource deleteResource updateResource createResource listBookings listBookingsIcal createBooking createTag listTags deleteTag retrieveBooking updateBooking deleteBooking retrieveBookingIcal);
@@ -38,7 +39,7 @@ sub retrieveResource {
         Smeagol::Server::sendError(HTTP_NOT_FOUND);
     }
     else {
-        Smeagol::Server::sendXML( $r->toXML( "", 1 ) );
+        Smeagol::Server::sendXML( $r->toXML("") );
     }
 }
 
@@ -95,7 +96,7 @@ sub createResource {
     }
     else {
         $r->save();
-        Smeagol::Server::sendXML( $r->toXML( "", 1 ), status => 201 );
+        Smeagol::Server::sendXML( $r->toXML(""), status => HTTP_CREATED );
     }
 }
 
@@ -120,7 +121,7 @@ sub listBookings {
         Smeagol::Server::sendICal("$ical");
     }
     else {
-        my $xml = $r->agenda->toXML( $r->url, 1 );
+        my $xml = $r->agenda->toXML( $r->url );
         Smeagol::Server::sendXML($xml);
     }
 }

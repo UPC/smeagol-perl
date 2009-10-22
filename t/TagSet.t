@@ -134,7 +134,7 @@ ok( $tg44->value eq "projeeector", 'tag checked' );
 
     ok( $tgS->size == 1, 'tgS contains 1 tags' );
 
-    $xmlTgS = $tgS->toXML();
+    $xmlTgS = $tgS->toString;
     ok( defined $xmlTgS, 'toXML ok' );
     ok( Compare( XMLin("<tags><tag>aula</tag></tags>"), XMLin($xmlTgS) ),
         'toXML checked' );

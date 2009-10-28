@@ -67,7 +67,7 @@ sub removeXLink {
     
     my $compiled_xpath = XML::LibXML::XPathExpression->new('*[@xlink:type]');
     
-    my @nodes = $doc->findnodes($compiled_xpath);
+    my @nodes = $self->doc->findnodes($compiled_xpath);
     
     for my $node (@nodes) {
         $node->removeAttribute('xlink:type');

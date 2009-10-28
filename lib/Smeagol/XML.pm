@@ -62,6 +62,20 @@ sub addXLink {
     }
 }
 
+sub removeXLink {
+    my $self = shift;
+    
+    my $compiled_xpath = XML::LibXML::XPathExpression->new('*[@xlink:type]');
+    
+    my @nodes = $doc->findnodes($compiled_xpath);
+    
+    for my $node (@nodes) {
+        $node->removeAttribute('xlink:type');
+        $node->removeAttribute('xlink:href');
+        $node->removeNamespace('http://www.w3.org/1999/xlink', 'xlink');
+    }
+}
+
 sub toString {
     return shift->{xmldoc}->toString();
 }

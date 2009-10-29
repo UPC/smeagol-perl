@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 83;
+use Test::More tests => 85;
 use DateTime;
 use LWP::UserAgent;
 use HTTP::Request;
@@ -160,19 +160,17 @@ my $resource2 = Smeagol::Resource->new( 'desc 2 2', undef, 'resource info' );
     # first, we create a new resource
     my $res
         = smeagolRequest( 'POST', smeagolURL('/resource'), $resource->toXML );
-    my $xmlTree = XMLin( $res->content );
+    my $xmlTreePOST = XMLin( $res->content );
 
     # retrieve the resource just created
-    $res = smeagolRequest( 'GET', smeagolURL( $xmlTree->{'xlink:href'} ) );
+    $res = smeagolRequest( 'GET', smeagolURL( $xmlTreePOST->{'xlink:href'} ) );
     ok( $res->code == HTTP_OK,
-        "resource $xmlTree->{'xlink:href'} retrieval, status "
+        "resource $xmlTreePOST->{'xlink:href'} retrieval, status "
             . Dumper( $res->code )
     );
 
-    print Dumper( $res->content );
-    my $r = Smeagol::Resource->newFromXML(
-        Smeagol::XML->removeXLink( $res->content ), 1000 );
-    ok( defined $r, "resource retrieval content " . Dumper( $res->content ) );
+    my $xmlTreeGET = XMLin( $res->content );
+    is_deeply($xmlTreePOST, $xmlTreeGET, 'ok');
 
     # retrieve non-existent Resource
     $res = smeagolRequest( 'GET', smeagolURL('/resource/-666') );
@@ -180,13 +178,13 @@ my $resource2 = Smeagol::Resource->new( 'desc 2 2', undef, 'resource info' );
         "non-existent resource retrieval status " . Dumper( $res->code ) );
 
     # delete the resource just created
-    $res = smeagolRequest( 'DELETE', smeagolURL( $xmlTree->{'xlink:href'} ) );
-    ok( $res->code == HTTP_OK, "resource removal $xmlTree->{'xlink:href'}" );
+    $res = smeagolRequest( 'DELETE', smeagolURL( $xmlTreeGET->{'xlink:href'} ) );
+    ok( $res->code == HTTP_OK, "resource removal $xmlTreeGET->{'xlink:href'}" );
 
     # try to retrieve the deleted resource
-    $res = smeagolRequest( 'GET', smeagolURL( $xmlTree->{'xlink:href'} ) );
+    $res = smeagolRequest( 'GET', smeagolURL( $xmlTreeGET->{'xlink:href'} ) );
     ok( $res->code == HTTP_NOT_FOUND,
-        "retrieval of $xmlTree->{'xlink:href'} deleted resource "
+        "retrieval of $xmlTreeGET->{'xlink:href'} deleted resource "
             . Dumper( $res->code )
     );
 }
@@ -201,51 +199,50 @@ my $resource2 = Smeagol::Resource->new( 'desc 2 2', undef, 'resource info' );
     ok( $res->code == HTTP_CREATED,
         'resource creation status ' . Dumper( $res->code ) );
     my $xmlTree = XMLin( $res->content );
-    my $r       = Smeagol::Resource->newFromXML(
-        Smeagol::XML->removeXLink( $res->content ), 1000 );
 
     # modify description
     my $novaDesc = 'He canviat la descripcio';
-    $r->description($novaDesc);
+    $resource->description($novaDesc);
 
     # update resource
-
     $res = smeagolRequest( 'POST', smeagolURL( $xmlTree->{'xlink:href'} ),
         $resource->toXML );
+    my $xmlTreeUP = XMLin($res->content);
 
     ok( $res->code == HTTP_OK,
         "resource $xmlTree->{'xlink:href'} update code: "
             . Dumper( $res->code )
     );
-
+    ok($xmlTree->{description} ne $xmlTreeUP->{description}, 'description changed ok' );
+    $xmlTree->{description} = $xmlTreeUP->{description};
+    is_deeply($xmlTree, $xmlTreeUP, 'rest of information not changed' );
+    
 }
 
 # Testing list bookings
 {
 
     # first, create a new resource
-    my $res = smeagolRequest( 'POST', smeagolURL('/resource'),
+    my $res1 = smeagolRequest( 'POST', smeagolURL('/resource'),
         $resource->toXML() );
 
-    ok( $res->code == HTTP_CREATED,
-        'resource creation status ' . Dumper( $res->code ) );
+    ok( $res1->code == HTTP_CREATED,
+        'resource creation status ' . Dumper( $res1->code ) );
 
-    my $xmlTree = XMLin( $res->content );
+    my $xmlTree = XMLin( $res1->content );
 
-    $res = smeagolRequest( 'GET',
+    my $res2 = smeagolRequest( 'GET',
         smeagolURL( $xmlTree->{agenda}->{'xlink:href'} ) );
 
-    ok( $res->code == HTTP_OK,
+    ok( $res2->code == HTTP_OK,
         "list bookings "
             . $xmlTree->{agenda}->{'xlink:href'}
             . " status "
-            . Dumper( $res->code )
+            . Dumper( $res2->code )
     );
-
-    my $ag = Smeagol::Agenda->newFromXML(
-        Smeagol::XML->removeXLink( $res->content ) );
-
-    ok( defined $ag, "list bookings content " . Dumper($ag) );
+    is_deeply( XMLin(Smeagol::XML->removeXLink(XMLout($xmlTree->{agenda}))),
+	XMLin(Smeagol::XML->removeXLink($res2->content)),
+	 'list bookings ok');
 }
 
 #Testing create booking

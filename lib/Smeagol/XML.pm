@@ -5,6 +5,7 @@ use warnings;
 
 use XML::LibXML;
 use Carp;
+use Data::Dumper;
 
 use overload q{""} => \&toString;
 
@@ -62,18 +63,27 @@ sub addXLink {
     }
 }
 
+# removes all XLink-related attributes (xmlns:xlink, xlink:type, xlink:href)
+#
 sub removeXLink {
-    my $self = shift;
-    
-    my $compiled_xpath = XML::LibXML::XPathExpression->new('*[@xlink:type]');
-    
-    my @nodes = $self->doc->findnodes($compiled_xpath);
-    
+    my $class  = shift;
+    my $xmlStr = shift;
+
+    my $parser = XML::LibXML->new();
+    my $doc = eval { $parser->parse_string($xmlStr) };
+    croak "cannot parse XML document: $@" if $@;
+
+    my $compiled_xpath = XML::LibXML::XPathExpression->new('//*');
+
+    my @nodes = $doc->findnodes($compiled_xpath);
+
     for my $node (@nodes) {
+        $node->removeAttributeNS( 'http://www.w3.org/1999/xlink', 'xlink' );
         $node->removeAttribute('xlink:type');
         $node->removeAttribute('xlink:href');
-        $node->removeNamespace('http://www.w3.org/1999/xlink', 'xlink');
     }
+
+    return $doc->toString;
 }
 
 sub toString {

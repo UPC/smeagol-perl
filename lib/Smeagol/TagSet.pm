@@ -49,7 +49,7 @@ sub toSmeagolXML {
     $url = $xlinkPrefix . $self->url if defined $xlinkPrefix;
 
     my $result = eval { Smeagol::XML->new("<tags/>") };
-    croak @_ if @_;
+    croak $@ if $@;
 
     my $tagSetNode = $result->doc->documentElement;
 

@@ -170,7 +170,8 @@ my $resource2 = Smeagol::Resource->new( 'desc 2 2', undef, 'resource info' );
     );
 
     print Dumper( $res->content );
-    my $r = Smeagol::Resource->newFromXML( $res->content, 1000 );
+    my $r = Smeagol::Resource->newFromXML(
+        Smeagol::XML->removeXLink( $res->content ), 1000 );
     ok( defined $r, "resource retrieval content " . Dumper( $res->content ) );
 
     # retrieve non-existent Resource
@@ -200,7 +201,8 @@ my $resource2 = Smeagol::Resource->new( 'desc 2 2', undef, 'resource info' );
     ok( $res->code == HTTP_CREATED,
         'resource creation status ' . Dumper( $res->code ) );
     my $xmlTree = XMLin( $res->content );
-    my $r = Smeagol::Resource->newFromXML( $res->content, 1000 );
+    my $r       = Smeagol::Resource->newFromXML(
+        Smeagol::XML->removeXLink( $res->content ), 1000 );
 
     # modify description
     my $novaDesc = 'He canviat la descripcio';
@@ -240,7 +242,8 @@ my $resource2 = Smeagol::Resource->new( 'desc 2 2', undef, 'resource info' );
             . Dumper( $res->code )
     );
 
-    my $ag = Smeagol::Agenda->newFromXML( $res->content );
+    my $ag = Smeagol::Agenda->newFromXML(
+        Smeagol::XML->removeXLink( $res->content ) );
 
     ok( defined $ag, "list bookings content " . Dumper($ag) );
 }
@@ -261,7 +264,8 @@ my $resource2 = Smeagol::Resource->new( 'desc 2 2', undef, 'resource info' );
     $res = smeagolRequest( 'POST', smeagolURL("$resourceURL/booking"),
         $b1->toXML() );
     ok( $res->code == HTTP_CREATED
-            && Smeagol::Booking->newFromXML( $res->content, $b1->id ) == $b1,
+            && Smeagol::Booking->newFromXML(
+            Smeagol::XML->removeXLink( $res->content ), $b1->id ) == $b1,
         'created booking ' . $res->code
     );
 

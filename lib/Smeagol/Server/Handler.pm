@@ -89,7 +89,12 @@ sub updateResource {
 sub createResource {
     my ($cgi) = @_;
 
-    my $r = Smeagol::Resource->newFromXML( $cgi->param('POSTDATA') );
+    # FIXME: hack to get rid of namespace attribute generation problems
+    my $xml = Smeagol::XML->removeXLink( $cgi->param('POSTDATA') );
+
+    # end FIXME
+
+    my $r = Smeagol::Resource->newFromXML($xml);
 
     if ( !defined $r ) {    # wrong XML argument
         Smeagol::Server::sendError(HTTP_BAD_REQUEST);
@@ -144,7 +149,8 @@ sub createBooking {
         return;
     }
 
-    my $b = Smeagol::Booking->newFromXML( $cgi->param('POSTDATA') );
+    my $b = Smeagol::Booking->newFromXML(
+        Smeagol::XML->removeXLink( $cgi->param('POSTDATA') ) );
     if ( !defined $b ) {
         Smeagol::Server::sendError(HTTP_BAD_REQUEST);
         return;
@@ -183,7 +189,8 @@ sub createTag {
         return;
     }
 
-    my $tg = Smeagol::Tag->newFromXML( $cgi->param('POSTDATA') );
+    my $tg = Smeagol::Tag->newFromXML(
+        Smeagol::XML->removeXLink( $cgi->param('POSTDATA') ) );
     if ( !defined $tg ) {
         Smeagol::Server::sendError(HTTP_BAD_REQUEST);
         return;
@@ -304,8 +311,8 @@ sub updateBooking {
         return;
     }
 
-    my $newBooking
-        = Smeagol::Booking->newFromXML( $cgi->param('POSTDATA'), $idB );
+    my $newBooking = Smeagol::Booking->newFromXML(
+        Smeagol::XML->removeXLink( $cgi->param('POSTDATA') ), $idB );
 
     if ( !defined $newBooking ) {
         Smeagol::Server::sendError(HTTP_BAD_REQUEST);

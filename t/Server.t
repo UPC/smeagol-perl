@@ -694,9 +694,13 @@ my $tgS;
 
     my $tagSet = Smeagol::TagSet->new();
     $tagSet->append($tg);
-    print Dumper( XMLin( $res->content ), XMLin( $tagSet->toXML ) );
-    ok( smeagolCompare( XMLin( $res->content ), XMLin( $tagSet->toXML ) ),
-        'tag list retrieval content' );
+
+    ok( smeagolCompare(
+            XMLin( $res->content,  ForceContent => 1 ),
+            XMLin( $tagSet->toXML, ForceContent => 1 )
+        ),
+        'tag list retrieval content'
+    );
 
     $res = smeagolRequest( 'POST', smeagolURL("$resourceURL/tag"),
         $tg2->toXML() );
@@ -709,18 +713,48 @@ my $tgS;
     );
 
     $res = smeagolRequest( 'GET', smeagolURL( $resourceURL . '/tags' ) );
-    $tgS = Smeagol::TagSet->newFromXML( $res->content );
     ok( $res->is_success, 'tag list retrieval status ' . $res->code );
-    ok( $tgS->size == 2,  'resource with 2 tag' );
+
+    my $expectedTagSet = Smeagol::TagSet->new();
+    $expectedTagSet->append($tg);
+    $expectedTagSet->append($tg2);
+
+    # XMLin parameters used to get rid of arrays in structures, which make
+    # comparison unfeasible because arrays define order in their elements,
+    # and we can't foresee the order of tags inside $res->content
+    ok( smeagolCompare(
+            XMLin(
+                $res->content,
+                ForceContent => 1,
+                ContentKey   => 'tag',
+                KeyAttr      => 'tag'
+            ),
+            XMLin(
+                $expectedTagSet->toXML,
+                ForceContent => 1,
+                ContentKey   => 'tag',
+                KeyAttr      => 'tag'
+            )
+        ),
+        'resource with 2 tag'
+    );
 
     $res = smeagolRequest( 'DELETE',
         smeagolURL( "$resourceURL/tag/" . $tg2->value ) );
     ok( $res->is_success, 'tag deleting status ' . $res->code );
 
     $res = smeagolRequest( 'GET', smeagolURL( $resourceURL . '/tags' ) );
-    my $tgS = Smeagol::TagSet->newFromXML( $res->content );
     ok( $res->is_success, 'tag list retrieval status ' . $res->code );
-    ok( $tgS->size == 1,  'resource with 1 tag' );
+
+    $expectedTagSet = Smeagol::TagSet->new();
+    $expectedTagSet->append($tg);
+
+    ok( smeagolCompare(
+            XMLin( $res->content,          ForceContent => 1 ),
+            XMLin( $expectedTagSet->toXML, ForceContent => 1 )
+        ),
+        'resource with 1 tag'
+    );
 
     $res = smeagolRequest( 'DELETE',
         smeagolURL( "/resource/-111/tag/" . $tg2->value ) );

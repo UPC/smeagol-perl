@@ -54,9 +54,13 @@ sub toSmeagolXML {
     my $tagSetNode = $result->doc->documentElement;
 
     for my $tag ( $self->elements ) {
-        my $tagNode = $tag->toSmeagolXML($url)->doc->documentElement();
+        my $tagNode = $tag->toSmeagolXML($xlinkPrefix)->doc->documentElement();
         $result->doc->adoptNode($tagNode);
         $tagSetNode->appendChild($tagNode);
+    }
+    
+    if ( defined $xlinkPrefix ) {
+        $result->addXLink( "tags", $xlinkPrefix );
     }
 
     return $result;

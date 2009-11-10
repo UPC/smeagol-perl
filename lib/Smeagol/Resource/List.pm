@@ -37,7 +37,7 @@ sub toSmeagolXML {
     my $resourcesNode = $dom->documentElement;
 
     for my $slot (@$self) {
-        my $rNode = $slot->toSmeagolXML($xlinkPrefix)->documentElement;
+        my $rNode = $slot->toSmeagolXML("")->documentElement;
         $dom->adoptNode($rNode);
         $resourcesNode->appendChild($rNode);
     }

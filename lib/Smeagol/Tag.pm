@@ -3,11 +3,8 @@ package Smeagol::Tag;
 use strict;
 use warnings;
 
-use XML::Simple;
-use XML::LibXML;
 use Carp;
 use Smeagol::XML;
-use Data::Dumper;
 
 use overload
     q{""} => \&toString,
@@ -60,29 +57,31 @@ sub isNotEqual {
     return !shift->isEqual(@_);
 }
 
-sub toString {
-    my $self = shift;
-    my ( $url, $isRootNode ) = @_;
+sub toSmeagolXML {
+    my $self        = shift;
+    my $xlinkPrefix = shift;
 
-    my $xmlText = "<tag>" . $self->value . "</tag>";
-
-    return $xmlText
-        unless defined $url;
-
-    my $xmlDoc = eval { Smeagol::XML->new($xmlText) };
+    my $result = eval { Smeagol::XML->new('<tag/>') };
     croak $@ if $@;
 
-    $xmlDoc->addXLink( "tag", $url . $self->url );
-    if ($isRootNode) {
-        $xmlDoc->addPreamble("tag");
-        return "$xmlDoc";
-    }
-    else {
+    my $dom     = $result->doc;
+    my $tagNode = $dom->documentElement();
+    $tagNode->appendText( $self->value );
 
-        # Take the first node and skip processing instructions
-        my $node = $xmlDoc->doc->getElementsByTagName("tag")->[0];
-        return $node->toString;
+    if ( defined $xlinkPrefix ) {
+        $result->addXLink( "tag", $xlinkPrefix . $self->url );
     }
+
+    return $result;
+}
+
+sub toString {
+    my $self = shift;
+    my $url  = shift;
+
+    my $xmlTag = $self->toSmeagolXML($url);
+
+    return $xmlTag->toString;
 }
 
 sub toXML {
@@ -106,14 +105,7 @@ sub newFromXML {
         return;
     }
 
-    # XML is valid.
-    my $tagValue;
-    if ( ref( XMLin($xml) ) eq 'HASH' ) {
-        $tagValue = XMLin( $xml, SuppressEmpty => '' )->{content};
-    }
-    else {
-        $tagValue = XMLin( $xml, SuppressEmpty => '' );
-    }
+    my $tagValue = $doc->findvalue('/tag');
 
     return if ( !_checkValue($tagValue) );
 

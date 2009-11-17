@@ -5,7 +5,6 @@ use warnings;
 
 use Set::Object ();
 use base qw(Set::Object);
-use XML::LibXML;
 use Smeagol::Tag;
 use Data::Dumper;
 use Smeagol::XML;
@@ -42,34 +41,62 @@ sub findValue {
     return grep { $value eq $_->value } $self->elements;
 }
 
+sub toSmeagolXML {
+    my $self        = shift;
+    my $xlinkPrefix = shift;
+
+    my $url;
+    $url = $xlinkPrefix . $self->url if defined $xlinkPrefix;
+
+    my $result = eval { Smeagol::XML->new("<tags/>") };
+    croak $@ if $@;
+
+    my $tagSetNode = $result->doc->documentElement;
+
+    for my $tag ( $self->elements ) {
+        my $tagNode = $tag->toSmeagolXML($xlinkPrefix)->doc->documentElement();
+        $result->doc->adoptNode($tagNode);
+        $tagSetNode->appendChild($tagNode);
+    }
+    
+    if ( defined $xlinkPrefix ) {
+        $result->addXLink( "tags", $xlinkPrefix );
+    }
+
+    return $result;
+}
+
+sub url {
+    return "/tags";
+}
+
 # No special order is granted in results, because of Set->elements behaviour.
 sub toString {
     my $self = shift;
-    my ( $url, $isRootNode ) = @_;
+    my $url  = shift;
 
-    my $xmlText = "<tags>";
-    for my $slot ( $self->elements ) {
-        $xmlText .= $slot->toXML($url);
+    my $dom = $self->toSmeagolXML($url);
+
+    if ( defined $url ) {
+        $dom->addXLink( "tags", $url . "/tags" );
     }
-    $xmlText .= "</tags>";
 
-    return $xmlText
-        unless defined $url;
+    return $dom->toString;
 
-    my $xmlDoc = eval { Smeagol::XML->new($xmlText) };
-    croak $@ if $@;
+    # FIXME: Perhaps the $isRootNode variable is superfluous when using
+    #        XML::LibXML (see comment in "toString" method, in
+    #        Smeagol/Booking.pm source file), so the following lines
+    #        could be definively removed
 
-    $xmlDoc->addXLink( "tags", $url . "/tags" );
-    if ($isRootNode) {
-        $xmlDoc->addPreamble("tags");
-        return "$xmlDoc";
-    }
-    else {
-
-        # Take the first node and skip processing instructions
-        my $node = $xmlDoc->doc->getElementsByTagName("tags")->[0];
-        return $node->toString;
-    }
+    #if ($isRootNode) {
+    #    $xmlDoc->addPreamble("tags");
+    #    return "$xmlDoc";
+    #}
+    #else {
+    #    # Take the first node and skip processing instructions
+    #    my $node = $xmlDoc->doc->getElementsByTagName("tags")->[0];
+    #    return $node->toString;
+    #}
 }
 
 sub toXML {
@@ -101,12 +128,8 @@ sub newFromXML {
     bless $tagSet, $class;
 
     # traverse all '<tag>' elements found in DOM structure.
-    # note: all intersecting bookings in the agenda will be ignored,
-    # because we use the "append" method to store tags in the
-    # $tgs object, so we do not need to worry about eventual
-    # intersections present in the $xml
     for my $node ( $dom->getElementsByTagName('tag') ) {
-        my $tag = Smeagol::Tag->newFromXML( $node->toString(0) );
+        my $tag = Smeagol::Tag->newFromXML( $node->toString );
         $tagSet->append($tag);
     }
 

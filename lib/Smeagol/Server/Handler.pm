@@ -11,6 +11,7 @@ use Smeagol::Agenda;
 use Smeagol::Booking;
 use Smeagol::Tag;
 use HTTP::Status qw(:constants);
+use Data::Dumper;
 
 our @EXPORT_OK
     = qw(listResources retrieveResource deleteResource updateResource createResource listBookings listBookingsIcal createBooking createTag listTags deleteTag retrieveBooking updateBooking deleteBooking retrieveBookingIcal);
@@ -21,7 +22,7 @@ our @EXPORT_OK
 
 sub listResources {
     my $list = Smeagol::Resource::List->new();
-    Smeagol::Server::sendXML( $list->toXML( "/resources", 1 ) );
+    Smeagol::Server::sendXML( $list->toXML( "/resources" ) );
 }
 
 sub retrieveResource {
@@ -38,7 +39,7 @@ sub retrieveResource {
         Smeagol::Server::sendError(HTTP_NOT_FOUND);
     }
     else {
-        Smeagol::Server::sendXML( $r->toXML( "", 1 ) );
+        Smeagol::Server::sendXML( $r->toXML("") );
     }
 }
 
@@ -81,21 +82,26 @@ sub updateResource {
     }
     else {
         $updatedResource->save();
-        Smeagol::Server::sendXML( $updatedResource->toXML( "", 1 ) );
+        Smeagol::Server::sendXML( $updatedResource->toXML( "" ) );
     }
 }
 
 sub createResource {
     my ($cgi) = @_;
 
-    my $r = Smeagol::Resource->newFromXML( $cgi->param('POSTDATA') );
+    # FIXME: hack to get rid of namespace attribute generation problems
+    my $xml = Smeagol::XML->removeXLink( $cgi->param('POSTDATA') );
+
+    # end FIXME
+
+    my $r = Smeagol::Resource->newFromXML($xml);
 
     if ( !defined $r ) {    # wrong XML argument
         Smeagol::Server::sendError(HTTP_BAD_REQUEST);
     }
     else {
         $r->save();
-        Smeagol::Server::sendXML( $r->toXML( "", 1 ), status => 201 );
+        Smeagol::Server::sendXML( $r->toXML(""), status => HTTP_CREATED );
     }
 }
 
@@ -120,7 +126,7 @@ sub listBookings {
         Smeagol::Server::sendICal("$ical");
     }
     else {
-        my $xml = $r->agenda->toXML( $r->url, 1 );
+        my $xml = $r->agenda->toXML( $r->url );
         Smeagol::Server::sendXML($xml);
     }
 }
@@ -143,7 +149,8 @@ sub createBooking {
         return;
     }
 
-    my $b = Smeagol::Booking->newFromXML( $cgi->param('POSTDATA') );
+    my $b = Smeagol::Booking->newFromXML(
+        Smeagol::XML->removeXLink( $cgi->param('POSTDATA') ) );
     if ( !defined $b ) {
         Smeagol::Server::sendError(HTTP_BAD_REQUEST);
         return;
@@ -158,14 +165,14 @@ sub createBooking {
             $overlappingAgenda->append($aux);
         }
 
-        Smeagol::Server::sendXML( $overlappingAgenda->toXML( $r->url, 1 ),
+        Smeagol::Server::sendXML( $overlappingAgenda->toXML( $r->url ),
             status => HTTP_CONFLICT );
         return;
     }
 
     $r->agenda->append($b);
     $r->save();
-    Smeagol::Server::sendXML( $b->toXML( $r->url, 1 ),
+    Smeagol::Server::sendXML( $b->toXML( $r->url ),
         status => HTTP_CREATED );
 }
 
@@ -182,7 +189,8 @@ sub createTag {
         return;
     }
 
-    my $tg = Smeagol::Tag->newFromXML( $cgi->param('POSTDATA') );
+    my $tg = Smeagol::Tag->newFromXML(
+        Smeagol::XML->removeXLink( $cgi->param('POSTDATA') ) );
     if ( !defined $tg ) {
         Smeagol::Server::sendError(HTTP_BAD_REQUEST);
         return;
@@ -190,7 +198,7 @@ sub createTag {
 
     $r->tags->append($tg);
     $r->save();
-    Smeagol::Server::sendXML( $tg->toXML( $r->url, 1 ),
+    Smeagol::Server::sendXML( $tg->toXML( $r->url ),
         status => HTTP_CREATED );
 }
 
@@ -202,7 +210,7 @@ sub listTags {
         Smeagol::Server::sendError(HTTP_NOT_FOUND);
         return;
     }
-    my $xml = $r->tags->toXML( $r->url, 1 );
+    my $xml = $r->tags->toXML( $r->url );
     Smeagol::Server::sendXML($xml);
 }
 
@@ -269,7 +277,7 @@ sub retrieveBooking {
         Smeagol::Server::sendICal($ics);
     }
     else {
-        Smeagol::Server::sendXML( $b->toXML( $r->url, 1 ) );
+        Smeagol::Server::sendXML( $b->toXML( $r->url ) );
     }
 }
 
@@ -303,8 +311,8 @@ sub updateBooking {
         return;
     }
 
-    my $newBooking
-        = Smeagol::Booking->newFromXML( $cgi->param('POSTDATA'), $idB );
+    my $newBooking = Smeagol::Booking->newFromXML(
+        Smeagol::XML->removeXLink( $cgi->param('POSTDATA') ), $idB );
 
     if ( !defined $newBooking ) {
         Smeagol::Server::sendError(HTTP_BAD_REQUEST);
@@ -328,7 +336,7 @@ sub updateBooking {
         }
         $r->agenda($overlappingAgenda);
 
-        Smeagol::Server::sendXML( $overlappingAgenda->toXML( $r->url, 1 ),
+        Smeagol::Server::sendXML( $overlappingAgenda->toXML( $r->url ),
             status => HTTP_CONFLICT );
         return;
     }
@@ -337,7 +345,7 @@ sub updateBooking {
     $r->agenda($ag);
     $r->save();
 
-    Smeagol::Server::sendXML( $newBooking->toXML( $r->url, 1 ) );
+    Smeagol::Server::sendXML( $newBooking->toXML( $r->url ) );
     return;
 }
 

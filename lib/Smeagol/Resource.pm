@@ -120,6 +120,7 @@ sub newFromXML {
         "dtd/resource.dtd" );
 
     my $dom = eval { XML::LibXML->new->parse_string($xml) };
+    croak $@ if $@;
 
     if ( ( !defined $dom ) || !$dom->is_valid($dtd) ) {
 
@@ -142,7 +143,11 @@ sub newFromXML {
             $dom->getElementsByTagName('agenda')->get_node(1)->toString );
     }
 
-    my $info = $dom->findnodes('//resource/info')->get_node(1)->string_value;
+    my $info;
+
+    if ( $dom->findnodes('//resource/info')->get_node(1) ) {
+        $info = $dom->findnodes('//resource/info')->get_node(1)->string_value;
+    }
 
     $obj->{info} = ( defined $info ) ? $info : "";
 
@@ -155,44 +160,55 @@ sub newFromXML {
     return $obj;
 }
 
-sub toString {
-    my $self = shift;
-    my ( $url, $isRootNode ) = @_;
+sub toSmeagolXML {
+    my $self        = shift;
+    my $xlinkPrefix = shift;
 
-    $url .= $self->url
-        if defined $url;
+    my $url;
 
-    my $xmlText = "<resource>";
-    $xmlText .= "<description>" . $self->{description} . "</description>";
+    $url = ( $xlinkPrefix . $self->url ) if defined $xlinkPrefix;
 
-    $xmlText .= $self->{agenda}->toXML($url)
-        if ( ( defined $self->{agenda} )
-        && defined( $self->{agenda}->elements ) );
-
-    $xmlText .= "<info>" . $self->{info} . "</info>";
-    $xmlText .= $self->{tags}->toXML($url)
-        if ( ( defined $self->{tags} )
-        && defined( $self->{tags}->elements ) );
-
-    $xmlText .= "</resource>";
-
-    return $xmlText
-        unless defined $url && $url ne '';
-
-    my $xmlDoc = eval { Smeagol::XML->new($xmlText) };
+    my $smeagolXML = eval { Smeagol::XML->new('<resource/>') };
     croak $@ if $@;
 
-    $xmlDoc->addXLink( "resource", $url );
-    if ($isRootNode) {
-        $xmlDoc->addPreamble("resource");
-        return "$xmlDoc";
-    }
-    else {
+    my $dom = $smeagolXML->doc;
 
-        # Take the first node and skip processing instructions
-        my $node = $xmlDoc->doc->getElementsByTagName("resource")->[0];
-        return $node->toString;
+    my $resourceNode = $dom->documentElement;
+
+    $resourceNode->appendTextChild( 'description', $self->{description} );
+
+    if ( $self->{agenda}->size > 0 ) {
+        my $agendaNode
+            = $self->{agenda}->toSmeagolXML($url)->doc->documentElement();
+        $dom->adoptNode($agendaNode);
+        $resourceNode->appendChild($agendaNode);
     }
+
+    if ( $self->{info} ne "" ) {
+        $resourceNode->appendTextChild( 'info', $self->{info} );
+    }
+
+    if ( $self->{tags}->size > 0 ) {
+        my $tagSetNode
+            = $self->{tags}->toSmeagolXML($url)->doc->documentElement();
+        $dom->adoptNode($tagSetNode);
+        $resourceNode->appendChild($tagSetNode);
+    }
+
+    if ( defined $xlinkPrefix ) {
+        $smeagolXML->addXLink( "resource", $url );
+    }
+
+    return $dom;
+}
+
+sub toString {
+    my $self = shift;
+    my $url  = shift;
+
+    my $dom = $self->toSmeagolXML($url);
+
+    return $dom->toString;
 }
 
 sub toXML {

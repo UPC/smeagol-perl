@@ -11,6 +11,7 @@ use Data::ICal;
 use Data::ICal::Entry::Event;
 use Date::ICal;
 use Encode;
+use Data::Dumper;
 
 BEGIN {
     use_ok($_) for qw(
@@ -223,8 +224,8 @@ ok( $ag->size == 0, 'remove non-existing b4 from ag' );
 
     $agenda->append($booking);
     ok( $agenda->contains($booking), 'booking added in agenda' );
-    like( "$agenda", qr/$description/, "UTF-8 description found in agenda" );
-    like( "$agenda", qr/$info/,        "UTF-8 info found in agenda" );
+    like( decode('UTF-8',"$agenda"), qr/$description/, "UTF-8 description found in agenda" );
+    like( decode('UTF-8',"$agenda"), qr/$info/,        "UTF-8 info found in agenda" );
 }
 
 END { Smeagol::DataStore->clean(); }

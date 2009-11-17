@@ -25,33 +25,35 @@ sub new {
     return $obj;
 }
 
-sub toString {
-    my $self = shift;
-    my ( $url, $isRootNode ) = @_;
+sub toSmeagolXML {
+    my $self        = shift;
+    my $xlinkPrefix = shift;
 
-    my $xmlText = "<resources>";
-    for my $slot (@$self) {
-        $xmlText .= $slot->toXML("");
-    }
-    $xmlText .= "</resources>";
-
-    return $xmlText
-        unless defined $url;
-
-    my $xmlDoc = eval { Smeagol::XML->new($xmlText) };
+    my $result = eval { Smeagol::XML->new('<resources/>') };
     croak $@ if $@;
 
-    $xmlDoc->addXLink( "resources", $url );
-    if ($isRootNode) {
-        $xmlDoc->addPreamble("resources");
-        return "$xmlDoc";
-    }
-    else {
+    $result->addPreamble('resources');
+    my $dom           = $result->doc;
+    my $resourcesNode = $dom->documentElement;
 
-        # Take the first node and skip processing instructions
-        my $node = $xmlDoc->doc->getElementsByTagName("resources")->[0];
-        return $node->toString;
+    for my $slot (@$self) {
+        my $rNode = $slot->toSmeagolXML("")->documentElement;
+        $dom->adoptNode($rNode);
+        $resourcesNode->appendChild($rNode);
     }
+
+    if ( defined $xlinkPrefix ) {
+        $result->addXLink( "resources", $xlinkPrefix );
+    }
+
+    return $result;
+}
+
+sub toString {
+    my $self = shift;
+    my $url  = shift;
+
+    return $self->toSmeagolXML($url)->toString;
 }
 
 sub toXML {

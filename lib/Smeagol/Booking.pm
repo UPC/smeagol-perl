@@ -4,8 +4,6 @@ use strict;
 use warnings;
 
 use DateTime::Span ();
-use XML::Simple;
-use XML::LibXML;
 use Carp;
 use Smeagol::XML;
 use Smeagol::DataStore;
@@ -90,78 +88,60 @@ sub isNotEqual {
     return !shift->isEqual(@_);
 }
 
-sub toString {
-    my $self = shift;
-    my ( $url, $isRootNode ) = @_;
+# Returns an Smeagol::XML object representing the Booking
+# The following method is useful when building DOMs from wrapper
+# classes (agenda, resource), which can call toSmeagolXML() without
+# having to call toString and parse the result again.
+sub toSmeagolXML {
+    my $self        = shift;
+    my $xlinkPrefix = shift;
+
+    my $url;
+    $url = ( $xlinkPrefix . $self->url ) if defined $xlinkPrefix;
 
     my $from = $self->span->start;
     my $to   = $self->span->end;
 
-    my $xmlText
-        = "<booking>" . "<id>"
-        . $self->id . "</id>"
-        . "<description>"
-        . $self->description
-        . "</description>"
-        . "<from>"
-        . "<year>"
-        . $from->year
-        . "</year>"
-        . "<month>"
-        . $from->month
-        . "</month>" . "<day>"
-        . $from->day
-        . "</day>"
-        . "<hour>"
-        . $from->hour
-        . "</hour>"
-        . "<minute>"
-        . $from->minute
-        . "</minute>"
-        . "<second>"
-        . $from->second
-        . "</second>"
-        . "</from><to>"
-        . "<year>"
-        . $to->year
-        . "</year>"
-        . "<month>"
-        . $to->month
-        . "</month>" . "<day>"
-        . $to->day
-        . "</day>"
-        . "<hour>"
-        . $to->hour
-        . "</hour>"
-        . "<minute>"
-        . $to->minute
-        . "</minute>"
-        . "<second>"
-        . $to->second
-        . "</second>" . "</to>"
-        . "<info>"
-        . $self->info
-        . "</info>"
-        . "</booking>";
-
-    return $xmlText
-        unless defined $url;
-
-    my $xmlDoc = eval { Smeagol::XML->new($xmlText) };
+    my $result = eval { Smeagol::XML->new("<booking/>") };
     croak $@ if $@;
 
-    $xmlDoc->addXLink( "booking", $url . $self->url );
-    if ($isRootNode) {
-        $xmlDoc->addPreamble("booking");
-        return "$xmlDoc";
-    }
-    else {
+    my $dom         = $result->doc;
+    my $bookingNode = $dom->documentElement();
 
-        # Take the first node and skip processing instructions
-        my $node = $xmlDoc->doc->getElementsByTagName("booking")->[0];
-        return $node->toString;
-    }
+    my $fromNode = $dom->createElement('from');
+    $fromNode->appendTextChild( 'year',   $from->year );
+    $fromNode->appendTextChild( 'month',  $from->month );
+    $fromNode->appendTextChild( 'day',    $from->day );
+    $fromNode->appendTextChild( 'hour',   $from->hour );
+    $fromNode->appendTextChild( 'minute', $from->minute );
+    $fromNode->appendTextChild( 'second', $from->second );
 
+    my $toNode = $dom->createElement('to');
+    $toNode->appendTextChild( 'year',   $to->year );
+    $toNode->appendTextChild( 'month',  $to->month );
+    $toNode->appendTextChild( 'day',    $to->day );
+    $toNode->appendTextChild( 'hour',   $to->hour );
+    $toNode->appendTextChild( 'minute', $to->minute );
+    $toNode->appendTextChild( 'second', $to->second );
+
+    $bookingNode->appendTextChild( 'id',          $self->id );
+    $bookingNode->appendTextChild( 'description', $self->description );
+    $bookingNode->appendChild($fromNode);
+    $bookingNode->appendChild($toNode);
+    $bookingNode->appendTextChild( 'info', $self->info );
+
+    $result->addXLink( "booking", $url ) if defined $xlinkPrefix;
+
+    return $result;
+}
+
+sub toString {
+    my $self = shift;
+    my $url  = shift;
+
+    my $xmlBooking = $self->toSmeagolXML($url);
+
+    return $xmlBooking->toString;
 }
 
 # DEPRECATED
@@ -186,38 +166,42 @@ sub newFromXML {
         return;
     }
 
-    # XML is valid. Build empty elements as ''
-    my $xmlTree = XMLin( $xml, SuppressEmpty => '' );
+    # $doc won't be modified, so we can speed up XPath
+    # searches with indexElements()
+    $doc->indexElements();
 
     my $span = DateTime::Span->from_datetimes(
         start => DateTime->new(
-            year   => $xmlTree->{from}->{year},
-            month  => $xmlTree->{from}->{month},
-            day    => $xmlTree->{from}->{day},
-            hour   => $xmlTree->{from}->{hour},
-            minute => $xmlTree->{from}->{minute},
-            second => $xmlTree->{from}->{second}
+            year   => $doc->findvalue('/booking/from/year'),
+            month  => $doc->findvalue('/booking/from/month'),
+            day    => $doc->findvalue('/booking/from/day'),
+            hour   => $doc->findvalue('/booking/from/hour'),
+            minute => $doc->findvalue('/booking/from/minute'),
+            second => $doc->findvalue('/booking/from/second'),
         ),
         end => DateTime->new(
-            year   => $xmlTree->{to}->{year},
-            month  => $xmlTree->{to}->{month},
-            day    => $xmlTree->{to}->{day},
-            hour   => $xmlTree->{to}->{hour},
-            minute => $xmlTree->{to}->{minute},
-            second => $xmlTree->{to}->{second}
+            year   => $doc->findvalue('/booking/to/year'),
+            month  => $doc->findvalue('/booking/to/month'),
+            day    => $doc->findvalue('/booking/to/day'),
+            hour   => $doc->findvalue('/booking/to/hour'),
+            minute => $doc->findvalue('/booking/to/minute'),
+            second => $doc->findvalue('/booking/to/second'),
         )
     );
 
     my $obj = $class->SUPER::from_spans( spans => [$span], );
 
     $obj->{ __PACKAGE__ . "::id" }
-        = ( defined $xmlTree->{id} ) ? $xmlTree->{id}
+        = ( $doc->exists('/booking/id') ) ? $doc->findvalue('/booking/id')
         : ( defined $id ) ? $id
         :                   Smeagol::DataStore->getNextID(__PACKAGE__);
 
-    $obj->{ __PACKAGE__ . "::description" } = $xmlTree->{description};
+    $obj->{ __PACKAGE__ . "::description" }
+        = $doc->findvalue('/booking/description');
     $obj->{ __PACKAGE__ . "::info" }
-        = defined( $xmlTree->{info} ) ? $xmlTree->{info} : '';
+        = $doc->exists('/booking/info')
+        ? $doc->findvalue('/booking/info')
+        : '';
 
     bless $obj, $class;
     return $obj;

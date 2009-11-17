@@ -5,7 +5,6 @@ use warnings;
 
 use Set::Object ();
 use base qw(Set::Object);
-use XML::LibXML;
 use Smeagol::Booking;
 use Smeagol::XML;
 use Carp;
@@ -41,39 +40,47 @@ sub interlace {
     return grep { $booking->intersects($_) } $self->elements;
 }
 
+sub toSmeagolXML {
+    my $self        = shift;
+    my $xlinkPrefix = shift;
+
+    my $url;
+    $url = ( $xlinkPrefix . $self->url ) if defined $xlinkPrefix;
+
+    my $result = eval { Smeagol::XML->new("<agenda/>") };
+    croak $@ if $@;
+
+    my $agendaNode = $result->doc->documentElement();
+
+    for my $slot ( $self->elements ) {
+        my $bookingNode
+            = $slot->toSmeagolXML($xlinkPrefix)->doc->documentElement();
+        $result->doc->adoptNode($bookingNode);
+        $agendaNode->appendChild($bookingNode);
+    }
+
+    $result->addXLink( "agenda", $url ) if defined $xlinkPrefix;
+
+    return $result;
+}
+
 # no special order is granted in results, because of Set->elements behaviour.
 sub toString {
     my $self = shift;
-    my ( $url, $isRootNode ) = @_;
+    my $url  = shift;
 
-    my $xmlText = "<agenda>";
-    for my $slot ( $self->elements ) {
-        $xmlText .= $slot->toXML($url);
-    }
-    $xmlText .= "</agenda>";
+    my $xmlAgenda = $self->toSmeagolXML($url);
 
-    return $xmlText
-        unless defined $url;
-
-    my $xmlDoc = eval { Smeagol::XML->new($xmlText) };
-    croak $@ if $@;
-
-    $xmlDoc->addXLink( "agenda", $url . "/bookings" );
-    if ($isRootNode) {
-        $xmlDoc->addPreamble("agenda");
-        return "$xmlDoc";
-    }
-    else {
-
-        # Take the first node and skip processing instructions
-        my $node = $xmlDoc->doc->getElementsByTagName("agenda")->[0];
-        return $node->toString;
-    }
+    return $xmlAgenda->toString;
 }
 
 # DEPRECATED
 sub toXML {
     return shift->toString(@_);
+}
+
+sub url {
+    return "/bookings";
 }
 
 sub newFromXML {
@@ -106,7 +113,7 @@ sub newFromXML {
     # $ag object, so we do not need to worry about eventual
     # intersections present in the $xml
     for my $node ( $dom->getElementsByTagName('booking') ) {
-        my $booking = Smeagol::Booking->newFromXML( $node->toString(0) );
+        my $booking = Smeagol::Booking->newFromXML( $node->toString );
         $agenda->append($booking);
     }
 

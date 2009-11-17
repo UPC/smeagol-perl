@@ -83,28 +83,37 @@ $r1->agenda->append($b1);
 my $ident = $r1->id;
 ok( $r1->agenda->contains($b1),  'b1 in r1->ag' );
 ok( !$r1->agenda->contains($b2), 'b2 not in r1->ag' );
-ok( $r1->toXML() eq "<resource>"
-        . "<description>"
-        . $r1->description
-        . "</description>"
-        . "<agenda>"
-        . "<booking>" . "<id>"
-        . $b1->id . "</id>"
-        . "<description>"
-        . $b1->description
-        . "</description>"
-        . "<from><year>2008</year><month>4</month><day>14</day><hour>17</hour><minute>0</minute><second>0</second></from>"
-        . "<to><year>2008</year><month>4</month><day>14</day><hour>18</hour><minute>59</minute><second>0</second></to>"
-        . "<info>"
-        . $b1->info
-        . "</info>"
-        . "</booking></agenda>"
-        . "<info>"
-        . $r1->info
-        . "</info>"
-        . "</resource>",
-    'to_xml resource with agenda and 1 booking: ' . $r1->toXML()
+$resourceAsHash = {
+    description => $r1->description,
+    agenda      => {
+        booking => {
+            id          => $b1->id,
+            description => $b1->description,
+            from        => {
+                year   => 2008,
+                month  => 4,
+                day    => 14,
+                hour   => 17,
+                minute => 0,
+                second => 0,
+            },
+            to => {
+                year   => 2008,
+                month  => 4,
+                day    => 14,
+                hour   => 18,
+                minute => 59,
+                second => 0,
+            },
+            info => $b1->info,
+        },
+    },
+    info => $r1->info,
+};
+ok( Compare( $resourceAsHash, XMLin( $r1->toString ) ),
+    'resource->toString with agenda and 1 booking'
 );
+
 $r1->agenda->append($b2);
 ok( $r1->agenda->contains($b2), 'b2 in r->ag' );
 
@@ -180,7 +189,8 @@ my $ag;
     ok( defined $ag, 'ag created ok' );
 
     $r3 = Smeagol::Resource->new( 'A5123', 'dies', $ag, $tgS );
-    ok( defined $r3 && $r3->tags->toXML() eq "<tags><tag>aula</tag></tags>",
+    my $tagsAsHash = { tag => 'aula', };
+    ok( defined $r3 && Compare( $tagsAsHash, XMLin( $r3->tags->toString ) ),
         'resource created ok from data' );
 
     #without agenda
@@ -197,7 +207,7 @@ my $ag;
     ok( defined $ag, 'ag created ok' );
 
     $r3 = Smeagol::Resource->new( 'A5123', 'dies', undef, $tgS );
-    ok( defined $r3 && $r3->tags->toXML() eq "<tags><tag>aula</tag></tags>",
+    ok( defined $r3 && Compare( $tagsAsHash, XMLin( $r3->tags->toString ) ),
         'resource created ok from data' );
 }
 
@@ -235,27 +245,31 @@ my $ag;
 				<tag>aula</tag>
 			</tags>
 		</resource>' );
+
+    my $tagsAsHash = { tag => 'aula', };
+
     ok( defined $r3
             && $r3->description eq 'aula'
             && $r3->info        eq 'horaria'
-            && $r3->tags->toXML eq "<tags><tag>aula</tag></tags>",
-        'resource created ok newFromXML, with agenda'
+            && Compare( $tagsAsHash, XMLin( $r3->tags->toString ) ),
+        'resource->newFromXML created, with agenda'
     );
 
     #without agenda
     $r3 = Smeagol::Resource->newFromXML( '
-		<resource>
+                <resource>
 		    <description>aula</description>
-    		<info>horaria</info>
-			<tags>
-				<tag>aula</tag>
-			</tags>
-		</resource>' );
+                    <info>horaria</info>
+                    <tags>
+	                <tag>aula</tag>
+                    </tags>
+                </resource>' );
     ok( defined $r3
             && $r3->description eq 'aula'
             && $r3->info        eq 'horaria'
-            && $r3->tags->toXML eq "<tags><tag>aula</tag></tags>",
-        'resource created ok newFromXML, without agenda'
+            && $r3->agenda->size == 0
+            && Compare( $tagsAsHash, XMLin( $r3->tags->toString ) ),
+        'resource->newFromXML created, without agenda'
     );
 
 }
@@ -270,10 +284,12 @@ my $ag;
 				<tag>aula</tag>
 			</tags>
 		</resource>' );
+    my $tagsAsHash = { tag => 'aula', };
+
     ok( defined $r3
             && $r3->description eq 'aula'
             && $r3->info        eq 'horaria'
-            && $r3->tags->toXML eq "<tags><tag>aula</tag></tags>",
+            && Compare( $tagsAsHash, XMLin( $r3->tags->toString ) ),
         'resource created ok'
     );
 

@@ -1,6 +1,7 @@
 AUTHORS
 bin/smeagol-client
 bin/smeagol-server
+bin/smeagol-shell
 Changes
 COPYING
 doc/diagrams/arquitectura-88.dia

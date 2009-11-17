@@ -21,8 +21,7 @@ requires 'HTTP::Status'              => 5.817;
 test_requires 'Test::More'    => 0;
 test_requires 'Data::Compare' => 0;
 
-install_script 'bin/smeagol-client';
-install_script 'bin/smeagol-server';
+install_script glob 'bin/*';
 
 install_share;
 

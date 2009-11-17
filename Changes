@@ -1,5 +1,11 @@
 Històric de revisions del projecte smeagol.
 
+0.0802 Tue Nov 17 20:30:50 2009
+       - corregits els errors d'instal·lació del smeagol-shell
+       - actualitzat el Module::Install
+       - Smeagol::Client retorna estructures de dades de Perl
+       - millores generals de l'ús del XML
+
 0.0801 Thu Oct  1 01:43:09 2009
        - afegit un intèrpret d'ordres senzill com a client
 

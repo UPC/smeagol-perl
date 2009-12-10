@@ -22,7 +22,7 @@ our @EXPORT_OK
 
 sub listResources {
     my $list = Smeagol::Resource::List->new();
-    Smeagol::Server::sendXML( $list->toXML( "/resources" ) );
+    Smeagol::Server::sendXML( $list->toXML("/resources") );
 }
 
 sub retrieveResource {
@@ -82,7 +82,7 @@ sub updateResource {
     }
     else {
         $updatedResource->save();
-        Smeagol::Server::sendXML( $updatedResource->toXML( "" ) );
+        Smeagol::Server::sendXML( $updatedResource->toXML("") );
     }
 }
 
@@ -101,7 +101,13 @@ sub createResource {
     }
     else {
         $r->save();
-        Smeagol::Server::sendXML( $r->toXML(""), status => HTTP_CREATED );
+
+#Smeagol::Server::sendXML( $r->toXML(""), status => HTTP_CREATED );
+# FIXME: Sending relative URI in "Location:" headers (should be an absolute URI)
+        Smeagol::Server::reply(
+            status  => HTTP_CREATED,
+            headers => ( 'Location: /resource/' . $r->id, ),
+        );
     }
 }
 
@@ -172,8 +178,7 @@ sub createBooking {
 
     $r->agenda->append($b);
     $r->save();
-    Smeagol::Server::sendXML( $b->toXML( $r->url ),
-        status => HTTP_CREATED );
+    Smeagol::Server::sendXML( $b->toXML( $r->url ), status => HTTP_CREATED );
 }
 
 sub createTag {
@@ -198,8 +203,7 @@ sub createTag {
 
     $r->tags->append($tg);
     $r->save();
-    Smeagol::Server::sendXML( $tg->toXML( $r->url ),
-        status => HTTP_CREATED );
+    Smeagol::Server::sendXML( $tg->toXML( $r->url ), status => HTTP_CREATED );
 }
 
 sub listTags {

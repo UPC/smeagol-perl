@@ -130,12 +130,10 @@ my $resource2 = Smeagol::Resource->new( 'desc 2 2', undef, 'resource info' );
     ok( $res->code == HTTP_CREATED,
         "resource creation status " . Dumper( $res->code ) );
 
-    my $xmlTree = XMLin( $res->content );
+    ok( defined $res->header('Location'), "resource location defined" );
 
-    ok( $xmlTree->{description} eq $resource->description
-            && $xmlTree->{info} eq $resource->info,
-        "resource creation content " . Dumper( $res->content )
-    );
+    #print Dumper($res->header('Location'));    
+    like( $res->header('location'), qr/\/resource\/\d+/, "resource location value" );    
 }
 
 # Testing getIDList with non-empty DataStore

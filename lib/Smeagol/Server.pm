@@ -191,8 +191,8 @@ sub _logRequest {
 #
 # Example:
 #   reply( status  => HTTP_OK,
-#                  headers => ('Content-type: text/plain', ),
-#                  body    => 'hello world');
+#          headers => ('Content-type: text/plain', ),
+#          body    => 'hello world');
 #
 sub reply {
     my (%args) = @_;

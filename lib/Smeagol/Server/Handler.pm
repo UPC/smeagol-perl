@@ -102,8 +102,8 @@ sub createResource {
     else {
         $r->save();
 
-#Smeagol::Server::sendXML( $r->toXML(""), status => HTTP_CREATED );
-# FIXME: Sending relative URI in "Location:" headers (should be an absolute URI)
+        # FIXME: Sending relative URI in "Location:" header.
+        #        Conforming HTTP standars, location should be an absolute URI.
         Smeagol::Server::reply(
             status  => HTTP_CREATED,
             headers => ( 'Location: /resource/' . $r->id, ),

@@ -134,7 +134,7 @@ my $resource2 = Smeagol::Resource->new( 'desc 2 2', undef, 'resource info' );
 
     #print Dumper($res->header('Location'));
     like( $res->header('location'),
-        qr/\/resource\/\d+/, "resource location value" );
+        qr#/resource/\d+#, "resource location value" );
 }
 
 # Testing getIDList with non-empty DataStore

@@ -225,7 +225,7 @@ sub sendError {
 
     reply(
         status  => $status,
-        headers => [ 'Content-type: text/plain', ],
+        headers => [ 'Content-Type: text/plain', ],
         body    => $text
     );
 }
@@ -238,7 +238,7 @@ sub sendXML {
 
     reply(
         status  => $args{status},
-        headers => [ 'Content-type: text/xml', ],
+        headers => [ 'Content-Type: text/xml', ],
         body    => $xml
     );
 }
@@ -248,7 +248,7 @@ sub sendICal {
 
     reply(
         status  => HTTP_OK,
-        headers => [ 'Content-type: text/calendar; charset=UTF-8', ],
+        headers => [ 'Content-Type: text/calendar; charset=UTF-8', ],
         body    => encode( 'UTF-8', $ical )
     );
 }
@@ -270,7 +270,7 @@ sub _sendFile {
 
         reply(
             status  => HTTP_OK,
-            headers => [ "Content-type: $mime", ],
+            headers => [ "Content-Type: $mime", ],
             body    => <$file>
         );
     }

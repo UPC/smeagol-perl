@@ -191,7 +191,7 @@ sub _logRequest {
 #
 # Example:
 #   reply( status  => HTTP_OK,
-#          headers => ('Content-type: text/plain', ),
+#          headers => ['Content-Type: text/plain', ],
 #          body    => 'hello world');
 #
 sub reply {
@@ -203,7 +203,7 @@ sub reply {
     croak( "unknown status code " . $args{status} ) unless defined $msg;
 
     print "HTTP/1.0 ", $args{status}, " $msg\n";
-    foreach ( $args{headers} ) {
+    foreach ( @{ $args{headers} } ) {
         print $_, "\n";
     }
     print "\n";
@@ -225,7 +225,7 @@ sub sendError {
 
     reply(
         status  => $status,
-        headers => ( 'Content-type: text/plain', ),
+        headers => [ 'Content-type: text/plain', ],
         body    => $text
     );
 }
@@ -238,7 +238,7 @@ sub sendXML {
 
     reply(
         status  => $args{status},
-        headers => ( 'Content-type: text/xml', ),
+        headers => [ 'Content-type: text/xml', ],
         body    => $xml
     );
 }
@@ -248,7 +248,7 @@ sub sendICal {
 
     reply(
         status  => HTTP_OK,
-        headers => ( 'text/calendar; charset=UTF-8', ),
+        headers => [ 'Content-type: text/calendar; charset=UTF-8', ],
         body    => encode( 'UTF-8', $ical )
     );
 }
@@ -270,7 +270,7 @@ sub _sendFile {
 
         reply(
             status  => HTTP_OK,
-            headers => ( "Content-type: $mime", ),
+            headers => [ "Content-type: $mime", ],
             body    => <$file>
         );
     }

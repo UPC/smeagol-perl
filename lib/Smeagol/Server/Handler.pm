@@ -106,7 +106,7 @@ sub createResource {
         #        Conforming HTTP standars, location should be an absolute URI.
         Smeagol::Server::reply(
             status  => HTTP_CREATED,
-            headers => ( 'Location: /resource/' . $r->id, ),
+            headers => ['Location: /resource/' . $r->id, ],
         );
     }
 }

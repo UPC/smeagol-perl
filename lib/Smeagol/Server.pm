@@ -181,21 +181,36 @@ sub _logRequest {
 # Http tools
 #############################################################
 
-sub _reply {
-    my ( $status, $type, $text ) = @_;
+#
+# reply: Generate generic HTTP response.
+#
+# Expected arguments are:
+#    status (required) => HTTP status code (200, 201, 404, etc.)
+#    headers => array containing a list of strings representing HTTP headers
+#    body => string containing response body
+#
+# Example:
+#   reply( status  => HTTP_OK,
+#          headers => ['Content-Type: text/plain', ],
+#          body    => 'hello world');
+#
+sub reply {
+    my (%args) = @_;
 
-    croak "wrong number of parameters"
-        if @_ < 2;
+    croak "missing required 'status' argument" unless defined $args{status};
 
-    my $msg = status_message($status);
-    croak "unknown status code $status"
-        unless defined $msg;
+    my $msg = status_message( $args{status} );
+    croak( "unknown status code " . $args{status} ) unless defined $msg;
 
-    $text = $msg
-        unless defined $text;
+    print "HTTP/1.0 ", $args{status}, " $msg\n";
+    foreach ( @{ $args{headers} } ) {
+        print $_, "\n";
+    }
+    print "\n";
 
-    print "HTTP/1.0 $status $msg\n", CGI->header($type), $text, "\n";
-    return $status;
+    print $args{body}, "\n" if defined $args{body};
+
+    return $args{status};
 }
 
 # Prints an Http response. Message is optional.
@@ -207,7 +222,12 @@ sub sendError {
     #        shouldn't we returning errors as XML too?
     #        (ticket:114)
     #
-    _reply( $status, 'text/plain', $text );
+
+    reply(
+        status  => $status,
+        headers => [ 'Content-Type: text/plain', ],
+        body    => $text
+    );
 }
 
 sub sendXML {
@@ -216,16 +236,20 @@ sub sendXML {
     # default status for XML is OK
     $args{status} ||= HTTP_OK;
 
-    _reply( $args{status}, 'text/xml', $xml );
+    reply(
+        status  => $args{status},
+        headers => [ 'Content-Type: text/xml', ],
+        body    => $xml
+    );
 }
 
 sub sendICal {
     my ($ical) = @_;
 
-    _reply(
-        HTTP_OK,
-        'text/calendar; charset=UTF-8',
-        encode( 'UTF-8', $ical )
+    reply(
+        status  => HTTP_OK,
+        headers => [ 'Content-Type: text/calendar; charset=UTF-8', ],
+        body    => encode( 'UTF-8', $ical )
     );
 }
 
@@ -243,7 +267,12 @@ sub _sendFile {
 
         # slurp html file
         local $/;
-        _reply( HTTP_OK, $mime, <$file> );
+
+        reply(
+            status  => HTTP_OK,
+            headers => [ "Content-Type: $mime", ],
+            body    => <$file>
+        );
     }
     else {
         sendError(HTTP_BAD_REQUEST);

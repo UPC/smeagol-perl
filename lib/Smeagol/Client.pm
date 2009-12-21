@@ -78,12 +78,23 @@ sub createResource {
         <description>$description</description>
         <info>" . ( ( defined $info ) ? $info : "" ) . "</info>
         </resource>";
+
+    # Two calls to the server are required:
+    #    * one call to create the booking and get its location
+    #    * another call to retrieve the booking from the server
+
+    # request to create booking
     my $req = HTTP::Request->new( POST => $self->{url} . "/resource" );
     $req->content_type('text/xml');
     $req->content($respXML);
 
     my $res = $self->{ua}->request($req);
     return unless $res->status_line =~ /201/;
+
+    # request to retrieve booking
+    my $location = $res->header('Location');
+    $res = $self->{ua}->get( $self->{url} . $location );
+    return unless $res->status_line =~ /200/;
 
     my $dom = eval { XML::LibXML->new->parse_string( $res->content ) };
     croak $@ if $@;

@@ -82,7 +82,7 @@ sub updateResource {
     }
     else {
         $updatedResource->save();
-        Smeagol::Server::sendError( HTTP_OK );
+        Smeagol::Server::sendError(HTTP_OK);
     }
 }
 

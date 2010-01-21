@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 95;
+use Test::More tests => 93;
 use DateTime;
 use LWP::UserAgent;
 use HTTP::Request;
@@ -216,17 +216,9 @@ my $resource2 = Smeagol::Resource->new( 'desc 2 2', undef, 'resource info' );
 
     # update resource
     $res = smeagolRequest( 'POST', smeagolURL($url), $resource->toXML );
-    my $xmlTreeUP = XMLin( $res->content );
 
     ok( $res->code == HTTP_OK,
         "resource $url update code: " . Dumper( $res->code ) );
-    ok( $xmlTree->{description} ne $xmlTreeUP->{description},
-        'description changed ok' );
-    $xmlTree->{description} = $xmlTreeUP->{description};
-    ok( smeagolCompare( $xmlTree, $xmlTreeUP ),
-        'remaining fields did not change'
-    );
-
 }
 
 # Testing list bookings

@@ -335,12 +335,7 @@ sub updateResource {
     my $res = $self->{ua}->request($req);
     return unless $res->status_line =~ /200/;
 
-    my $dom = eval { XML::LibXML->new->parse_string( $res->content ) };
-    croak $@ if $@;
-
-    my $result = XMLin( $res->content );
-    $result->{id}  = _idResource( $result->{'xlink:href'} );
-    $result->{url} = $self->{url} . $result->{'xlink:href'};
+    my $result = $self->getResource($id);
     return $result;
 
 }

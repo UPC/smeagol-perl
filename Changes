@@ -1,5 +1,13 @@
 Històric de revisions del projecte smeagol.
 
+0.10   Mon Feb 15 08:56:45 2010
+       - petits canvis a la API per ajustar-se a la filosofia REST
+       - Smeagol::Server::Handler::updateResource no retorna res al
+         response body
+       - Smeagol::Server::Handler::createResource no retorna el recurs
+         creat, sinó que retorna el cos de la resposta buit, i
+         un header Location amb l'identificador del nou recurs creat
+
 0.0802 Tue Nov 17 20:30:50 2009
        - corregits els errors d'instal·lació del smeagol-shell
        - actualitzat el Module::Install

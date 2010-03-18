@@ -63,6 +63,10 @@ sub deleteResource {
     }
 }
 
+
+#
+# Updates resource description and/or resource info
+#
 sub updateResource {
     my ( $cgi, $id ) = @_;
 
@@ -76,14 +80,21 @@ sub updateResource {
 
     if ( !defined $updatedResource ) {
         Smeagol::Server::sendError(HTTP_BAD_REQUEST);
+        return;
     }
-    elsif ( !defined Smeagol::Resource->load($id) ) {
+    
+    my $resourceToUpdate = Smeagol::Resource->load($id);
+    
+    if ( !defined $resourceToUpdate ) {
         Smeagol::Server::sendError(HTTP_NOT_FOUND);
+        return;
     }
-    else {
-        $updatedResource->save();
-        Smeagol::Server::sendError(HTTP_OK);
-    }
+    
+    $resourceToUpdate->description($updatedResource->description);
+    $resourceToUpdate->info($updatedResource->info);
+        
+    $resourceToUpdate->save();
+    Smeagol::Server::sendError(HTTP_OK);
 }
 
 sub createResource {

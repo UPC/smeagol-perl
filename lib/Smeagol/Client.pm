@@ -9,6 +9,7 @@ use Carp;
 use Data::Dumper;
 use XML::LibXML;
 use XML::Simple;
+use Smeagol::XML;
 
 my %COMMAND_VALID = map { $_ => 1 } qw( POST GET PUT DELETE );
 
@@ -340,6 +341,7 @@ sub updateResource {
     $oldDesc->replaceNode($newDesc);
 
     # update info, if needed
+
     if ( defined $info ) {
         my $oldInfo = $dom->getElementsByTagName('info')->get_node(1);
         my $newInfo = $dom->createElement('info');
@@ -350,7 +352,9 @@ sub updateResource {
     my $req = HTTP::Request->new( POST => $self->{url} . '/resource/' . $id );
 
     $req->content_type('text/xml');
-    $req->content( $dom->toString );
+    my $xmlStr = eval { Smeagol::XML->removeXLink( $dom->toString ) };
+    croak $@ . " " . Dumper($xmlStr) if $@;
+    $req->content($xmlStr);
 
     my $res = $self->{ua}->request($req);
     return unless $res->status_line =~ /200/;

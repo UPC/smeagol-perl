@@ -63,9 +63,6 @@ sub deleteResource {
     }
 }
 
-#
-# Updates resource description and/or resource info
-#
 sub updateResource {
     my ( $cgi, $id ) = @_;
 

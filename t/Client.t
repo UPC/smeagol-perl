@@ -209,9 +209,9 @@ my $info0 = "info 0";
     };
     my $info = 'dummy booking for updateResource tests';
 
-    my $idBooking
-        = $client->createBooking( $resource->{id}, $desc, $from, $to, $info );
-    ok( defined $idBooking, 'booking created for updateResource tests' );
+#    my $idBooking
+#        = $client->createBooking( $resource->{id}, $desc, $from, $to, $info );
+#    ok( defined $idBooking, 'booking created for updateResource tests' );
 
     my $dataBefore = $client->getResource( $resource->{id} );
     ok( defined $dataBefore );
@@ -228,7 +228,8 @@ my $info0 = "info 0";
         'description updated successfully'
     );
     ok( $dataRes->{info} eq 'info aulaaaaaa', 'info updated successfully' );
-    ok( defined $dataRes->{agenda}, 'agenda still exists' );
+
+    #    ok( defined $dataRes->{agenda}, 'agenda still exists' );
     warn Dumper($dataRes) . "\n" . Dumper($dataBefore);
     ok( smeagolCompare( $dataRes, $dataBefore ),
         'bookings and tags did not change'

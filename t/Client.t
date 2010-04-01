@@ -1,10 +1,11 @@
 #!/usr/bin/perl
 
-use Test::More tests => 78;
+use Test::More tests => 81;
 
 use strict;
 use warnings;
 use Data::Dumper;
+use Data::Compare;
 
 use Date::ICal;
 use Data::ICal;
@@ -16,6 +17,14 @@ BEGIN {
         Smeagol::Client
         Smeagol::DataStore
     );
+}
+
+# Auxiliary routine to compare two Perl hashes, ignoring XLink-related keys
+sub smeagolCompare {
+    my ( $got, $expected ) = @_;
+
+    return Compare( $got, $expected,
+        { ignore_hash_keys => [qw(xmlns:xlink xlink:type xlink:href)] } );
 }
 
 my $serverPort = 8000;
@@ -170,29 +179,54 @@ my $info0 = "info 0";
 
 #Testing resource updating and getting
 {
-    $idRes = $client->updateResource( $Resources[0]->{id},
-        "aulaaaaaa", "info aulaaaaaa" );
+    # checking updateResource only changes description and info; tags and
+    # bookings should remain unmodified. See ticket #171
+    my $resource = $client->getResource( $Resources[0]->{id} );
+    ok( defined $resource && $resource->{id} eq $Resources[0]->{id}, 
+        'resource retrieval for updateResource tests' );
+
+    # add tag and booking to the resource
+    my $idTag = $client->createTag( $resource->{id}, 'dummytag' );
+    ok( defined $idTag, 'tag creation for updateResource tests' );
+
+    my $desc = 'dummy booking description';
+    my $from = {
+        year   => 2010,
+        month  => 4,
+        day    => 1,
+        hour   => 16,
+        minute => 0,
+        second => 0,
+    };
+    my $to = {
+        year   => 2010,
+        month  => 4,
+        day    => 1,
+        hour   => 17,
+        minute => 0,
+        second => 0,
+    };
+    my $info = 'dummy booking for updateResource tests';
+
+    my $idBooking
+        = $client->createBooking( $resource->{id}, $desc, $from, $to, $info );
+    ok( defined $idBooking, 'booking created for updateResource tests');
+
+    my $dataBefore = $client->getResource( $resource->{id} );
+    ok(defined $dataBefore);
+    
+    $idRes = $client->updateResource( $Resources[0]->{id}, 'aulaaaaaa', 'info aulaaaaaa' );
     ok( $idRes->{id} eq $Resources[0]->{id},
         'updated resource ' . $Resources[0]->{id}
     );
-    $dataRes = $client->getResource( $Resources[0]->{id} );
-    ok( $dataRes->{description} eq 'aulaaaaaa'
-            && !defined $dataRes->{agenda}
-            && $dataRes->{info} eq 'info aulaaaaaa',
-        'get resource ' . $Resources[0]->{id}
-    );
-
-    $idRes = $client->updateResource( $Resources[0]->{id}, "aula", "info" );
-    ok( $idRes->{id} eq $Resources[0]->{id},
-        'updated resource ' . $Resources[0]->{id}
-    );
 
     $dataRes = $client->getResource( $Resources[0]->{id} );
-    ok( $dataRes->{description} eq 'aula'
-            && !defined $dataRes->{agenda}
-            && $dataRes->{info} eq 'info',
-        'get resource ' . $Resources[0]->{id}
-    );
+
+    ok( $dataRes->{description} eq 'aulaaaaaa', 'description updated successfully' );
+    ok( $dataRes->{info} eq 'info aulaaaaaa', 'info updated successfully' );
+    ok( defined $dataRes->{agenda}, 'agenda still exists' );
+    warn Dumper($dataRes) . "\n" . Dumper($dataBefore);
+    ok ( smeagolCompare( $dataRes, $dataBefore ), 'bookings and tags did not change' );
 
     @idResources = $client->listResources();
     ok( $idResources[0]->{id} eq $Resources[0]->{id},
@@ -211,6 +245,7 @@ my $info0 = "info 0";
             && $dataRes->{info} eq 'info projector',
         'get resource ' . $Resources[1]->{id}
     );
+
 }
 
 #Testing deleting resource

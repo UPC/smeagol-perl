@@ -179,10 +179,11 @@ my $info0 = "info 0";
 
 #Testing resource updating and getting
 {
+
     # checking updateResource only changes description and info; tags and
     # bookings should remain unmodified. See ticket #171
     my $resource = $client->getResource( $Resources[0]->{id} );
-    ok( defined $resource && $resource->{id} eq $Resources[0]->{id}, 
+    ok( defined $resource && $resource->{id} eq $Resources[0]->{id},
         'resource retrieval for updateResource tests' );
 
     # add tag and booking to the resource
@@ -210,23 +211,28 @@ my $info0 = "info 0";
 
     my $idBooking
         = $client->createBooking( $resource->{id}, $desc, $from, $to, $info );
-    ok( defined $idBooking, 'booking created for updateResource tests');
+    ok( defined $idBooking, 'booking created for updateResource tests' );
 
     my $dataBefore = $client->getResource( $resource->{id} );
-    ok(defined $dataBefore);
-    
-    $idRes = $client->updateResource( $Resources[0]->{id}, 'aulaaaaaa', 'info aulaaaaaa' );
+    ok( defined $dataBefore );
+
+    $idRes = $client->updateResource( $Resources[0]->{id},
+        'aulaaaaaa', 'info aulaaaaaa' );
     ok( $idRes->{id} eq $Resources[0]->{id},
         'updated resource ' . $Resources[0]->{id}
     );
 
     $dataRes = $client->getResource( $Resources[0]->{id} );
 
-    ok( $dataRes->{description} eq 'aulaaaaaa', 'description updated successfully' );
+    ok( $dataRes->{description} eq 'aulaaaaaa',
+        'description updated successfully'
+    );
     ok( $dataRes->{info} eq 'info aulaaaaaa', 'info updated successfully' );
     ok( defined $dataRes->{agenda}, 'agenda still exists' );
     warn Dumper($dataRes) . "\n" . Dumper($dataBefore);
-    ok ( smeagolCompare( $dataRes, $dataBefore ), 'bookings and tags did not change' );
+    ok( smeagolCompare( $dataRes, $dataBefore ),
+        'bookings and tags did not change'
+    );
 
     @idResources = $client->listResources();
     ok( $idResources[0]->{id} eq $Resources[0]->{id},

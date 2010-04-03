@@ -19,14 +19,6 @@ BEGIN {
     );
 }
 
-# Auxiliary routine to compare two Perl hashes, ignoring XLink-related keys
-sub smeagolCompare {
-    my ( $got, $expected ) = @_;
-
-    return Compare( $got, $expected,
-        { ignore_hash_keys => [qw(xmlns:xlink xlink:type xlink:href)] } );
-}
-
 my $serverPort = 8000;
 my $server     = "http://localhost:$serverPort";
 my $pid        = Smeagol::Server->new($serverPort)->background();

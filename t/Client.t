@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-use Test::More tests => 81;
+use Test::More tests => 84;
 
 use strict;
 use warnings;
@@ -209,31 +209,42 @@ my $info0 = "info 0";
     };
     my $info = 'dummy booking for updateResource tests';
 
-#    my $idBooking
-#        = $client->createBooking( $resource->{id}, $desc, $from, $to, $info );
-#    ok( defined $idBooking, 'booking created for updateResource tests' );
+    my $booking
+        = $client->createBooking( $resource->{id}, $desc, $from, $to, $info );
+    ok( defined $booking, 'booking created for updateResource tests' );
 
-    my $dataBefore = $client->getResource( $resource->{id} );
-    ok( defined $dataBefore );
+    my $oldResource = $client->getResource( $resource->{id} );
+    my @oldAgenda   = $client->listBookings( $resource->{id} );
+    ok( @oldAgenda, 'retrieving bookings before update' );
 
-    $idRes = $client->updateResource( $Resources[0]->{id},
-        'aulaaaaaa', 'info aulaaaaaa' );
-    ok( $idRes->{id} eq $Resources[0]->{id},
-        'updated resource ' . $Resources[0]->{id}
+    my $NEW_DESC = 'aulaaaaaa';
+    my $NEW_INFO = 'info aulaaaaaa';
+    $idRes
+        = $client->updateResource( $oldResource->{id}, $NEW_DESC, $NEW_INFO );
+    ok( $idRes->{id} eq $oldResource->{id},
+        'updated resource ' . $oldResource->{id}
     );
 
-    $dataRes = $client->getResource( $Resources[0]->{id} );
+    my $newResource = $client->getResource( $idRes->{id} );
+    my @newAgenda   = $client->listBookings( $resource->{id} );
+    ok( @newAgenda, 'retrieving bookings after update' );
 
-    ok( $dataRes->{description} eq 'aulaaaaaa',
+    ok( $newResource->{description} eq $NEW_DESC,
         'description updated successfully'
     );
-    ok( $dataRes->{info} eq 'info aulaaaaaa', 'info updated successfully' );
+    ok( $newResource->{info} eq $NEW_INFO, 'info updated successfully' );
 
-    #    ok( defined $dataRes->{agenda}, 'agenda still exists' );
-    warn Dumper($dataRes) . "\n" . Dumper($dataBefore);
-    ok( smeagolCompare( $dataRes, $dataBefore ),
+    ok( Compare(
+            $newResource,
+            $oldResource,
+            {   ignore_hash_keys =>
+                    [qw(xmlns:xlink xlink:type xlink:href description info)]
+            }
+        ),
         'bookings and tags did not change'
     );
+
+    ok( Compare( @oldAgenda, @newAgenda ), 'agenda contents did not change' );
 
     @idResources = $client->listResources();
     ok( $idResources[0]->{id} eq $Resources[0]->{id},

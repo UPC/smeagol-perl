@@ -343,7 +343,11 @@ sub updateResource {
     # update info, if needed
 
     if ( defined $info ) {
-        my $oldInfo = $dom->getElementsByTagName('info')->get_node(1);
+        my $xpathExpr = XML::LibXML::XPathExpression->new('/resource/info');
+        my @nodes     = $dom->findnodes($xpathExpr);
+        my $oldInfo   = $nodes[0];
+
+        #my $oldInfo = $dom->getElementsByTagName('info')->get_node(1);
         my $newInfo = $dom->createElement('info');
         $newInfo->appendText($info);
         $oldInfo->replaceNode($newInfo);

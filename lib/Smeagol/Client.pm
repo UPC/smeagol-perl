@@ -325,7 +325,6 @@ sub updateResource {
     return unless defined $id && defined $description;
 
     # get resource to update
-
     my $response = $self->{ua}->get( $self->{url} . '/resource/' . $id );
 
     return unless $response->status_line =~ /200/;
@@ -334,20 +333,17 @@ sub updateResource {
     croak $@ if $@;
 
     # update description
-
     my $oldDesc = $dom->getElementsByTagName('description')->get_node(1);
     my $newDesc = $dom->createElement('description');
     $newDesc->appendText($description);
     $oldDesc->replaceNode($newDesc);
 
     # update info, if needed
-
     if ( defined $info ) {
         my $xpathExpr = XML::LibXML::XPathExpression->new('/resource/info');
         my @nodes     = $dom->findnodes($xpathExpr);
         my $oldInfo   = $nodes[0];
 
-        #my $oldInfo = $dom->getElementsByTagName('info')->get_node(1);
         my $newInfo = $dom->createElement('info');
         $newInfo->appendText($info);
         $oldInfo->replaceNode($newInfo);

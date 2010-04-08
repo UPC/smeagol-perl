@@ -9,6 +9,7 @@ use Carp;
 use Data::Dumper;
 use XML::LibXML;
 use XML::Simple;
+use Smeagol::XML;
 
 my %COMMAND_VALID = map { $_ => 1 } qw( POST GET PUT DELETE );
 
@@ -323,14 +324,37 @@ sub updateResource {
     # $info is not mandatory
     return unless defined $id && defined $description;
 
-    my $respXML = "<resource>
-        <description>$description</description>
-        <info>" . ( ( defined $info ) ? $info : "" ) . "</info>
-        </resource>";
+    # get resource to update
+    my $response = $self->{ua}->get( $self->{url} . '/resource/' . $id );
+
+    return unless $response->status_line =~ /200/;
+
+    my $dom = eval { XML::LibXML->new->parse_string( $response->content ) };
+    croak $@ if $@;
+
+    # update description
+    my $oldDesc = $dom->getElementsByTagName('description')->get_node(1);
+    my $newDesc = $dom->createElement('description');
+    $newDesc->appendText($description);
+    $oldDesc->replaceNode($newDesc);
+
+    # update info, if needed
+    if ( defined $info ) {
+        my $xpathExpr = XML::LibXML::XPathExpression->new('/resource/info');
+        my @nodes     = $dom->findnodes($xpathExpr);
+        my $oldInfo   = $nodes[0];
+
+        my $newInfo = $dom->createElement('info');
+        $newInfo->appendText($info);
+        $oldInfo->replaceNode($newInfo);
+    }
+
     my $req = HTTP::Request->new( POST => $self->{url} . '/resource/' . $id );
 
     $req->content_type('text/xml');
-    $req->content($respXML);
+    my $xmlStr = eval { Smeagol::XML->removeXLink( $dom->toString ) };
+    croak $@ . " " . Dumper($xmlStr) if $@;
+    $req->content($xmlStr);
 
     my $res = $self->{ua}->request($req);
     return unless $res->status_line =~ /200/;

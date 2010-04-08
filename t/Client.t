@@ -1,10 +1,11 @@
 #!/usr/bin/perl
 
-use Test::More tests => 78;
+use Test::More tests => 84;
 
 use strict;
 use warnings;
 use Data::Dumper;
+use Data::Compare;
 
 use Date::ICal;
 use Data::ICal;
@@ -170,29 +171,72 @@ my $info0 = "info 0";
 
 #Testing resource updating and getting
 {
-    $idRes = $client->updateResource( $Resources[0]->{id},
-        "aulaaaaaa", "info aulaaaaaa" );
-    ok( $idRes->{id} eq $Resources[0]->{id},
-        'updated resource ' . $Resources[0]->{id}
-    );
-    $dataRes = $client->getResource( $Resources[0]->{id} );
-    ok( $dataRes->{description} eq 'aulaaaaaa'
-            && !defined $dataRes->{agenda}
-            && $dataRes->{info} eq 'info aulaaaaaa',
-        'get resource ' . $Resources[0]->{id}
+
+    # checking updateResource only changes description and info; tags and
+    # bookings should remain unmodified. See ticket #171
+    my $resource = $client->getResource( $Resources[0]->{id} );
+    ok( defined $resource && $resource->{id} eq $Resources[0]->{id},
+        'resource retrieval for updateResource tests' );
+
+    # add tag and booking to the resource
+    my $idTag = $client->createTag( $resource->{id}, 'dummytag' );
+    ok( defined $idTag, 'tag creation for updateResource tests' );
+
+    my $desc = 'dummy booking description';
+    my $from = {
+        year   => 2010,
+        month  => 4,
+        day    => 1,
+        hour   => 16,
+        minute => 0,
+        second => 0,
+    };
+    my $to = {
+        year   => 2010,
+        month  => 4,
+        day    => 1,
+        hour   => 17,
+        minute => 0,
+        second => 0,
+    };
+    my $info = 'dummy booking for updateResource tests';
+
+    my $booking
+        = $client->createBooking( $resource->{id}, $desc, $from, $to, $info );
+    ok( defined $booking, 'booking created for updateResource tests' );
+
+    my $oldResource = $client->getResource( $resource->{id} );
+    my @oldAgenda   = $client->listBookings( $resource->{id} );
+    ok( @oldAgenda, 'retrieving bookings before update' );
+
+    my $NEW_DESC = 'aulaaaaaa';
+    my $NEW_INFO = 'info aulaaaaaa';
+    $idRes
+        = $client->updateResource( $oldResource->{id}, $NEW_DESC, $NEW_INFO );
+    ok( $idRes->{id} eq $oldResource->{id},
+        'updated resource ' . $oldResource->{id}
     );
 
-    $idRes = $client->updateResource( $Resources[0]->{id}, "aula", "info" );
-    ok( $idRes->{id} eq $Resources[0]->{id},
-        'updated resource ' . $Resources[0]->{id}
+    my $newResource = $client->getResource( $idRes->{id} );
+    my @newAgenda   = $client->listBookings( $resource->{id} );
+    ok( @newAgenda, 'retrieving bookings after update' );
+
+    ok( $newResource->{description} eq $NEW_DESC,
+        'description updated successfully'
+    );
+    ok( $newResource->{info} eq $NEW_INFO, 'info updated successfully' );
+
+    ok( Compare(
+            $newResource,
+            $oldResource,
+            {   ignore_hash_keys =>
+                    [qw(xmlns:xlink xlink:type xlink:href description info)]
+            }
+        ),
+        'bookings and tags did not change'
     );
 
-    $dataRes = $client->getResource( $Resources[0]->{id} );
-    ok( $dataRes->{description} eq 'aula'
-            && !defined $dataRes->{agenda}
-            && $dataRes->{info} eq 'info',
-        'get resource ' . $Resources[0]->{id}
-    );
+    ok( Compare( @oldAgenda, @newAgenda ), 'agenda contents did not change' );
 
     @idResources = $client->listResources();
     ok( $idResources[0]->{id} eq $Resources[0]->{id},
@@ -211,6 +255,7 @@ my $info0 = "info 0";
             && $dataRes->{info} eq 'info projector',
         'get resource ' . $Resources[1]->{id}
     );
+
 }
 
 #Testing deleting resource

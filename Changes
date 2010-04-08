@@ -1,5 +1,10 @@
 Històric de revisions del projecte smeagol.
 
+0.1001 Thu Apr  8 10:21:45 CEST 2010
+       - resolt el bug #171, que provocaba que l'operació updateResource
+         al mòdul Smeagol::Client actualitzés de manera incorrecta els tags
+         i bookings del resource.
+
 0.10   Mon Feb 15 08:56:45 2010
        - petits canvis a la API per ajustar-se a la filosofia REST
        - Smeagol::Server::Handler::updateResource no retorna res al

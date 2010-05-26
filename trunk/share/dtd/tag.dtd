@@ -1,0 +1,5 @@
+<!ELEMENT tag (#PCDATA) >
+<!ATTLIST tag 
+    xmlns:xlink CDATA #IMPLIED
+    xlink:href CDATA #IMPLIED
+    xlink:type CDATA #IMPLIED>

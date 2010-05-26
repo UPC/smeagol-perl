@@ -3,7 +3,6 @@ package V2::Server::Controller::Resource;
 use Moose;
 use namespace::autoclean;
 use Data::Dumper;
-use JSON;
 
 BEGIN { extends 'Catalyst::Controller::REST' }
 
@@ -36,7 +35,7 @@ sub default_GET {
       $c->log->debug('Mètode: '.$req->method);
       
       my @res_aux = $c->model('DB::Resource')->all;
-      my $j = JSON->new;
+
       my @tags;
       
       foreach (@res_aux){
@@ -59,23 +58,18 @@ sub default_GET {
 		  $c-> stash-> {template} = 'not_found.tt';
 		  $c->forward( $c->view('TT') );
 	    }else{	
-		  $c->stash->{resource}=$j->encode($resource);
-		  $c-> stash-> {template} = 'resource/get_resource.tt';
-		  $c->forward( $c->view('TT') );
+		  $c->stash->{content}=$resource;
+		  $c->forward( $c->view('JSON') );
 	    } 
       }else {
-	    my $jresources = $j->encode(\@resources);
-	    
-	    $c->stash->{resources}=$jresources;
-	    $c->stash->{template}='resource/get_list.tt';
-	    $c->forward( $c->view('TT') );
+	    $c->stash->{content}=\@resources;
+	    $c->forward( $c->view('JSON') );
       }
       
 }
 
 sub default_POST {
       my ( $self, $c, $id ) = @_;
-      my $j = JSON->new;
       my $req=$c->request;
       
       $c->log->debug('Mètode: '.$req->method);
@@ -136,19 +130,14 @@ sub default_POST {
 	    info => $new_resource->info,
 	    tags => $new_resource->tag_list,
       }; 
-      
-      
-      my $jresource = $j->encode(\@resource);
     
-      $c->stash->{resource}=$jresource;
-      $c->stash->{template}='resource/get_resource.tt';
-      $c->forward( $c->view('TT') );
+      $c->stash->{resource}=\@resource;
+      $c->forward( $c->view('JSON') );
       
       }
       
 sub default_PUT {
       my ( $self, $c, $id ) = @_;
-      my $j = JSON->new;
       my $req= $c->request;
       $c->log->debug('Mètode: '.$req->method);
       $c->log->debug ("El PUT funciona");
@@ -212,12 +201,8 @@ sub default_PUT {
 		  tags => $resource->tag_list,
 	    }; 
 	    
-	    
-	    my $jresource = $j->encode(\@resource);
-	    
-	    $c->stash->{resource}=$jresource;
-	    $c->stash->{template}='resource/get_resource.tt';
-	    $c->forward( $c->view('TT') );
+	    $c->stash->{resource}=\@resource;
+	    $c->forward( $c->view('JSON') );
       }else{
 	$c->stash->{template} = 'not_found.tt';
 	$c->forward( $c->view('TT') );

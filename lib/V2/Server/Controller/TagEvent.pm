@@ -2,7 +2,6 @@ package V2::Server::Controller::TagEvent;
 use Moose;
 use namespace::autoclean;
 use Data::Dumper;
-use JSON;
 
 BEGIN { extends 'Catalyst::Controller::REST' }
 

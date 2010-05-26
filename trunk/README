@@ -1,0 +1,51 @@
+DESCRIPCIÓ
+
+Aquesta és la prova pilot del projecte Sméagol, que pretén construir
+un gestor de recursos descentralitzat basat en components.
+
+INSTAL·LACIÓ
+
+Per instal·lar aquesta prova executeu:
+
+   perl Makefile.PL
+   make
+   make test
+   make install
+
+DEPENDÈNCIES
+
+Aquesta distribució depèn d'aquests altres mòduls:
+
+  +---------------------------+----------------------------+
+  | Mòdul                     | Paquet Debian/Ubuntu       |
+  +---------------------------+----------------------------+
+  | DateTime                  | libdatetime-perl           |
+  | DateTime::Span            | libdatetime-set-perl       |
+  | Set::Object               | libset-object-perl         |
+  | Test::More                | perl-modules               |
+  | XML::LibXML               | libxml-libxml-perl         |
+  | XML::Simple               | libxml-simple-perl         |
+  | HTTP::Server::Simple::CGI | libhttp-server-simple-perl |
+  | Getopt::Euclid            | libgetopt-euclid-perl      |
+  | Data::Compare             | libdata-compare-perl       |
+  | Date::ICal                | libdate-ical-perl          |
+  | Data::ICal                | libdata-ical-perl          |
+  +---------------------------+----------------------------+
+
+LLICÈNCIA
+
+Copyright (C) 2008,2009  Universitat Politècnica de Catalunya
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+

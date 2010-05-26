@@ -2,7 +2,6 @@ package V2::Server::Controller::ResourceTag;
 use Moose;
 use namespace::autoclean;
 use Data::Dumper;
-use JSON;
 
 BEGIN { extends 'Catalyst::Controller::REST' }
 
@@ -25,7 +24,6 @@ sub default : Local : ActionClass('REST') {
 
 sub default_GET {
   my ( $self, $c, $res, $tag ) = @_;
-  my $j = JSON->new;
   
   if($tag){
     my @resource_tag = $c->model('DB::ResourceTag')->search({tag_id=>$tag});
@@ -48,11 +46,9 @@ if (@resource_tag){
       push (@resources, @resource);
       
     }
-      my $jresources = $j->encode(\@resources);
       
-      $c->stash->{resources}=$jresources;
-      $c->stash->{template}='resource/get_list.tt';
-      $c->forward( $c->view('TT') ); 
+      $c->stash->{content}=@resources;
+      $c->forward( $c->view('JSON') ); 
 }else{
       $c->stash->{template}='not_found.tt';
       $c->forward( $c->view('TT') ); 	

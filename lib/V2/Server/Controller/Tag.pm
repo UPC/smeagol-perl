@@ -3,7 +3,6 @@ package V2::Server::Controller::Tag;
 use Moose;
 use namespace::autoclean;
 use Data::Dumper;
-use JSON;
 
 BEGIN { extends 'Catalyst::Controller::REST' }
 
@@ -36,7 +35,6 @@ sub default_GET {
       $c->log->debug('Mètode: '.$req->method);
       
       my @tag_aux = $c->model('DB::Tag')->all;
-      my $j = JSON->new;
       
       #Cal refer el hash que conté els tags perquè treballar directament amb el model de DB::Tag
       # és bastant engorrós
@@ -58,16 +56,13 @@ sub default_GET {
 		  $c-> stash-> {template} = 'not_found.tt';
 		  $c->forward( $c->view('TT') );
 	    }else{	
-		  $c->stash->{tag}=$j->encode($tag);
-		  $c-> stash-> {template} = 'tag/get_tag.tt';
-		  $c->forward( $c->view('TT') );
+		  $c->stash->{content}=$tag;
+		  $c->forward( $c->view('JSON') );
 	    } 
       }else {
-	    my $jtags = $j->encode(\@tags);
-	    
-	    $c->stash->{tags}=$jtags;
-	    $c->stash->{template}='tag/get_list.tt';
-	    $c->forward( $c->view('TT') );
+ 
+	    $c->stash->{content}=\@tags;
+	    $c->forward( $c->view('JSON') );
       }
       
 }
@@ -77,7 +72,7 @@ sub default_POST {
       my $req=$c->request;
       $c->log->debug('Mètode: '.$req->method);
       $c->log->debug ("El POST funciona");
-      my $j = JSON->new;
+
       my $name=$req->parameters->{name};
       
       my $new_tag = $c->model('DB::Tag')->find_or_new();
@@ -89,9 +84,8 @@ sub default_POST {
 	    id => $new_tag->id,
       };
       
-      $c->stash->{tag}=$j->encode(\@tag);
-      $c-> stash-> {template} = 'tag/get_tag.tt';
-      $c->forward( $c->view('TT') );
+      $c->stash->{content}=\@tag;
+      $c->forward( $c->view('JSON') );
 }
 
 
@@ -101,7 +95,7 @@ sub default_PUT {
       my $req=$c->request;
       $c->log->debug('Mètode: '.$req->method);
       $c->log->debug ("El PUT funciona");
-      my $j = JSON->new;
+
       my $name=$req->parameters->{name};
       
       my $tag = $c->model('DB::Tag')->find_or_new({id=>$id});
@@ -114,9 +108,8 @@ sub default_PUT {
 	      id => $tag->id,
 	};
 	
-	$c->stash->{tag}=$j->encode(\@tag);
-	$c-> stash-> {template} = 'tag/get_tag.tt';
-	$c->forward( $c->view('TT') );
+	$c->stash->{content}=\@tag;
+	$c->forward( $c->view('JSON') );
       }else{
 	  $c->stash->{template} = 'not_found.tt';
 	  $c->forward( $c->view('TT') );

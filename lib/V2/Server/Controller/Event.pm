@@ -3,7 +3,6 @@ package V2::Server::Controller::Event;
 use Moose;
 use namespace::autoclean;
 use Data::Dumper;
-use JSON;
 
 BEGIN { extends 'Catalyst::Controller::REST' }
 
@@ -29,7 +28,6 @@ sub default : Local : ActionClass('REST') {
 
 sub default_GET  {
   my ( $self, $c, $res, $id ) = @_;
-  my $j = JSON->new;
 
   if ($id){
     my $event_aux = $c->model('DB::Event')->find({id=>$id});
@@ -42,11 +40,8 @@ sub default_GET  {
 	    ends=>$event_aux->ends->iso8601(),
 	  };
 
-    my $jevent = $j->encode(\@event);
-    $c->log->debug($jevent);
-    $c->stash->{event}=$jevent;
-    $c->stash->{template}='event/get_event.tt';
-    $c->forward( $c->view('TT') );
+    $c->stash->{event}=\@event;
+    $c->forward( $c->view('JSON') );
 
   }else{
     my @events_aux = $c->model('DB::Event')->all;
@@ -65,12 +60,8 @@ sub default_GET  {
 
 $c->log->debug("#Events: ".@events);
 
-
-    my $jevents = $j->encode(\@events);
-    $c->log->debug($jevents);
-    $c->stash->{events}=$jevents;
-    $c->stash->{template}='event/get_list.tt';
-    $c->forward( $c->view('TT') );
+    $c->stash->{content}=\@events;
+    $c->forward( $c->view('JSON') );
   }
 }
 
@@ -79,7 +70,6 @@ sub default_POST {
       my $req=$c->request;
       $c->log->debug('Mètode: '.$req->method);
       $c->log->debug ("El POST funciona");
-      my $j = JSON->new;
 
       my $info=$req->parameters->{info};
       my $description=$req->parameters->{description};
@@ -98,9 +88,8 @@ sub default_POST {
 	    ends => $new_event->ends,
       };
       
-      $c->stash->{event}=$j->encode(\@event);
-      $c-> stash-> {template} = 'event/get_event.tt';
-      $c->forward( $c->view('TT') );
+      $c->stash->{content}=@event;
+      $c->forward( $c->view('JSON') );
 }
 
 sub default_PUT {
@@ -108,7 +97,6 @@ sub default_PUT {
       my $req=$c->request;
       $c->log->debug('Mètode: '.$req->method);
       $c->log->debug ("El POST funciona");
-      my $j = JSON->new;
 
       my $info=$req->parameters->{info};
       my $description=$req->parameters->{description};
@@ -128,9 +116,8 @@ sub default_PUT {
 	      ends => $event->ends,
 	};
 	
-	$c->stash->{event}=$j->encode(\@event);
-	$c-> stash-> {template} = 'event/get_event.tt';
-	$c->forward( $c->view('TT') );
+	$c->stash->{content}=\@event;
+	$c->forward( $c->view('JSON') );
       }else{
 	$c-> stash-> {template} = 'not_found.tt';
 	$c->forward( $c->view('TT') );

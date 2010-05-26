@@ -3,7 +3,6 @@ package V2::Server::Controller::Booking_S;
 use Moose;
 use namespace::autoclean;
 use Data::Dumper;
-use JSON;
 use DateTime::Span; 
 
 BEGIN { extends 'Catalyst::Controller::REST' }
@@ -30,7 +29,6 @@ sub default : Local : ActionClass('REST') {
 
 sub default_GET  {
   my ( $self, $c, $res, $id ) = @_;
-  my $j = JSON->new;
   
   if ($id) {
     my $booking_aux = $c->model('DB::Booking')->find({id=>$id});
@@ -44,12 +42,8 @@ sub default_GET  {
 	  ends=> $booking_aux->ends->iso8601(),
 	};
 
-	my $jbooking = $j->encode(\@booking);
-	$c->log->debug($jbooking);  
-
-	$c->stash->{booking}=$jbooking;
-	$c->stash->{template}='booking_s/get_booking.tt';
-	$c->forward( $c->view('TT') );
+	$c->stash->{content}=\@booking;
+	$c->forward( $c->view('JSON') );
 	
     } else {
 	$c->stash->{template}='not_found.tt';
@@ -74,12 +68,8 @@ sub default_GET  {
 	  push (@bookings, @booking);
     }
     
-    my $jbookings = $j->encode(\@bookings);
-    $c->log->debug($jbookings);  
-
-    $c->stash->{bookings}=$jbookings;
-    $c->stash->{template}='booking_s/get_list.tt';
-    $c->forward( $c->view('TT') );
+    $c->stash->{content}=\@bookings;
+    $c->forward( $c->view('JSON') );
   }
   
 }
@@ -89,7 +79,6 @@ sub default_POST {
   my $req=$c->request;
   $c->log->debug('Mètode: '.$req->method);
   $c->log->debug ("El POST funciona");
-  my $j = JSON->new;
 
   my $id_resource=$req->parameters->{id_resource};
   my $id_event=$req->parameters->{id_event};
@@ -140,10 +129,7 @@ sub default_POST {
       ends=> $new_booking->ends->iso8601(),
     };
 
-    my $jbooking = $j->encode(\@booking);
-    $c->log->debug($jbooking);  
-
-    $c->stash->{booking}=$jbooking;
+    $c->stash->{content}=\@booking;
     $c->stash->{template}='booking_s/get_booking.tt';
     $c->forward( $c->view('TT') );
   
@@ -155,7 +141,6 @@ sub default_PUT {
   my $req=$c->request;
   $c->log->debug('Mètode: '.$req->method);
   $c->log->debug ("El PUT funciona");
-  my $j = JSON->new;
 
   my $id_resource=$req->parameters->{id_resource};
   my $id_event=$req->parameters->{id_event};
@@ -206,12 +191,8 @@ sub default_PUT {
 	ends=> $booking->ends->iso8601(),
       };
 
-      my $jbooking = $j->encode(\@booking);
-      $c->log->debug($jbooking);  
-
-      $c->stash->{booking}=$jbooking;
-      $c->stash->{template}='booking_s/get_booking.tt';
-      $c->forward( $c->view('TT') );      
+      $c->stash->{content}=\@booking;
+      $c->forward( $c->view('JSON') );      
       }  
 
 }

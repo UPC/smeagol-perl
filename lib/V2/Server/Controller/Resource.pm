@@ -131,7 +131,7 @@ sub default_POST {
 	    tags => $new_resource->tag_list,
       }; 
     
-      $c->stash->{resource}=\@resource;
+      $c->stash->{content}=\@resource;
       $c->forward( $c->view('JSON') );
       
       }
@@ -201,7 +201,7 @@ sub default_PUT {
 		  tags => $resource->tag_list,
 	    }; 
 	    
-	    $c->stash->{resource}=\@resource;
+	    $c->stash->{content}=\@resource;
 	    $c->forward( $c->view('JSON') );
       }else{
 	$c->stash->{template} = 'not_found.tt';

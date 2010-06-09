@@ -11,16 +11,16 @@ BEGIN {
 ok my ($res, $c) = ctx_request('/'), 'context object';  # make sure we got the context object...
 
 my $schema = DBICx::TestDatabase->new('V2::Server::Schema');
-my @tags_aux = $c->model('DB::Tag')->all;
+my @events_aux = $c->model('DB::Event')->all;
 
-my @tags;
-my $tag;
-foreach (@tags_aux) {
-  $tag = $_->id;
-  push (@tags, $tag);
+my @events;
+my $event;
+foreach (@events_aux) {
+  $event = $_->id;
+  push (@events, $event);
 
 }
 
-diag(Dumper(\@tags));
+diag(Dumper(\@events));
 
 done_testing();

@@ -14,10 +14,12 @@ my $schema = DBICx::TestDatabase->new('V2::Server::Schema');
 my @resources_aux = $c->model('DB::Resource')->all;
 
 my @resources;
-my $resource;
+my @resource;
 foreach (@resources_aux) {
-  $resource = $_->id;
-  push (@resources, $resource);
+  @resource = {
+	$_->id
+	};
+  push (@resources, @resource);
 
 }
 

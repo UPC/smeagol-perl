@@ -14,10 +14,12 @@ my $schema = DBICx::TestDatabase->new('V2::Server::Schema');
 my @tags_aux = $c->model('DB::Tag')->all;
 
 my @tags;
-my $tag;
+my @tag;
 foreach (@tags_aux) {
-  $tag = $_->id;
-  push (@tags, $tag);
+  @tag = {
+	id => $_->id  
+  };
+  push (@tags, @tag);
 
 }
 

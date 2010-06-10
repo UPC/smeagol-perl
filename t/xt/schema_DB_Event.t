@@ -14,10 +14,12 @@ my $schema = DBICx::TestDatabase->new('V2::Server::Schema');
 my @events_aux = $c->model('DB::Event')->all;
 
 my @events;
-my $event;
+my @event;
 foreach (@events_aux) {
-  $event = $_->id;
-  push (@events, $event);
+      @event = {
+	    $_->id
+      };
+  push (@events, @event);
 
 }
 

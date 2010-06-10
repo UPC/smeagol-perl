@@ -1,34 +1,34 @@
-package Smeagol::Client::Agenda;
+package V2::Client::Agenda;
 
 use strict;
 use warnings;
 use Moose;
 use Data::Dumper;
 
-extends 'Smeagol::Client';
+extends 'V2::Client';
 
 has 'desc' => (
-		is => 'rw',
-		required => 1,
-		default => sub {
-		        	my $self = shift;
-				my %args = @_;
-        			return $args{desc};
-    		}
-	     );
+    is       => 'rw',
+    required => 1,
+    default  => sub {
+        my $self = shift;
+        my %args = @_;
+        return $args{desc};
+    }
+);
 has 'info' => (
-		is => 'rw',
-		required => 0,
-		default => sub {
-		        	my $self = shift;
-				my %args = @_;
-        			return $args{info} if (defined $args{info});
-    		});
-has 'id' => ( is => 'rw', required => 0);
-has 'agenda' => (is => 'rw', isa => 'Smeagol::Client::Agenda', required => 0);
+    is       => 'rw',
+    required => 0,
+    default  => sub {
+        my $self = shift;
+        my %args = @_;
+        return $args{info} if ( defined $args{info} );
+    }
+);
+has 'id' => ( is => 'rw', required => 0 );
+has 'agenda' => ( is => 'rw', isa => 'V2::Client::Agenda', required => 0 );
+
 #Cal afegir els tags i els events
-
-
 
 sub list {
     my $self = shift;
@@ -127,7 +127,6 @@ sub get {
     return;
 }
 
-
 sub update {
     my $self = shift;
     my ( $id, $description, $info ) = @_;
@@ -151,7 +150,6 @@ sub update {
     return $result;
 
 }
-
 
 sub delete {
     my $self = shift;

@@ -4,8 +4,6 @@ use strict;
 use warnings;
 
 use Test::More tests => 7;
-use Test::MockModule;
-use Data::Dumper;
 
 my $module     = 'V2::Client';
 my $serverPort = 8000;

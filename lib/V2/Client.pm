@@ -5,7 +5,6 @@ use warnings;
 
 use LWP::UserAgent;
 use Moose;
-use V2::Client::Resource;
 
 has 'url' => (
     is       => 'rw',
@@ -28,7 +27,5 @@ has 'ua' => (
         return $ua;
     }
 );
-
-has 'resource' => ( is => 'rw', isa => 'V2::Client::Resource' );
 
 1;

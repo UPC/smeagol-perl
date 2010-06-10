@@ -2,12 +2,10 @@ package V2::Client::Tag;
 
 use strict;
 use warnings;
+
 use Moose;
 use Data::Dumper;
 
-#use XML::LibXML;
-#use XML::Simple;
-#use Smeagol::XML;
 use HTTP::Request::Common;
 use JSON;
 

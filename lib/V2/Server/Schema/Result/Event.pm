@@ -63,7 +63,6 @@ __PACKAGE__->add_columns(
     data_type => "INTEGER",
     default_value => undef,
     is_nullable => 1,
-    is_auto_increment => 1,
     size => undef,
   },
   "info",

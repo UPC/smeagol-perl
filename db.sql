@@ -2,7 +2,7 @@
 --Crear una base de dades SQLite amb 2 taules: resource i tag
 --
     CREATE TABLE resources (
-            id          INTEGER PRIMARY KEY,
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
             description      TEXT,
 	    info	TEXT
     );
@@ -25,7 +25,7 @@
    );
    
    CREATE TABLE event (
-	id INTEGER PRIMARY KEY,
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	info TEXT,
 	description TEXT,
 	starts DATETIME,
@@ -33,7 +33,7 @@
    );
 
     CREATE TABLE booking_s (
-	    id 		INTEGER PRIMARY KEY,
+	    id 		INTEGER PRIMARY KEY AUTOINCREMENT,
 	    id_resource INTEGER REFERENCES resources(id) ON DELETE CASCADE ON UPDATE CASCADE,
 	    id_event	INTEGER REFERENCES event(id) ON DELETE CASCADE ON UPDATE CASCADE,
 	    starts	DATETIME,
@@ -41,7 +41,7 @@
     
     );
     CREATE TABLE booking_r(
-	    id 		INTEGER PRIMARY KEY,
+	    id 		INTEGER PRIMARY KEY AUTOINCREMENT,
 	    id_resource INTEGER REFERENCES resources(id) ON DELETE CASCADE ON UPDATE CASCADE,
 	    id_event	INTEGER REFERENCES event(id) ON DELETE CASCADE ON UPDATE CASCADE,
 	    frequency,

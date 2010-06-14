@@ -17,7 +17,9 @@ my @resources;
 my @resource;
 foreach (@resources_aux) {
   @resource = {
-	$_->id
+	id=>$_->id,
+	info=>$_->info,
+	description=>$_->description,
 	};
   push (@resources, @resource);
 

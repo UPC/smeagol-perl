@@ -39,7 +39,6 @@ __PACKAGE__->config(
     disable_component_resolution_regex_fallback => 1,
     'View::JSON' => {
           expose_stash    => 'content',
-	  encoding => 'utf8'
       },
 
 );
@@ -54,7 +53,7 @@ V2::Server - Catalyst based application
 
 =head1 SYNOPSIS
 
-    script/v2_server_server.pl
+    script/server.pl
 
 =head1 DESCRIPTION
 

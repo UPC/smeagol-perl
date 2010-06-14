@@ -37,6 +37,10 @@ __PACKAGE__->config(
     name => 'V2::Server',
     # Disable deprecated behavior needed by old applications
     disable_component_resolution_regex_fallback => 1,
+    'View::JSON' => {
+          expose_stash    => 'content',
+      },
+
 );
 
 # Start the application
@@ -49,7 +53,7 @@ V2::Server - Catalyst based application
 
 =head1 SYNOPSIS
 
-    script/v2_server_server.pl
+    script/server.pl
 
 =head1 DESCRIPTION
 

@@ -3,12 +3,6 @@ package V2::Server::View::JSON;
 use strict;
 use base 'Catalyst::View::JSON';
 
-
-__PACKAGE__->config(
-    expose_stash => 'content',
-);
-
-
 =head1 NAME
 
 V2::Server::View::JSON - Catalyst JSON View

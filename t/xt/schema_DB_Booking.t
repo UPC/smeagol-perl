@@ -105,7 +105,7 @@ diag("Esborra reserves \n");
   unless (my $check_booking2 = $c->model('DB::Booking')->find({id=>$id_test})) {
     diag("Delete test ok \n");
   }else{
-    diag("Delete test failde \n");
+    diag("Delete test failed \n");
   }
 
 done_testing();

@@ -93,7 +93,7 @@ Related object: L<V2::Server::Schema::Result::Booking>
 =cut
 
 __PACKAGE__->has_many(
-  "booking_s",
+  "booking",
   "V2::Server::Schema::Result::Booking",
   { "foreign.id_resource" => "self.id" },
 );

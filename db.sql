@@ -1,29 +1,34 @@
 --
 --Crear una base de dades SQLite amb 2 taules: resource i tag
 --
+drop table if exists  resources;
     CREATE TABLE resources (
             id          INTEGER PRIMARY KEY AUTOINCREMENT,
             description      TEXT,
 	    info	TEXT
     );
 
+drop table if exists  resource_tag;
     CREATE TABLE resource_tag (
             resource_id     INTEGER REFERENCES resources(id) ON DELETE CASCADE ON UPDATE CASCADE,
             tag_id   TEXT REFERENCES tag(id) ON DELETE CASCADE ON UPDATE CASCADE,
             PRIMARY KEY (resource_id, tag_id)
     );
 
+drop table if exists tag;
   CREATE TABLE tag (
 	    id		TEXT,
 	    PRIMARY KEY (id)
     );
-   
+    
+drop table if exists tag_event;   
    CREATE TABLE tag_event (
 	id_tag	TEXT REFERENCES tag(id) ON DELETE CASCADE ON UPDATE CASCADE,
 	id_event TEXT REFERENCES event(id) ON DELETE CASCADE ON UPDATE CASCADE,
 	PRIMARY KEY (id_tag,id_event)
    );
-   
+
+drop table if exists event;  
    CREATE TABLE event (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	info TEXT,
@@ -32,23 +37,16 @@
 	ends DATETIME
    );
 
-    CREATE TABLE booking_s (
+drop table if exists booking;
+    CREATE TABLE booking(
 	    id 		INTEGER PRIMARY KEY AUTOINCREMENT,
 	    id_resource INTEGER REFERENCES resources(id) ON DELETE CASCADE ON UPDATE CASCADE,
 	    id_event	INTEGER REFERENCES event(id) ON DELETE CASCADE ON UPDATE CASCADE,
 	    starts	DATETIME,
-	    ends	DATETIME
-    
-    );
-    CREATE TABLE booking_r(
-	    id 		INTEGER PRIMARY KEY AUTOINCREMENT,
-	    id_resource INTEGER REFERENCES resources(id) ON DELETE CASCADE ON UPDATE CASCADE,
-	    id_event	INTEGER REFERENCES event(id) ON DELETE CASCADE ON UPDATE CASCADE,
+	    ends	DATETIME,
 	    frequency,
 	    interval,
 	    duration,
-	    starts	DATETIME,
-	    ends	DATETIME,
 	    per_minuts,
 	    per_hores,
 	    per_dies,
@@ -100,11 +98,11 @@ INSERT INTO event values (2,'Informació 2',"Descripció de l'event",'2010-02-16
 INSERT INTO event values(3,'Informació 3',"Descripció de l'event",'2010-02-16 04:00:00','2010-02-16 05:00:00');
 INSERT INTO event values(4,'Informació 4',"Descripció de l'event",'2010-02-16 04:00:00','2010-02-16 05:00:00');
 
-INSERT INTO booking_s values (1,3,1,'2010-02-16 04:00:00','2010-02-16 05:00:00');
-INSERT INTO booking_s values (2,4,1,'2010-02-16 04:00:00','2010-02-16 05:00:00');
-INSERT INTO booking_s values (3,5,2,'2010-02-16 04:00:00','2010-02-16 05:00:00');
-INSERT INTO booking_s values (4,2,3,'2010-02-16 04:00:00','2010-02-16 05:00:00');
-INSERT INTO booking_s values (5,1,4,'2010-02-16 04:00:00','2010-02-16 05:00:00');
+INSERT INTO booking values (1,3,1,'2010-02-16 04:00:00','2010-02-16 05:00:00','','','','','','','','');
+INSERT INTO booking values (2,4,1,'2010-02-16 04:00:00','2010-02-16 05:00:00','','','','','','','','');
+INSERT INTO booking values (3,5,2,'2010-02-16 04:00:00','2010-02-16 05:00:00','','','','','','','','');
+INSERT INTO booking values (4,2,3,'2010-02-16 04:00:00','2010-02-16 05:00:00','','','','','','','','');
+INSERT INTO booking values (5,1,4,'2010-02-16 04:00:00','2010-02-16 05:00:00','','','','','','','','');
 
 INSERT INTO tag_event values ('projector',1);
 INSERT INTO tag_event values ('pantalla',1);

@@ -12,11 +12,11 @@ __PACKAGE__->load_components("InflateColumn::DateTime", "TimeStamp");
 
 =head1 NAME
 
-V2::Server::Schema::Result::Booking
+V2::Server::Schema::Result::BookingR
 
 =cut
 
-__PACKAGE__->table("booking_s");
+__PACKAGE__->table("booking");
 
 =head1 ACCESSORS
 
@@ -43,6 +43,27 @@ __PACKAGE__->table("booking_s");
   is_nullable: 1
   size: undef
 
+=head2 frequency
+
+  data_type: (empty string)
+  default_value: undef
+  is_nullable: 1
+  size: undef
+
+=head2 interval
+
+  data_type: (empty string)
+  default_value: undef
+  is_nullable: 1
+  size: undef
+
+=head2 duration
+
+  data_type: (empty string)
+  default_value: undef
+  is_nullable: 1
+  size: undef
+
 =head2 starts
 
   data_type: DATETIME
@@ -53,6 +74,41 @@ __PACKAGE__->table("booking_s");
 =head2 ends
 
   data_type: DATETIME
+  default_value: undef
+  is_nullable: 1
+  size: undef
+
+=head2 per_minuts
+
+  data_type: (empty string)
+  default_value: undef
+  is_nullable: 1
+  size: undef
+
+=head2 per_hores
+
+  data_type: (empty string)
+  default_value: undef
+  is_nullable: 1
+  size: undef
+
+=head2 per_dies
+
+  data_type: (empty string)
+  default_value: undef
+  is_nullable: 1
+  size: undef
+
+=head2 per_mesos
+
+  data_type: (empty string)
+  default_value: undef
+  is_nullable: 1
+  size: undef
+
+=head2 per_dia_mes
+
+  data_type: (empty string)
   default_value: undef
   is_nullable: 1
   size: undef
@@ -83,6 +139,12 @@ __PACKAGE__->add_columns(
     is_nullable => 1,
     size => undef,
   },
+  "frequency",
+  { data_type => "", default_value => undef, is_nullable => 1, size => undef },
+  "interval",
+  { data_type => "", default_value => undef, is_nullable => 1, size => undef },
+  "duration",
+  { data_type => "", default_value => undef, is_nullable => 1, size => undef },
   "starts",
   {
     data_type => "DATETIME",
@@ -97,6 +159,16 @@ __PACKAGE__->add_columns(
     is_nullable => 1,
     size => undef,
   },
+  "per_minuts",
+  { data_type => "", default_value => undef, is_nullable => 1, size => undef },
+  "per_hores",
+  { data_type => "", default_value => undef, is_nullable => 1, size => undef },
+  "per_dies",
+  { data_type => "", default_value => undef, is_nullable => 1, size => undef },
+  "per_mesos",
+  { data_type => "", default_value => undef, is_nullable => 1, size => undef },
+  "per_dia_mes",
+  { data_type => "", default_value => undef, is_nullable => 1, size => undef },
 );
 __PACKAGE__->set_primary_key("id");
 
@@ -134,12 +206,8 @@ __PACKAGE__->belongs_to(
 
 
 # Created by DBIx::Class::Schema::Loader v0.05003 @ 2010-05-11 17:00:01
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:jKHpneqSVqu/3B57e6mGoQ
-sub overlap {
-      my ($self) = @_;
-      
-      return 1;
-}
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:H0OjD8KneM8/lLSiDpPrLA
+
 
 # You can replace this text with custom content, and it will be preserved on regeneration
 1;

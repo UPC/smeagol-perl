@@ -121,25 +121,10 @@ Related object: L<V2::Server::Schema::Result::Booking>
 =cut
 
 __PACKAGE__->has_many(
-  "booking_s",
+  "booking",
   "V2::Server::Schema::Result::Booking",
   { "foreign.id_event" => "self.id" },
 );
-
-=head2 booking_rs
-
-Type: has_many
-
-Related object: L<V2::Server::Schema::Result::BookingR>
-
-=cut
-
-__PACKAGE__->has_many(
-  "booking_rs",
-  "V2::Server::Schema::Result::BookingR",
-  { "foreign.id_event" => "self.id" },
-);
-
 
 # Created by DBIx::Class::Schema::Loader v0.05003 @ 2010-05-11 17:00:01
 # DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:mpI3x2qk+IJqNAA2RGn3RQ

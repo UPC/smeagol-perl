@@ -40,20 +40,29 @@ sub default_GET  {
 	    ends=>$event_aux->ends->iso8601(),
 	  };
 
-    $c->stash->{event}=\@event;
+    $c->stash->{content}=\@event;
     $c->forward( $c->view('JSON') );
 
   }else{
     my @events_aux = $c->model('DB::Event')->all;
     my @event;
     my @events;
+    my $starts; my $ends;
+    
     foreach (@events_aux){
+      $c->log->debug('Event aux: '.$_->id);
+      $c->log->debug('Starts: '.$_->starts->iso8601());
+      $c->log->debug('Ends: '.$_->ends->iso8601());
+      
+      $starts = $_->starts->iso8601();
+      $ends = $_->ends->iso8601();
+      
       @event = {
 	id=>$_->id,
 	info=>$_->info,
 	description=>$_->description,
-	starts=>$_->starts->iso8601(),
-	ends=>$_->ends->iso8601(),
+	starts=>$starts,
+	ends=>$ends,
       };
   push (@events, @event);
 }
@@ -73,22 +82,26 @@ sub default_POST {
 
       my $info=$req->parameters->{info};
       my $description=$req->parameters->{description};
+      my $starts=$req->parameters->{starts};
+      my $ends=$req->parameters->{ends};
       
       my $new_event = $c->model('DB::Event')->find_or_new();
       
       $new_event->info($info);
       $new_event->description($description);
+      $new_event->starts($starts);
+      $new_event->ends($ends);      
       $new_event->insert;
       
       my @event = {
 	    id => $new_event->id,
 	    info => $new_event->info,
 	    description => $new_event->description,
-	    starts => $new_event->starts,
-	    ends => $new_event->ends,
+	    starts => $new_event->starts->iso8601(),
+	    ends => $new_event->ends->iso8601(),
       };
       
-      $c->stash->{content}=@event;
+      $c->stash->{content}=\@event;
       $c->forward( $c->view('JSON') );
 }
 
@@ -96,16 +109,21 @@ sub default_PUT {
       my ($self, $c, $id) = @_;
       my $req=$c->request;
       $c->log->debug('Mètode: '.$req->method);
-      $c->log->debug ("El POST funciona");
+      $c->log->debug ("El PUT funciona");
 
       my $info=$req->parameters->{info};
       my $description=$req->parameters->{description};
+      my $starts=$req->parameters->{starts};
+      my $ends=$req->parameters->{ends};
+      
       
       my $event = $c->model('DB::Event')->find({id=>$id});
 
       if ($event){
 	$event->info($info);
 	$event->description($description);
+	$event->starts($starts);
+	$event->ends($ends); 
 	$event->insert_or_update;
 
 	my @event = {

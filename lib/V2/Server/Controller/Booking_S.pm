@@ -88,7 +88,7 @@ sub default_POST {
   my $new_booking = $c->model('DB::Booking')->find_or_new();
 
   $new_booking->id_resource($id_resource);
-  $new_booking->id_event($id_resource);
+  $new_booking->id_event($id_event);
   $new_booking->starts($starts);
   $new_booking->ends($ends);  
   
@@ -140,6 +140,7 @@ sub default_PUT {
   my ( $self, $c, $res, $id) = @_;
   my $req=$c->request;
   $c->log->debug('Mètode: '.$req->method);
+  $c->log->debug('Params: '.$req->parameters->{id_resource}.', '.$req->parameters->{id_event});
   $c->log->debug ("El PUT funciona");
 
   my $id_resource=$req->parameters->{id_resource};
@@ -162,7 +163,6 @@ sub default_PUT {
   my $overlap_aux;
   my $overlap = 0;
   
-  $c->log->debug ("# de reserves: ".@old_bookings);
   
   foreach (@old_bookings){
     $c->log->debug("Start: ".$_->starts);

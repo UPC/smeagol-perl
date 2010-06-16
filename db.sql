@@ -1,14 +1,14 @@
 --
 --Crear una base de dades SQLite amb 2 taules: resource i tag
 --
-drop table if exists  resources;
+drop table if exists resources;
     CREATE TABLE resources (
             id          INTEGER PRIMARY KEY AUTOINCREMENT,
             description      TEXT,
 	    info	TEXT
     );
 
-drop table if exists  resource_tag;
+drop table if exists resource_tag;
     CREATE TABLE resource_tag (
             resource_id     INTEGER REFERENCES resources(id) ON DELETE CASCADE ON UPDATE CASCADE,
             tag_id   TEXT REFERENCES tag(id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -20,15 +20,15 @@ drop table if exists tag;
 	    id		TEXT,
 	    PRIMARY KEY (id)
     );
-    
-drop table if exists tag_event;   
+
+drop table if exists tag_event;
    CREATE TABLE tag_event (
 	id_tag	TEXT REFERENCES tag(id) ON DELETE CASCADE ON UPDATE CASCADE,
 	id_event TEXT REFERENCES event(id) ON DELETE CASCADE ON UPDATE CASCADE,
 	PRIMARY KEY (id_tag,id_event)
    );
 
-drop table if exists event;  
+drop table if exists event;
    CREATE TABLE event (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	info TEXT,
@@ -44,7 +44,7 @@ drop table if exists booking;
 	    id_event	INTEGER REFERENCES event(id) ON DELETE CASCADE ON UPDATE CASCADE,
 	    starts	DATETIME,
 	    ends	DATETIME,
-	    frequency,
+            frequency,
 	    interval,
 	    duration,
 	    per_minuts,

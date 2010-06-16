@@ -39,11 +39,13 @@ sub default_GET {
       my @tags;
       
       foreach (@res_aux){
+	@tags= $_->tag_list;
+	$c->log->debug(\@tags);
 	    @resource = {
 		  id => $_->id,
 		  description => $_->description,
 		  info => $_->info,
-		  tags => $_->tag_list,
+		  tags => @tags,
 	    };
 	    push (@resources, @resource);
 	    
@@ -131,7 +133,7 @@ sub default_POST {
 	    tags => $new_resource->tag_list,
       }; 
     
-      $c->stash->{content}=\@resource;
+      $c->stash->{resource}=\@resource;
       $c->forward( $c->view('JSON') );
       
       }
@@ -201,7 +203,7 @@ sub default_PUT {
 		  tags => $resource->tag_list,
 	    }; 
 	    
-	    $c->stash->{content}=\@resource;
+	    $c->stash->{resource}=\@resource;
 	    $c->forward( $c->view('JSON') );
       }else{
 	$c->stash->{template} = 'not_found.tt';

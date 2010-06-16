@@ -3,13 +3,7 @@ package V2::Server::Controller::Booking;
 use Moose;
 use namespace::autoclean;
 use Data::Dumper;
-
-use DateTime;
-use DateTime::Span;
-use DateTime::TimeZone;
-
-my $tz = DateTime::TimeZone->new( name => 'local' );
-
+use DateTime::Span; 
 
 BEGIN { extends 'Catalyst::Controller::REST' }
 
@@ -38,27 +32,14 @@ sub default_GET  {
   
   if ($id) {
     my $booking_aux = $c->model('DB::Booking')->find({id=>$id});
-    my @starts;
-    my @ends;
-    
-    if ($booking_aux){
-      @starts = {
-	value =>$booking_aux->starts->iso8601(),
-	zone_time =>$tz,
-	offset =>$tz->offset_for_datetime($booking_aux->starts->time_zone->name),
-      };
 
-      @ends = {
-	value =>$booking_aux->ends->iso8601(),
-	zone_time =>$tz,
-	offset =>$tz->offset_for_datetime($booking_aux->ends->time_zone->name),
-      };
+    if ($booking_aux){
 	my @booking = {
 	  id=> $booking_aux->id,
 	  id_resource=> $booking_aux->id_resource->id,
 	  id_event=> $booking_aux->id_event->id,
-	  starts=> @starts,
-	  ends=> @ends,
+	  starts=> $booking_aux->starts->iso8601(),
+	  ends=> $booking_aux->ends->iso8601(),
 	};
 
 	$c->stash->{content}=\@booking;
@@ -101,12 +82,9 @@ sub default_POST {
 
   my $id_resource=$req->parameters->{id_resource};
   my $id_event=$req->parameters->{id_event};
-  my $starts_aux=$req->parameters->{starts};
-  my $ends_aux=$req->parameters->{ends};
+  my $starts=$req->parameters->{starts};
+  my $ends=$req->parameters->{ends};
 
-  my $starts = DateTime->from_epoch(epoch=>time($starts_aux));
-  my $ends = DateTime->from_epoch(epoch=>time($ends_aux));
-  
   my $new_booking = $c->model('DB::Booking')->find_or_new();
 
   $new_booking->id_resource($id_resource);

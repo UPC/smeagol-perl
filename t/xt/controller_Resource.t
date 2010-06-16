@@ -1,14 +1,12 @@
 use strict;
 use warnings;
-
 use Test::More;
 use Data::Dumper;
 use HTTP::Request::Common;
-require LWP::UserAgent;
 use JSON::Any;
 
-BEGIN { use_ok 'Catalyst::Test', 'V2::Server' }
-BEGIN { use_ok 'V2::Server::Controller::Resource' }
+BEGIN { use_ok 'Catalyst::Test', 'SmeagolServer' }
+BEGIN { use_ok 'SmeagolServer::Controller::Resource' }
 
 my $j = JSON::Any->new;
 
@@ -60,7 +58,7 @@ diag $response_put->content;
 
 diag '#########Deleting resource#########';
 diag '###################################';
-ok($response = request GET '/resource', []);
+ok(my $response = request GET '/resource', []);
 my $resource_aux = $j->jsonToObj($response->content);
 
 my @resource = @{$resource_aux};

@@ -8,7 +8,7 @@ use warnings;
 
 use base 'DBIx::Class::Core';
 
-__PACKAGE__->load_components("InflateColumn::DateTime", "TimeStamp");
+__PACKAGE__->load_components("InflateColumn::DateTime", "InflateColumn", "TimeStamp");
 
 =head1 NAME
 
@@ -91,8 +91,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.05003 @ 2010-05-11 17:00:01
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:qKT6fd5AZq1eWj/YhviWQA
+# Created by DBIx::Class::Schema::Loader v0.05003 @ 2010-06-16 17:28:30
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:b8Ebq4wbEnNQPBJhLnEC/A
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

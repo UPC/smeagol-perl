@@ -8,7 +8,7 @@ use warnings;
 
 use base 'DBIx::Class::Core';
 
-__PACKAGE__->load_components("InflateColumn::DateTime", "TimeStamp");
+__PACKAGE__->load_components("InflateColumn::DateTime", "InflateColumn", "TimeStamp");
 
 =head1 NAME
 
@@ -24,6 +24,7 @@ __PACKAGE__->table("event");
 
   data_type: INTEGER
   default_value: undef
+  is_auto_increment: 1
   is_nullable: 1
   size: undef
 
@@ -62,6 +63,7 @@ __PACKAGE__->add_columns(
   {
     data_type => "INTEGER",
     default_value => undef,
+    is_auto_increment => 1,
     is_nullable => 1,
     size => undef,
   },
@@ -112,7 +114,7 @@ __PACKAGE__->has_many(
   { "foreign.id_event" => "self.id" },
 );
 
-=head2 booking_s
+=head2 bookings
 
 Type: has_many
 
@@ -121,13 +123,15 @@ Related object: L<V2::Server::Schema::Result::Booking>
 =cut
 
 __PACKAGE__->has_many(
-  "booking",
+  "bookings",
   "V2::Server::Schema::Result::Booking",
   { "foreign.id_event" => "self.id" },
 );
 
-# Created by DBIx::Class::Schema::Loader v0.05003 @ 2010-05-11 17:00:01
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:mpI3x2qk+IJqNAA2RGn3RQ
+
+# Created by DBIx::Class::Schema::Loader v0.05003 @ 2010-06-16 17:28:30
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:2rs8OntjQc4LkjR0jMlRjQ
+
 
 # You can replace this text with custom content, and it will be preserved on regeneration
 1;

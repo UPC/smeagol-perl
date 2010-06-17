@@ -40,7 +40,6 @@ sub default_GET {
       
       foreach (@res_aux){
 	@tags= $_->tag_list;
-	$c->log->debug(\@tags);
 	    @resource = {
 		  id => $_->id,
 		  description => $_->description,

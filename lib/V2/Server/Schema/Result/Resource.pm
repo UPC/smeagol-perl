@@ -8,7 +8,7 @@ use warnings;
 
 use base 'DBIx::Class::Core';
 
-__PACKAGE__->load_components("InflateColumn::DateTime", "InflateColumn", "TimeStamp");
+__PACKAGE__->load_components("InflateColumn::DateTime", "TimeStamp");
 
 =head1 NAME
 
@@ -103,7 +103,27 @@ __PACKAGE__->has_many(
 
 # Created by DBIx::Class::Schema::Loader v0.05003 @ 2010-06-16 17:28:30
 # DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:tNLtmP6xI8C/nBmPhg3k7g
+sub tag_count {
+      my ($self) = @_;
+      
+      return $self->resource_tag->count;
+}
 
+sub tag_list {    
+      my ($self) = @_;
+
+      my @tags;
+      my @tag;
+
+      foreach my $tag ($self->resource_tags) {
+	    my @tag = {
+		  id => $tag->tag_id,
+	    };
+	    push(@tags, @tag);
+      }
+
+      return (\@tags);
+}
 
 # You can replace this text with custom content, and it will be preserved on regeneration
 1;

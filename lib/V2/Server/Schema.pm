@@ -8,7 +8,10 @@ use warnings;
 
 use base 'DBIx::Class::Schema';
 
-__PACKAGE__->load_namespaces();
+__PACKAGE__->load_namespaces(
+      result_namespace => 'Result',
+      resultset_namespace => 'ResultSet',
+);
 
 
 # Created by DBIx::Class::Schema::Loader v0.05003 @ 2010-06-16 17:25:56

@@ -7,6 +7,8 @@ use Moose;
 use Data::Dumper;
 
 use HTTP::Request::Common;
+use HTTP::Response;
+use HTTP::Status qw(:constants :is status_message);
 use JSON;
 
 extends 'V2::Client';
@@ -25,20 +27,22 @@ sub list {
     my $self = shift;
 
     my $res = $self->ua->get( $self->url . "/tag" );
-    return unless $res->status_line =~ /200/;
 
-    my @idTags;
+    return unless $res->code == HTTP_OK;
 
-    my $perl_scalar = from_json( $res->content, { utf8 => 1 } );
-    foreach (@$perl_scalar) {
-        if ( defined $$perl_scalar[0] ) {
-            my $scr = V2::Client::Tag->new( url => $self->url );
-            $scr->{id}   = '/tag/' . $_->{'id'};
-            $scr->{name} = $_->{'name'};
-            push @idTags, $scr;
-        }
+    my @tagList;
+
+    print Dumper( $res->content );
+
+    my $j = JSON::Any->new;
+    my $objectList = $j->from_json( $res->content, { utf8 => 1 } );
+
+    foreach (@$objectList) {
+        my $tag = V2::Client::Tag->new( url => $self->url );
+        $tag->{id} = $_->{'id'};
+        push @tagList, $tag;
     }
-    return @idTags;
+    return @tagList;
 }
 
 sub create {

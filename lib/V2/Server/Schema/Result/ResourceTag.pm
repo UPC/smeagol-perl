@@ -22,58 +22,34 @@ __PACKAGE__->table("resource_tag");
 
 =head2 resource_id
 
-  data_type: INTEGER
-  default_value: undef
+  data_type: 'integer'
+  is_auto_increment: 1
   is_foreign_key: 1
   is_nullable: 1
-  size: undef
 
 =head2 tag_id
 
-  data_type: TEXT
-  default_value: undef
+  data_type: 'text'
   is_foreign_key: 1
   is_nullable: 1
-  size: undef
+  size: 20
 
 =cut
 
 __PACKAGE__->add_columns(
   "resource_id",
   {
-    data_type => "INTEGER",
-    default_value => undef,
-    is_foreign_key => 1,
-    is_nullable => 1,
-    size => undef,
+    data_type         => "integer",
+    is_auto_increment => 1,
+    is_foreign_key    => 1,
+    is_nullable       => 1,
   },
   "tag_id",
-  {
-    data_type => "TEXT",
-    default_value => undef,
-    is_foreign_key => 1,
-    is_nullable => 1,
-    size => undef,
-  },
+  { data_type => "text", is_foreign_key => 1, is_nullable => 1, size => 20 },
 );
 __PACKAGE__->set_primary_key("resource_id", "tag_id");
 
 =head1 RELATIONS
-
-=head2 resource
-
-Type: belongs_to
-
-Related object: L<V2::Server::Schema::Result::Resource>
-
-=cut
-
-__PACKAGE__->belongs_to(
-  "resource",
-  "V2::Server::Schema::Result::Resource",
-  { id => "resource_id" },
-  { join_type => "LEFT" },
-);
 
 =head2 tag
 
@@ -87,12 +63,27 @@ __PACKAGE__->belongs_to(
   "tag",
   "V2::Server::Schema::Result::Tag",
   { id => "tag_id" },
-  { join_type => "LEFT" },
+  { join_type => "LEFT", on_delete => "CASCADE", on_update => "CASCADE" },
+);
+
+=head2 resource
+
+Type: belongs_to
+
+Related object: L<V2::Server::Schema::Result::Resource>
+
+=cut
+
+__PACKAGE__->belongs_to(
+  "resource",
+  "V2::Server::Schema::Result::Resource",
+  { id => "resource_id" },
+  { join_type => "LEFT", on_delete => "CASCADE", on_update => "CASCADE" },
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.05003 @ 2010-06-16 17:28:30
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:7b1d1syuHZBH1giB2rUDgA
+# Created by DBIx::Class::Schema::Loader v0.07000 @ 2010-06-22 16:34:06
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:T8mHcEIGrenypnxWDxubMg
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

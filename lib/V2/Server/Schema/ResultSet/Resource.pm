@@ -2,29 +2,28 @@ package V2::Server::Schema::ResultSet::Resource;
 
 use strict;
 use warnings;
+use Data::Dumper;
 
 use base 'DBIx::Class::ResultSet';
 
-sub tag_count {
-    my ($self) = @_;
+sub get_resources {
+  my ($self) = @_;
 
-    return $self->resource_tag->count;
-}
+  my @resource;
+  my @resources;
 
-sub tag_list {
-    my ($self) = @_;
+  foreach ($self) {
+    @resource = {
+      id => $_->id,
+      description => $_->description,
+      info => $_->info,
+      tags => $_->tag_list,
+	    };
+    push (@resources, @resource);
+  }
 
-    my @tags;
-    my @tag;
+  return @resources;
 
-    foreach my $tag ($self->resource_tags) {
-      my @tag = {
-	id => $tag->tag_id,
-      };
-	push(@tags, @tag);
-    }
-
-    return (\@tags);
 }
 
 1;

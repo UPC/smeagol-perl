@@ -34,22 +34,15 @@ sub default_GET {
       my $req = $c->request;
       $c->log->debug('Mètode: '.$req->method);
       
-      my @res_aux = $c->model('DB::Resource')->all;
+      #my @res_aux
+      @resources = $c->model('DB::Resource')->get_resources;
 
-      my @tags;
-      
-      foreach (@res_aux){
-	@tags= $_->tag_list;
-	    @resource = {
-		  id => $_->id,
-		  description => $_->description,
-		  info => $_->info,
-		  tags => @tags,
-	    };
-	    push (@resources, @resource);
-	    
-      }
-      
+      my @test;
+      #foreach (@res_aux){
+	#@resources = @res_aux->get_resources;
+	#push (@resources, @resource);
+      #}
+
       if ($id){
 	    foreach (@resources) {
 		  if ($_->{id} eq $id) {$resource=$_;}

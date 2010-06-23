@@ -22,79 +22,45 @@ __PACKAGE__->table("event");
 
 =head2 id
 
-  data_type: INTEGER
-  default_value: undef
+  data_type: 'integer'
   is_auto_increment: 1
   is_nullable: 1
-  size: undef
 
 =head2 info
 
-  data_type: TEXT
-  default_value: undef
+  data_type: 'text'
   is_nullable: 1
-  size: undef
+  size: 50
 
 =head2 description
 
-  data_type: TEXT
-  default_value: undef
+  data_type: 'text'
   is_nullable: 1
-  size: undef
+  size: 20
 
 =head2 starts
 
-  data_type: DATETIME
-  default_value: undef
+  data_type: 'datetime'
   is_nullable: 1
-  size: undef
 
 =head2 ends
 
-  data_type: DATETIME
-  default_value: undef
+  data_type: 'datetime'
   is_nullable: 1
-  size: undef
 
 =cut
 
 __PACKAGE__->add_columns(
   "id",
-  {
-    data_type => "INTEGER",
-    default_value => undef,
-    is_auto_increment => 1,
-    is_nullable => 1,
-    size => undef,
-  },
+  { data_type => "integer", is_auto_increment => 1, is_nullable => 1 },
   "info",
-  {
-    data_type => "TEXT",
-    default_value => undef,
-    is_nullable => 1,
-    size => undef,
-  },
+  { data_type => "text", is_nullable => 1, size => 50 },
   "description",
-  {
-    data_type => "TEXT",
-    default_value => undef,
-    is_nullable => 1,
-    size => undef,
-  },
+  { data_type => "text", is_nullable => 1, size => 20 },
   "starts",
-  {
-    data_type => "DATETIME",
-    default_value => undef,
-    is_nullable => 1,
-    size => undef,
-  },
+  { data_type => "datetime", is_nullable => 1 },
   "ends",
-  {
-    data_type => "DATETIME",
-    default_value => undef,
-    is_nullable => 1,
-    size => undef,
-  },
+  { data_type => "datetime", is_nullable => 1 },
 );
 __PACKAGE__->set_primary_key("id");
 
@@ -112,6 +78,7 @@ __PACKAGE__->has_many(
   "tag_events",
   "V2::Server::Schema::Result::TagEvent",
   { "foreign.id_event" => "self.id" },
+  { cascade_copy => 0, cascade_delete => 0 },
 );
 
 =head2 bookings
@@ -126,11 +93,12 @@ __PACKAGE__->has_many(
   "bookings",
   "V2::Server::Schema::Result::Booking",
   { "foreign.id_event" => "self.id" },
+  { cascade_copy => 0, cascade_delete => 0 },
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.05003 @ 2010-06-16 17:28:30
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:2rs8OntjQc4LkjR0jMlRjQ
+# Created by DBIx::Class::Schema::Loader v0.07000 @ 2010-06-22 16:34:06
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:MuzaCKudC5m6kOh8npTYUw
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

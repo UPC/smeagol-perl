@@ -48,13 +48,16 @@ sub default_GET {
 	    
 	    if (!$resource) {
 		  $c-> stash-> {template} = 'not_found.tt';
+		  $c->response->status(404);
 		  $c->forward( $c->view('TT') );
 	    }else{	
 		  $c->stash->{content}=$resource;
+		  $c->response->status(200);
 		  $c->forward( $c->view('JSON') );
 	    } 
       }else {
 	    $c->stash->{content}=\@resources;
+	    $c->response->status(200);
 	    $c->forward( $c->view('JSON') );
       }
       
@@ -124,6 +127,7 @@ sub default_POST {
       }; 
     
       $c->stash->{resource}=\@resource;
+      $c->response->status(201);
       $c->forward( $c->view('JSON') );
       
       }
@@ -194,9 +198,11 @@ sub default_PUT {
 	    }; 
 	    
 	    $c->stash->{resource}=\@resource;
+	    $c->response->status(200);
 	    $c->forward( $c->view('JSON') );
       }else{
 	$c->stash->{template} = 'not_found.tt';
+	$c->response->status(404);
 	$c->forward( $c->view('TT') );
       }
       
@@ -216,9 +222,11 @@ sub default_DELETE {
 	    if ($resource_aux){
 		  $resource_aux-> delete;
 		  $c-> stash-> {template} = 'resource/delete_ok.tt';
+		  $c->response->status(200);
 		  $c->forward( $c->view('TT') );
 	    }else{
 		  $c-> stash-> {template} = 'not_found.tt';
+		  $c->response->status(404);
 		  $c->forward( $c->view('TT') );
 	    }
 	    

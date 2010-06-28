@@ -48,9 +48,11 @@ if (@resource_tag){
     }
       
       $c->stash->{content}=@resources;
+      $c->response->status(200);
       $c->forward( $c->view('JSON') ); 
 }else{
       $c->stash->{template}='not_found.tt';
+      $c->response->status(404);
       $c->forward( $c->view('TT') ); 	
 
 }   

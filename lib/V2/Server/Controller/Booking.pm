@@ -43,10 +43,12 @@ sub default_GET  {
 	};
 
 	$c->stash->{content}=\@booking;
+	$c->response->status(200);
 	$c->forward( $c->view('JSON') );
 	
     } else {
 	$c->stash->{template}='not_found.tt';
+	$c->response->status(404);
 	$c->forward( $c->view('TT') );
 
     }   
@@ -69,6 +71,7 @@ sub default_GET  {
     }
     
     $c->stash->{content}=\@bookings;
+    $c->response->status(200);
     $c->forward( $c->view('JSON') );
   }
   
@@ -117,6 +120,7 @@ sub default_POST {
   
   if ($overlap) {      
     $c-> stash-> {template} = 'fail.tt';
+    $c->response->status(404);
     $c->forward( $c->view('TT') );
   }else {
     $new_booking->insert;
@@ -131,6 +135,7 @@ sub default_POST {
 
     $c->stash->{content}=\@booking;
     $c->stash->{template}='booking_s/get_booking.tt';
+    $c->response->status(201);
     $c->forward( $c->view('TT') );
   
   }    
@@ -179,6 +184,7 @@ sub default_PUT {
   
   if ($overlap){
     $c-> stash-> {template} = 'fail.tt';
+    $c->response->status(404);
     $c->forward( $c->view('TT') );
   }else {
       $booking->update;
@@ -192,6 +198,7 @@ sub default_PUT {
       };
 
       $c->stash->{content}=\@booking;
+      $c->response->status(200);
       $c->forward( $c->view('JSON') );      
       }  
 
@@ -209,9 +216,11 @@ sub default_DELETE {
       if ($booking_aux){
 	    $booking_aux-> delete;
 	    $c-> stash-> {template} = 'booking_s/delete_ok.tt';
+	    $c->response->status(200);
 	    $c->forward( $c->view('TT') );
       }else{
 	    $c-> stash-> {template} = 'not_found.tt';
+	    $c->response->status(404);
 	    $c->forward( $c->view('TT') );
       }
 }

@@ -54,14 +54,17 @@ sub default_GET {
 	    
 	    if (!$tag) {
 		  $c-> stash-> {template} = 'not_found.tt';
+		  $c->response->status(404);
 		  $c->forward( $c->view('TT') );
 	    }else{	
 		  $c->stash->{content}=$tag;
+		  $c->response->status(200);
 		  $c->forward( $c->view('JSON') );
 	    } 
       }else {
  
 	    $c->stash->{content}=\@tags;
+	    $c->response->status(200);
 	    $c->forward( $c->view('JSON') );
       }
       
@@ -86,6 +89,7 @@ sub default_POST {
       };
       
       $c->stash->{content}=\@tag;
+      $c->response->status(201);
       $c->forward( $c->view('JSON') );
 }
 
@@ -110,9 +114,11 @@ sub default_PUT {
 	};
 	
 	$c->stash->{content}=\@tag;
+	$c->response->status(200);
 	$c->forward( $c->view('JSON') );
       }else{
 	  $c->stash->{template} = 'not_found.tt';
+	  $c->response->status(404);
 	  $c->forward( $c->view('TT') );
     }
 }
@@ -131,9 +137,11 @@ sub default_DELETE {
       if ($tag_aux){
 	    $tag_aux-> delete;
 	    $c-> stash-> {template} = 'event/delete_ok.tt';
+	    $c->response->status(200);
 	    $c->forward( $c->view('TT') );
       }else{
 	    $c-> stash-> {template} = 'not_found.tt';
+	    $c->response->status(404);
 	    $c->forward( $c->view('TT') );
       }
       

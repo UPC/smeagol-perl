@@ -41,6 +41,7 @@ sub default_GET  {
 	  };
 
     $c->stash->{content}=\@event;
+    $c->response->status(200);
     $c->forward( $c->view('JSON') );
 
   }else{
@@ -70,6 +71,7 @@ sub default_GET  {
 $c->log->debug("#Events: ".@events);
 
     $c->stash->{content}=\@events;
+    $c->response->status(200);
     $c->forward( $c->view('JSON') );
   }
 }
@@ -102,6 +104,7 @@ sub default_POST {
       };
       
       $c->stash->{content}=\@event;
+      $c->response->status(201);
       $c->forward( $c->view('JSON') );
 }
 
@@ -135,9 +138,11 @@ sub default_PUT {
 	};
 	
 	$c->stash->{content}=\@event;
+	$c->response->status(200);
 	$c->forward( $c->view('JSON') );
       }else{
 	$c-> stash-> {template} = 'not_found.tt';
+	$c->response->status(404);
 	$c->forward( $c->view('TT') );
       }
 }
@@ -154,9 +159,11 @@ sub default_DELETE {
       if ($event_aux){
 	    $event_aux-> delete;
 	    $c-> stash-> {template} = 'event/delete_ok.tt';
+	    $c->response->status(200);
 	    $c->forward( $c->view('TT') );
       }else{
 	    $c-> stash-> {template} = 'not_found.tt';
+	    $c->response->status(404);
 	    $c->forward( $c->view('TT') );
       }
 }

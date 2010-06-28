@@ -47,7 +47,7 @@ if (@resource_tag){
       
     }
       
-      $c->stash->{content}=@resources;
+      $c->stash->{content}=\@resources;
       $c->response->status(200);
       $c->forward( $c->view('JSON') ); 
 }else{

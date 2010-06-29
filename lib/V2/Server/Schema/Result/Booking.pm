@@ -155,6 +155,18 @@ __PACKAGE__->belongs_to(
 
 # Created by DBIx::Class::Schema::Loader v0.07000 @ 2010-06-22 16:34:06
 # DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:C6gkav+hj8AJTN8BF2iYdg
+sub hash_booking{
+  my ($self) = @_;
+
+  my @booking = {
+    id=> $self->id,
+    id_resource=> $self->id_resource->id,
+    id_event=> $self->id_event->id,
+    starts=> $self->starts->iso8601(),
+    ends=> $self->ends->iso8601(),
+  };
+  return \@booking;
+}
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

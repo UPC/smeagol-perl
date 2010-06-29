@@ -34,13 +34,7 @@ sub default_GET  {
     my $booking_aux = $c->model('DB::Booking')->find({id=>$id});
 
     if ($booking_aux){
-	my @booking = {
-	  id=> $booking_aux->id,
-	  id_resource=> $booking_aux->id_resource->id,
-	  id_event=> $booking_aux->id_event->id,
-	  starts=> $booking_aux->starts->iso8601(),
-	  ends=> $booking_aux->ends->iso8601(),
-	};
+	my @booking = $booking_aux->hash_booking;
 
 	$c->stash->{content}=\@booking;
 	$c->response->status(200);
@@ -59,14 +53,7 @@ sub default_GET  {
     my @bookings;
 
     foreach (@booking_aux) {
-          @booking = {
-	    id=> $_->id,
-	    id_resource=> $_->id_resource->id,
-	    id_event=> $_->id_event->id,
-	    starts=> $_->starts->iso8601(),
-	    ends=> $_->ends->iso8601(),
-	  };
-
+          @booking = $_->hash_booking;
 	  push (@bookings, @booking);
     }
     
@@ -118,20 +105,15 @@ sub default_POST {
   
   }
   
-  if ($overlap) {      
+  if ($overlap) {
+    $c->log->debug("Hi ha solapament \n");
     $c-> stash-> {template} = 'fail.tt';
     $c->response->status(404);
     $c->forward( $c->view('TT') );
   }else {
     $new_booking->insert;
 
-    my @booking = {
-      id=> $new_booking->id,
-      id_resource=> $new_booking->id_resource->id,
-      id_event=> $new_booking->id_event->id,
-      starts=> $new_booking->starts->iso8601(),
-      ends=> $new_booking->ends->iso8601(),
-    };
+    my @booking = $new_booking->hash_booking;
 
     $c->stash->{content}=\@booking;
     $c->stash->{template}='booking_s/get_booking.tt';
@@ -189,13 +171,7 @@ sub default_PUT {
   }else {
       $booking->update;
 
-      my @booking = {
-	id=> $booking->id,
-	id_resource=> $booking->id_resource->id,
-	id_event=> $booking->id_event->id,
-	starts=> $booking->starts->iso8601(),
-	ends=> $booking->ends->iso8601(),
-      };
+      my @booking = $new_booking->hash_booking;
 
       $c->stash->{content}=\@booking;
       $c->response->status(200);

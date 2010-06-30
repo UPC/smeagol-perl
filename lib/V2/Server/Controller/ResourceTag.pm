@@ -36,12 +36,7 @@ if (@resource_tag){
     foreach (@resource_tag) {
       $resource_aux = $c->model('DB::Resource')->find({id=>$_->resource_id});
       
-      my  @resource = {
-	    id => $resource_aux->id,
-	    description => $resource_aux->description,
-	    info => $resource_aux->info,
-	    tags => $resource_aux->tag_list,
-      }; 
+      my  @resource = $resource_aux->get_resources;
 
       push (@resources, @resource);
       

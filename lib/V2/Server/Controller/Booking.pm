@@ -83,28 +83,18 @@ sub default_POST {
   $new_booking->ends($ends);  
   
   my @old_bookings = $c->model('DB::Booking')->search({id_resource=>$id_resource}); #Recuperem les reserves que utilitzen el recurs
-  
-  my $current_set = DateTime::Span->from_datetimes(start=>$new_booking->starts , end=>$new_booking->ends);
- 
-  my $old_booking_set;
-  my $overlap_aux;
-  my $overlap = 0;
-  
-  $c->log->debug ("# de reserves: ".@old_bookings);
-  
+  $c->log->debug("Ends: ".$new_booking->ends);
+  my $current_set = DateTime::Span->from_datetimes(start=> $new_booking->starts , end=> $new_booking->ends);
+
+  my $overlap;
+
   foreach (@old_bookings){
-    $c->log->debug("Start: ".$_->starts);
-    $c->log->debug("End: ".$_->ends);
-    
-    $old_booking_set = DateTime::Span->from_datetimes((start=>$_->starts , end=>$_->ends));
-  
-    if ($old_booking_set->intersects($current_set)){
-      $overlap = 1;
+    $overlap = $_->overlap($current_set);
+    if ($overlap){
       last;
     }
-  
   }
-  
+
   if ($overlap) {
     $c->log->debug("Hi ha solapament \n");
     $c-> stash-> {template} = 'fail.tt';
@@ -127,7 +117,6 @@ sub default_PUT {
   my ( $self, $c, $res, $id) = @_;
   my $req=$c->request;
   $c->log->debug('Mètode: '.$req->method);
-  $c->log->debug('Params: '.$req->parameters->{id_resource}.', '.$req->parameters->{id_event});
   $c->log->debug ("El PUT funciona");
 
   my $id_resource=$req->parameters->{id_resource};
@@ -143,26 +132,20 @@ sub default_PUT {
   $booking->ends($ends);
   
   my @old_bookings = $c->model('DB::Booking')->search({id_resource=>$id_resource}); #Recuperem les reserves que utilitzen el recurs
-  
-  my $current_set = DateTime::Span->from_datetimes(start=>$req->parameters->{starts} , end=>$req->parameters->{ends});
+
+  my $current_set = DateTime::Span->from_datetimes(start=> $booking->starts , end=> $booking->ends);
  
   my $old_booking_set;
   my $overlap_aux;
   my $overlap = 0;
   
-  
   foreach (@old_bookings){
-    $c->log->debug("Start: ".$_->starts);
-    $c->log->debug("End: ".$_->ends);
-    
-    $old_booking_set = DateTime::Span->from_datetimes((start=>$_->starts , end=>$_->ends));
-  
-    if ($old_booking_set->intersects($current_set)){
-      $overlap = 1;
+    if ($_->id ne $id ){$overlap = $_->overlap($current_set);}
+    if ($overlap){
       last;
     }
-  
   }
+
   
   if ($overlap){
     $c-> stash-> {template} = 'fail.tt';
@@ -171,7 +154,7 @@ sub default_PUT {
   }else {
       $booking->update;
 
-      my @booking = $new_booking->hash_booking;
+      my @booking = $booking->hash_booking;
 
       $c->stash->{content}=\@booking;
       $c->response->status(200);

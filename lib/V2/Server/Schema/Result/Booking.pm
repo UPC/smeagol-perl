@@ -168,6 +168,19 @@ sub hash_booking{
   return \@booking;
 }
 
+use DateTime::Span;
+
+sub overlap {
+  my ($self, $current_set) = @_;
+  my $overlap = 0;
+  my $old_booking_set = DateTime::Span->from_datetimes((start=>$self->starts , end=>$self->ends));
+
+  if ($old_booking_set->intersects($current_set)){
+    $overlap = 1;
+  }
+
+  return $overlap;
+}
 
 # You can replace this text with custom content, and it will be preserved on regeneration
 1;

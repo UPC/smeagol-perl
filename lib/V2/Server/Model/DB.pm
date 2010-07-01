@@ -5,11 +5,11 @@ use base 'Catalyst::Model::DBIC::Schema';
 
 __PACKAGE__->config(
     schema_class => 'V2::Server::Schema',
-    
+
     connect_info => {
-        dsn => 'dbi:SQLite:./smeagol.db',
-        user => '',
-        password => '',
+        dsn           => 'dbi:SQLite:./smeagol.db',
+        user          => '',
+        password      => '',
         on_connect_do => q{PRAGMA foreign_keys=ON},
     }
 );

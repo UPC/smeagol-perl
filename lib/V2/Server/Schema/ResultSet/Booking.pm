@@ -6,9 +6,9 @@ use warnings;
 use base 'DBIx::Class::ResultSet';
 
 sub overlap {
-      my ($self) = @_;
-      
-      return 1;
+    my ($self) = @_;
+
+    return 1;
 }
 
 1;

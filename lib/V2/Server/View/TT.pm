@@ -6,10 +6,8 @@ use warnings;
 use base 'Catalyst::View::TT';
 
 __PACKAGE__->config(
-	TEMPLATE_EXTENSION => '.tt',
-	INCLUDE_PATH       => [
-		V2::Server->path_to( 'root', 'templates' ),
-	],
+    TEMPLATE_EXTENSION => '.tt',
+    INCLUDE_PATH       => [ V2::Server->path_to( 'root', 'templates' ), ],
 );
 
 =head1 NAME

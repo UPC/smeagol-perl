@@ -8,7 +8,8 @@ use warnings;
 
 use base 'DBIx::Class::Core';
 
-__PACKAGE__->load_components("InflateColumn::DateTime", "InflateColumn", "TimeStamp");
+__PACKAGE__->load_components( "InflateColumn::DateTime", "InflateColumn",
+    "TimeStamp" );
 
 =head1 NAME
 
@@ -51,16 +52,16 @@ __PACKAGE__->table("event");
 =cut
 
 __PACKAGE__->add_columns(
-  "id",
-  { data_type => "integer", is_auto_increment => 1, is_nullable => 1 },
-  "info",
-  { data_type => "text", is_nullable => 1, size => 50 },
-  "description",
-  { data_type => "text", is_nullable => 1, size => 20 },
-  "starts",
-  { data_type => "datetime", is_nullable => 1 },
-  "ends",
-  { data_type => "datetime", is_nullable => 1 },
+    "id",
+    { data_type => "integer", is_auto_increment => 1, is_nullable => 1 },
+    "info",
+    { data_type => "text", is_nullable => 1, size => 50 },
+    "description",
+    { data_type => "text", is_nullable => 1, size => 20 },
+    "starts",
+    { data_type => "datetime", is_nullable => 1 },
+    "ends",
+    { data_type => "datetime", is_nullable => 1 },
 );
 __PACKAGE__->set_primary_key("id");
 
@@ -75,10 +76,10 @@ Related object: L<V2::Server::Schema::Result::TagEvent>
 =cut
 
 __PACKAGE__->has_many(
-  "tag_events",
-  "V2::Server::Schema::Result::TagEvent",
-  { "foreign.id_event" => "self.id" },
-  { cascade_copy => 0, cascade_delete => 0 },
+    "tag_events",
+    "V2::Server::Schema::Result::TagEvent",
+    { "foreign.id_event" => "self.id" },
+    { cascade_copy       => 0, cascade_delete => 0 },
 );
 
 =head2 bookings
@@ -90,28 +91,27 @@ Related object: L<V2::Server::Schema::Result::Booking>
 =cut
 
 __PACKAGE__->has_many(
-  "bookings",
-  "V2::Server::Schema::Result::Booking",
-  { "foreign.id_event" => "self.id" },
-  { cascade_copy => 0, cascade_delete => 0 },
+    "bookings",
+    "V2::Server::Schema::Result::Booking",
+    { "foreign.id_event" => "self.id" },
+    { cascade_copy       => 0, cascade_delete => 0 },
 );
-
 
 # Created by DBIx::Class::Schema::Loader v0.07000 @ 2010-06-22 16:34:06
 # DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:MuzaCKudC5m6kOh8npTYUw
 
 sub hash_event {
-  my ($self) = @_;
+    my ($self) = @_;
 
-  my @event = {
-	id=>$self->id,
-	info=>$self->info,
-	description=>$self->description,
-	starts=>$self->starts->iso8601(),
-	ends=>$self->ends->iso8601(),
-      };
+    my @event = {
+        id          => $self->id,
+        info        => $self->info,
+        description => $self->description,
+        starts      => $self->starts->iso8601(),
+        ends        => $self->ends->iso8601(),
+    };
 
-  return \@event;
+    return \@event;
 }
 
 # You can replace this text with custom content, and it will be preserved on regeneration

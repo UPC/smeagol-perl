@@ -9,7 +9,6 @@ use parent 'Catalyst::Controller';
 #
 __PACKAGE__->config->{namespace} = '';
 
-
 =head1 NAME
 
 V2::CatalystREST::Controller::Root - Root Controller for V2::CatalystREST
@@ -22,16 +21,16 @@ V2::CatalystREST::Controller::Root - Root Controller for V2::CatalystREST
 
 =cut
 
-sub index :Path :Args(0){
-      my ( $self, $c ) = @_;
-      $c->response->redirect($c->uri_for('/resource'));
+sub index : Path : Args(0) {
+    my ( $self, $c ) = @_;
+    $c->response->redirect( $c->uri_for('/resource') );
 }
 
-sub default :Private {
-      my ( $self, $c ) = @_;
-      
-      $c->response->status(404);
-      $c->stash->{template}= 'not_found.tt';
+sub default : Private {
+    my ( $self, $c ) = @_;
+
+    $c->response->status(404);
+    $c->stash->{template} = 'not_found.tt';
 }
 
 =head2 end

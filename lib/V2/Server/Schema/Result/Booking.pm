@@ -174,7 +174,10 @@ sub overlap {
     my ( $self, $current_set ) = @_;
     my $overlap         = 0;
     my $old_booking_set = DateTime::Span->from_datetimes(
-        ( start => $self->starts, end => $self->ends ) );
+        (   start => $self->starts,
+            end   => $self->ends->clone->subtract( seconds => 1 )
+        )
+    );
 
     if ( $old_booking_set->intersects($current_set) ) {
         $overlap = 1;

@@ -153,7 +153,7 @@ sub default_PUT {
 
     my $current_set = DateTime::Span->from_datetimes(
         start => $booking->starts,
-        end   => $booking->ends
+        end   => $booking->ends->clone->subtract( seconds => 1 )
     );
 
     my $old_booking_set;

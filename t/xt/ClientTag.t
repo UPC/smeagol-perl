@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 9;
+use Test::More tests => 18;
 use JSON::Any;
 use Test::MockModule;
 use HTTP::Status qw(:constants :is status_message);
@@ -15,7 +15,7 @@ BEGIN {
     );
 }
 
-my $serverPort = 8080;
+my $serverPort = 3000;
 my $server     = "http://localhost:$serverPort";
 my $module     = 'V2::Client::Tag';
 
@@ -27,61 +27,71 @@ my @emptyTagList;
     my $sct = $module->new( url => $server );
     isa_ok( $sct, $module );
     can_ok( $sct, 'list' );
+
+    my $id = 'socUnTag';
+
+    $sct->id($id);
+    is( $sct->id, $id, 'id() setter and getter' );
 }
 
-# Testing Client::Tag->list() with empty result set
+# Testing Client::Tag->list() with empty result list
 {
-    my $lwpUserAgent = new Test::MockModule('LWP::UserAgent');
+    my $EXPECTED_TAGS = 0; # expected number of tags returned by mocked server
+    my $JSON_TAG_LIST = '[]';    # tag list to mock
 
+    my $lwpUserAgent = new Test::MockModule('LWP::UserAgent');
     $lwpUserAgent->mock(
         'get',
         sub {
             my $res = HTTP::Response->new();
-            $res->content('[ {"id": "tag1"},{"id": "tag2"} ]');
+            $res->content($JSON_TAG_LIST);
             $res->code(HTTP_OK);
             $res;
         }
     );
 
     my $sct = $module->new( url => $server );
-
     isa_ok( $sct, $module );
     can_ok( $sct, 'list' );
 
     my @list = $sct->list();
-
-    #note explain @list;
+    ok( @list == $EXPECTED_TAGS, 'number of elements in empty tag list' );
 }
 
-=pod
-#CREATE
-TODO: {
-    local $TODO = "Not yet mocked";
+# Testing Client::Tag->list() with non-empty result list
+{
+    my $EXPECTED_TAGS = 2; # expected number of tags returned by mocked server
+    my $JSON_TAG_LIST
+        = '[ {"id": "tag1"},{"id": "tag2"} ]';    # tag list to mock
 
-    my ($name) = ("CN");
+    my $lwpUserAgent = new Test::MockModule('LWP::UserAgent');
+    $lwpUserAgent->mock(
+        'get',
+        sub {
+            my $res = HTTP::Response->new();
+            $res->content($JSON_TAG_LIST);
+            $res->code(HTTP_OK);
+            $res;
+        }
+    );
 
     my $sct = $module->new( url => $server );
     isa_ok( $sct, $module );
-    can_ok( $sct, 'create' );
+    can_ok( $sct, 'list' );
+    my @list = $sct->list();
+    ok( @list == $EXPECTED_TAGS, 'number of elements in non-empty tag list' );
 
-    my @list1 = $sct->list();
-
-    my $tag = $sct->create( name => $name );
-    isa_ok( $tag, $module );
-
-    my @list2 = $sct->list();
-
-    is( $tag->id(),
-        $list2[ ( scalar @list2 ) - 1 ]->id(),
-        "id() should return '" . $tag->id() . "'"
-    );
-
-    is( scalar(@list1) + 1, scalar(@list2), "added one tag" );
+    my $tag1 = $list[0];
+    my $tag2 = $list[1];
+    isa_ok( $tag1, $module ) || diag explain $tag1;
+    isa_ok( $tag2, $module ) || diag explain $tag2;
+    is( $tag1->id, 'tag1', 'first element is tag1' );
+    is( $tag2->id, 'tag2', 'second element is tag2' );
 }
 
 #GET
-TODO: {
-    local $TODO = "Not yet mocked";
+{
+    my $tagId = "tagForGetTests";
 
     my $sct = $module->new( url => $server );
     isa_ok( $sct, $module );
@@ -95,6 +105,69 @@ TODO: {
     isa_ok( $r, $module );
     is( $r->id(), $tag->id, "id() should return '" . $r->id() . "'" );
 }
+
+# Testing Client::Tag->create()
+{
+    my $tagId = 'tagForCreateTests';
+
+    my $EXPECTED_BEFORE_CREATION = '[ {"id": "dummy"} ]';
+    my $EXPECTED_AFTER_CREATION
+        = '[ {"id": "dummy"}, {"id": "' . $tagId . '"} ]';
+    my $lwpUserAgent = new Test::MockModule('LWP::UserAgent');
+
+    # mock for "get" before tag creation
+    $lwpUserAgent->mock(
+        'get',
+        sub {
+            my $res = HTTP::Response->new();
+            $res->content($EXPECTED_BEFORE_CREATION);
+            $res->code(HTTP_OK);
+            $res;
+        }
+    );
+
+    my $sct = $module->new( url => $server );
+    isa_ok( $sct, $module );
+    can_ok( $sct, 'create' );
+
+    my @listBefore = $sct->list();
+    is( scalar(@listBefore), 1, 'right number of tags before creation' );
+
+    $lwpUserAgent->mock(
+        'post',
+        sub {
+            my $res = HTTP::Response->new();
+            $res->header( 'Location' => "$server/tag/$tagId" );
+            $res->code(HTTP_CREATED);
+            $res;
+        }
+    );
+
+    my $tag = $sct->create( id => $tagId );
+    isa_ok( $tag, $module );
+
+    # mock for "get" after tag creation
+    $lwpUserAgent->mock(
+        'get',
+        sub {
+            my $res = HTTP::Response->new();
+            $res->content($EXPECTED_AFTER_CREATION);
+            $res->code(HTTP_OK);
+            $res;
+        }
+    );
+
+    my @listAfter = $sct->list();
+
+    is( $tag->id(),
+        $listAfter[ ( scalar @listAfter ) - 1 ]->id(),
+        "id() should return '" . $tag->id() . "'"
+    );
+
+    is( scalar(@listAfter), scalar(@listBefore) + 1, "added one tag" );
+}
+
+=pod
 
 #UPDATE
 TODO: {

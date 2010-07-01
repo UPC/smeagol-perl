@@ -19,7 +19,7 @@ has 'id' => (
     default  => sub {
         my $self = shift;
         my %args = @_;
-        return $args{name};
+        return $args{id};
     }
 );
 
@@ -31,8 +31,6 @@ sub list {
     return unless $res->code == HTTP_OK;
 
     my @tagList;
-
-    print Dumper( $res->content );
 
     my $j = JSON::Any->new;
     my $objectList = $j->from_json( $res->content, { utf8 => 1 } );
@@ -46,26 +44,19 @@ sub list {
 }
 
 sub create {
-    my $self   = shift;
-    my %args   = @_;
-    my ($name) = ( $args{name} );
+    my $self = shift;
+    my %args = @_;
+    my ($id) = ( $args{id} );
     return unless defined $name;
-
-    #    my $req = HTTP::Request->new( POST => $self->url . "/tag" );
-    #    $req->content_type('text/plain');
-    #    $()req->content($respXML);
 
     my $res
         = $self->ua->request( POST $self->url . '/tag', [ name => $name ] );
 
-    #    return unless $res->status_line =~ /201/;
+    die status_message(HTTP_BAD_REQUEST)
+        unless $res->status_line == HTTP_CREATED;
 
-    my $perl_scalar = from_json( $res->content, { utf8 => 1 } );
-    if ( ref($perl_scalar) eq 'ARRAY' ) {
-        $self->{id}   = '/tag/' . $$perl_scalar[0]->{'id'};
-        $self->{name} = $$perl_scalar[0]->{'name'};
-    }
-    return $self;
+    # the server returns the location of the new tag as an HTTP header
+    return $self->get( $res->header('Location') );
 }
 
 sub get {
@@ -78,8 +69,7 @@ sub get {
 
     if ( $res->status_line =~ /200/ ) {
         my $perl_scalar = from_json( $res->content, { utf8 => 1 } );
-        $self->{id}   = '/tag/' . $perl_scalar->{'id'};
-        $self->{name} = $perl_scalar->{'name'};
+        $self->{id} = '/tag/' . $perl_scalar->{'id'};
         return $self;
     }
     return;

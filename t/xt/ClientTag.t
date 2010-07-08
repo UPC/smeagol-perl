@@ -91,14 +91,27 @@ my @emptyTagList;
 
 #GET
 {
-    my $tagId = "tagForGetTests";
+    my $tagId    = "tagForGetTests";
+    my $JSON_TAG = '{ "id" : "' . $tagId . '"}';
+
+    my $lwpUserAgent = new Test::MockModule('LWP::UserAgent');
+    $lwpUserAgent->mock(
+        'get',
+        sub {
+            my $res = HTTP::Response->new();
+            $res->content($JSON_TAG);
+            $res->code(HTTP_OK);
+            $res;
+        }
+    );
 
     my $sct = $module->new( url => $server );
     isa_ok( $sct, $module );
     can_ok( $sct, 'get' );
 
-    my @list = $sct->list();
-    my $tag = $list[0] if ( defined $list[0] );
+    my $tag = $sct->get($tagId);
+
+    #my $tag = $list[0] if ( defined $list[0] );
 
     my $r = $sct->get( $tag->id() );
 
@@ -167,8 +180,6 @@ my @emptyTagList;
     is( scalar(@listAfter), scalar(@listBefore) + 1, "added one tag" );
 }
 
-=pod
-
 #UPDATE
 TODO: {
     local $TODO = "Not yet mocked";
@@ -203,4 +214,4 @@ TODO: {
         );
     }
 }
-=cut
+

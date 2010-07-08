@@ -47,16 +47,14 @@ sub create {
     my $self = shift;
     my %args = @_;
     my ($id) = ( $args{id} );
-    return unless defined $name;
+    return unless defined $id;
 
-    my $res
-        = $self->ua->request( POST $self->url . '/tag', [ name => $name ] );
+    my $res = $self->ua->post( $self->url . '/tag', [ id => $id ] );
 
-    die status_message(HTTP_BAD_REQUEST)
-        unless $res->status_line == HTTP_CREATED;
+    return unless $res->code == HTTP_CREATED;
 
     # the server returns the location of the new tag as an HTTP header
-    return $self->get( $res->header('Location') );
+    return $self->get($id);
 }
 
 sub get {
@@ -65,11 +63,11 @@ sub get {
 
     return unless defined $id;
 
-    my $res = $self->ua->get( $self->url . $id );
+    my $res = $self->ua->get( $self->url . '/tag/' . $id );
 
-    if ( $res->status_line =~ /200/ ) {
-        my $perl_scalar = from_json( $res->content, { utf8 => 1 } );
-        $self->{id} = '/tag/' . $perl_scalar->{'id'};
+    if ( $res->code == HTTP_OK ) {
+        my $tag = from_json( $res->content, { utf8 => 1 } );
+        $self->{id} = $tag->{'id'};
         return $self;
     }
     return;

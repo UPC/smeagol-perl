@@ -8,7 +8,12 @@ use warnings;
 
 use base 'DBIx::Class::Core';
 
+<<<<<<< .working
 __PACKAGE__->load_components("InflateColumn::DateTime", "TimeStamp");
+=======
+__PACKAGE__->load_components( "InflateColumn::DateTime", "InflateColumn",
+    "TimeStamp" );
+>>>>>>> .merge-right.r1154
 
 =head1 NAME
 
@@ -22,44 +27,81 @@ __PACKAGE__->table("booking_s");
 
 =head2 id
 
-  data_type: INTEGER
-  default_value: undef
+  data_type: 'integer'
   is_nullable: 1
-  size: undef
 
 =head2 id_resource
 
-  data_type: INTEGER
-  default_value: undef
+  data_type: 'integer'
   is_foreign_key: 1
   is_nullable: 1
-  size: undef
 
 =head2 id_event
 
-  data_type: INTEGER
-  default_value: undef
+  data_type: 'integer'
   is_foreign_key: 1
   is_nullable: 1
-  size: undef
 
+<<<<<<< .working
+=======
 =head2 starts
 
-  data_type: DATETIME
-  default_value: undef
+  data_type: 'datetime'
   is_nullable: 1
-  size: undef
 
 =head2 ends
 
-  data_type: DATETIME
-  default_value: undef
+  data_type: 'datetime'
   is_nullable: 1
-  size: undef
 
+=head2 frequency
+
+  data_type: (empty string)
+  is_nullable: 1
+
+>>>>>>> .merge-right.r1154
+=head2 interval
+
+  data_type: (empty string)
+  is_nullable: 1
+
+=head2 duration
+
+  data_type: (empty string)
+  is_nullable: 1
+
+<<<<<<< .working
+=======
+=head2 per_minuts
+
+  data_type: (empty string)
+  is_nullable: 1
+
+=head2 per_hores
+
+  data_type: (empty string)
+  is_nullable: 1
+
+=head2 per_dies
+
+  data_type: (empty string)
+  is_nullable: 1
+
+=head2 per_mesos
+
+  data_type: (empty string)
+  is_nullable: 1
+
+=head2 per_dia_mes
+
+  data_type: (empty string)
+  is_nullable: 1
+
+>>>>>>> .merge-right.r1154
 =cut
 
 __PACKAGE__->add_columns(
+<<<<<<< .working
   "id",
   {
     data_type => "INTEGER",
@@ -97,25 +139,38 @@ __PACKAGE__->add_columns(
     is_nullable => 1,
     size => undef,
   },
+=======
+    "id",
+    { data_type => "integer", is_auto_increment => 1, is_nullable => 1 },
+    "id_resource",
+    { data_type => "integer", is_foreign_key => 1, is_nullable => 1 },
+    "id_event",
+    { data_type => "integer", is_foreign_key => 1, is_nullable => 1 },
+    "starts",
+    { data_type => "datetime", is_nullable => 1 },
+    "ends",
+    { data_type => "datetime", is_nullable => 1 },
+    "frequency",
+    { data_type => "", is_nullable => 1 },
+    "interval",
+    { data_type => "", is_nullable => 1 },
+    "duration",
+    { data_type => "", is_nullable => 1 },
+    "per_minuts",
+    { data_type => "", is_nullable => 1 },
+    "per_hores",
+    { data_type => "", is_nullable => 1 },
+    "per_dies",
+    { data_type => "", is_nullable => 1 },
+    "per_mesos",
+    { data_type => "", is_nullable => 1 },
+    "per_dia_mes",
+    { data_type => "", is_nullable => 1 },
+>>>>>>> .merge-right.r1154
 );
 __PACKAGE__->set_primary_key("id");
 
 =head1 RELATIONS
-
-=head2 id_resource
-
-Type: belongs_to
-
-Related object: L<V2::Server::Schema::Result::Resource>
-
-=cut
-
-__PACKAGE__->belongs_to(
-  "id_resource",
-  "V2::Server::Schema::Result::Resource",
-  { id => "id_resource" },
-  { join_type => "LEFT" },
-);
 
 =head2 id_event
 
@@ -126,19 +181,71 @@ Related object: L<V2::Server::Schema::Result::Event>
 =cut
 
 __PACKAGE__->belongs_to(
-  "id_event",
-  "V2::Server::Schema::Result::Event",
-  { id => "id_event" },
-  { join_type => "LEFT" },
+    "id_event",
+    "V2::Server::Schema::Result::Event",
+    { id        => "id_event" },
+    { join_type => "LEFT", on_delete => "CASCADE", on_update => "CASCADE" },
 );
 
+=head2 id_resource
 
+Type: belongs_to
+
+Related object: L<V2::Server::Schema::Result::Resource>
+
+=cut
+
+__PACKAGE__->belongs_to(
+    "id_resource",
+    "V2::Server::Schema::Result::Resource",
+    { id        => "id_resource" },
+    { join_type => "LEFT", on_delete => "CASCADE", on_update => "CASCADE" },
+);
+
+# Created by DBIx::Class::Schema::Loader v0.07000 @ 2010-06-22 16:34:06
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:C6gkav+hj8AJTN8BF2iYdg
+use DateTime::Span;
+
+<<<<<<< .working
 # Created by DBIx::Class::Schema::Loader v0.05003 @ 2010-05-11 17:00:01
 # DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:jKHpneqSVqu/3B57e6mGoQ
 sub overlap {
       my ($self) = @_;
       
       return 1;
+}
+=======
+sub hash_booking {
+    my ($self) = @_;
+>>>>>>> .merge-right.r1154
+
+<<<<<<< .working
+=======
+    my @booking = {
+        id          => $self->id,
+        id_resource => $self->id_resource->id,
+        id_event    => $self->id_event->id,
+        starts      => $self->starts->iso8601(),
+        ends        => $self->ends->iso8601(),
+    };
+    return \@booking;
+}
+
+>>>>>>> .merge-right.r1154
+sub overlap {
+    my ( $self, $current_set ) = @_;
+    my $overlap         = 0;
+    my $old_booking_set = DateTime::Span->from_datetimes(
+        (   start => $self->starts,
+            end   => $self->ends->clone->subtract( seconds => 1 )
+        )
+    );
+
+    if ( $old_booking_set->intersects($current_set) ) {
+        $overlap = 1;
+    }
+
+    return $overlap;
 }
 
 # You can replace this text with custom content, and it will be preserved on regeneration

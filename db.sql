@@ -3,31 +3,31 @@
 --
     CREATE TABLE resources (
             id          INTEGER PRIMARY KEY AUTOINCREMENT,
-            description      TEXT,
-	    info	TEXT
+            description      TEXT(20),
+	    info	TEXT(50)
     );
 
     CREATE TABLE resource_tag (
             resource_id     INTEGER REFERENCES resources(id) ON DELETE CASCADE ON UPDATE CASCADE,
-            tag_id   TEXT REFERENCES tag(id) ON DELETE CASCADE ON UPDATE CASCADE,
+            tag_id   TEXT(20) REFERENCES tag(id) ON DELETE CASCADE ON UPDATE CASCADE,
             PRIMARY KEY (resource_id, tag_id)
     );
 
   CREATE TABLE tag (
-	    id		TEXT,
+	    id		TEXT(20),
 	    PRIMARY KEY (id)
     );
    
    CREATE TABLE tag_event (
-	id_tag	TEXT REFERENCES tag(id) ON DELETE CASCADE ON UPDATE CASCADE,
-	id_event TEXT REFERENCES event(id) ON DELETE CASCADE ON UPDATE CASCADE,
+	id_tag	TEXT(20) REFERENCES tag(id) ON DELETE CASCADE ON UPDATE CASCADE,
+	id_event INTEGER REFERENCES event(id) ON DELETE CASCADE ON UPDATE CASCADE,
 	PRIMARY KEY (id_tag,id_event)
    );
    
    CREATE TABLE event (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
-	info TEXT,
-	description TEXT,
+	info TEXT(50),
+	description TEXT(20),
 	starts DATETIME,
 	ends DATETIME
    );

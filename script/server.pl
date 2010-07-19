@@ -5,7 +5,7 @@ BEGIN {
 }
 
 use Catalyst::ScriptRunner;
-Catalyst::ScriptRunner->run('V2::Server', 'Server');
+Catalyst::ScriptRunner->run( 'V2::Server', 'Server' );
 
 1;
 

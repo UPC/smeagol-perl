@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use Catalyst::ScriptRunner;
-Catalyst::ScriptRunner->run('V2::Server', 'Create');
+Catalyst::ScriptRunner->run( 'V2::Server', 'Create' );
 
 1;
 

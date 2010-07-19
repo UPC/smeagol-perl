@@ -17,47 +17,47 @@ Catalyst Controller.
 
 =cut
 
-
 sub default : Local : ActionClass('REST') {
-  
+
 }
 
 sub default_GET {
-  my ( $self, $c, $res, $tag ) = @_;
-  
-  if($tag){
-    my @resource_tag = $c->model('DB::ResourceTag')->search({tag_id=>$tag});
-    my @resources;
-    my $resource_aux;
-    my @resource;
+    my ( $self, $c, $res, $tag ) = @_;
 
-if (@resource_tag){	
-    
-    foreach (@resource_tag) {
-      $resource_aux = $c->model('DB::Resource')->find({id=>$_->resource_id});
-      
-      my  @resource = {
-	    id => $resource_aux->id,
-	    description => $resource_aux->description,
-	    info => $resource_aux->info,
-	    tags => $resource_aux->tag_list,
-      }; 
+    if ($tag) {
+        my @resource_tag
+            = $c->model('DB::ResourceTag')->search( { tag_id => $tag } );
+        my @resources;
+        my $resource_aux;
+        my @resource;
 
-      push (@resources, @resource);
-      
+        if (@resource_tag) {
+
+            foreach (@resource_tag) {
+                $resource_aux = $c->model('DB::Resource')
+                    ->find( { id => $_->resource_id } );
+
+                my @resource = $resource_aux->get_resources;
+
+                push( @resources, @resource );
+
+            }
+
+            $c->stash->{content} = \@resources;
+            $c->response->status(200);
+            $c->forward( $c->view('JSON') );
+        }
+        else {
+            $c->stash->{template} = 'not_found.tt';
+            $c->response->status(404);
+            $c->forward( $c->view('TT') );
+
+        }
+
     }
-      
-      $c->stash->{content}=@resources;
-      $c->forward( $c->view('JSON') ); 
-}else{
-      $c->stash->{template}='not_found.tt';
-      $c->forward( $c->view('TT') ); 	
-
-}   
-    
-  }else{
-    $c->response->redirect('/resource');  
-  }   
+    else {
+        $c->response->redirect('/resource');
+    }
 }
 
 sub default_POST {
@@ -79,6 +79,5 @@ This library is free software. You can redistribute it and/or modify
 it under the same terms as Perl itself.
 
 =cut
-
 
 1;

@@ -10,15 +10,10 @@ use base 'DBIx::Class::Schema';
 
 __PACKAGE__->load_namespaces;
 
-# Created by DBIx::Class::Schema::Loader v0.07000 @ 2010-06-22 16:34:06
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:Fs/Q084Y3cLdPyCLFzoi1w
 
-<<<<<<< .working
-# Created by DBIx::Class::Schema::Loader v0.05003 @ 2010-05-11 17:00:01
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:RRsnn9KCUmzuNHPA+I0TGA
+# Created by DBIx::Class::Schema::Loader v0.07000 @ 2010-07-20 18:39:18
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:TibmkznusrBYZnKp6D/Ecw
 
 
-=======
->>>>>>> .merge-right.r1154
 # You can replace this text with custom content, and it will be preserved on regeneration
 1;

@@ -8,12 +8,7 @@ use warnings;
 
 use base 'DBIx::Class::Core';
 
-<<<<<<< .working
-__PACKAGE__->load_components("InflateColumn::DateTime", "TimeStamp");
-=======
-__PACKAGE__->load_components( "InflateColumn::DateTime", "InflateColumn",
-    "TimeStamp" );
->>>>>>> .merge-right.r1154
+__PACKAGE__->load_components("InflateColumn::DateTime", "TimeStamp", "InflateColumn");
 
 =head1 NAME
 
@@ -28,19 +23,20 @@ __PACKAGE__->table("event");
 =head2 id
 
   data_type: 'integer'
+  is_auto_increment: 1
   is_nullable: 1
 
 =head2 info
 
   data_type: 'text'
   is_nullable: 1
-  size: 50
+  size: 256
 
 =head2 description
 
   data_type: 'text'
   is_nullable: 1
-  size: 20
+  size: 128
 
 =head2 starts
 
@@ -55,54 +51,16 @@ __PACKAGE__->table("event");
 =cut
 
 __PACKAGE__->add_columns(
-<<<<<<< .working
   "id",
-  {
-    data_type => "INTEGER",
-    default_value => undef,
-    is_nullable => 1,
-    size => undef,
-  },
+  { data_type => "integer", is_auto_increment => 1, is_nullable => 1 },
   "info",
-  {
-    data_type => "TEXT",
-    default_value => undef,
-    is_nullable => 1,
-    size => undef,
-  },
+  { data_type => "text", is_nullable => 1, size => 256 },
   "description",
-  {
-    data_type => "TEXT",
-    default_value => undef,
-    is_nullable => 1,
-    size => undef,
-  },
+  { data_type => "text", is_nullable => 1, size => 128 },
   "starts",
-  {
-    data_type => "DATETIME",
-    default_value => undef,
-    is_nullable => 1,
-    size => undef,
-  },
+  { data_type => "datetime", is_nullable => 1 },
   "ends",
-  {
-    data_type => "DATETIME",
-    default_value => undef,
-    is_nullable => 1,
-    size => undef,
-  },
-=======
-    "id",
-    { data_type => "integer", is_auto_increment => 1, is_nullable => 1 },
-    "info",
-    { data_type => "text", is_nullable => 1, size => 50 },
-    "description",
-    { data_type => "text", is_nullable => 1, size => 20 },
-    "starts",
-    { data_type => "datetime", is_nullable => 1 },
-    "ends",
-    { data_type => "datetime", is_nullable => 1 },
->>>>>>> .merge-right.r1154
+  { data_type => "datetime", is_nullable => 1 },
 );
 __PACKAGE__->set_primary_key("id");
 
@@ -117,13 +75,13 @@ Related object: L<V2::Server::Schema::Result::TagEvent>
 =cut
 
 __PACKAGE__->has_many(
-    "tag_events",
-    "V2::Server::Schema::Result::TagEvent",
-    { "foreign.id_event" => "self.id" },
-    { cascade_copy       => 0, cascade_delete => 0 },
+  "tag_events",
+  "V2::Server::Schema::Result::TagEvent",
+  { "foreign.id_event" => "self.id" },
+  { cascade_copy => 0, cascade_delete => 0 },
 );
 
-=head2 booking_s
+=head2 bookings
 
 Type: has_many
 
@@ -132,35 +90,19 @@ Related object: L<V2::Server::Schema::Result::Booking>
 =cut
 
 __PACKAGE__->has_many(
-<<<<<<< .working
-  "booking_s",
+  "bookings",
   "V2::Server::Schema::Result::Booking",
   { "foreign.id_event" => "self.id" },
-=======
-    "bookings",
-    "V2::Server::Schema::Result::Booking",
-    { "foreign.id_event" => "self.id" },
-    { cascade_copy       => 0, cascade_delete => 0 },
->>>>>>> .merge-right.r1154
+  { cascade_copy => 0, cascade_delete => 0 },
 );
 
-<<<<<<< .working
-=head2 booking_rs
-=======
-# Created by DBIx::Class::Schema::Loader v0.07000 @ 2010-06-22 16:34:06
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:MuzaCKudC5m6kOh8npTYUw
->>>>>>> .merge-right.r1154
 
-<<<<<<< .working
-Type: has_many
-=======
+# Created by DBIx::Class::Schema::Loader v0.07000 @ 2010-07-20 18:40:59
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:rZ/kpSSl5CEI5XSpU1FOUw
+
 sub hash_event {
     my ($self) = @_;
->>>>>>> .merge-right.r1154
 
-<<<<<<< .working
-Related object: L<V2::Server::Schema::Result::BookingR>
-=======
     my @event = {
         id          => $self->id,
         info        => $self->info,
@@ -168,25 +110,7 @@ Related object: L<V2::Server::Schema::Result::BookingR>
         starts      => $self->starts->iso8601(),
         ends        => $self->ends->iso8601(),
     };
->>>>>>> .merge-right.r1154
-
-<<<<<<< .working
-=cut
-
-__PACKAGE__->has_many(
-  "booking_rs",
-  "V2::Server::Schema::Result::BookingR",
-  { "foreign.id_event" => "self.id" },
-);
-
-
-# Created by DBIx::Class::Schema::Loader v0.05003 @ 2010-05-11 17:00:01
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:mpI3x2qk+IJqNAA2RGn3RQ
-
-=======
-    return \@event;
 }
 
->>>>>>> .merge-right.r1154
 # You can replace this text with custom content, and it will be preserved on regeneration
 1;

@@ -27,66 +27,20 @@ sub default : Path : ActionClass('REST') {
 
 sub default_GET {
     my ( $self, $c, $id ) = @_;
-    my @resource;
-    my @resources;
-
-<<<<<<< .working
-      my @tags;
-      
-      foreach (@res_aux){
-	    @resource = {
-		  id => $_->id,
-		  description => $_->description,
-		  info => $_->info,
-		  tags => $_->tag_list,
-	    };
-	    push (@resources, @resource);
-	    
-      }
-      
-      if ($id){
-	    foreach (@resources) {
-		  if ($_->{id} eq $id) {$resource=$_;}
-	    }
-	    
-	    if (!$resource) {
-		  $c-> stash-> {template} = 'not_found.tt';
-		  $c->forward( $c->view('TT') );
-	    }else{	
-		  $c->stash->{content}=$resource;
-		  $c->forward( $c->view('JSON') );
-	    } 
-      }else {
-	    $c->stash->{content}=\@resources;
-	    $c->forward( $c->view('JSON') );
-      }
-      
-=======
-    my $req = $c->request;
-    $c->log->debug( 'Mètode: ' . $req->method );
-
-    my @res_aux = $c->model('DB::Resource')->all;
-
-    foreach (@res_aux) {
-        @resource = $_->get_resources;
-        push( @resources, @resource );
-    }
 
     if ($id) {
-        $c->forward( 'get_resource', [ $id, @resources ] );
+        $c->forward( 'get_resource', [ $id ] );
     }
     else {
-        $c->forward( 'resource_list', [@resources] );
+        $c->forward( 'resource_list', [] );
     }
 
->>>>>>> .merge-right.r1154
 }
 
 sub get_resource : Local {
-    my ( $self, $c, $id, @resources ) = @_;
+    my ( $self, $c, $id) = @_;
     my $resource;
-
-    $c->log->debug( "# recursos: " . @resources );
+    my @resources = $c->model('DB::Resource')->find({id=>$id})->get_resources;
 
     foreach (@resources) {
         $c->log->debug( Dumper($_) );
@@ -106,7 +60,14 @@ sub get_resource : Local {
 }
 
 sub resource_list : Local {
-    my ( $self, $c, @resources ) = @_;
+    my ( $self, $c ) = @_;
+    my @resources;
+    my @res_aux = $c->model('DB::Resource')->all;
+
+    foreach (@res_aux){
+      push (@resources, $_->get_resources);
+
+}
 
     $c->stash->{content} = \@resources;
     $c->response->status(200);

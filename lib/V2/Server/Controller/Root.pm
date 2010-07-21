@@ -23,14 +23,17 @@ V2::CatalystREST::Controller::Root - Root Controller for V2::CatalystREST
 
 sub index : Path : Args(0) {
     my ( $self, $c ) = @_;
-    $c->response->redirect( $c->uri_for('/resource') );
+    $c->response->status(200);
+    $c->stash->{template} = 'index.tt';
+    $c->forward( $c->view('HTML') );
 }
 
 sub default : Private {
     my ( $self, $c ) = @_;
 
     $c->response->status(404);
-    $c->stash->{template} = 'not_found.tt';
+    $c->stash->{template} = 'old_not_found.tt';
+    $c->forward( $c->view('HTML') );
 }
 
 =head2 end

@@ -1,1 +1,33 @@
-[% resource %]
+[% META title='Detalls del recurs'%]
+
+[% FOREACH res IN resource %]
+
+<dl class="resource">
+<dt>ID</dt><dd>[% res.id | html %] <a class='delete' href='/resource/[% res.id %]'>Esborra</a></dd>
+<dt>Description</dt><dd>[% res.description | html %]</dd>
+<dt>Information</dt><dd>[% res.info %]</dd>
+<dt>Tags</dt>
+  <dd>
+  <ul class="list-of-tag">
+  [% SET ct=0 %]
+  [% FOREACH tag IN res.tags %]
+  [% SET resource_tag = res.tags.$ct.id %]
+  <li><a href='[% c.uri_for("/tag/$resource_tag") %]'>[% res.tags.$ct.id | html %]</a></li>
+  [% SET ct=ct+1 %]
+  [% END %]
+  </ul>
+  </dd>
+</dl>
+
+  <h3>Edit resource</h3>
+  <form action='/resource/[% res.id %]' method="put" class=edit_resource id="edit_resource_form">
+    <p><label>Description: <textarea name="description" placeholder="New resource's description" cols=20 required></textarea></label></p>
+    <p><label>Info: <textarea name="info" placeholder="New resource's info" cols=20 rows=3 required></textarea></label></p>
+    <p><label>Tags: <input name="tags" placeholder="New resource's tags sepatrated by commas"/></label></p>
+    <p><button type='submit'>Edit</button></p>
+  </form>
+[% END %]
+<a href='[% c.uri_for("/resource") | html %]'> <--Tornar a la llista de recursos </a>
+
+[%# USE Dumper %]
+[%# Dumper.dump(resource) %]

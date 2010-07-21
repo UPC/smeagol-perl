@@ -39,23 +39,22 @@ sub default_GET {
 
 sub get_resource : Local {
     my ( $self, $c, $id) = @_;
-    my $resource;
-    my @resources = $c->model('DB::Resource')->find({id=>$id})->get_resources;
+    my $resource = $c->model('DB::Resource')->find({id=>$id});
+    #$c->log->debug("Recurs: ".Dumper(@resource));
 
-    foreach (@resources) {
-        $c->log->debug( Dumper($_) );
-        if ( $_->{id} eq $id ) { $resource = $_; }
-    }
-
+    my @resource;
+    push (@resource, $resource->get_resources);
+    
     if ( !$resource ) {
         $c->stash->{template} = 'not_found.tt';
         $c->response->status(404);
         $c->forward( $c->view('TT') );
     }
     else {
-        $c->stash->{content} = $resource;
+        $c->stash->{resource} = \@resource;
         $c->response->status(200);
-        $c->forward( $c->view('JSON') );
+	$c->stash->{template} = 'resource/get_resource.tt';
+        $c->forward( $c->view('HTML') );
     }
 }
 
@@ -69,9 +68,10 @@ sub resource_list : Local {
 
 }
 
-    $c->stash->{content} = \@resources;
+    $c->stash->{resources} = \@resources;
     $c->response->status(200);
-    $c->forward( $c->view('JSON') );
+    $c->stash->{template} = 'resource/get_list.tt';
+    $c->forward( $c->view('HTML') );
 }
 
 sub default_POST {

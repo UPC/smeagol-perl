@@ -76,10 +76,10 @@ Related object: L<V2::Server::Schema::Result::TagEvent>
 =cut
 
 __PACKAGE__->has_many(
-  "tag_events",
-  "V2::Server::Schema::Result::TagEvent",
-  { "foreign.id_event" => "self.id" },
-  { cascade_copy => 0, cascade_delete => 0 },
+    "tag_events",
+    "V2::Server::Schema::Result::TagEvent",
+    { "foreign.id_event" => "self.id" },
+    { cascade_copy       => 0, cascade_delete => 0 },
 );
 
 =head2 bookings

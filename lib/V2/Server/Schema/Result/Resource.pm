@@ -62,10 +62,10 @@ Related object: L<V2::Server::Schema::Result::ResourceTag>
 =cut
 
 __PACKAGE__->has_many(
-  "resource_tags",
-  "V2::Server::Schema::Result::ResourceTag",
-  { "foreign.resource_id" => "self.id" },
-  { cascade_copy => 0, cascade_delete => 0 },
+    "resource_tags",
+    "V2::Server::Schema::Result::ResourceTag",
+    { "foreign.resource_id" => "self.id" },
+    { cascade_copy          => 0, cascade_delete => 0 },
 );
 
 =head2 bookings

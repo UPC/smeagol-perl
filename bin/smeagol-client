@@ -183,7 +183,7 @@ if ( defined $ARGV{createtag} ) {
     my $rid = $ARGV{createtag}{resourceid};
     my $tag = $ARGV{createtag}{tag};
 
-    verbose( "request: create tag $tag from resource $rid" );
+    verbose("request: create tag $tag from resource $rid");
     my $result = $client->createTag( $rid, $tag );
     defined $result or die "could not create tag\n";
     verbose("tag created successfully");

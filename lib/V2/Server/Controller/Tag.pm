@@ -39,9 +39,9 @@ sub default_GET {
 # és bastant engorrós
     foreach (@tag_aux) {
         @tag = {
-	  id => $_->id,
-	  description => $_->description,
-	};
+            id          => $_->id,
+            description => $_->description,
+        };
 
         push( @tags, @tag );
     }
@@ -60,15 +60,15 @@ sub default_GET {
         else {
             $c->stash->{tag} = $tag;
             $c->response->status(200);
-	    $c->stash->{template} = 'tag/get_tag.tt';
+            $c->stash->{template} = 'tag/get_tag.tt';
             $c->forward( $c->view('HTML') );
         }
     }
     else {
 
-        $c->stash->{tags} = \@tags;
-	$c->stash->{template} = 'tag/get_list.tt';
-	$c->forward( $c->view('HTML') );
+        $c->stash->{tags}     = \@tags;
+        $c->stash->{template} = 'tag/get_list.tt';
+        $c->forward( $c->view('HTML') );
     }
 
 }
@@ -88,12 +88,12 @@ sub default_POST {
     $new_tag->description($desc);
     $new_tag->insert;
 
-    my @tag = { 
-	  id => $new_tag->id,
-	  description => $new_tag->description
-	    };
+    my @tag = {
+        id          => $new_tag->id,
+        description => $new_tag->description
+    };
 
-    $c->stash->{tag} = \@tag;
+    $c->stash->{tag}      = \@tag;
     $c->stash->{template} = 'tag/get_tag.tt';
     $c->forward( $c->view('HTML') );
 }

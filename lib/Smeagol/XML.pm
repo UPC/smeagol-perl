@@ -82,7 +82,7 @@ sub removeXLink {
         $node->removeAttribute('xlink:type');
         $node->removeAttribute('xlink:href');
     }
-    my $string = $doc->toString ;
+    my $string = $doc->toString;
     $string =~ s/xmlns:xlink="http:\/\/www\.w3\.org\/1999\/xlink"//g;
     return $string;
 }

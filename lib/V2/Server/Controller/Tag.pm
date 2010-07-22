@@ -38,7 +38,10 @@ sub default_GET {
 #Cal refer el hash que conté els tags perquè treballar directament amb el model de DB::Tag
 # és bastant engorrós
     foreach (@tag_aux) {
-        @tag = { id => $_->id, };
+        @tag = {
+	  id => $_->id,
+	  description => $_->description,
+	};
 
         push( @tags, @tag );
     }

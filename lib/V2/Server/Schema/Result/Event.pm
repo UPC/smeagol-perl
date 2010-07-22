@@ -24,19 +24,20 @@ __PACKAGE__->table("event");
 =head2 id
 
   data_type: 'integer'
+  is_auto_increment: 1
   is_nullable: 1
 
 =head2 info
 
   data_type: 'text'
   is_nullable: 1
-  size: 50
+  size: 256
 
 =head2 description
 
   data_type: 'text'
   is_nullable: 1
-  size: 20
+  size: 128
 
 =head2 starts
 
@@ -75,13 +76,13 @@ Related object: L<V2::Server::Schema::Result::TagEvent>
 =cut
 
 __PACKAGE__->has_many(
-    "tag_events",
-    "V2::Server::Schema::Result::TagEvent",
-    { "foreign.id_event" => "self.id" },
-    { cascade_copy       => 0, cascade_delete => 0 },
+  "tag_events",
+  "V2::Server::Schema::Result::TagEvent",
+  { "foreign.id_event" => "self.id" },
+  { cascade_copy => 0, cascade_delete => 0 },
 );
 
-=head2 booking_s
+=head2 bookings
 
 Type: has_many
 
@@ -96,8 +97,8 @@ __PACKAGE__->has_many(
     { cascade_copy       => 0, cascade_delete => 0 },
 );
 
-# Created by DBIx::Class::Schema::Loader v0.07000 @ 2010-06-22 16:34:06
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:MuzaCKudC5m6kOh8npTYUw
+# Created by DBIx::Class::Schema::Loader v0.07000 @ 2010-07-20 18:40:59
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:rZ/kpSSl5CEI5XSpU1FOUw
 
 sub hash_event {
     my ($self) = @_;

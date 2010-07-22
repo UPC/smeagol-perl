@@ -24,19 +24,20 @@ __PACKAGE__->table("resources");
 =head2 id
 
   data_type: 'integer'
+  is_auto_increment: 1
   is_nullable: 1
 
 =head2 description
 
   data_type: 'text'
   is_nullable: 1
-  size: 20
+  size: 128
 
 =head2 info
 
   data_type: 'text'
   is_nullable: 1
-  size: 50
+  size: 256
 
 =cut
 
@@ -61,13 +62,13 @@ Related object: L<V2::Server::Schema::Result::ResourceTag>
 =cut
 
 __PACKAGE__->has_many(
-    "resource_tags",
-    "V2::Server::Schema::Result::ResourceTag",
-    { "foreign.resource_id" => "self.id" },
-    { cascade_copy          => 0, cascade_delete => 0 },
+  "resource_tags",
+  "V2::Server::Schema::Result::ResourceTag",
+  { "foreign.resource_id" => "self.id" },
+  { cascade_copy => 0, cascade_delete => 0 },
 );
 
-=head2 booking_s
+=head2 bookings
 
 Type: has_many
 
@@ -82,8 +83,8 @@ __PACKAGE__->has_many(
     { cascade_copy          => 0, cascade_delete => 0 },
 );
 
-# Created by DBIx::Class::Schema::Loader v0.07000 @ 2010-06-22 16:34:06
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:jaEVFhKaimxMHc7MR/ipYw
+# Created by DBIx::Class::Schema::Loader v0.07000 @ 2010-07-20 18:40:59
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:3veZRmYItqd91J5YGQpJJg
 
 sub get_resources {
     my ($self) = @_;

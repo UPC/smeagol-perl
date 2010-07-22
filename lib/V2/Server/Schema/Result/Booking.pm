@@ -17,13 +17,14 @@ V2::Server::Schema::Result::Booking
 
 =cut
 
-__PACKAGE__->table("booking_s");
+__PACKAGE__->table("booking");
 
 =head1 ACCESSORS
 
 =head2 id
 
   data_type: 'integer'
+  is_auto_increment: 1
   is_nullable: 1
 
 =head2 id_resource
@@ -131,10 +132,10 @@ Related object: L<V2::Server::Schema::Result::Event>
 =cut
 
 __PACKAGE__->belongs_to(
-    "id_event",
-    "V2::Server::Schema::Result::Event",
-    { id        => "id_event" },
-    { join_type => "LEFT", on_delete => "CASCADE", on_update => "CASCADE" },
+  "id_event",
+  "V2::Server::Schema::Result::Event",
+  { id => "id_event" },
+  { join_type => "LEFT", on_delete => "CASCADE", on_update => "CASCADE" },
 );
 
 =head2 id_resource
@@ -146,14 +147,16 @@ Related object: L<V2::Server::Schema::Result::Resource>
 =cut
 
 __PACKAGE__->belongs_to(
-    "id_resource",
-    "V2::Server::Schema::Result::Resource",
-    { id        => "id_resource" },
-    { join_type => "LEFT", on_delete => "CASCADE", on_update => "CASCADE" },
+  "id_resource",
+  "V2::Server::Schema::Result::Resource",
+  { id => "id_resource" },
+  { join_type => "LEFT", on_delete => "CASCADE", on_update => "CASCADE" },
 );
 
-# Created by DBIx::Class::Schema::Loader v0.07000 @ 2010-06-22 16:34:06
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:C6gkav+hj8AJTN8BF2iYdg
+
+# Created by DBIx::Class::Schema::Loader v0.07000 @ 2010-07-20 18:39:18
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:805sw5JLWdOKhwL7WSDTTg
+
 use DateTime::Span;
 
 sub hash_booking {

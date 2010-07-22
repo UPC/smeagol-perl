@@ -27,29 +27,17 @@ sub default : Path : ActionClass('REST') {
 
 sub default_GET {
     my ( $self, $c, $id ) = @_;
-    my @resource;
-    my @resources;
-
-    my $req = $c->request;
-    $c->log->debug( 'Mètode: ' . $req->method );
-
-    my @res_aux = $c->model('DB::Resource')->all;
-
-    foreach (@res_aux) {
-        @resource = $_->get_resources;
-        push( @resources, @resource );
-    }
 
     if ($id) {
-        $c->forward( 'get_resource', [ $id, @resources ] );
+        $c->forward( 'get_resource', [ $id ] );
     }
     else {
-        $c->forward( 'resource_list', [@resources] );
+        $c->forward( 'resource_list', [] );
     }
 }
 
 sub get_resource :Private {
-    my ( $self, $c, $id, @resources ) = @_;
+    my ( $self, $c, $id) = @_;
     my $resource = $c->model('DB::Resource')->find({id=>$id});
     #$c->log->debug("Recurs: ".Dumper(@resource));
 
@@ -69,7 +57,14 @@ sub get_resource :Private {
 }
 
 sub resource_list :Private {
-    my ( $self, $c, @resources ) = @_;
+    my ( $self, $c ) = @_;
+    my @resources;
+    my @res_aux = $c->model('DB::Resource')->all;
+
+    foreach (@res_aux){
+      push (@resources, $_->get_resources);
+
+}
 
     $c->stash->{resources} = \@resources;
     $c->response->status(200);

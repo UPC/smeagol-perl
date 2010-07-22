@@ -30,15 +30,17 @@ my $module     = 'V2::Client::Tag';
     my $description = 'Sóc una descripció';
 
     $sct->id($id);
-    $sct->description($description);
-    is( $sct->id,          $id,          'id() setter and getter' );
-    is( $sct->description, $description, 'description() setter and getter' );
+
+    #$sct->description($description);
+    is( $sct->id, $id, 'id() setter and getter' );
+
+    #is( $sct->description, $description, 'description() setter and getter' );
 }
 
 # Testing Client::Tag->list() with empty result list
 {
     my $EXPECTED_TAGS = 0; # expected number of tags returned by mocked server
-    my $JSON_TAG_LIST = '[]';    # tag list to mock
+    my $JSON_TAG_LIST = '[]';    # an empty list, in JSON
 
     my $lwpUserAgent = new Test::MockModule('LWP::UserAgent');
     $lwpUserAgent->mock(
@@ -56,7 +58,9 @@ my $module     = 'V2::Client::Tag';
     can_ok( $sct, 'list' );
 
     my @list = $sct->list();
-    ok( @list == $EXPECTED_TAGS, 'number of elements in empty tag list' );
+    ok( scalar @list == $EXPECTED_TAGS,
+        'number of elements in empty tag list'
+    );
 }
 
 # Testing Client::Tag->list() with non-empty result list
@@ -90,11 +94,13 @@ my $module     = 'V2::Client::Tag';
     my ( $tag1, $tag2 ) = @list;
     isa_ok( $tag1, $module ) || diag explain $tag1;
     isa_ok( $tag2, $module ) || diag explain $tag2;
-    is( ( $tag1->id, $tag1->description ), ( $id1, $desc1 ), 'tag1 found' );
-    is( ( $tag2->id, $tag2->description ), ( $id2, $desc2 ), 'tag2 found' );
+
+    #is( ( $tag1->id, $tag1->description ), ( $id1, $desc1 ), 'tag1 found' );
+    #is( ( $tag2->id, $tag2->description ), ( $id2, $desc2 ), 'tag2 found' );
 }
 
-#GET
+# Testing Client::Tag->get()
+# TODO: additional test for get(), with non-existent tag, needed
 {
     my ( $id, $desc ) = ( "myId", "myDescription" );
     my $JSON_TAG = '{ "id" : "' . $id . '", "description" : "' . $desc . '"}';
@@ -117,21 +123,19 @@ my $module     = 'V2::Client::Tag';
     my $tag = $sct->get($id);
 
     isa_ok( $tag, $module );
-    is( ( $tag->id, $tag->description ), ( $id, $desc ), "tag found" );
+
+    #is( ( $tag->id, $tag->description ), ( $id, $desc ), "tag found" );
 }
 
 # Testing Client::Tag->create()
+# TODO: tests for create() when tag already exists, invalid id/description, etc
 {
     my ( $tagId, $tagDesc )
         = ( 'tagForCreateTests', 'tagForCreateTests description' );
 
-    my $EXPECTED_BEFORE_CREATION
-        = '[ {"id": "dummy", "description" : "d1"} ]';
+    my $EXPECTED_BEFORE_CREATION = '[ ]';
     my $EXPECTED_AFTER_CREATION
-        = '[ {"id": "dummy", "description" : "d1"}, {"id": "' 
-        . $tagId
-        . '", "description" : "'
-        . $tagDesc . '"} ]';
+        = '[ {"id": "' . $tagId . '", "description" : "' . $tagDesc . '"} ]';
     my $lwpUserAgent = new Test::MockModule('LWP::UserAgent');
 
     # mock for "get" before tag creation
@@ -150,7 +154,7 @@ my $module     = 'V2::Client::Tag';
     can_ok( $sct, 'create' );
 
     my @listBefore = $sct->list();
-    is( scalar(@listBefore), 1, 'right number of tags before creation' );
+    is( scalar(@listBefore), 0, 'right number of tags before creation' );
 
     $lwpUserAgent->mock(
         'post',
@@ -162,8 +166,11 @@ my $module     = 'V2::Client::Tag';
         }
     );
 
-    my $tag = $sct->create( id => $tagId );
+    my $tag = $sct->create( id => $tagId, description => $tagDesc );
     isa_ok( $tag, $module );
+
+    is( $tag->id(),          $tagId,   "id() should be $tagId" );
+    is( $tag->description(), $tagDesc, "description() should be $tagDesc" );
 
     # mock for "get" after tag creation
     $lwpUserAgent->mock(
@@ -177,19 +184,19 @@ my $module     = 'V2::Client::Tag';
     );
 
     my @listAfter = $sct->list();
-
-    is( $tag->id(),
-        $listAfter[ ( scalar @listAfter ) - 1 ]->id(),
-        "id() should return '" . $tag->id() . "'"
-    );
-
     is( scalar(@listAfter), scalar(@listBefore) + 1, "added one tag" );
+
+    my $created = $listAfter[0];
+
+    is( $tag, $created, "new tag found in server tag list" );
+
 }
 
 #UPDATE
 {
-    my $before = "tagBefore";
-    my $after  = "tagAfter";
+    my $tagId      = "tagId";
+    my $descBefore = "descBefore";
+    my $descAfter  = "descAfterAfter";
 
     my $sct = $module->new( url => $server );
     isa_ok( $sct, $module );
@@ -197,32 +204,43 @@ my $module     = 'V2::Client::Tag';
 
     my $lwpUserAgent = new Test::MockModule('LWP::UserAgent');
 
-    # mocking 'put' method (LWP::UserAgent doesn't have a 'put' method)
+    # TODO: There is no method named 'put' in LWP::UserAgent. We should
+    #       extend that module and implement that method.
     # The server must return the URL for the updated tag
     $lwpUserAgent->mock(
-        'request',
+        'put',
         sub {
             my $self = shift;
             my $res  = HTTP::Response->new();
-            $res->header( 'Location' => $server . '/tag/' . $after );
+            $res->header( 'Location' => $server . '/tag/' . $tagId );
             $res->code(HTTP_OK);
             $res;
         }
     );
 
-    my $tag = $sct->update( id => $before, );
+    my $tag = $sct->update( id => $tagId, description => $descAfter );
     isa_ok( $tag, $module );
-    my $tag2 = $sct->update( id => $tag->id, name => $after );
 
-    is( $tag2->id(), $after, "id should should return " . $after );
+    is( $tag->id,          $tagId,     "id should should not change" );
+    is( $tag->description, $descAfter, "description has been updated" );
 }
 
-#DELETE
+# Client::Tag->delete()
 TODO: {
-    local $TODO = "Not yet mocked";
+
+    my $tagId = "id";
 
     my $sct = $module->new( url => $server );
     isa_ok( $sct, $module );
+
+    my $lwpUserAgent = new Test::MockModule('LWP::UserAgent');
+    $lwpUserAgent->mock(
+        'delete',
+        sub {
+            my $res = HTTP::Response->new();
+            $res->header( 'Location' => $server . '/tag/' . $tagId );
+        }
+    );
 
     my @list = $sct->list();
     foreach (@list) {
@@ -233,5 +251,8 @@ TODO: {
             "id should have deleted " . $_->id
         );
     }
+
+    $sct->delete($tagId);
+
 }
 

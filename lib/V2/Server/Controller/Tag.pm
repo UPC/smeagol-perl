@@ -53,21 +53,22 @@ sub default_GET {
         }
 
         if ( !$tag ) {
-            $c->stash->{template} = 'not_found.tt';
+            $c->stash->{template} = 'old_not_found.tt';
             $c->response->status(404);
-            $c->forward( $c->view('TT') );
+            $c->forward( $c->view('HTML') );
         }
         else {
-            $c->stash->{content} = $tag;
+            $c->stash->{tag} = $tag;
             $c->response->status(200);
-            $c->forward( $c->view('JSON') );
+	    $c->stash->{template} = 'tag/get_tag.tt';
+            $c->forward( $c->view('HTML') );
         }
     }
     else {
 
-        $c->stash->{content} = \@tags;
-        $c->response->status(200);
-        $c->forward( $c->view('JSON') );
+        $c->stash->{tags} = \@tags;
+	$c->stash->{template} = 'tag/get_list.tt';
+	$c->forward( $c->view('HTML') );
     }
 
 }
@@ -79,17 +80,22 @@ sub default_POST {
     $c->log->debug("El POST funciona");
 
     my $name = $req->parameters->{name};
+    my $desc = $req->parameters->{description};
 
     my $new_tag = $c->model('DB::Tag')->find_or_new();
 
     $new_tag->id($name);
+    $new_tag->description($desc);
     $new_tag->insert;
 
-    my @tag = { id => $new_tag->id, };
+    my @tag = { 
+	  id => $new_tag->id,
+	  description => $new_tag->description
+	    };
 
-    $c->stash->{content} = \@tag;
-    $c->response->status(201);
-    $c->forward( $c->view('JSON') );
+    $c->stash->{tag} = \@tag;
+    $c->stash->{template} = 'tag/get_tag.tt';
+    $c->forward( $c->view('HTML') );
 }
 
 sub default_PUT {

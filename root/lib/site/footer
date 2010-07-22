@@ -45,12 +45,11 @@ $(document).ready( function() {
         dataType: 'html',
         error: function (XMLHttpRequest, textStatus, errorThrown) {
           alert("Ooooops!, request failed with status: " + XMLHttpRequest.status + ' ' + XMLHttpRequest.responseText);
-        }
+        },
+	succes: location.reload(true)
       });
-    
-    return true;
+    return false;
   });
-
 });
 </script>
 
@@ -64,7 +63,7 @@ $(document).ready( function() {
 	  url: $(this).attr('href'),
 	  data: $(this).serialize(),
 	  dataType: 'html',
-	  succes:function(){location.reload();},
+	  succes: location.reload(true)
 	 });
 	 return false;
     });

@@ -37,20 +37,19 @@ sub default_GET {
 
 }
 
-sub get_resource : Local {
+sub get_resource :Private {
     my ( $self, $c, $id) = @_;
     my $resource = $c->model('DB::Resource')->find({id=>$id});
     #$c->log->debug("Recurs: ".Dumper(@resource));
 
-    my @resource;
-    push (@resource, $resource->get_resources);
-    
     if ( !$resource ) {
-        $c->stash->{template} = 'not_found.tt';
+        $c->stash->{template} = 'old_not_found.tt';
         $c->response->status(404);
-        $c->forward( $c->view('TT') );
+        $c->forward( $c->view('HTML') );
     }
     else {
+	my @resource;
+	push (@resource, $resource->get_resources);
         $c->stash->{resource} = \@resource;
         $c->response->status(200);
 	$c->stash->{template} = 'resource/get_resource.tt';
@@ -58,7 +57,7 @@ sub get_resource : Local {
     }
 }
 
-sub resource_list : Local {
+sub resource_list :Private {
     my ( $self, $c ) = @_;
     my @resources;
     my @res_aux = $c->model('DB::Resource')->all;
@@ -141,7 +140,8 @@ sub default_POST {
 
     $c->stash->{resource} = \@resource;
     $c->response->status(201);
-    $c->forward( $c->view('JSON') );
+    $c->stash->{template} = 'resource/get_resource.tt';
+    $c->forward( $c->view('HTML') );
 
 }
 
@@ -237,14 +237,15 @@ sub default_DELETE {
 
     if ($resource_aux) {
         $resource_aux->delete;
-        $c->stash->{template} = 'resource/delete_ok.tt';
-        $c->response->status(200);
-        $c->forward( $c->view('TT') );
+        #$c->stash->{template} = 'resource/delete_ok.tt';
+        #$c->response->status(200);
+        #$c->forward( $c->view('HTML') );
+	$c->go("/resource/resource_list"); 
     }
     else {
-        $c->stash->{template} = 'not_found.tt';
+        $c->stash->{template} = 'old_not_found.tt';
         $c->response->status(404);
-        $c->forward( $c->view('TT') );
+        $c->forward( $c->view('HTML') );
     }
 
 }

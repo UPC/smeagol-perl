@@ -8,12 +8,8 @@ use warnings;
 
 use base 'DBIx::Class::Core';
 
-<<<<<<< .working
-__PACKAGE__->load_components("InflateColumn::DateTime", "TimeStamp");
-=======
 __PACKAGE__->load_components( "InflateColumn::DateTime", "InflateColumn",
     "TimeStamp" );
->>>>>>> .merge-right.r1154
 
 =head1 NAME
 
@@ -92,12 +88,5 @@ __PACKAGE__->belongs_to(
 # Created by DBIx::Class::Schema::Loader v0.07000 @ 2010-06-22 16:34:06
 # DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:T8mHcEIGrenypnxWDxubMg
 
-<<<<<<< .working
-# Created by DBIx::Class::Schema::Loader v0.05003 @ 2010-05-11 17:00:01
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:ZXVZnTTYd+3XXEL+HEPxnw
-
-
-=======
->>>>>>> .merge-right.r1154
 # You can replace this text with custom content, and it will be preserved on regeneration
 1;

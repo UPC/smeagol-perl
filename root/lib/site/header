@@ -1,0 +1,6 @@
+<!-- BEGIN site/header -->
+<div id="logo"><img src='/static/images/logo.png' alt='logo'/>
+<span class="title">[% template.title or site.title %]</span>
+</div>
+
+<!-- END site/header -->

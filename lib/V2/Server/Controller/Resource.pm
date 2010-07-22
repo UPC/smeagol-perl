@@ -30,38 +30,6 @@ sub default_GET {
     my @resource;
     my @resources;
 
-<<<<<<< .working
-      my @tags;
-      
-      foreach (@res_aux){
-	    @resource = {
-		  id => $_->id,
-		  description => $_->description,
-		  info => $_->info,
-		  tags => $_->tag_list,
-	    };
-	    push (@resources, @resource);
-	    
-      }
-      
-      if ($id){
-	    foreach (@resources) {
-		  if ($_->{id} eq $id) {$resource=$_;}
-	    }
-	    
-	    if (!$resource) {
-		  $c-> stash-> {template} = 'not_found.tt';
-		  $c->forward( $c->view('TT') );
-	    }else{	
-		  $c->stash->{content}=$resource;
-		  $c->forward( $c->view('JSON') );
-	    } 
-      }else {
-	    $c->stash->{content}=\@resources;
-	    $c->forward( $c->view('JSON') );
-      }
-      
-=======
     my $req = $c->request;
     $c->log->debug( 'Mètode: ' . $req->method );
 
@@ -78,39 +46,35 @@ sub default_GET {
     else {
         $c->forward( 'resource_list', [@resources] );
     }
-
->>>>>>> .merge-right.r1154
 }
 
-sub get_resource : Local {
+sub get_resource :Private {
     my ( $self, $c, $id, @resources ) = @_;
-    my $resource;
-
-    $c->log->debug( "# recursos: " . @resources );
-
-    foreach (@resources) {
-        $c->log->debug( Dumper($_) );
-        if ( $_->{id} eq $id ) { $resource = $_; }
-    }
+    my $resource = $c->model('DB::Resource')->find({id=>$id});
+    #$c->log->debug("Recurs: ".Dumper(@resource));
 
     if ( !$resource ) {
-        $c->stash->{template} = 'not_found.tt';
+        $c->stash->{template} = 'old_not_found.tt';
         $c->response->status(404);
-        $c->forward( $c->view('TT') );
+        $c->forward( $c->view('HTML') );
     }
     else {
-        $c->stash->{content} = $resource;
+	my @resource;
+	push (@resource, $resource->get_resources);
+        $c->stash->{resource} = \@resource;
         $c->response->status(200);
-        $c->forward( $c->view('JSON') );
+	$c->stash->{template} = 'resource/get_resource.tt';
+        $c->forward( $c->view('HTML') );
     }
 }
 
-sub resource_list : Local {
+sub resource_list :Private {
     my ( $self, $c, @resources ) = @_;
 
-    $c->stash->{content} = \@resources;
+    $c->stash->{resources} = \@resources;
     $c->response->status(200);
-    $c->forward( $c->view('JSON') );
+    $c->stash->{template} = 'resource/get_list.tt';
+    $c->forward( $c->view('HTML') );
 }
 
 sub default_POST {
@@ -180,7 +144,8 @@ sub default_POST {
 
     $c->stash->{resource} = \@resource;
     $c->response->status(201);
-    $c->forward( $c->view('JSON') );
+    $c->stash->{template} = 'resource/get_resource.tt';
+    $c->forward( $c->view('HTML') );
 
 }
 
@@ -276,14 +241,15 @@ sub default_DELETE {
 
     if ($resource_aux) {
         $resource_aux->delete;
-        $c->stash->{template} = 'resource/delete_ok.tt';
-        $c->response->status(200);
-        $c->forward( $c->view('TT') );
+        #$c->stash->{template} = 'resource/delete_ok.tt';
+        #$c->response->status(200);
+        #$c->forward( $c->view('HTML') );
+	$c->go("/resource/resource_list"); 
     }
     else {
-        $c->stash->{template} = 'not_found.tt';
+        $c->stash->{template} = 'old_not_found.tt';
         $c->response->status(404);
-        $c->forward( $c->view('TT') );
+        $c->forward( $c->view('HTML') );
     }
 
 }

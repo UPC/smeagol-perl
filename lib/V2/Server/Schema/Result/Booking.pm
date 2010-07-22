@@ -8,12 +8,8 @@ use warnings;
 
 use base 'DBIx::Class::Core';
 
-<<<<<<< .working
-__PACKAGE__->load_components("InflateColumn::DateTime", "TimeStamp");
-=======
 __PACKAGE__->load_components( "InflateColumn::DateTime", "InflateColumn",
     "TimeStamp" );
->>>>>>> .merge-right.r1154
 
 =head1 NAME
 
@@ -42,8 +38,6 @@ __PACKAGE__->table("booking_s");
   is_foreign_key: 1
   is_nullable: 1
 
-<<<<<<< .working
-=======
 =head2 starts
 
   data_type: 'datetime'
@@ -59,7 +53,6 @@ __PACKAGE__->table("booking_s");
   data_type: (empty string)
   is_nullable: 1
 
->>>>>>> .merge-right.r1154
 =head2 interval
 
   data_type: (empty string)
@@ -70,8 +63,6 @@ __PACKAGE__->table("booking_s");
   data_type: (empty string)
   is_nullable: 1
 
-<<<<<<< .working
-=======
 =head2 per_minuts
 
   data_type: (empty string)
@@ -97,49 +88,9 @@ __PACKAGE__->table("booking_s");
   data_type: (empty string)
   is_nullable: 1
 
->>>>>>> .merge-right.r1154
 =cut
 
 __PACKAGE__->add_columns(
-<<<<<<< .working
-  "id",
-  {
-    data_type => "INTEGER",
-    default_value => undef,
-    is_nullable => 1,
-    size => undef,
-  },
-  "id_resource",
-  {
-    data_type => "INTEGER",
-    default_value => undef,
-    is_foreign_key => 1,
-    is_nullable => 1,
-    size => undef,
-  },
-  "id_event",
-  {
-    data_type => "INTEGER",
-    default_value => undef,
-    is_foreign_key => 1,
-    is_nullable => 1,
-    size => undef,
-  },
-  "starts",
-  {
-    data_type => "DATETIME",
-    default_value => undef,
-    is_nullable => 1,
-    size => undef,
-  },
-  "ends",
-  {
-    data_type => "DATETIME",
-    default_value => undef,
-    is_nullable => 1,
-    size => undef,
-  },
-=======
     "id",
     { data_type => "integer", is_auto_increment => 1, is_nullable => 1 },
     "id_resource",
@@ -166,7 +117,6 @@ __PACKAGE__->add_columns(
     { data_type => "", is_nullable => 1 },
     "per_dia_mes",
     { data_type => "", is_nullable => 1 },
->>>>>>> .merge-right.r1154
 );
 __PACKAGE__->set_primary_key("id");
 
@@ -206,21 +156,9 @@ __PACKAGE__->belongs_to(
 # DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:C6gkav+hj8AJTN8BF2iYdg
 use DateTime::Span;
 
-<<<<<<< .working
-# Created by DBIx::Class::Schema::Loader v0.05003 @ 2010-05-11 17:00:01
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:jKHpneqSVqu/3B57e6mGoQ
-sub overlap {
-      my ($self) = @_;
-      
-      return 1;
-}
-=======
 sub hash_booking {
     my ($self) = @_;
->>>>>>> .merge-right.r1154
 
-<<<<<<< .working
-=======
     my @booking = {
         id          => $self->id,
         id_resource => $self->id_resource->id,
@@ -231,7 +169,6 @@ sub hash_booking {
     return \@booking;
 }
 
->>>>>>> .merge-right.r1154
 sub overlap {
     my ( $self, $current_set ) = @_;
     my $overlap         = 0;

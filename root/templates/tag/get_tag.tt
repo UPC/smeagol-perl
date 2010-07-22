@@ -1,1 +1,6 @@
-[% tag %]
+[% META title='Tag\'s details'%]
+
+<dl clas="tag">
+<dt>ID</dt><dd>[% tag.id | html %] <a class='delete' href='/tag/[% tag.id %]'>Esborra</a></dd>
+<dt>Description</dt><dd>[% tag.description | html %]</dd>
+</dl>

@@ -140,6 +140,7 @@ sub default_POST {
 
     $c->stash->{resource} = \@resource;
     $c->response->status(201);
+    $c->response->content_type('text/html');
     $c->stash->{template} = 'resource/get_resource.tt';
     $c->forward( $c->view('HTML') );
 

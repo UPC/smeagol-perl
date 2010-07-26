@@ -22,6 +22,13 @@ Catalyst Controller.
 
 =cut
 
+__PACKAGE__->config(
+      map => {
+          'text/html' => [ 'View', 'HTML' ],
+          'application/json'  => [ 'View', 'JSON' ],
+      }
+  );
+
 sub default : Local : ActionClass('REST') {
 }
 
@@ -61,7 +68,7 @@ sub default_GET {
             $c->stash->{tag} = $tag;
             $c->response->status(200);
             $c->stash->{template} = 'tag/get_tag.tt';
-            $c->forward( $c->view('HTML') );
+	    $c->forward( $c->view('HTML') );
         }
     }
     else {
@@ -95,6 +102,8 @@ sub default_POST {
 
     $c->stash->{tag}      = \@tag;
     $c->stash->{template} = 'tag/get_tag.tt';
+    $c->response->content_type('text/html');
+    $c->response->redirect('tag/'.$new_tag->id);
     $c->forward( $c->view('HTML') );
 }
 
@@ -137,7 +146,7 @@ sub default_DELETE {
 
     if ($tag_aux) {
         $tag_aux->delete;
-        $c->stash->{template} = 'event/delete_ok.tt';
+        $c->stash->{template} = 'tag/delete_ok.tt';
         $c->response->status(200);
         $c->forward( $c->view('TT') );
     }

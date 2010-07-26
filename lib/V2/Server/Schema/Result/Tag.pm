@@ -8,7 +8,8 @@ use warnings;
 
 use base 'DBIx::Class::Core';
 
-__PACKAGE__->load_components("InflateColumn::DateTime", "TimeStamp");
+__PACKAGE__->load_components( "InflateColumn::DateTime", "InflateColumn",
+    "TimeStamp" );
 
 =head1 NAME
 
@@ -22,21 +23,21 @@ __PACKAGE__->table("tag");
 
 =head2 id
 
-  data_type: TEXT
-  default_value: undef
+  data_type: 'text'
   is_nullable: 1
-  size: undef
+  size: 64
+
+=head2 description
+
+  data_type: 'text'
+  is_nullable: 1
+  size: 256
 
 =cut
 
 __PACKAGE__->add_columns(
-  "id",
-  {
-    data_type => "TEXT",
-    default_value => undef,
-    is_nullable => 1,
-    size => undef,
-  },
+    "id",          { data_type => "text", is_nullable => 1, size => 64 },
+    "description", { data_type => "text", is_nullable => 1, size => 256 },
 );
 __PACKAGE__->set_primary_key("id");
 
@@ -51,9 +52,10 @@ Related object: L<V2::Server::Schema::Result::ResourceTag>
 =cut
 
 __PACKAGE__->has_many(
-  "resource_tags",
-  "V2::Server::Schema::Result::ResourceTag",
-  { "foreign.tag_id" => "self.id" },
+    "resource_tags",
+    "V2::Server::Schema::Result::ResourceTag",
+    { "foreign.tag_id" => "self.id" },
+    { cascade_copy     => 0, cascade_delete => 0 },
 );
 
 =head2 tag_events
@@ -65,15 +67,14 @@ Related object: L<V2::Server::Schema::Result::TagEvent>
 =cut
 
 __PACKAGE__->has_many(
-  "tag_events",
-  "V2::Server::Schema::Result::TagEvent",
-  { "foreign.id_tag" => "self.id" },
+    "tag_events",
+    "V2::Server::Schema::Result::TagEvent",
+    { "foreign.id_tag" => "self.id" },
+    { cascade_copy     => 0, cascade_delete => 0 },
 );
 
-
-# Created by DBIx::Class::Schema::Loader v0.05003 @ 2010-05-11 17:00:01
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:bW1ZUz8lmRvehVU2pF7uuw
-
+# Created by DBIx::Class::Schema::Loader v0.07000 @ 2010-07-20 18:40:59
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:2PycvPGaD5pMgith4ksFcg
 
 # You can replace this text with custom content, and it will be preserved on regeneration
 1;

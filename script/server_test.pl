@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 use Catalyst::ScriptRunner;
-Catalyst::ScriptRunner->run('V2::Server', 'Test');
+Catalyst::ScriptRunner->run( 'V2::Server', 'Test' );
 
 1;
 

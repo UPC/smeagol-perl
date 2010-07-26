@@ -26,212 +26,232 @@ sub default : Path : ActionClass('REST') {
 }
 
 sub default_GET {
-      my ( $self, $c, $id ) = @_;
-      my $resource;
-      my @resource;
-      my @resources;
-      
-      my $req = $c->request;
-      $c->log->debug('Mètode: '.$req->method);
-      
-      my @res_aux = $c->model('DB::Resource')->all;
+    my ( $self, $c, $id ) = @_;
 
-      my @tags;
-      
-      foreach (@res_aux){
-	    @resource = {
-		  id => $_->id,
-		  description => $_->description,
-		  info => $_->info,
-		  tags => $_->tag_list,
-	    };
-	    push (@resources, @resource);
-	    
-      }
-      
-      if ($id){
-	    foreach (@resources) {
-		  if ($_->{id} eq $id) {$resource=$_;}
-	    }
-	    
-	    if (!$resource) {
-		  $c-> stash-> {template} = 'not_found.tt';
-		  $c->forward( $c->view('TT') );
-	    }else{	
-		  $c->stash->{content}=$resource;
-		  $c->forward( $c->view('JSON') );
-	    } 
-      }else {
-	    $c->stash->{content}=\@resources;
-	    $c->forward( $c->view('JSON') );
-      }
-      
+    if ($id) {
+        $c->forward( 'get_resource', [$id] );
+    }
+    else {
+        $c->forward( 'resource_list', [] );
+    }
+}
+
+sub get_resource : Private {
+    my ( $self, $c, $id ) = @_;
+    my $resource = $c->model('DB::Resource')->find( { id => $id } );
+
+    #$c->log->debug("Recurs: ".Dumper(@resource));
+
+    if ( !$resource ) {
+        $c->stash->{template} = 'old_not_found.tt';
+        $c->response->status(404);
+        $c->forward( $c->view('HTML') );
+    }
+    else {
+        my @resource;
+        push( @resource, $resource->get_resources );
+        $c->stash->{resource} = \@resource;
+        $c->response->status(200);
+        $c->stash->{template} = 'resource/get_resource.tt';
+        $c->forward( $c->view('HTML') );
+    }
+}
+
+sub resource_list : Private {
+    my ( $self, $c ) = @_;
+    my @resources;
+    my @res_aux = $c->model('DB::Resource')->all;
+
+    foreach (@res_aux) {
+        push( @resources, $_->get_resources );
+
+    }
+
+    $c->stash->{resources} = \@resources;
+    $c->response->status(200);
+    $c->stash->{template} = 'resource/get_list.tt';
+    $c->forward( $c->view('HTML') );
 }
 
 sub default_POST {
-      my ( $self, $c, $id ) = @_;
-      my $req=$c->request;
-      
-      $c->log->debug('Mètode: '.$req->method);
-      $c->log->debug ("El POST funciona");
-      $c->log->debug(Dumper($req->parameters));
-      
-      my $descr = $req->parameters->{description};	
-      my $info = $req->parameters->{info};
-      
-      my $tags_aux = $req->parameters->{tags};
-      my @tags = split(/,/ ,$tags_aux);
-      
-      
-      my $new_resource = $c->model('DB::Resource')->find_or_new();
-      
-      $new_resource->description($descr);
-      $new_resource->info($info);
-      $new_resource->insert;
-      
-      $c->log->debug("La id del nou recurs és: ".$new_resource->id);
-      
-      #Buscarem si els tags ja existeixen, en cas de no existir els crearem
-      #Cal omplir DB::ResourceTag per a establir la relació entre els tags i els recursos
-      
-      my $TagID;
-      
-      foreach (@tags){
-	    $TagID = $c->model('DB::Tag')->find({id=>$_});
-	    
-	    if ($TagID) {
-		  $c->log->debug('Llista id\'s tag: '.$TagID->id);
-		  #Si el tag existeix, fem constar a ResourceTag la relació recurs-tag
-		  my $ResTag = $c->model('DB::ResourceTag')->find_or_new();
-		  $ResTag-> resource_id($new_resource->id);
-		  $ResTag-> tag_id($TagID->id);
-		  $ResTag-> insert;
-		  
-	    }else{
-		  #Si el tag no existeix, el creem i repetim com a dalt
-		  my $new_tag = $c->model('DB::Tag')->find_or_new();
-		  
-		  $new_tag->id($_);
-		  $new_tag->insert;
-		  
-		  $c->log->debug('Nou tag: '.$new_tag->id);
-		  
-		  my $ResTag = $c->model('DB::ResourceTag')->find_or_new();
-		  $ResTag-> resource_id($new_resource->id);
-		  $ResTag-> tag_id($new_tag->id);
-		  $ResTag-> insert;  
-	    }
-      }
-      
-      #Un cop tenim el tema dels tags aclarit, muntem el json am les dades del recurs
-      my  @resource = {
-	    id => $new_resource->id,
-	    description => $new_resource->description,
-	    info => $new_resource->info,
-	    tags => $new_resource->tag_list,
-      }; 
-    
-      $c->stash->{content}=\@resource;
-      $c->forward( $c->view('JSON') );
-      
-      }
-      
-sub default_PUT {
-      my ( $self, $c, $id ) = @_;
-      my $req= $c->request;
-      $c->log->debug('Mètode: '.$req->method);
-      $c->log->debug ("El PUT funciona");
-      
-      my $descr = $req->parameters->{description};
+    my ( $self, $c, $id ) = @_;
+    my $req = $c->request;
 
-      $c->log->debug("Description: ".$descr);
+    $c->log->debug( 'Mètode: ' . $req->method );
+    $c->log->debug("El POST funciona");
+    $c->log->debug( Dumper( $req->parameters ) );
 
-      my $tags_aux = $req->parameters->{tags};
-      my $info = $req->parameters->{info};
-      my @tags = split(/,/ ,$tags_aux);
-      
-      my $resource = $c->model('DB::Resource')->find({id=>$id});
-      
-      if ($resource){
-	    $resource->description($descr);
-	    $resource->info($info);
-	    $resource->update;
-	    
-	    my $TagID;
-	    
-	    my @old_tags = $c->model('DB::ResourceTag')->search({resource_id=>$id});
-	    
-	    foreach (@old_tags) {
-		  $c->log->debug('Tags vells: '.$_->tag_id);
-		  $_->delete;
-	    }
-	    
-	    foreach (@tags){
-		  $TagID = $c->model('DB::Tag')->find({id=>$_});
-		  
-		  if ($TagID) {
-			
-			#Si el tag existeix, fem constar a ResourceTag la relació recurs-tag
-			my $ResTag = $c->model('DB::ResourceTag')->find_or_new();
-			$ResTag-> resource_id($resource->id);
-			$ResTag-> tag_id($TagID->id);
-			$ResTag-> insert;
-			
-		  }else{
-			#Si el tag no existeix, el creem i repetim com a dalt
-			my $new_tag = $c->model('DB::Tag')->find_or_new();
-			
-			$new_tag->id($_);
-			$new_tag->insert;
-			
-			$c->log->debug('Nou tag: '.$new_tag->id);
-			
-			my $ResTag = $c->model('DB::ResourceTag')->find_or_new();
-			$ResTag-> resource_id($resource->id);
-			$ResTag-> tag_id($new_tag->id);
-			$ResTag-> insert;  
-		  }
-		  
-	    }
-	    
-	    my  @resource = {
-		  id => $resource->id,
-		  description => $resource->description,
-		  info => $resource->info,
-		  tags => $resource->tag_list,
-	    }; 
-	    
-	    $c->stash->{content}=\@resource;
-	    $c->forward( $c->view('JSON') );
-      }else{
-	$c->stash->{template} = 'not_found.tt';
-	$c->forward( $c->view('TT') );
-      }
-      
+    my $descr = $req->parameters->{description};
+    my $info  = $req->parameters->{info};
+
+    my $tags_aux = $req->parameters->{tags};
+    my @tags = split( /,/, $tags_aux );
+
+    my $new_resource = $c->model('DB::Resource')->find_or_new();
+
+    $new_resource->description($descr);
+    $new_resource->info($info);
+    $new_resource->insert;
+
+    $c->log->debug( "La id del nou recurs és: " . $new_resource->id );
+
+#Buscarem si els tags ja existeixen, en cas de no existir els crearem
+#Cal omplir DB::ResourceTag per a establir la relació entre els tags i els recursos
+
+    my $TagID;
+
+    foreach (@tags) {
+        $TagID = $c->model('DB::Tag')->find( { id => $_ } );
+
+        if ($TagID) {
+            $c->log->debug( 'Llista id\'s tag: ' . $TagID->id );
+
+         #Si el tag existeix, fem constar a ResourceTag la relació recurs-tag
+            my $ResTag = $c->model('DB::ResourceTag')->find_or_new();
+            $ResTag->resource_id( $new_resource->id );
+            $ResTag->tag_id( $TagID->id );
+            $ResTag->insert;
+
+        }
+        else {
+
+            #Si el tag no existeix, el creem i repetim com a dalt
+            my $new_tag = $c->model('DB::Tag')->find_or_new();
+
+            $new_tag->id($_);
+            $new_tag->insert;
+
+            $c->log->debug( 'Nou tag: ' . $new_tag->id );
+
+            my $ResTag = $c->model('DB::ResourceTag')->find_or_new();
+            $ResTag->resource_id( $new_resource->id );
+            $ResTag->tag_id( $new_tag->id );
+            $ResTag->insert;
+        }
+    }
+
+#Un cop tenim el tema dels tags aclarit, muntem el json am les dades del recurs
+    my @resource = {
+        id          => $new_resource->id,
+        description => $new_resource->description,
+        info        => $new_resource->info,
+        tags        => $new_resource->tag_list,
+    };
+
+    $c->stash->{resource} = \@resource;
+    $c->response->status(201);
+    $c->response->content_type('text/html');
+    $c->stash->{template} = 'resource/get_resource.tt';
+    $c->forward( $c->view('HTML') );
+
 }
-      
+
+sub default_PUT {
+    my ( $self, $c, $id ) = @_;
+    my $req = $c->request;
+    $c->log->debug( 'Mètode: ' . $req->method );
+    $c->log->debug("El PUT funciona");
+
+    my $descr = $req->parameters->{description};
+
+    $c->log->debug( "Description: " . $descr );
+
+    my $tags_aux = $req->parameters->{tags};
+    my $info     = $req->parameters->{info};
+    my @tags     = split( /,/, $tags_aux );
+
+    my $resource = $c->model('DB::Resource')->find( { id => $id } );
+
+    if ($resource) {
+        $resource->description($descr);
+        $resource->info($info);
+        $resource->update;
+
+        my $TagID;
+
+        my @old_tags
+            = $c->model('DB::ResourceTag')->search( { resource_id => $id } );
+
+        foreach (@old_tags) {
+            $c->log->debug( 'Tags vells: ' . $_->tag_id );
+            $_->delete;
+        }
+
+        foreach (@tags) {
+            $TagID = $c->model('DB::Tag')->find( { id => $_ } );
+
+            if ($TagID) {
+
+         #Si el tag existeix, fem constar a ResourceTag la relació recurs-tag
+                my $ResTag = $c->model('DB::ResourceTag')->find_or_new();
+                $ResTag->resource_id( $resource->id );
+                $ResTag->tag_id( $TagID->id );
+                $ResTag->insert;
+
+            }
+            else {
+
+                #Si el tag no existeix, el creem i repetim com a dalt
+                my $new_tag = $c->model('DB::Tag')->find_or_new();
+
+                $new_tag->id($_);
+                $new_tag->insert;
+
+                $c->log->debug( 'Nou tag: ' . $new_tag->id );
+
+                my $ResTag = $c->model('DB::ResourceTag')->find_or_new();
+                $ResTag->resource_id( $resource->id );
+                $ResTag->tag_id( $new_tag->id );
+                $ResTag->insert;
+            }
+
+        }
+
+        my @resource = {
+            id          => $resource->id,
+            description => $resource->description,
+            info        => $resource->info,
+            tags        => $resource->tag_list,
+        };
+
+        $c->stash->{resource} = \@resource;
+        $c->response->status(200);
+        $c->forward( $c->view('JSON') );
+    }
+    else {
+        $c->stash->{template} = 'not_found.tt';
+        $c->response->status(404);
+        $c->forward( $c->view('TT') );
+    }
+
+}
 
 sub default_DELETE {
-	    my ($self, $c, $id) = @_;
-	    my $req=$c->request;
-	    
-	    $c->log->debug('Mètode: '.$req->method);
-	    $c->log->debug("ID: ".$id);	  
-	    $c->log->debug ("El DELETE funciona");
-	    
-	    my $resource_aux = $c->model('DB::Resource')->find({id=>$id});
-	    
-	    if ($resource_aux){
-		  $resource_aux-> delete;
-		  $c-> stash-> {template} = 'resource/delete_ok.tt';
-		  $c->forward( $c->view('TT') );
-	    }else{
-		  $c-> stash-> {template} = 'not_found.tt';
-		  $c->forward( $c->view('TT') );
-	    }
-	    
-      }
-	    
+    my ( $self, $c, $id ) = @_;
+    my $req = $c->request;
+
+    $c->log->debug( 'Mètode: ' . $req->method );
+    $c->log->debug( "ID: " . $id );
+    $c->log->debug("El DELETE funciona");
+
+    my $resource_aux = $c->model('DB::Resource')->find( { id => $id } );
+
+    if ($resource_aux) {
+        $resource_aux->delete;
+
+        #$c->stash->{template} = 'resource/delete_ok.tt';
+        #$c->response->status(200);
+        #$c->forward( $c->view('HTML') );
+        $c->go("/resource/resource_list");
+    }
+    else {
+        $c->stash->{template} = 'old_not_found.tt';
+        $c->response->status(404);
+        $c->forward( $c->view('HTML') );
+    }
+
+}
+
 =head1 AUTHOR
 
 Jordi Amorós Andreu

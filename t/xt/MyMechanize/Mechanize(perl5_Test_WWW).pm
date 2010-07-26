@@ -67,13 +67,12 @@ results in
 use WWW::Mechanize ();
 use Test::LongString lcss => 0;
 use Test::Builder ();
-use Carp ();
+use Carp          ();
 use Carp::Assert::More;
 
 use base 'WWW::Mechanize';
 
 my $Test = Test::Builder->new();
-
 
 =head1 CONSTRUCTOR
 
@@ -134,7 +133,7 @@ sub new {
 
     my $autolint = delete $args{autolint};
 
-    my $self = $class->SUPER::new( %args );
+    my $self = $class->SUPER::new(%args);
 
     $self->{autolint} = $autolint;
 
@@ -156,15 +155,15 @@ A default description of "GET $url" is used if none if provided.
 
 sub get_ok {
     my $self = shift;
-    my $url = shift;
+    my $url  = shift;
 
     my $desc;
     my %opts;
 
-    if ( @_ ) {
-        my $flex = shift; # The flexible argument
+    if (@_) {
+        my $flex = shift;    # The flexible argument
 
-        if ( !defined( $flex ) ) {
+        if ( !defined($flex) ) {
             $desc = shift;
         }
         elsif ( ref $flex eq 'HASH' ) {
@@ -178,7 +177,7 @@ sub get_ok {
         else {
             $desc = $flex;
         }
-    } # parms left
+    }    # parms left
 
     $self->get( $url, %opts );
     my $ok = $self->success;
@@ -200,9 +199,9 @@ sub _maybe_lint {
 
     local $Test::Builder::Level = $Test::Builder::Level + 1;
 
-    if ( $ok ) {
+    if ($ok) {
         if ( $self->is_html && $self->{autolint} ) {
-            $ok = $self->_lint_content_ok( $desc );
+            $ok = $self->_lint_content_ok($desc);
         }
         else {
             $Test->ok( $ok, $desc );
@@ -230,29 +229,29 @@ A default description of "HEAD $url" is used if none if provided.
 
 sub head_ok {
     my $self = shift;
-    my $url = shift;
+    my $url  = shift;
 
     my $desc;
     my %opts;
 
-    if ( @_ ) {
-        my $flex = shift; # The flexible argument
+    if (@_) {
+        my $flex = shift;    # The flexible argument
 
-        if ( !defined( $flex ) ) {
+        if ( !defined($flex) ) {
             $desc = shift;
         }
         elsif ( ref $flex eq 'HASH' ) {
             %opts = %{$flex};
             $desc = shift;
         }
-       elsif ( ref $flex eq 'ARRAY' ) {
+        elsif ( ref $flex eq 'ARRAY' ) {
             %opts = @{$flex};
             $desc = shift;
         }
         else {
             $desc = $flex;
         }
-    } # parms left
+    }    # parms left
 
     $self->head( $url, %opts );
     my $ok = $self->success;
@@ -283,15 +282,15 @@ A default description of "POST to $url" is used if none if provided.
 
 sub post_ok {
     my $self = shift;
-    my $url = shift;
+    my $url  = shift;
 
     my $desc;
     my %opts;
 
-    if ( @_ ) {
-        my $flex = shift; # The flexible argument
+    if (@_) {
+        my $flex = shift;    # The flexible argument
 
-        if ( !defined( $flex ) ) {
+        if ( !defined($flex) ) {
             $desc = shift;
         }
         elsif ( ref $flex eq 'HASH' ) {
@@ -305,7 +304,7 @@ sub post_ok {
         else {
             $desc = $flex;
         }
-    } # parms left
+    }    # parms left
 
     if ( not defined $desc ) {
         $url = $url->url if ref($url) eq 'WWW::Mechanize::Link';
@@ -335,15 +334,15 @@ A default description of "PUT to $url" is used if none if provided.
 
 sub put_ok {
     my $self = shift;
-    my $url = shift;
+    my $url  = shift;
 
     my $desc;
     my %opts;
 
-    if ( @_ ) {
-        my $flex = shift; # The flexible argument
+    if (@_) {
+        my $flex = shift;    # The flexible argument
 
-        if ( !defined( $flex ) ) {
+        if ( !defined($flex) ) {
             $desc = shift;
         }
         elsif ( ref $flex eq 'HASH' ) {
@@ -357,7 +356,7 @@ sub put_ok {
         else {
             $desc = $flex;
         }
-    } # parms left
+    }    # parms left
 
     if ( not defined $desc ) {
         $url = $url->url if ref($url) eq 'WWW::Mechanize::Link';
@@ -396,12 +395,12 @@ is not available.
 =cut
 
 sub submit_form_ok {
-    my $self = shift;
+    my $self  = shift;
     my $parms = shift || {};
-    my $desc = shift;
+    my $desc  = shift;
 
     if ( ref $parms ne 'HASH' ) {
-       Carp::croak 'FATAL: parameters must be given as a hashref';
+        Carp::croak 'FATAL: parameters must be given as a hashref';
     }
 
     # return from submit_form() is an HTTP::Response or undef
@@ -422,11 +421,10 @@ sub submit_form_ok {
     }
 
     $Test->ok( $ok, $desc );
-    $Test->diag( $error ) if $error;
+    $Test->diag($error) if $error;
 
     return $ok;
 }
-
 
 =head2 $mech->follow_link_ok( \%parms [, $desc] )
 
@@ -450,17 +448,18 @@ is not available.
 =cut
 
 sub follow_link_ok {
-    my $self = shift;
+    my $self  = shift;
     my $parms = shift || {};
-    my $desc = shift;
+    my $desc  = shift;
 
-    if (!defined($desc)) {
-        my $parms_str = join(', ', map { join('=', $_, $parms->{$_}) } keys(%{$parms}));
+    if ( !defined($desc) ) {
+        my $parms_str = join( ', ',
+            map { join( '=', $_, $parms->{$_} ) } keys( %{$parms} ) );
         $desc = qq{Followed link with "$parms_str"} if !defined($desc);
     }
 
     if ( ref $parms ne 'HASH' ) {
-       Carp::croak 'FATAL: parameters must be given as a hashref';
+        Carp::croak 'FATAL: parameters must be given as a hashref';
     }
 
     # return from follow_link() is an HTTP::Response or undef
@@ -481,11 +480,10 @@ sub follow_link_ok {
     }
 
     $Test->ok( $ok, $desc );
-    $Test->diag( $error ) if $error;
+    $Test->diag($error) if $error;
 
     return $ok;
 }
-
 
 =head2 click_ok( $button[, $desc] )
 
@@ -499,13 +497,13 @@ sub click_ok {
     my $button = shift;
     my $desc   = shift;
 
-    my $response = $self->click( $button );
+    my $response = $self->click($button);
     if ( !$response ) {
         return $Test->ok( 0, $desc );
     }
 
     if ( !$response->is_success ) {
-        $Test->diag( "Failed test $desc:" );
+        $Test->diag("Failed test $desc:");
         $Test->diag( $response->as_string );
         return $Test->ok( 0, $desc );
     }
@@ -534,11 +532,13 @@ sub html_lint_ok {
     my $ok;
 
     if ( $self->is_html ) {
-        $ok = $self->_lint_content_ok( $desc );
+        $ok = $self->_lint_content_ok($desc);
     }
     else {
         $ok = $Test->ok( 0, $desc );
-        $Test->diag( q{This page doesn't appear to be HTML, or didn't get the proper text/html content type returned.} );
+        $Test->diag(
+            q{This page doesn't appear to be HTML, or didn't get the proper text/html content type returned.}
+        );
     }
 
     return $ok;
@@ -550,7 +550,7 @@ sub _lint_content_ok {
 
     local $Test::Builder::Level = $Test::Builder::Level + 1;
 
-    if ( not ( eval 'require HTML::Lint' ) ) {
+    if ( not( eval 'require HTML::Lint' ) ) {
         die "Test::WWW::Mechanize can't do linting without HTML::Lint: $@";
     }
 
@@ -558,15 +558,15 @@ sub _lint_content_ok {
     my $lint = HTML::Lint->new;
     $lint->parse( $self->content );
 
-    my @errors = $lint->errors;
+    my @errors  = $lint->errors;
     my $nerrors = @errors;
     my $ok;
-    if ( $nerrors ) {
+    if ($nerrors) {
         $ok = $Test->ok( 0, $desc );
         $Test->diag( 'HTML::Lint errors for ' . $self->uri );
         $Test->diag( $_->as_string ) for @errors;
         my $s = $nerrors == 1 ? '' : 's';
-        $Test->diag( "$nerrors error$s on the page" );
+        $Test->diag("$nerrors error$s on the page");
     }
     else {
         $ok = $Test->ok( 1, $desc );
@@ -585,7 +585,7 @@ Tells if the title of the page is the given string.
 
 sub title_is {
     my $self = shift;
-    my $str = shift;
+    my $str  = shift;
     my $desc = shift;
     $desc = qq{Title is "$str"} if !defined($desc);
 
@@ -602,9 +602,9 @@ Tells if the title of the page matches the given regex.
 =cut
 
 sub title_like {
-    my $self = shift;
+    my $self  = shift;
     my $regex = shift;
-    my $desc = shift;
+    my $desc  = shift;
     $desc = qq{Title is like "$regex"} if !defined($desc);
 
     local $Test::Builder::Level = $Test::Builder::Level + 1;
@@ -620,9 +620,9 @@ Tells if the title of the page matches the given regex.
 =cut
 
 sub title_unlike {
-    my $self = shift;
+    my $self  = shift;
     my $regex = shift;
-    my $desc = shift;
+    my $desc  = shift;
     $desc = qq{Title is unlike "$regex"} if !defined($desc);
 
     local $Test::Builder::Level = $Test::Builder::Level + 1;
@@ -639,7 +639,7 @@ Tells if the base of the page is the given string.
 
 sub base_is {
     my $self = shift;
-    my $str = shift;
+    my $str  = shift;
     my $desc = shift;
     $desc = qq{Base is "$str"} if !defined($desc);
 
@@ -656,9 +656,9 @@ Tells if the base of the page matches the given regex.
 =cut
 
 sub base_like {
-    my $self = shift;
+    my $self  = shift;
     my $regex = shift;
-    my $desc = shift;
+    my $desc  = shift;
     $desc = qq{Base is like "$regex"} if !defined($desc);
 
     local $Test::Builder::Level = $Test::Builder::Level + 1;
@@ -674,9 +674,9 @@ Tells if the base of the page matches the given regex.
 =cut
 
 sub base_unlike {
-    my $self = shift;
+    my $self  = shift;
     my $regex = shift;
-    my $desc = shift;
+    my $desc  = shift;
     $desc = qq{Base is unlike "$regex"} if !defined($desc);
 
     local $Test::Builder::Level = $Test::Builder::Level + 1;
@@ -691,7 +691,7 @@ Tells if the content of the page matches the given string
 
 sub content_is {
     my $self = shift;
-    my $str = shift;
+    my $str  = shift;
     my $desc = shift;
 
     local $Test::Builder::Level = $Test::Builder::Level + 1;
@@ -708,12 +708,12 @@ Tells if the content of the page contains I<$str>.
 
 sub content_contains {
     my $self = shift;
-    my $str = shift;
+    my $str  = shift;
     my $desc = shift;
 
     local $Test::Builder::Level = $Test::Builder::Level + 1;
     if ( ref($str) eq 'REGEX' ) {
-        diag( 'content_contains takes a string, not a regex' );
+        diag('content_contains takes a string, not a regex');
     }
     $desc = qq{Content contains "$str"} if !defined($desc);
 
@@ -728,12 +728,12 @@ Tells if the content of the page lacks I<$str>.
 
 sub content_lacks {
     my $self = shift;
-    my $str = shift;
+    my $str  = shift;
     my $desc = shift;
 
     local $Test::Builder::Level = $Test::Builder::Level + 1;
     if ( ref($str) eq 'REGEX' ) {
-        diag( 'content_lacks takes a string, not a regex' );
+        diag('content_lacks takes a string, not a regex');
     }
     $desc = qq{Content lacks "$str"} if !defined($desc);
 
@@ -747,9 +747,9 @@ Tells if the content of the page matches I<$regex>.
 =cut
 
 sub content_like {
-    my $self = shift;
+    my $self  = shift;
     my $regex = shift;
-    my $desc = shift;
+    my $desc  = shift;
     $desc = qq{Content is like "$regex"} if !defined($desc);
 
     local $Test::Builder::Level = $Test::Builder::Level + 1;
@@ -763,9 +763,9 @@ Tells if the content of the page does NOT match I<$regex>.
 =cut
 
 sub content_unlike {
-    my $self = shift;
+    my $self  = shift;
     my $regex = shift;
-    my $desc = shift;
+    my $desc  = shift;
     $desc = qq{Content is like "$regex"} if !defined($desc);
 
     local $Test::Builder::Level = $Test::Builder::Level + 1;
@@ -790,7 +790,6 @@ sub has_tag {
     return $Test->ok( $found, $desc );
 }
 
-
 =head2 $mech->has_tag_like( $tag, $regex [, $desc ] )
 
 Tells if the page has a C<$tag> tag with the given content in its text.
@@ -798,10 +797,10 @@ Tells if the page has a C<$tag> tag with the given content in its text.
 =cut
 
 sub has_tag_like {
-    my $self = shift;
-    my $tag  = shift;
+    my $self  = shift;
+    my $tag   = shift;
     my $regex = shift;
-    my $desc = shift;
+    my $desc  = shift;
     $desc = qq{Page has $tag tag like "$regex"} if !defined($desc);
 
     my $found = $self->_tag_walk( $tag, sub { $_[0] =~ $regex } );
@@ -809,17 +808,16 @@ sub has_tag_like {
     return $Test->ok( $found, $desc );
 }
 
-
 sub _tag_walk {
-    my $self = shift;
-    my $tag  = shift;
+    my $self  = shift;
+    my $tag   = shift;
     my $match = shift;
 
-    my $p = HTML::TokeParser->new( \($self->content) );
+    my $p = HTML::TokeParser->new( \( $self->content ) );
 
-    while ( my $token = $p->get_tag( $tag ) ) {
-        my $tagtext = $p->get_trimmed_text( "/$tag" );
-        return 1 if $match->( $tagtext );
+    while ( my $token = $p->get_tag($tag) ) {
+        my $tagtext = $p->get_trimmed_text("/$tag");
+        return 1 if $match->($tagtext);
     }
     return;
 }
@@ -852,13 +850,13 @@ sub page_links_ok {
     $desc = 'All links ok' unless defined $desc;
 
     my @links = $self->followable_links();
-    my @urls = _format_links(\@links);
+    my @urls  = _format_links( \@links );
 
     my @failures = $self->_check_links_status( \@urls );
-    my $ok = (@failures==0);
+    my $ok       = ( @failures == 0 );
 
     $Test->ok( $ok, $desc );
-    $Test->diag( $_ ) for @failures;
+    $Test->diag($_) for @failures;
 
     return $ok;
 }
@@ -873,27 +871,27 @@ Follow all links on the current page and test their contents for I<$regex>.
 =cut
 
 sub page_links_content_like {
-    my $self = shift;
+    my $self  = shift;
     my $regex = shift;
-    my $desc = shift;
+    my $desc  = shift;
 
     $desc = qq{All links are like "$regex"} unless defined $desc;
 
-    my $usable_regex=$Test->maybe_regex( $regex );
-    unless(defined( $usable_regex )) {
+    my $usable_regex = $Test->maybe_regex($regex);
+    unless ( defined($usable_regex) ) {
         my $ok = $Test->ok( 0, 'page_links_content_like' );
         $Test->diag(qq{     "$regex" doesn't look much like a regex to me.});
         return $ok;
     }
 
     my @links = $self->followable_links();
-    my @urls = _format_links(\@links);
+    my @urls  = _format_links( \@links );
 
     my @failures = $self->_check_links_content( \@urls, $regex );
-    my $ok = (@failures==0);
+    my $ok = ( @failures == 0 );
 
     $Test->ok( $ok, $desc );
-    $Test->diag( $_ ) for @failures;
+    $Test->diag($_) for @failures;
 
     return $ok;
 }
@@ -909,26 +907,26 @@ contain the specified regex.
 =cut
 
 sub page_links_content_unlike {
-    my $self = shift;
+    my $self  = shift;
     my $regex = shift;
-    my $desc = shift;
+    my $desc  = shift;
     $desc = "All links are unlike '$regex'" if !defined($desc);
 
-    my $usable_regex=$Test->maybe_regex( $regex );
-    unless(defined( $usable_regex )) {
+    my $usable_regex = $Test->maybe_regex($regex);
+    unless ( defined($usable_regex) ) {
         my $ok = $Test->ok( 0, 'page_links_content_unlike' );
         $Test->diag(qq{     "$regex" doesn't look much like a regex to me.});
         return $ok;
     }
 
     my @links = $self->followable_links();
-    my @urls = _format_links(\@links);
+    my @urls  = _format_links( \@links );
 
     my @failures = $self->_check_links_content( \@urls, $regex, 'unlike' );
-    my $ok = (@failures==0);
+    my $ok = ( @failures == 0 );
 
     $Test->ok( $ok, $desc );
-    $Test->diag( $_ ) for @failures;
+    $Test->diag($_) for @failures;
 
     return $ok;
 }
@@ -951,17 +949,17 @@ name.
 =cut
 
 sub links_ok {
-    my $self = shift;
+    my $self  = shift;
     my $links = shift;
-    my $desc = shift;
+    my $desc  = shift;
 
-    my @urls = _format_links( $links );
-    $desc = _default_links_desc(\@urls, 'are ok') unless defined $desc;
+    my @urls = _format_links($links);
+    $desc = _default_links_desc( \@urls, 'are ok' ) unless defined $desc;
     my @failures = $self->_check_links_status( \@urls );
-    my $ok = (@failures == 0);
+    my $ok       = ( @failures == 0 );
 
     $Test->ok( $ok, $desc );
-    $Test->diag( $_ ) for @failures;
+    $Test->diag($_) for @failures;
 
     return $ok;
 }
@@ -980,18 +978,19 @@ scalar URL name.
 =cut
 
 sub link_status_is {
-    my $self = shift;
-    my $links = shift;
+    my $self   = shift;
+    my $links  = shift;
     my $status = shift;
-    my $desc = shift;
+    my $desc   = shift;
 
-    my @urls = _format_links( $links );
-    $desc = _default_links_desc(\@urls, "have status $status") if !defined($desc);
+    my @urls = _format_links($links);
+    $desc = _default_links_desc( \@urls, "have status $status" )
+        if !defined($desc);
     my @failures = $self->_check_links_status( \@urls, $status );
-    my $ok = (@failures == 0);
+    my $ok = ( @failures == 0 );
 
     $Test->ok( $ok, $desc );
-    $Test->diag( $_ ) for @failures;
+    $Test->diag($_) for @failures;
 
     return $ok;
 }
@@ -1010,22 +1009,22 @@ scalar URL name.
 =cut
 
 sub link_status_isnt {
-    my $self = shift;
-    my $links = shift;
+    my $self   = shift;
+    my $links  = shift;
     my $status = shift;
-    my $desc = shift;
+    my $desc   = shift;
 
-    my @urls = _format_links( $links );
-    $desc = _default_links_desc(\@urls, "do not have status $status") if !defined($desc);
+    my @urls = _format_links($links);
+    $desc = _default_links_desc( \@urls, "do not have status $status" )
+        if !defined($desc);
     my @failures = $self->_check_links_status( \@urls, $status, 'isnt' );
-    my $ok = (@failures == 0);
+    my $ok = ( @failures == 0 );
 
     $Test->ok( $ok, $desc );
-    $Test->diag( $_ ) for @failures;
+    $Test->diag($_) for @failures;
 
     return $ok;
 }
-
 
 =head2 $mech->link_content_like( $links, $regex [, $desc ] )
 
@@ -1041,25 +1040,26 @@ array of URLs, or a scalar URL name.
 =cut
 
 sub link_content_like {
-    my $self = shift;
+    my $self  = shift;
     my $links = shift;
     my $regex = shift;
-    my $desc = shift;
+    my $desc  = shift;
 
-    my $usable_regex=$Test->maybe_regex( $regex );
-    unless(defined( $usable_regex )) {
+    my $usable_regex = $Test->maybe_regex($regex);
+    unless ( defined($usable_regex) ) {
         my $ok = $Test->ok( 0, 'link_content_like' );
         $Test->diag(qq{     "$regex" doesn't look much like a regex to me.});
         return $ok;
     }
 
-    my @urls = _format_links( $links );
-    $desc = _default_links_desc(\@urls, "are like '$regex'") if !defined($desc);
+    my @urls = _format_links($links);
+    $desc = _default_links_desc( \@urls, "are like '$regex'" )
+        if !defined($desc);
     my @failures = $self->_check_links_content( \@urls, $regex );
-    my $ok = (@failures == 0);
+    my $ok = ( @failures == 0 );
 
     $Test->ok( $ok, $desc );
-    $Test->diag( $_ ) for @failures;
+    $Test->diag($_) for @failures;
 
     return $ok;
 }
@@ -1078,42 +1078,44 @@ of URLs, or a scalar URL name.
 =cut
 
 sub link_content_unlike {
-    my $self = shift;
+    my $self  = shift;
     my $links = shift;
     my $regex = shift;
-    my $desc = shift;
+    my $desc  = shift;
 
-    my $usable_regex=$Test->maybe_regex( $regex );
-    unless(defined( $usable_regex )) {
+    my $usable_regex = $Test->maybe_regex($regex);
+    unless ( defined($usable_regex) ) {
         my $ok = $Test->ok( 0, 'link_content_unlike' );
         $Test->diag(qq{     "$regex" doesn't look much like a regex to me.});
         return $ok;
     }
 
-    my @urls = _format_links( $links );
-    $desc = _default_links_desc(\@urls, qq{are not like "$regex"}) if !defined($desc);
+    my @urls = _format_links($links);
+    $desc = _default_links_desc( \@urls, qq{are not like "$regex"} )
+        if !defined($desc);
     my @failures = $self->_check_links_content( \@urls, $regex, 'unlike' );
-    my $ok = (@failures == 0);
+    my $ok = ( @failures == 0 );
 
     $Test->ok( $ok, $desc );
-    $Test->diag( $_ ) for @failures;
+    $Test->diag($_) for @failures;
 
     return $ok;
 }
 
 # Create a default description for the link_* methods, including the link count.
 sub _default_links_desc {
-    my ($urls, $desc_suffix) = @_;
-    my $url_count = scalar(@{$urls});
-    return sprintf( '%d link%s %s', $url_count, $url_count == 1 ? '' : 's', $desc_suffix );
+    my ( $urls, $desc_suffix ) = @_;
+    my $url_count = scalar( @{$urls} );
+    return sprintf( '%d link%s %s',
+        $url_count, $url_count == 1 ? '' : 's', $desc_suffix );
 }
 
 # This actually performs the status check of each url.
 sub _check_links_status {
-    my $self = shift;
-    my $urls = shift;
+    my $self   = shift;
+    my $urls   = shift;
     my $status = shift || 200;
-    my $test = shift || 'is';
+    my $test   = shift || 'is';
 
     # Create a clone of the $mech used during the test as to not disrupt
     # the original.
@@ -1134,17 +1136,17 @@ sub _check_links_status {
         else {
             push( @failures, $url );
         }
-    } # for
+    }    # for
 
     return @failures;
 }
 
-# This actually performs the content check of each url. 
+# This actually performs the content check of each url.
 sub _check_links_content {
-    my $self = shift;
-    my $urls = shift;
+    my $self  = shift;
+    my $urls  = shift;
     my $regex = shift || qr/<html>/;
-    my $test = shift || 'like';
+    my $test  = shift || 'like';
 
     # Create a clone of the $mech used during the test as to not disrupt
     # the original.
@@ -1153,19 +1155,19 @@ sub _check_links_content {
     my @failures;
     for my $url ( @{$urls} ) {
         if ( $mech->follow_link( url => $url ) ) {
-            my $content=$mech->content();
+            my $content = $mech->content();
             if ( $test eq 'like' ) {
-                push( @failures, $url ) unless $content=~/$regex/;
+                push( @failures, $url ) unless $content =~ /$regex/;
             }
             else {
-                push( @failures, $url ) unless $content!~/$regex/;
+                push( @failures, $url ) unless $content !~ /$regex/;
             }
             $mech->back();
         }
         else {
             push( @failures, $url );
         }
-    } # for
+    }    # for
 
     return @failures;
 }
@@ -1175,9 +1177,9 @@ sub _format_links {
     my $links = shift;
 
     my @urls;
-    if (ref($links) eq 'ARRAY') {
-        if (defined($$links[0])) {
-            if (ref($$links[0]) eq 'WWW::Mechanize::Link') {
+    if ( ref($links) eq 'ARRAY' ) {
+        if ( defined( $$links[0] ) ) {
+            if ( ref( $$links[0] ) eq 'WWW::Mechanize::Link' ) {
                 @urls = map { $_->url() } @{$links};
             }
             else {
@@ -1186,7 +1188,7 @@ sub _format_links {
         }
     }
     else {
-        push(@urls,$links);
+        push( @urls, $links );
     }
     return @urls;
 }
@@ -1251,11 +1253,15 @@ sub stuff_inputs {
 
     my $options = shift || {};
     assert_isa( $options, 'HASH' );
-    assert_in( $_, ['ignore', 'fill', 'specs'] ) foreach ( keys %{$options} );
+    assert_in( $_, [ 'ignore', 'fill', 'specs' ] )
+        foreach ( keys %{$options} );
 
     # set up the fill we'll use unless a field overrides it
     my $default_fill = '@';
-    if ( exists $options->{fill} && defined $options->{fill} && length($options->{fill}) > 0 ) {
+    if (   exists $options->{fill}
+        && defined $options->{fill}
+        && length( $options->{fill} ) > 0 )
+    {
         $default_fill = $options->{fill};
     }
 
@@ -1263,7 +1269,7 @@ sub stuff_inputs {
     my $ignore = {};
     if ( exists $options->{ignore} ) {
         assert_isa( $options->{ignore}, 'ARRAY' );
-        $ignore = { map {($_, 1)} @{$options->{ignore}} };
+        $ignore = { map { ( $_, 1 ) } @{ $options->{ignore} } };
     }
 
     my $specs = {};
@@ -1272,20 +1278,24 @@ sub stuff_inputs {
         $specs = $options->{specs};
         foreach my $field_name ( keys %{$specs} ) {
             assert_isa( $specs->{$field_name}, 'HASH' );
-            assert_in( $_, ['fill', 'maxlength'] ) foreach ( keys %{$specs->{$field_name}} );
+            assert_in( $_, [ 'fill', 'maxlength' ] )
+                foreach ( keys %{ $specs->{$field_name} } );
         }
     }
 
-    my @inputs = $self->find_all_inputs( type_regex => qr/^(text|textarea|password)$/ );
+    my @inputs = $self->find_all_inputs(
+        type_regex => qr/^(text|textarea|password)$/ );
 
-    foreach my $field ( @inputs ) {
+    foreach my $field (@inputs) {
         next if $field->readonly();
-        next if $field->disabled();  # TODO: HTML::Form::TextInput allows setting disabled--allow it here?
+        next
+            if $field->disabled()
+        ; # TODO: HTML::Form::TextInput allows setting disabled--allow it here?
 
         my $name = $field->name();
 
         # skip if it's one of the fields to ignore
-        next if exists $ignore->{ $name };
+        next if exists $ignore->{$name};
 
         # fields with no maxlength will get this many characters
         my $maxlength = 66000;
@@ -1294,36 +1304,54 @@ sub stuff_inputs {
         if ( $field->type ne 'textarea' ) {
             if ( exists $field->{maxlength} ) {
                 $maxlength = $field->{maxlength};
-                # TODO: what to do about maxlength==0 ?  non-numeric? less than 0 ?
+
+           # TODO: what to do about maxlength==0 ?  non-numeric? less than 0 ?
             }
         }
 
         my $fill = $default_fill;
 
         if ( exists $specs->{$name} ) {
+
             # process the per-field info
 
-            if ( exists $specs->{$name}->{fill} && defined $specs->{$name}->{fill} && length($specs->{$name}->{fill}) > 0 ) {
+            if (   exists $specs->{$name}->{fill}
+                && defined $specs->{$name}->{fill}
+                && length( $specs->{$name}->{fill} ) > 0 )
+            {
                 $fill = $specs->{$name}->{fill};
             }
 
             # maxlength override from specs
-            if ( exists $specs->{$name}->{maxlength} && defined $specs->{$name}->{maxlength} ) {
+            if ( exists $specs->{$name}->{maxlength}
+                && defined $specs->{$name}->{maxlength} )
+            {
                 $maxlength = $specs->{$name}->{maxlength};
-                # TODO: what to do about maxlength==0 ?  non-numeric? less than 0?
+
+            # TODO: what to do about maxlength==0 ?  non-numeric? less than 0?
             }
         }
 
         # stuff it
-        if ( ($maxlength % length($fill)) == 0 ) {
+        if ( ( $maxlength % length($fill) ) == 0 ) {
+
             # the simple case
-            $field->value( $fill x ($maxlength/length($fill)) );
+            $field->value( $fill x ( $maxlength / length($fill) ) );
         }
         else {
+
             # can be improved later
-            $field->value( substr( $fill x int(($maxlength + length($fill) - 1)/length($fill)), 0, $maxlength ) );
+            $field->value(
+                substr(
+                    $fill x int(
+                        ( $maxlength + length($fill) - 1 ) / length($fill)
+                    ),
+                    0,
+                    $maxlength
+                )
+            );
         }
-    } # for @inputs
+    }    # for @inputs
 
     return;
 }
@@ -1399,4 +1427,4 @@ under the same terms as Perl itself.
 
 =cut
 
-1; # End of Test::WWW::Mechanize
+1;    # End of Test::WWW::Mechanize

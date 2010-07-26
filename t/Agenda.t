@@ -224,8 +224,10 @@ ok( $ag->size == 0, 'remove non-existing b4 from ag' );
 
     $agenda->append($booking);
     ok( $agenda->contains($booking), 'booking added in agenda' );
-    like( decode('UTF-8',"$agenda"), qr/$description/, "UTF-8 description found in agenda" );
-    like( decode('UTF-8',"$agenda"), qr/$info/,        "UTF-8 info found in agenda" );
+    like( decode( 'UTF-8', "$agenda" ),
+        qr/$description/, "UTF-8 description found in agenda" );
+    like( decode( 'UTF-8', "$agenda" ),
+        qr/$info/, "UTF-8 info found in agenda" );
 }
 
 END { Smeagol::DataStore->clean(); }

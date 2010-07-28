@@ -2,8 +2,8 @@ use strict;
 use warnings;
 use Test::More;
 
-BEGIN { use_ok 'Catalyst::Test', 'SmeagolServer' }
-BEGIN { use_ok 'SmeagolServer::Controller::Tag' }
+BEGIN { use_ok 'Catalyst::Test', 'V2::Server' }
+BEGIN { use_ok 'V2::Server::Controller::Tag' }
 
 ok( request('/tag')->is_success, 'Request should succeed' );
 diag '###################################';

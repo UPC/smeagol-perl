@@ -111,7 +111,7 @@ sub hash_event {
         ends        => $self->ends->iso8601(),
     };
 
-    return \@event;
+    return @event;
 }
 
 # You can replace this text with custom content, and it will be preserved on regeneration

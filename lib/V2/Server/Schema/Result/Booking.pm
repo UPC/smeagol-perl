@@ -168,7 +168,7 @@ sub hash_booking {
         starts      => $self->starts->iso8601(),
         ends        => $self->ends->iso8601(),
     };
-    return \@booking;
+    return @booking;
 }
 
 sub overlap {

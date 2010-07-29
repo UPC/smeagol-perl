@@ -3,9 +3,12 @@ use warnings;
 
 use Test::More;
 use Data::Dumper;
+use HTTP::Request;
 use HTTP::Request::Common;
 require LWP::UserAgent;
 use JSON::Any;
+use DateTime;
+use DateTime::Duration;
 
 BEGIN { use_ok 'Catalyst::Test', 'V2::Server' }
 BEGIN { use_ok 'V2::Server::Controller::Booking' }
@@ -39,15 +42,28 @@ Create new booking
 
 diag '#########Creating booking#########';
 diag '###################################';
+my $duration = DateTime::Duration->new(hours   => 2);
+my $start = DateTime->now();
+my $end = $start->clone->add_duration($duration);
+
 
 ok( my $response_post = request POST '/booking',
-    [   starts      => '2010-07-16T04:00:00',
-        ends        => '2010-07-16T05:00:00',
+    [   starts      => $start,
+        ends        => $end,
         id_resource => "1",
         id_event    => "1"
     ]
 );
 diag $response_post->content;
+
+my $booking_aux= $j->from_json( $response_post->content );
+my @booking = @{$booking_aux};
+my $bid;
+
+foreach (@booking){
+      $bid = $_->{id};
+}
+
 
 =head1
 Editing the last created booking
@@ -55,17 +71,15 @@ Editing the last created booking
 
 diag '##########Editing booking#########';
 diag '###################################';
-
-my $bid = @bookings + 1;
 diag "Last Booking ID: ".$bid;
-#diag "ID: ".$id;
-ok( my $response_put = request PUT '/booking/' . $bid,
-    [   starts      => '2010-02-16T04:00:00',
-        ends        => '2010-02-16T05:00:00',
-        id_resource => "2",
-        id_event    => "2"
-    ]
-);
+
+ok( my $response_put = request PUT '/booking/'.$bid,
+      {   starts      => $start,
+      ends        => $end,
+      id_resource => "2",
+      id_event    => "2",}
+    );
+
 diag $response_put->content;
 
 diag '#########Deleting booking#########';

@@ -3,6 +3,8 @@ package V2::Server::Controller::Booking;
 use Moose;
 use namespace::autoclean;
 use Data::Dumper;
+use DateTime;
+use DateTime::Duration;
 use DateTime::Span;
 
 BEGIN { extends 'Catalyst::Controller::REST' }
@@ -78,6 +80,7 @@ sub default_POST {
     my ( $self, $c ) = @_;
     my $req = $c->request;
     $c->log->debug( 'Mètode: ' . $req->method );
+    #$c->log->debug(Dumper($req));
     $c->log->debug("El POST funciona");
 
     my $id_resource = $req->parameters->{id_resource};
@@ -122,9 +125,8 @@ sub default_POST {
         my @booking = $new_booking->hash_booking;
 
         $c->stash->{content}  = \@booking;
-        $c->stash->{template} = 'booking_s/get_booking.tt';
         $c->response->status(201);
-        $c->forward( $c->view('TT') );
+        $c->forward( $c->view('JSON') );
 
     }
 }
@@ -152,8 +154,8 @@ sub default_PUT {
         ;    #Recuperem les reserves que utilitzen el recurs
 
     my $current_set = DateTime::Span->from_datetimes(
-        start => $booking->starts,
-        end   => $booking->ends->clone->subtract( seconds => 1 )
+        start => $starts,
+        end   => $ends->clone->subtract( seconds => 1 )
     );
 
     my $old_booking_set;

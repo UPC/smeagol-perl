@@ -117,6 +117,7 @@ sub default_POST {
         $c->log->debug("Hi ha solapament \n");
         $c->stash->{template} = 'fail.tt';
         $c->response->status(404);
+	$c->response->content_type('text/html');
         $c->forward( $c->view('TT') );
     }
     else {
@@ -197,7 +198,7 @@ sub default_DELETE {
 
     if ($booking_aux) {
         $booking_aux->delete;
-        $c->stash->{template} = 'booking_s/delete_ok.tt';
+        $c->stash->{template} = 'booking/delete_ok.tt';
         $c->response->status(200);
         $c->forward( $c->view('TT') );
     }

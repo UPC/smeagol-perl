@@ -49,6 +49,14 @@ ok( my $response_post = request POST '/event',
 );
 diag $response_post->content;
 
+$event_aux= $j->from_json( $response_post->content );
+@event = @{$event_aux};
+my $eid;
+
+foreach (@event){
+      $eid = $_->{id};
+}
+
 =head1
 Editing the last created event
 =cut
@@ -56,11 +64,11 @@ Editing the last created event
 diag '##########Editing event#########';
 diag '###################################';
 
-my $eid = @event + 1;
+
 diag "Editing event " . $eid;
 
 #diag "ID: ".$id;
-ok( my $response_put = request PUT '/event/' . $eid,
+ok( my $response_put = request PUT '/event/'.$eid."?starts=2010-02-16T06:00:00&description=:-X&ends=2010-02-16T08:00:00&info='Estem de proves'",
     [   starts      => '2010-02-16T06:00:00',
         description => ':-X',
         ends        => '2010-02-16T08:00:00',
@@ -76,6 +84,7 @@ my $ua = LWP::UserAgent->new;
 my $request_del
     = HTTP::Request->new( DELETE => 'http://localhost:3000/event/' . $eid );
 diag $request_del->content;
-ok( $ua->request($request_del) );
+ok( my $response_del = $ua->request($request_del) );
+diag $response_del->content;
 
 done_testing();

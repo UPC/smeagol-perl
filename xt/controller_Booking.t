@@ -10,11 +10,6 @@ use JSON::Any;
 use DateTime;
 use DateTime::Duration;
 
-use Test::WWW::Mechanize;
-
-my $mech = Test::WWW::Mechanize->new;
-
-
 BEGIN { use_ok 'Catalyst::Test', 'V2::Server' }
 BEGIN { use_ok 'V2::Server::Controller::Booking' }
 
@@ -79,16 +74,23 @@ diag '##########Editing booking#########';
 diag '###################################';
 diag "Last Booking ID: ".$bid;
 
-my $ua_put          = LWP::UserAgent->new;
+my $ua_put = LWP::UserAgent->new;
 my $request_put = HTTP::Request->new(
-    PUT => 'http://localhost:3000/booking/'.$bid,
-      [parameters=>{starts      => $start,
-      ends        => $end,
-      id_resource => "2",
-      id_event    => "2"}]);
+    PUT => 'http://localhost:3000/booking/'.$bid.'?starts='.$start.'&ends='.$end.'&id_resource=2&id_event=2',
+      [
+      parameters=>(
+	starts      => $start,
+	ends        => $end,
+	id_resource => "2",
+	id_event    => "2"
+	)
+      ]
+      );
+
+#diag Dumper($request_put->headers);
 ok($ua_put->request($request_put) );
 
-ok( $response = request GET '/booking/' .$bid, [] );
+ok( $response = request GET '/booking/'.$bid, [] );
 diag 'Edited Booking '.$bid.' '.$response->content;
 
 diag '#########Deleting booking#########';

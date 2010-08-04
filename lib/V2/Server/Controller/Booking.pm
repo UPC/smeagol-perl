@@ -83,10 +83,10 @@ sub default_POST {
     #$c->log->debug(Dumper($req));
     $c->log->debug("El POST funciona");
 
-    my $id_resource = $req->parameters->{id_resource};
-    my $id_event    = $req->parameters->{id_event};
-    my $starts      = $req->parameters->{starts};
-    my $ends        = $req->parameters->{ends};
+    my $id_resource = $req->parameters->{id_resource} || $req->query('id_resource');
+    my $id_event    = $req->parameters->{id_event} || $req->query('id_event');
+    my $starts      = $req->parameters->{starts} || $req->query('starts');
+    my $ends        = $req->parameters->{ends} || $req->query('ends');
 
     my $new_booking = $c->model('DB::Booking')->find_or_new();
 
@@ -138,10 +138,17 @@ sub default_PUT {
     $c->log->debug( 'Mètode: ' . $req->method );
     $c->log->debug("El PUT funciona");
 
-    my $id_resource = $req->parameters->{id_resource};
-    my $id_event    = $req->parameters->{id_event};
-    my $starts      = $req->parameters->{starts};
-    my $ends        = $req->parameters->{ends};
+#$c->log->debug(Dumper($req->headers));
+    
+    my $id_resource = $req->parameters->{id_resource} || $req->query('id_resource');
+    my $id_event    = $req->parameters->{id_event} || $req->query('id_event');
+    my $starts_aux  = $req->parameters->{starts} || $req->query('starts');
+    my $ends_aux    = $req->parameters->{ends} || $req->query('ends');
+
+    my $starts = ParseDate($starts_aux);
+    my $ends = ParseDate($ends_aux);
+
+    $c->log->debug("ID resource: ".$id_resource." ID Event: ".$id_event." Start: ".$starts." Ends: ".$ends);
 
     my $booking = $c->model('DB::Booking')->find( { id => $id } );
 
@@ -207,6 +214,24 @@ sub default_DELETE {
         $c->response->status(404);
         $c->forward( $c->view('TT') );
     }
+}
+
+sub ParseDate {
+  my ($date_str) = @_;
+
+  my ($day,$hour) = split(/T/,$date_str);
+
+  my ($year,$month,$nday) = split(/-/,$day);
+  my ($nhour,$min,$sec) = split(/:/,$hour);
+
+  my $date = DateTime->new(year   => $year,
+                       month  => $month,
+                       day    => $nday,
+                       hour   => $nhour,
+                       minute => $min,
+                       second => $sec,);
+
+  return $date;
 }
 
 =head1 AUTHOR

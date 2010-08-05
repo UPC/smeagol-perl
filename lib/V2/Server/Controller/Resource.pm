@@ -23,8 +23,12 @@ Catalyst Controller.
 =cut
 
 sub begin :Private {
-      my ($self, $c) = @_;      
-      $c->stash->{format}=$c->request->headers->{"accept"};
+      my ($self, $c) = @_;  
+      my $req = $c->request;
+      
+      $c->stash->{format} = $req->parameters->{format} || $req->headers->{'accept'};
+
+      $c->log->debug("Format: ".$c->stash->{format});
 }
 
 
@@ -254,7 +258,7 @@ sub default_DELETE {
 
 sub end :Private {
       my ($self,$c)= @_;
-      
+
       if ($c->stash->{format} ne "application/json") {
 	    $c->forward( $c->view('HTML') );      
       }else{

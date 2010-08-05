@@ -21,11 +21,6 @@ V2::CatalystREST::Controller::Root - Root Controller for V2::CatalystREST
 
 =cut
 
-sub begin :Private {
-      my ($self, $c) = @_;
-      $c->stash->{format}=$c->request->headers->{"accept"};
-}
-
 sub index : Path : Args(0) {
     my ( $self, $c ) = @_;
     $c->response->status(200);
@@ -39,23 +34,6 @@ sub default : Private {
     $c->response->status(404);
     $c->stash->{template} = 'old_not_found.tt';
     $c->forward( $c->view('HTML') );
-}
-
-=head2 end
-
-Attempt to render a view, if needed.
-
-=cut
-
-sub end : ActionClass('RenderView') {
-    my ( $self, $c ) = @_;
-
-    if ($c->stash->{format} ne "application/json") {
-      $c->forward( $c->view('HTML') );
-    }else{
-      $c->component('View::JSON')->encoding('utf-8');
-      $c->forward( $c->view('JSON') );
-    }
 }
 
 =head1 AUTHOR

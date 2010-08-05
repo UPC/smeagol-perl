@@ -2,7 +2,10 @@ use strict;
 use warnings;
 use Test::More;
 use Data::Dumper;
+use LWP::UserAgent;
+require HTTP::Request;
 use HTTP::Request::Common;
+require HTTP::Headers;
 use JSON::Any;
 
 BEGIN { use_ok 'Catalyst::Test', 'V2::Server' }
@@ -11,9 +14,12 @@ BEGIN { use_ok 'V2::Server::Controller::Resource' }
 my $j = JSON::Any->new;
 
 #List of resources ok?
-ok( request('/resource')->is_success, 'Request should succeed' );
 
-ok( my $response = request GET '/resource', [] );
+my $request_get = HTTP::Request->new(GET => 'http://localhost:3000/resource',[format => 'application/json']);
+$request_get->header( Accept => 'application/json');
+
+my $ua_get = LWP::UserAgent->new;
+ok( my $response = $ua_get->request($request_get) );
 
 diag 'Resource list: ' . $response->content;
 diag '###################################';
@@ -26,7 +32,10 @@ my $id;
 
 foreach (@resource) {
     $id = $_->{id};
-    ok( $response = request GET '/resource/' . $id, [] );
+    
+    $request_get = HTTP::Request->new(GET => 'http://localhost:3000/resource/'.$id,[format => 'application/json']);
+    
+    ok( $response = $ua_get->request($request_get) );
     diag 'Resource ' . $id . ' ' . $response->content;
     diag '###################################';
 }

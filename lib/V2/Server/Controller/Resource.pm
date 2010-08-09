@@ -23,12 +23,9 @@ Catalyst Controller.
 =cut
 
 sub begin :Private {
-      my ($self, $c) = @_;  
-      my $req = $c->request;
-      
-      $c->stash->{format} = $req->parameters->{format} || $req->headers->{'accept'};
+      my ($self, $c) = @_;
 
-      $c->log->debug("Format: ".$c->stash->{format});
+      $c->stash->{format} = $c->request->headers->{"accept"} || 'application/json';
 }
 
 
@@ -137,7 +134,7 @@ sub default_POST {
         }
     }
 
-#Un cop tenim el tema dels tags aclarit, muntem el json am les dades del recurs
+#Un cop tenim el tema dels tags aclarit, muntem el json amb les dades del recurs
     my @resource = {
         id          => $new_resource->id,
         description => $new_resource->description,
@@ -158,12 +155,12 @@ sub default_PUT {
     $c->log->debug( 'Mètode: ' . $req->method );
     $c->log->debug("El PUT funciona");
 
-    my $descr = $req->parameters->{description};
+    my $descr = $req->parameters->{description} || $req->{headers}->{description};
 
     $c->log->debug( "Description: " . $descr );
 
-    my $tags_aux = $req->parameters->{tags};
-    my $info     = $req->parameters->{info};
+    my $tags_aux = $req->parameters->{tags} || $req->{headers}->{tags};
+    my $info     = $req->parameters->{info} || $req->{headers}->{info};
     my @tags     = split( /,/, $tags_aux );
 
     my $resource = $c->model('DB::Resource')->find( { id => $id } );
@@ -258,7 +255,7 @@ sub default_DELETE {
 
 sub end :Private {
       my ($self,$c)= @_;
-
+      
       if ($c->stash->{format} ne "application/json") {
 	    $c->forward( $c->view('HTML') );      
       }else{

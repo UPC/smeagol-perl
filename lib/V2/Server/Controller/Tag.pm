@@ -22,28 +22,58 @@ Catalyst Controller.
 
 =cut
 
-__PACKAGE__->config(
-      map => {
-          'text/html' => [ 'View', 'HTML' ],
-          'application/json'  => [ 'View', 'JSON' ],
-      }
-  );
+sub begin :Private {
+      my ($self, $c) = @_;
 
+      $c->stash->{format} = $c->request->headers->{"accept"} || 'application/json';
+}
+  
 sub default : Local : ActionClass('REST') {
 }
 
 sub default_GET {
     my ( $self, $c, $res, $id ) = @_;
-    my @tag;
-    my @tags;
 
     my $req = $c->request;
     $c->log->debug( 'Mètode: ' . $req->method );
 
-    my @tag_aux = $c->model('DB::Tag')->all;
+    if ($id) {
+        $c->forward( 'get_tag', [$id] );
+    }
+    else {
+        $c->forward( 'tag_list', [] );
+    }
+}
 
-#Cal refer el hash que conté els tags perquè treballar directament amb el model de DB::Tag
-# és bastant engorrós
+sub get_tag :Private {
+  my ($self, $c, $id) = @_;
+
+  my $tag = $c->model('DB::Tag')->find({id=>$id});
+
+  if ( !$tag ) {
+      $c->stash->{template} = 'old_not_found.tt';
+      $c->response->status(404);
+  }
+  else {
+      my @tag = {
+	  id          => $tag->id,
+	  description => $tag->description,
+      };
+    
+      $c->stash->{tag} = $tag;
+      $c->stash->{content} = \@tag;
+      $c->response->status(200);
+      $c->stash->{template} = 'tag/get_tag.tt';
+  }
+}
+
+sub tag_list :Private {
+  my ($self, $c) = @_;
+  my @tag;
+  my @tags;
+  
+  my @tag_aux = $c->model('DB::Tag')->all;
+
     foreach (@tag_aux) {
         @tag = {
             id          => $_->id,
@@ -53,32 +83,11 @@ sub default_GET {
         push( @tags, @tag );
     }
 
-    if ($id) {
-        my $tag;
-        foreach (@tags) {
-            if ( $_->{id} eq $id ) { $tag = $_; }
-        }
-
-        if ( !$tag ) {
-            $c->stash->{template} = 'old_not_found.tt';
-            $c->response->status(404);
-            $c->forward( $c->view('HTML') );
-        }
-        else {
-            $c->stash->{tag} = $tag;
-            $c->response->status(200);
-            $c->stash->{template} = 'tag/get_tag.tt';
-	    $c->forward( $c->view('HTML') );
-        }
-    }
-    else {
-
-        $c->stash->{tags}     = \@tags;
-        $c->stash->{template} = 'tag/get_list.tt';
-        $c->forward( $c->view('HTML') );
-    }
-
+  $c->stash->{tags} = \@tags;
+  $c->stash->{content} = \@tags;
+  $c->stash->{template} = 'tag/get_list.tt';
 }
+
 
 sub default_POST {
     my ( $self, $c ) = @_;
@@ -101,10 +110,10 @@ sub default_POST {
     };
 
     $c->stash->{tag}      = \@tag;
+    $c->stash->{content} = \@tag;
     $c->stash->{template} = 'tag/get_tag.tt';
     $c->response->content_type('text/html');
     $c->response->redirect('tag/'.$new_tag->id);
-    $c->forward( $c->view('HTML') );
 }
 
 sub default_PUT {
@@ -115,23 +124,24 @@ sub default_PUT {
     $c->log->debug("El PUT funciona");
 
     my $name = $req->parameters->{name};
+    my $desc = $req->parameters->{description};
 
-    my $tag = $c->model('DB::Tag')->find_or_new( { id => $id } );
+    my $tag = $c->model('DB::Tag')->find( { id => $id } );
 
     if ($tag) {
         $tag->id($name);
+	$tag->description($desc);
         $tag->insert_or_update;
 
-        my @tag = { id => $tag->id, };
+        my @tag = { id => $tag->id, description => $tag->description};
 
-        $c->stash->{content} = \@tag;
+        $c->stash->{tag} = \@tag;
+	$c->stash->{content} = \@tag;
         $c->response->status(200);
-        $c->forward( $c->view('JSON') );
     }
     else {
         $c->stash->{template} = 'not_found.tt';
         $c->response->status(404);
-        $c->forward( $c->view('TT') );
     }
 }
 
@@ -146,16 +156,24 @@ sub default_DELETE {
 
     if ($tag_aux) {
         $tag_aux->delete;
-        $c->stash->{template} = 'tag/delete_ok.tt';
-        $c->response->status(200);
-        $c->forward( $c->view('TT') );
+	$c->response->content_type('text/html');
+	$c->forward( 'tag_list', [] );
     }
     else {
         $c->stash->{template} = 'not_found.tt';
         $c->response->status(404);
-        $c->forward( $c->view('TT') );
     }
 
+}
+
+sub end :Private {
+      my ($self,$c)= @_;
+
+      if ($c->stash->{format} ne "application/json") {
+	    $c->forward( $c->view('HTML') );
+      }else{
+	    $c->forward( $c->view('JSON') );
+      }
 }
 
 =head1 AUTHOR

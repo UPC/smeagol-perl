@@ -25,6 +25,12 @@ Catalyst Controller.
 
 =cut
 
+sub begin :Private {
+      my ($self, $c) = @_;
+
+      $c->stash->{format} = $c->request->headers->{"accept"} || 'application/json';
+}
+
 sub default : Local : ActionClass('REST') {
 }
 
@@ -47,14 +53,14 @@ sub get_booking : Private {
         my @booking = $booking_aux->hash_booking;
 
         $c->stash->{content} = \@booking;
+	$c->stash->{booking} = \@booking;
         $c->response->status(200);
-        $c->forward( $c->view('JSON') );
+	$c->stash->{template} = 'booking/get_booking.tt';
 
     }
     else {
-        $c->stash->{template} = 'not_found.tt';
+        $c->stash->{template} = 'old_not_found.tt';
         $c->response->status(404);
-        $c->forward( $c->view('TT') );
     }
 }
 
@@ -71,8 +77,9 @@ sub booking_list : Private {
     }
 
     $c->stash->{content} = \@bookings;
+    $c->stash->{bookings} = \@bookings;
     $c->response->status(200);
-    $c->forward( $c->view('JSON') );
+    $c->stash->{template} = 'booking/get_list.tt';
 
 }
 
@@ -232,6 +239,16 @@ sub ParseDate {
                        second => $sec,);
 
   return $date;
+}
+
+sub end :Private {
+      my ($self,$c)= @_;
+
+      if ($c->stash->{format} ne "application/json") {
+	    $c->forward( $c->view('HTML') );
+      }else{
+	    $c->forward( $c->view('JSON') );
+      }
 }
 
 =head1 AUTHOR

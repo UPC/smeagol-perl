@@ -23,6 +23,12 @@ Catalyst Controller.
 
 =cut
 
+sub begin :Private {
+      my ($self, $c) = @_;
+
+      $c->stash->{format} = $c->request->headers->{"accept"} || 'application/json';
+}
+
 sub default : Local : ActionClass('REST') {
 }
 
@@ -45,8 +51,9 @@ sub get_event : Local {
     my @event = $event_aux->hash_event;
 
     $c->stash->{content} = \@event;
+    $c->stash->{event} = \@event;
     $c->response->status(200);
-    $c->forward( $c->view('JSON') );
+    $c->stash->{template} = 'event/get_event.tt';
 }
 
 sub event_list : Local {
@@ -63,8 +70,9 @@ sub event_list : Local {
     }
 
     $c->stash->{content} = \@events;
+    $c->stash->{events} = \@events;
     $c->response->status(200);
-    $c->forward( $c->view('JSON') );
+    $c->stash->{template} = 'event/get_list.tt';
 }
 
 sub default_POST {
@@ -169,6 +177,16 @@ sub ParseDate :Private {
                        second => $sec,);
 
   return $date;
+}
+
+sub end :Private {
+      my ($self,$c)= @_;
+
+      if ($c->stash->{format} ne "application/json") {
+	    $c->forward( $c->view('HTML') );
+      }else{
+	    $c->forward( $c->view('JSON') );
+      }
 }
 
 =head1 AUTHOR

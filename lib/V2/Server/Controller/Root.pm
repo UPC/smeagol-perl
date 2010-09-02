@@ -36,17 +36,6 @@ sub default : Private {
     $c->forward( $c->view('HTML') );
 }
 
-=head2 end
-
-Attempt to render a view, if needed.
-
-=cut
-
-sub end : ActionClass('RenderView') {
-    my ( $self, $c ) = @_;
-    $c->component('View::JSON')->encoding('utf-8');
-}
-
 =head1 AUTHOR
 
 Jordi Amorós Andreu

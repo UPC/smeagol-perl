@@ -15,6 +15,14 @@ See L<V2::Server>
 
 Catalyst JSON View.
 
+=cut
+
+__PACKAGE__->config(
+    expose_stash => 'content',
+    allow_nonref => 1 ,
+);
+
+
 =head1 AUTHOR
 
 Jordi Amorós Andreu,,,

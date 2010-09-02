@@ -3,6 +3,7 @@ package V2::Server::Controller::Event;
 use Moose;
 use namespace::autoclean;
 use Data::Dumper;
+use DateTime;
 
 BEGIN { extends 'Catalyst::Controller::REST' }
 
@@ -93,15 +94,18 @@ sub default_POST {
 }
 
 sub default_PUT {
-    my ( $self, $c, $id ) = @_;
+    my ( $self, $c, $res, $id ) = @_;
     my $req = $c->request;
     $c->log->debug( 'Mètode: ' . $req->method );
+    $c->log->debug("ID: ".$id);
     $c->log->debug("El PUT funciona");
 
-    my $info        = $req->parameters->{info};
-    my $description = $req->parameters->{description};
-    my $starts      = $req->parameters->{starts};
-    my $ends        = $req->parameters->{ends};
+    my $info        = $req->parameters->{info} || $req->query('info');
+    my $description = $req->parameters->{description} || $req->query('description');
+    my $starts_aux  = $req->parameters->{starts} || $req->query('starts');
+    my $starts      = $c->forward('ParseDate',[$starts_aux]);
+    my $ends_aux    = $req->parameters->{ends} || $req->query('ends');
+    my $ends        = $c->forward('ParseDate',[$req->parameters->{ends}]);
 
     my $event = $c->model('DB::Event')->find( { id => $id } );
 
@@ -145,6 +149,26 @@ sub default_DELETE {
         $c->response->status(404);
         $c->forward( $c->view('TT') );
     }
+}
+
+sub ParseDate :Private {
+  my ($self, $c, $date_str) = @_;
+
+  $c->log->debug("Date to parse: ".$date_str);
+  
+  my ($day,$hour) = split(/T/,$date_str);
+
+  my ($year,$month,$nday) = split(/-/,$day);
+  my ($nhour,$min,$sec) = split(/:/,$hour);
+
+  my $date = DateTime->new(year   => $year,
+                       month  => $month,
+                       day    => $nday,
+                       hour   => $nhour,
+                       minute => $min,
+                       second => $sec,);
+
+  return $date;
 }
 
 =head1 AUTHOR

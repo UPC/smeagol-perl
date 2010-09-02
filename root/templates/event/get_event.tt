@@ -1,1 +1,11 @@
-[% event %]
+[% META title='Events details' %]
+
+[% FOREACH ev IN event %]
+<dl class=event>
+<dt>ID</dt> <dd>[% ev.id %]</dd>
+<dt>Info</dt><dd>[% ev.info%]</dd>
+<dt>Description</dt><dd>[% ev.description %]</dd>
+<dt>Starts</dt><dd>[% ev.starts %]</dd>
+<dt>Ends</dt><dd>[% ev.ends %]</dd>
+</dl>
+[% END %]

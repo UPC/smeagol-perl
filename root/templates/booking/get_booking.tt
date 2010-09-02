@@ -1,1 +1,17 @@
-[% booking %]
+[% META title='Detalls de la reserva'%]
+
+[% FOREACH boo IN booking %]
+
+<dl class="resource">
+<dt>ID</dt><dd>[% boo.id | html %] <a class='delete' href='/booking/[% boo.id %]'>Esborra</a></dd>
+<dt>ID resource</dt><dd><a href='/resource/[% boo.id_resource %]'>[% boo.id_resource %]</a></dd>
+<dt>ID event</dt><dd><a href='/event/[% boo.id %]'>[% boo.id_event %]</a></dd>
+<dt>Start</dt><dd>[% boo.starts %]</dd>
+<dt>End</dt><dd>[% boo.ends %]</dd>
+</dl>
+
+[% END %]
+
+[% booking.id %]
+
+<a href='[% c.uri_for("/booking") | html %]'> <--Tornar a la llista de reserves</a>

@@ -22,12 +22,11 @@ Catalyst Controller.
 
 =cut
 
-__PACKAGE__->config(
-      map => {
-          'text/html' => [ 'View', 'HTML' ],
-          'application/json'  => [ 'View', 'JSON' ],
-      }
-  );
+sub begin :Private {
+      my ($self, $c) = @_;
+
+      $c->stash->{format} = $c->request->headers->{"accept"} || 'application/json';
+}
 
 sub default : Local : ActionClass('REST') {
 }
@@ -156,6 +155,16 @@ sub default_DELETE {
         $c->forward( $c->view('TT') );
     }
 
+}
+
+sub end :Private {
+      my ($self,$c)= @_;
+
+      if ($c->stash->{format} ne "application/json") {
+	    $c->forward( $c->view('HTML') );
+      }else{
+	    $c->forward( $c->view('JSON') );
+      }
 }
 
 =head1 AUTHOR

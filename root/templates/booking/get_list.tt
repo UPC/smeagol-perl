@@ -1,1 +1,13 @@
-[% bookings %]
+[% META title='List of bookings'%]
+
+<ul class='list-of-bookings'>
+[% FOREACH booking IN bookings %]
+<li>
+[% SET id = booking.id%]
+<a href='[% c.uri_for("/booking/$id") %]'>[% booking.id %]</a>
+</li>
+[% END %]
+</ul>
+
+[%# USE Dumper %]
+[%# Dumper.dump_html(resources) %]

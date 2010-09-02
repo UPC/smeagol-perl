@@ -22,6 +22,13 @@ Catalyst Controller.
 
 =cut
 
+sub begin :Private {
+      my ($self, $c) = @_;
+
+      $c->stash->{format} = $c->request->headers->{"accept"} || 'application/json';
+}
+
+
 sub default : Path : ActionClass('REST') {
 }
 
@@ -40,20 +47,17 @@ sub get_resource : Private {
     my ( $self, $c, $id ) = @_;
     my $resource = $c->model('DB::Resource')->find( { id => $id } );
 
-    #$c->log->debug("Recurs: ".Dumper(@resource));
-
     if ( !$resource ) {
         $c->stash->{template} = 'old_not_found.tt';
         $c->response->status(404);
-        $c->forward( $c->view('HTML') );
     }
     else {
         my @resource;
         push( @resource, $resource->get_resources );
         $c->stash->{resource} = \@resource;
+	$c->stash->{content} = \@resource;
         $c->response->status(200);
         $c->stash->{template} = 'resource/get_resource.tt';
-        $c->forward( $c->view('HTML') );
     }
 }
 
@@ -68,9 +72,9 @@ sub resource_list : Private {
     }
 
     $c->stash->{resources} = \@resources;
+    $c->stash->{content} = \@resources;
     $c->response->status(200);
     $c->stash->{template} = 'resource/get_list.tt';
-    $c->forward( $c->view('HTML') );
 }
 
 sub default_POST {
@@ -130,7 +134,7 @@ sub default_POST {
         }
     }
 
-#Un cop tenim el tema dels tags aclarit, muntem el json am les dades del recurs
+#Un cop tenim el tema dels tags aclarit, muntem el json amb les dades del recurs
     my @resource = {
         id          => $new_resource->id,
         description => $new_resource->description,
@@ -139,11 +143,10 @@ sub default_POST {
     };
 
     $c->stash->{resource} = \@resource;
+    $c->stash->{content} = \@resource;
     $c->response->status(201);
     $c->response->content_type('text/html');
     $c->stash->{template} = 'resource/get_resource.tt';
-    $c->forward( $c->view('HTML') );
-
 }
 
 sub default_PUT {
@@ -152,12 +155,12 @@ sub default_PUT {
     $c->log->debug( 'Mètode: ' . $req->method );
     $c->log->debug("El PUT funciona");
 
-    my $descr = $req->parameters->{description};
+    my $descr = $req->parameters->{description} || $req->{headers}->{description};
 
     $c->log->debug( "Description: " . $descr );
 
-    my $tags_aux = $req->parameters->{tags};
-    my $info     = $req->parameters->{info};
+    my $tags_aux = $req->parameters->{tags} || $req->{headers}->{tags};
+    my $info     = $req->parameters->{info} || $req->{headers}->{info};
     my @tags     = split( /,/, $tags_aux );
 
     my $resource = $c->model('DB::Resource')->find( { id => $id } );
@@ -215,13 +218,12 @@ sub default_PUT {
         };
 
         $c->stash->{resource} = \@resource;
+	$c->stash->{content} = \@resource;
         $c->response->status(200);
-        $c->forward( $c->view('JSON') );
     }
     else {
         $c->stash->{template} = 'not_found.tt';
         $c->response->status(404);
-        $c->forward( $c->view('TT') );
     }
 
 }
@@ -247,9 +249,18 @@ sub default_DELETE {
     else {
         $c->stash->{template} = 'old_not_found.tt';
         $c->response->status(404);
-        $c->forward( $c->view('HTML') );
     }
 
+}
+
+sub end :Private {
+      my ($self,$c)= @_;
+      
+      if ($c->stash->{format} ne "application/json") {
+	    $c->forward( $c->view('HTML') );      
+      }else{
+	    $c->forward( $c->view('JSON') );	        
+      }
 }
 
 =head1 AUTHOR

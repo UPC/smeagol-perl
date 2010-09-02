@@ -3,6 +3,8 @@ package V2::Server::Controller::Booking;
 use Moose;
 use namespace::autoclean;
 use Data::Dumper;
+use DateTime;
+use DateTime::Duration;
 use DateTime::Span;
 
 BEGIN { extends 'Catalyst::Controller::REST' }
@@ -78,12 +80,13 @@ sub default_POST {
     my ( $self, $c ) = @_;
     my $req = $c->request;
     $c->log->debug( 'Mètode: ' . $req->method );
+    #$c->log->debug(Dumper($req));
     $c->log->debug("El POST funciona");
 
-    my $id_resource = $req->parameters->{id_resource};
-    my $id_event    = $req->parameters->{id_event};
-    my $starts      = $req->parameters->{starts};
-    my $ends        = $req->parameters->{ends};
+    my $id_resource = $req->parameters->{id_resource} || $req->query('id_resource');
+    my $id_event    = $req->parameters->{id_event} || $req->query('id_event');
+    my $starts      = $req->parameters->{starts} || $req->query('starts');
+    my $ends        = $req->parameters->{ends} || $req->query('ends');
 
     my $new_booking = $c->model('DB::Booking')->find_or_new();
 
@@ -114,6 +117,7 @@ sub default_POST {
         $c->log->debug("Hi ha solapament \n");
         $c->stash->{template} = 'fail.tt';
         $c->response->status(404);
+	$c->response->content_type('text/html');
         $c->forward( $c->view('TT') );
     }
     else {
@@ -122,9 +126,8 @@ sub default_POST {
         my @booking = $new_booking->hash_booking;
 
         $c->stash->{content}  = \@booking;
-        $c->stash->{template} = 'booking_s/get_booking.tt';
         $c->response->status(201);
-        $c->forward( $c->view('TT') );
+        $c->forward( $c->view('JSON') );
 
     }
 }
@@ -135,10 +138,17 @@ sub default_PUT {
     $c->log->debug( 'Mètode: ' . $req->method );
     $c->log->debug("El PUT funciona");
 
-    my $id_resource = $req->parameters->{id_resource};
-    my $id_event    = $req->parameters->{id_event};
-    my $starts      = $req->parameters->{starts};
-    my $ends        = $req->parameters->{ends};
+#$c->log->debug(Dumper($req->headers));
+    
+    my $id_resource = $req->parameters->{id_resource} || $req->query('id_resource');
+    my $id_event    = $req->parameters->{id_event} || $req->query('id_event');
+    my $starts_aux  = $req->parameters->{starts} || $req->query('starts');
+    my $ends_aux    = $req->parameters->{ends} || $req->query('ends');
+
+    my $starts = ParseDate($starts_aux);
+    my $ends = ParseDate($ends_aux);
+
+    $c->log->debug("ID resource: ".$id_resource." ID Event: ".$id_event." Start: ".$starts." Ends: ".$ends);
 
     my $booking = $c->model('DB::Booking')->find( { id => $id } );
 
@@ -152,8 +162,8 @@ sub default_PUT {
         ;    #Recuperem les reserves que utilitzen el recurs
 
     my $current_set = DateTime::Span->from_datetimes(
-        start => $booking->starts,
-        end   => $booking->ends->clone->subtract( seconds => 1 )
+        start => $starts,
+        end   => $ends->clone->subtract( seconds => 1 )
     );
 
     my $old_booking_set;
@@ -195,7 +205,7 @@ sub default_DELETE {
 
     if ($booking_aux) {
         $booking_aux->delete;
-        $c->stash->{template} = 'booking_s/delete_ok.tt';
+        $c->stash->{template} = 'booking/delete_ok.tt';
         $c->response->status(200);
         $c->forward( $c->view('TT') );
     }
@@ -204,6 +214,24 @@ sub default_DELETE {
         $c->response->status(404);
         $c->forward( $c->view('TT') );
     }
+}
+
+sub ParseDate {
+  my ($date_str) = @_;
+
+  my ($day,$hour) = split(/T/,$date_str);
+
+  my ($year,$month,$nday) = split(/-/,$day);
+  my ($nhour,$min,$sec) = split(/:/,$hour);
+
+  my $date = DateTime->new(year   => $year,
+                       month  => $month,
+                       day    => $nday,
+                       hour   => $nhour,
+                       minute => $min,
+                       second => $sec,);
+
+  return $date;
 }
 
 =head1 AUTHOR

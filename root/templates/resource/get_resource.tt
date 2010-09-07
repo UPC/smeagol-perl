@@ -20,7 +20,7 @@
 </dl>
 
   <h3>Edit resource</h3>
-  <form action='/resource/[% res.id %]' method="put" class=edit_resource id="edit_resource_form">
+  <form action='/resource/[% res.id %]' method="put" class=edit id="edit_resource_form">
     <p><label>Description: <textarea name="description" placeholder="New resource's description" cols=20 required></textarea></label></p>
     <p><label>Info: <textarea name="info" placeholder="New resource's info" cols=20 rows=3 required></textarea></label></p>
     <p><label>Tags: <input name="tags" placeholder="New resource's tags sepatrated by commas"/></label></p>

@@ -1,6 +1,21 @@
 [% META title='Tag\'s details'%]
 
+[% IF error%]
+  [% error | html %]
+[% END %]
 <dl clas="tag">
 <dt>ID</dt><dd>[% tag.id | html %] <a class='delete' href='/tag/[% tag.id %]'>Esborra</a></dd>
 <dt>Description</dt><dd>[% tag.description | html %]</dd>
 </dl>
+
+<h3>Edit tag</h3>
+<form action='/tag/[% tag.id %]' method="put" class=edit id="edit_tag_form">
+  <p><label>Description: </label><textarea name="description" placeholder="New tag's description" cols=20 required></textarea></p>
+  <p><button type='submit'>Edit</button></p>
+</form>
+
+
+<p><a href='[% c.uri_for("/tag")%]'><---- Tornar a la llista de tags</a></p>
+
+[%# USE DUMPER %]
+[%# Dumper.dump_html(tag) %]

@@ -18,6 +18,18 @@ requires 'Getopt::Euclid'            => 0;
 requires 'File::Path'                => 0;
 requires 'HTTP::Status'              => 5.817;
 
+requires 'Catalyst::View::JSON'             => 0;
+requires 'Catalyst::Model::DBIC::Schema'    => 0;
+requires 'Catalyst::Plugin::Unicode'        => 0;
+requires 'Catalyst::Plugin::Static::Simple' => 0;
+requires 'Catalyst::Plugin::ConfigLoader'   => 0;
+requires 'Catalyst::View::TT'               => 0;
+requires 'Catalyst::Controller::REST'       => 0;
+requires 'DBIx::Class'                      => 0;
+requires 'DBIx::Class::TimeStamp'           => 0;
+requires 'Catalyst::Action::RenderView'     => 0;
+requires 'DateTime::Format::SQLite'         => 0;
+
 test_requires 'Test::More'    => 0;
 test_requires 'Data::Compare' => 0;
 

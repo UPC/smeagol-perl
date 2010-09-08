@@ -14,27 +14,30 @@ Per instal·lar aquesta prova executeu:
 
 DEPENDÈNCIES
 
-Aquesta distribució depèn d'aquests altres mòduls:
+Aquesta distribució depèn d'una bona pila d'altres mòduls.
+Podeu obtenir-ne un llistat complet al fitxer META.yml que
+acompanya la distribució.
 
-  +---------------------------+----------------------------+
-  | Mòdul                     | Paquet Debian/Ubuntu       |
-  +---------------------------+----------------------------+
-  | DateTime                  | libdatetime-perl           |
-  | DateTime::Span            | libdatetime-set-perl       |
-  | Set::Object               | libset-object-perl         |
-  | Test::More                | perl-modules               |
-  | XML::LibXML               | libxml-libxml-perl         |
-  | XML::Simple               | libxml-simple-perl         |
-  | HTTP::Server::Simple::CGI | libhttp-server-simple-perl |
-  | Getopt::Euclid            | libgetopt-euclid-perl      |
-  | Data::Compare             | libdata-compare-perl       |
-  | Date::ICal                | libdate-ical-perl          |
-  | Data::ICal                | libdata-ical-perl          |
-  +---------------------------+----------------------------+
+Per a sistemes Debian, Ubuntu o derivats, podeu instal·lar
+la llista següent de paquets:
+
+  $ sudo apt-get install \
+    perl-modules \
+    libdatetime-perl \
+    libdatetime-set-perl 
+    libset-object-perl \
+    libxml-libxml-perl \
+    libxml-simple-perl \
+    libhttp-server-simple-perl \
+    libgetopt-euclid-perl \
+    libdata-compare-perl \
+    libdate-ical-perl \
+    libdata-ical-perl
+
 
 LLICÈNCIA
 
-Copyright (C) 2008,2009  Universitat Politècnica de Catalunya
+Copyright (C) 2008-2010  Universitat Politècnica de Catalunya
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as

@@ -1,0 +1,32 @@
+Source: libsmeagol-perl
+Section: perl
+Priority: optional
+Build-Depends: debhelper (>= 7)
+Build-Depends-Indep: perl (>= 5.10.1), libdata-compare-perl,
+  libwww-perl (>= 5.817), libdatetime-perl,
+  libcatalyst-modules-perl, libdatetime-set-perl,
+  libcatalyst-perl (>= 5.80), libdate-ical-perl,
+  libcatalyst-view-tt-perl, libdbix-class-perl,
+  libdata-ical-perl, libcatalyst-action-rest-perl,
+  libset-object-perl, libxml-libxml-perl, libxml-simple-perl,
+  libhttp-server-simple-perl, libmoose-perl,
+  libnamespace-autoclean-perl, libterm-shell-perl
+Maintainer: Alex Muntada <alexm@cpan.org>
+Standards-Version: 3.8.3
+Homepage: http://devel.cpl.upc.edu/recursos/
+
+Package: libsmeagol-perl
+Architecture: all
+Depends: ${perl:Depends}, ${misc:Depends}, perl (>= 5.10.1),
+  libdatetime-perl, libwww-perl (>= 5.817),
+  libcatalyst-modules-perl, libdatetime-set-perl,
+  libcatalyst-perl (>= 5.80), libdate-ical-perl,
+  libcatalyst-view-tt-perl, libdbix-class-perl,
+  libdata-ical-perl, libcatalyst-action-rest-perl,
+  libset-object-perl, libxml-libxml-perl, libxml-simple-perl,
+  libhttp-server-simple-perl, libmoose-perl,
+  libnamespace-autoclean-perl, libterm-shell-perl
+Description: A resource and booking management tool for the greedy
+ A resource and booking management tool for the greedy
+ .
+ This description was automagically extracted from the module by dh-make-perl.

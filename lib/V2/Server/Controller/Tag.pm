@@ -67,8 +67,31 @@ sub default_GET {
 	  $c->stash->{template} = 'old_not_found.tt';
 	  $c->response->status(404);
         }else{
-	  $c->stash->{content} = $tag;
-	  $c->stash->{tag} = $tag;
+	      
+	  my @resource_tag = $c->model('DB::ResourceTag')->search( { tag_id => $id } );
+	  
+	  my @resources;
+	  my $resource_aux;
+	  my @resource;
+	  
+	  foreach (@resource_tag) {
+		$resource_aux = $c->model('DB::Resource')
+		->find( { id => $_->resource_id } );
+		
+		my @resource = $resource_aux->get_resources;
+		
+		push( @resources, @resource );
+		
+	  }
+	  
+	  my @tag = {
+	    id => $tag->{id},
+	    description=> $tag->{description},
+	    resources=> \@resources
+	  };
+	  
+	  $c->stash->{content} = \@tag;
+	  $c->stash->{tag_aux} = \@tag;
 	  $c->response->status(200);
 	  $c->stash->{template} = 'tag/get_tag.tt';
         }

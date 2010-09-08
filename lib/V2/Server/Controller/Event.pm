@@ -47,13 +47,25 @@ sub get_event : Local {
     my ( $self, $c, $id ) = @_;
 
     my $event_aux = $c->model('DB::Event')->find( { id => $id } );
+    
+    if ($event_aux){
+	  my @event = $event_aux->hash_event;
+	  
+	  $c->stash->{content} = \@event;
+	  $c->stash->{event} = \@event;
+	  $c->response->status(200);
+	  $c->stash->{template} = 'event/get_event.tt';    
+    }else{
+	  my @message = {
+		message => "We can't find what you are looking for."
+	  };
+	  
+	  $c->stash->{content} = \@message;
+	  $c->stash->{template} = 'old_not_found.tt';
+	  $c->response->status(404);
+    }
 
-    my @event = $event_aux->hash_event;
 
-    $c->stash->{content} = \@event;
-    $c->stash->{event} = \@event;
-    $c->response->status(200);
-    $c->stash->{template} = 'event/get_event.tt';
 }
 
 sub event_list : Local {

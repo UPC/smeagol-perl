@@ -48,8 +48,13 @@ sub get_resource : Private {
     my $resource = $c->model('DB::Resource')->find( { id => $id } );
 
     if ( !$resource ) {
-        $c->stash->{template} = 'old_not_found.tt';
-        $c->response->status(404);
+	
+      my @message = {
+	    message => "We can't find what you are looking for."
+      };
+      $c->stash->{content} = \@message;
+      $c->stash->{template} = 'old_not_found.tt';
+      $c->response->status(404);
     }
     else {
         my @resource;
@@ -222,7 +227,11 @@ sub default_PUT {
         $c->response->status(200);
     }
     else {
-        $c->stash->{template} = 'not_found.tt';
+	  my @message = {
+		message => "We can't find what you are looking for."
+	  };
+	$c->stash->{content} = \@message;
+        $c->stash->{template} = 'old_not_found.tt';
         $c->response->status(404);
     }
 
@@ -247,6 +256,11 @@ sub default_DELETE {
         $c->go("/resource/resource_list");
     }
     else {
+	  
+	  my @message = {
+		message => "We can't find what you are looking for."
+	  };
+	  $c->stash->{content} = \@message;
         $c->stash->{template} = 'old_not_found.tt';
         $c->response->status(404);
     }

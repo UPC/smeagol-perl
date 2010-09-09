@@ -17,6 +17,18 @@
   [% END %]
   </ul>
   </dd>
+<dt>Bookings</dt>
+  <dd>
+  <ul class="list-of-bookings">
+  [% SET ct=0 %]
+  [% FOREACH book IN res.bookings %]
+  [% SET book_id = res.bookings.$ct.id %]
+  <li><a href='[% c.uri_for("/booking/$book_id") %]'>[% res.bookings.$ct.id | html %]</a></li>
+  [% SET ct=ct+1 %]
+  [% END %]
+  </ul>
+  </dd>
+  
 </dl>
 
   <h3>Edit resource</h3>

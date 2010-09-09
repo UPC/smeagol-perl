@@ -7,5 +7,22 @@
 <dt>Description</dt><dd>[% ev.description %]</dd>
 <dt>Starts</dt><dd>[% ev.starts %]</dd>
 <dt>Ends</dt><dd>[% ev.ends %]</dd>
+<dt>Event's tags</dt>
+  <dd><ul>
+  [% FOREACH tag IN ev.tags%]
+      [% SET tagid=tag.id %]
+      <li><a href='[% c.uri_for("/tag/$tagid")%]'>[% tag.id %]</a></li>
+  [% END %]
+  </ul></dd>
+
+  <dt>Event's bookings</dt>
+  <dd><ul>
+  [% FOREACH booking IN ev.bookings%]
+      [% SET bookid=booking.id %]
+      <li><a href='[% c.uri_for("/booking/$bookid")%]'>[% booking.id %]</a></li>
+  [% END %]
+  </ul></dd>
+
+
 </dl>
 [% END %]

@@ -109,10 +109,39 @@ sub hash_event {
         description => $self->description,
         starts      => $self->starts->iso8601(),
         ends        => $self->ends->iso8601(),
+        tags        => $self->tag_list,
+        bookings    => $self->booking_list
     };
 
     return @event;
 }
 
+sub tag_list {
+    my ($self) = @_;
+
+    my @tags;
+    my @tag;
+
+    foreach my $tag ( $self->tag_events ) {
+        @tag = { id => $tag->id_tag->id };
+        push( @tags, @tag );
+    }
+
+    return ( \@tags );
+}
+
+sub booking_list {
+    my ($self) = @_;
+
+    my @bookings;
+    my @booking;
+
+    foreach my $booking ( $self->bookings ) {
+        @booking = { id => $booking->id };
+        push( @bookings, @booking );
+    }
+
+    return ( \@bookings );
+}
 # You can replace this text with custom content, and it will be preserved on regeneration
 1;

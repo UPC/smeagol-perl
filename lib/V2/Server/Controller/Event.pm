@@ -50,7 +50,7 @@ sub get_event : Local {
     
     if ($event_aux){
 	  my @event = $event_aux->hash_event;
-	  
+
 	  $c->stash->{content} = \@event;
 	  $c->stash->{event} = \@event;
 	  $c->response->status(200);

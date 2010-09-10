@@ -1,5 +1,9 @@
 [% META title='List of bookings'%]
 
+[% IF error %]
+  [% error | html %]
+[% END %]
+
 <ul class='list-of-bookings'>
 [% FOREACH booking IN bookings %]
 <li>

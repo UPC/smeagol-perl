@@ -13,7 +13,7 @@
   <form action="" method="post">
     <p><label>Description: <textarea name="description" placeholder="New resource's description" cols=20 required></textarea></label></p>
     <p><label>Info: <textarea name="info" placeholder="New resource's info" cols=20 rows=3 required></textarea></label></p>
-    <p><label>Tags: <input name="tags" placeholder="New resource's tags sepatrated by commas"></label></p>
+    <p><label>Tags (separated by commas): <input name="tags" placeholder="New resource's tags sepatrated by commas"></label></p>
     <p><input type=submit value="New resource!"></p>
   </form>
 

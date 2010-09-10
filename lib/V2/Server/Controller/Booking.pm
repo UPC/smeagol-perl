@@ -122,10 +122,14 @@ sub default_POST {
 
     if ($overlap) {
         $c->log->debug("Hi ha solapament \n");
-        $c->stash->{template} = 'fail.tt';
+
+	my @message = {
+	   message => "Error: Overlap with another booking",
+	};
+        $c->stash->{content} = \@message;
         $c->response->status(409);
-	$c->response->content_type('text/html');
-        $c->forward( $c->view('TT') );
+	$c->stash->{error} = "Error: Overlap with onather booking";
+	$c->stash->{template} = 'booking/get_list';
     }
     else {
         $new_booking->insert;
@@ -133,8 +137,9 @@ sub default_POST {
         my @booking = $new_booking->hash_booking;
 
         $c->stash->{content}  = \@booking;
-        $c->response->status(201);
-        $c->forward( $c->view('JSON') );
+	$c->stash->{booking} = \@booking;
+	$c->response->status(201);
+	$c->stash->{template} = 'booking/get_booking';
 
     }
 }

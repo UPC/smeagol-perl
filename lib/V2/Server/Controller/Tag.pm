@@ -35,7 +35,7 @@ sub default_GET {
     my ( $self, $c, $res, $id ) = @_;
     my @tag;
     my @tags;
-
+    my @message;
     my $req = $c->request;
     $c->log->debug( 'Mètode: ' . $req->method );
 
@@ -59,22 +59,47 @@ sub default_GET {
         }
 
         if ( !$tag ) {
-            $c->stash->{template} = 'old_not_found.tt';
-            $c->response->status(404);
-            $c->forward( $c->view('HTML') );
-        }
-        else {
-            $c->stash->{tag} = $tag;
-            $c->response->status(200);
-            $c->stash->{template} = 'tag/get_tag.tt';
-	    $c->forward( $c->view('HTML') );
+	  @message = {
+	    message => "We can't find what you are looking for."
+	  };
+
+	  $c->stash->{content} = \@message;
+	  $c->stash->{template} = 'old_not_found.tt';
+	  $c->response->status(404);
+        }else{
+	      
+	  my @resource_tag = $c->model('DB::ResourceTag')->search( { tag_id => $id } );
+	  
+	  my @resources;
+	  my $resource_aux;
+	  my @resource;
+	  
+	  foreach (@resource_tag) {
+		$resource_aux = $c->model('DB::Resource')
+		->find( { id => $_->resource_id } );
+		
+		my @resource = $resource_aux->get_resources;
+		
+		push( @resources, @resource );
+		
+	  }
+	  
+	  my @tag = {
+	    id => $tag->{id},
+	    description=> $tag->{description},
+	    resources=> \@resources
+	  };
+	  
+	  $c->stash->{content} = \@tag;
+	  $c->stash->{tag_aux} = \@tag;
+	  $c->response->status(200);
+	  $c->stash->{template} = 'tag/get_tag.tt';
         }
     }
     else {
-
+	$c->stash->{content} = \@tags;
         $c->stash->{tags}     = \@tags;
         $c->stash->{template} = 'tag/get_list.tt';
-        $c->forward( $c->view('HTML') );
     }
 
 }
@@ -82,61 +107,92 @@ sub default_GET {
 sub default_POST {
     my ( $self, $c ) = @_;
     my $req = $c->request;
+    my @new_tag;
+    
     $c->log->debug( 'Mètode: ' . $req->method );
     $c->log->debug("El POST funciona");
 
     my $name = $req->parameters->{name};
     my $desc = $req->parameters->{description};
 
-    my $new_tag = $c->model('DB::Tag')->find_or_new();
+    my $tag_exist = $c->model('DB::Tag')->find({id=>$name});
+    
+    if (!$tag_exist){
+      my $new_tag = $c->model('DB::Tag')->find_or_new();
 
-    $new_tag->id($name);
-    $new_tag->description($desc);
-    $new_tag->insert;
+      $new_tag->id($name);
+      $new_tag->description($desc);
+      $new_tag->insert;
 
-    my @tag = {
-        id          => $new_tag->id,
-        description => $new_tag->description
-    };
+      @new_tag = {
+	id => $name,
+	description => $desc
+      };
+      
+      $c->stash->{content} = \@new_tag;
+      $c->stash->{tag}      = $new_tag;
+      $c->stash->{template} = 'tag/get_tag.tt';
+      $c->response->content_type('text/html');
+      $c->response->status(201);
+    } else {
 
-    $c->stash->{tag}      = \@tag;
-    $c->stash->{template} = 'tag/get_tag.tt';
-    $c->response->content_type('text/html');
-    $c->response->redirect('tag/'.$new_tag->id);
-    $c->forward( $c->view('HTML') );
+      @new_tag = {
+	id => $tag_exist->id,
+	description => $tag_exist->description
+      };
+      
+      $c->stash->{content} = \@new_tag;
+      $c->stash->{tag}      = $tag_exist;
+      $c->stash->{template} = 'tag/get_tag.tt';
+      $c->response->content_type('text/html');
+      $c->stash->{error} = 'This tag already exists';
+      $c->response->status(409);
+    }
 }
 
 sub default_PUT {
     my ( $self, $c, $res, $id ) = @_;
-
+    my @message;
     my $req = $c->request;
     $c->log->debug( 'Mètode: ' . $req->method );
     $c->log->debug("El PUT funciona");
 
-    my $name = $req->parameters->{name};
-
-    my $tag = $c->model('DB::Tag')->find_or_new( { id => $id } );
+    my $name = $id;
+    my $desc = $req->parameters->{description};
+    
+    my $tag = $c->model('DB::Tag')->find( { id => $id } );
 
     if ($tag) {
         $tag->id($name);
+	$tag->description($desc);
         $tag->insert_or_update;
 
-        my @tag = { id => $tag->id, };
+        my @tag = {
+	  id => $tag->id,
+	  description => $tag->description
+	};
 
         $c->stash->{content} = \@tag;
+	$c->stash->{tag} = $tag;
+	$c->stash->{template} = 'tag/get_tag.tt';
+	$c->response->content_type('text/html');
         $c->response->status(200);
-        $c->forward( $c->view('JSON') );
     }
     else {
-        $c->stash->{template} = 'not_found.tt';
+	@message = {
+	  message => "We can't find what you are looking for."
+	};
+
+	$c->stash->{content} = \@message;
+        $c->stash->{template} = 'old_not_found.tt';
         $c->response->status(404);
-        $c->forward( $c->view('TT') );
     }
 }
 
 sub default_DELETE {
     my ( $self, $c, $res, $id ) = @_;
     my $req = $c->request;
+    my @message;
 
     $c->log->debug( 'Mètode: ' . $req->method );
     $c->log->debug("El DELETE funciona");
@@ -145,14 +201,23 @@ sub default_DELETE {
 
     if ($tag_aux) {
         $tag_aux->delete;
+
+	@message = {
+	  message => "Tag succesfully deleted"
+	};
+	$c->stash->{content} = \@message;
         $c->stash->{template} = 'tag/delete_ok.tt';
         $c->response->status(200);
-        $c->forward( $c->view('TT') );
     }
     else {
-        $c->stash->{template} = 'not_found.tt';
+
+	@message = {
+	  message => "We can't find what you are looking for."
+	};
+
+	$c->stash->{content} = \@message;
+        $c->stash->{template} = 'old_not_found.tt';
         $c->response->status(404);
-        $c->forward( $c->view('TT') );
     }
 
 }

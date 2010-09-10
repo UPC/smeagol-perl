@@ -1,1 +1,8 @@
-{Message: "Tag successfully deleted"}
+[% META title='Tag deleted' %]
+
+<h1>The tag has been succesfully deleted</h1>
+
+<p><a href='[% c.uri_for("/resource")%]'>Tornar a la llista de recursos</a></p>
+<p><a href='[% c.uri_for("/tag")%]'>Tornar a la llista de tags</a></p>
+<p><a href='[% c.uri_for("/booking")%]'>Tornar a la llista de reserves</a></p>
+<p><a href='[% c.uri_for("/event")%]'>Tornar a la llista d'events</a></p>

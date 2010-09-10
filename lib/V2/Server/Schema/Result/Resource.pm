@@ -98,6 +98,7 @@ sub get_resources {
             description => $_->description,
             info        => $_->info,
             tags        => $_->tag_list,
+            bookings    => $_->book_list
         };
         push( @resources, @resource );
     }
@@ -118,6 +119,20 @@ sub tag_list {
     }
 
     return ( \@tags );
+}
+
+sub book_list {
+    my ($self) = @_;
+
+    my @books;
+    my @book;
+
+    foreach my $book ( $self->bookings ) {
+        my @book = { id => $book->id, };
+        push( @books, @book );
+    }
+
+    return ( \@books );
 }
 
 # You can replace this text with custom content, and it will be preserved on regeneration

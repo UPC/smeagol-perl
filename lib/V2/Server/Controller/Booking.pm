@@ -123,7 +123,7 @@ sub default_POST {
     if ($overlap) {
         $c->log->debug("Hi ha solapament \n");
         $c->stash->{template} = 'fail.tt';
-        $c->response->status(404);
+        $c->response->status(409);
 	$c->response->content_type('text/html');
         $c->forward( $c->view('TT') );
     }
@@ -186,7 +186,7 @@ sub default_PUT {
 
     if ($overlap) {
         $c->stash->{template} = 'fail.tt';
-        $c->response->status(404);
+        $c->response->status(409);
         $c->forward( $c->view('TT') );
     }
     else {

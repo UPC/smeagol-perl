@@ -115,15 +115,15 @@ sub default_POST {
     my $name = $req->parameters->{name};
     my $desc = $req->parameters->{description};
 
-    my $name_ok = $c->visit('/check/check_name', [$name]);
-    my $desc_ok = $c->visit('/check/check_desc', [$desc]);
+    $c->visit('/check/check_name', [$name]);
+    $c->visit('/check/check_desc', [$desc]);
 
     my $tag_exist = $c->model('DB::Tag')->find({id=>$name});
     
     if (!$tag_exist){ #Creation of the new tag if it not exists
       my $new_tag = $c->model('DB::Tag')->find_or_new();
 
-      if (($name_ok and $desc_ok) ne 0){
+      if ($c->stash->{name_ok} and $c->stash->{desc_ok}) != 0){
 	    $new_tag->id($name);
 	    $new_tag->description($desc);
 	    $new_tag->insert;

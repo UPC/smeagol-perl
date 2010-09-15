@@ -32,76 +32,76 @@ sub default : Local : ActionClass('REST') {
 }
 
 sub default_GET {
-    my ( $self, $c, $res, $id ) = @_;
-    my @tag;
-    my @tags;
-    my @message;
-    my $req = $c->request;
-    $c->log->debug( 'Mètode: ' . $req->method );
+  my ($self, $c, $res, $id) = @_;
 
-    my @tag_aux = $c->model('DB::Tag')->all;
+  if ($id) {
+    $c->detach('get_tag',[$id]);
+  }else{
+    $c->detach('tag_list',[]);
+  }
+}
 
-#Cal refer el hash que conté els tags perquè treballar directament amb el model de DB::Tag
-# és bastant engorrós
-    foreach (@tag_aux) {
-        @tag = {
-            id          => $_->id,
-            description => $_->description,
-        };
+sub tag_list :Private{
+  my ($self, $c) = @_;
+  my @tag;
+  my @tags;
+  my @message;
 
-        push( @tags, @tag );
+  my @tag_aux = $c->model('DB::Tag')->all;
+
+  foreach (@tag_aux) {
+    @tag = {
+	id          => $_->id,
+	description => $_->description,
+    };
+
+    push( @tags, @tag );
     }
 
-    if ($id) {
-        my $tag;
-        foreach (@tags) {
-            if ( $_->{id} eq $id ) { $tag = $_; }
-        }
+    $c->stash->{content} = \@tags;
+    $c->stash->{tags}     = \@tags;
+    $c->stash->{template} = 'tag/get_list.tt';
+  
+}
 
-        if ( !$tag ) {
-	  @message = {
+sub get_tag :Private{
+  my ($self, $c, $id) = @_;
+  my @message;
+  my $tag = $c->model('DB::Tag')->find({id => $id});
+
+  if (!$tag){
+    @message = {
 	    message => "We can't find what you are looking for."
 	  };
 
-	  $c->stash->{content} = \@message;
-	  $c->stash->{template} = 'old_not_found.tt';
-	  $c->response->status(404);
-        }else{
-	      
-	  my @resource_tag = $c->model('DB::ResourceTag')->search( { tag_id => $id } );
-	  
-	  my @resources;
-	  my $resource_aux;
-	  my @resource;
-	  
-	  foreach (@resource_tag) {
-		$resource_aux = $c->model('DB::Resource')
-		->find( { id => $_->resource_id } );
-		
-		my @resource = $resource_aux->get_resources;
-		
-		push( @resources, @resource );
-		
-	  }
-	  
-	  my @tag = {
-	    id => $tag->{id},
-	    description=> $tag->{description},
-	    resources=> \@resources
-	  };
-	  
-	  $c->stash->{content} = \@tag;
-	  $c->stash->{tag_aux} = \@tag;
-	  $c->response->status(200);
-	  $c->stash->{template} = 'tag/get_tag.tt';
-        }
-    }
-    else {
-	$c->stash->{content} = \@tags;
-        $c->stash->{tags}     = \@tags;
-        $c->stash->{template} = 'tag/get_list.tt';
+    $c->stash->{content} = \@message;
+    $c->stash->{template} = 'old_not_found.tt';
+    $c->response->status(404);
+  }else{
+    my @resource_tag = $c->model('DB::ResourceTag')->search( { tag_id => $id } );
+
+    my @resources;
+    my $resource_aux;
+    my @resource;
+
+    foreach (@resource_tag) {
+	  $resource_aux = $c->model('DB::Resource')->find( { id => $_->resource_id } );
+	  my @resource = $resource_aux->get_resources;
+	  push( @resources, @resource );
     }
 
+    my @tag = {
+      id => $tag->id,
+      description=> $tag->description,
+      resources=> \@resources
+    };
+
+    $c->stash->{content} = \@tag;
+    $c->stash->{tag_aux} = \@tag;
+    $c->response->status(200);
+    $c->stash->{template} = 'tag/get_tag.tt';
+  }
+  
 }
 
 sub default_POST {
@@ -115,39 +115,60 @@ sub default_POST {
     my $name = $req->parameters->{name};
     my $desc = $req->parameters->{description};
 
+    my $name_ok = $c->visit('/check/check_name', [$name]);
+    my $desc_ok = $c->visit('/check/check_desc', [$desc]);
+
     my $tag_exist = $c->model('DB::Tag')->find({id=>$name});
     
-    if (!$tag_exist){
+    if (!$tag_exist){ #Creation of the new tag if it not exists
       my $new_tag = $c->model('DB::Tag')->find_or_new();
 
-      $new_tag->id($name);
-      $new_tag->description($desc);
-      $new_tag->insert;
+      if (($name_ok and $desc_ok) ne 0){
+	    $new_tag->id($name);
+	    $new_tag->description($desc);
+	    $new_tag->insert;
 
-      @new_tag = {
-	id => $name,
-	description => $desc
-      };
-      
-      $c->stash->{content} = \@new_tag;
-      $c->stash->{tag}      = $new_tag;
-      $c->stash->{template} = 'tag/get_tag.tt';
-      $c->response->content_type('text/html');
-      $c->response->status(201);
-    } else {
+	    @new_tag = {
+	      id => $name,
+	      description => $desc
+	    };
 
-      @new_tag = {
-	id => $tag_exist->id,
-	description => $tag_exist->description
-      };
-      
-      $c->stash->{content} = \@new_tag;
-      $c->stash->{tag}      = $tag_exist;
-      $c->stash->{template} = 'tag/get_tag.tt';
-      $c->response->content_type('text/html');
-      $c->stash->{error} = 'This tag already exists';
-      $c->response->status(409);
-    }
+	    $c->stash->{content} = \@new_tag;
+	    $c->stash->{tag}      = \@new_tag;
+	    $c->stash->{template} = 'tag/get_tag.tt';
+	    $c->response->content_type('text/html');
+	    $c->response->status(201);
+      }else {
+
+	my @message = {message => 'The name of the tag or the description should be shorter.'};
+
+	@new_tag = {
+	  id => $name,
+	  description => $desc
+	};
+
+	$c->stash->{content} = \@message;
+	$c->stash->{tag}      = \@new_tag;
+	$c->stash->{template} = 'tag/get_tag.tt';
+	$c->response->content_type('text/html');
+	$c->stash->{error} = 'The name of the tag or the description should be shorter.';
+	$c->response->status(400);
+      }
+
+
+    } else { # The tag exists, therefore the server informs of the fact
+	@new_tag = {
+	  id => $tag_exist->id,
+	  description => $tag_exist->description
+	};
+
+	$c->stash->{content} = \@new_tag;
+	$c->stash->{tag}      = \@new_tag;
+	$c->stash->{template} = 'tag/get_tag.tt';
+	$c->response->content_type('text/html');
+	$c->stash->{error} = 'This tag already exists';
+	$c->response->status(409);
+      }
 }
 
 sub default_PUT {
@@ -162,7 +183,12 @@ sub default_PUT {
     
     my $tag = $c->model('DB::Tag')->find( { id => $id } );
 
+    $c->visit('/check/check_name', [$name]);
+    $c->visit('/check/check_desc', [$desc]);
+
+    $c->log->debug("Desc OK? ".$c->stash->{desc_ok});
     if ($tag) {
+      if (($c->stash->{name_ok} and $c->stash->{desc_ok}) != 0){
         $tag->id($name);
 	$tag->description($desc);
         $tag->insert_or_update;
@@ -177,6 +203,22 @@ sub default_PUT {
 	$c->stash->{template} = 'tag/get_tag.tt';
 	$c->response->content_type('text/html');
         $c->response->status(200);
+      } else {
+	my @message = {message => 'The name of the tag or the description should be shorter.'};
+
+	my @new_tag = {
+	  id => $name,
+	  description => $desc
+	};
+
+	$c->stash->{content} = \@message;
+	$c->stash->{tag}      = \@new_tag;
+	$c->stash->{template} = 'tag/get_tag.tt';
+	$c->response->content_type('text/html');
+	$c->stash->{error} = 'The name of the tag or the description should be shorter.';
+	$c->response->status(400);
+	
+      }
     }
     else {
 	@message = {
@@ -198,9 +240,14 @@ sub default_DELETE {
     $c->log->debug("El DELETE funciona");
 
     my $tag_aux = $c->model('DB::Tag')->find( { id => $id } );
+    my @resource_tag = $c->model('DB::ResourceTag')->search({tag_id => $id});
 
     if ($tag_aux) {
         $tag_aux->delete;
+
+	foreach (@resource_tag) {
+	  $_->delete;
+	}
 
 	@message = {
 	  message => "Tag succesfully deleted"

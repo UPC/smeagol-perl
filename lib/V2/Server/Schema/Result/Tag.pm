@@ -76,5 +76,17 @@ __PACKAGE__->has_many(
 # Created by DBIx::Class::Schema::Loader v0.07000 @ 2010-07-20 18:40:59
 # DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:2PycvPGaD5pMgith4ksFcg
 
+sub hash_tag {
+    my ($self) = @_;
+
+    my @tag = {
+        id          => $self->id,
+        description => $self->description,
+       # events      => $self->tag_events->id,
+       # resources   => $self->resource_tags->id
+    };
+    return \@tag;
+}
+
 # You can replace this text with custom content, and it will be preserved on regeneration
 1;

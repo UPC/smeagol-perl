@@ -18,7 +18,7 @@ drop table if exists resource_tag;
 drop table if exists tag;
   CREATE TABLE tag (
 	    id		TEXT(64),
-	    description TEXT(256),
+	    description TEXT(128),
 	    PRIMARY KEY (id)
     );
 

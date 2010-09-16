@@ -10,9 +10,9 @@ sub check_name :Local {
  my ($self, $c, $name) = @_;
 
  if (length($name) < 64 ){
-   return 1;
+   $c->stash->{desc_ok}=1;
  }else{
-    return 0;
+    $c->stash->{desc_ok}=0;
  }
 
 }
@@ -33,10 +33,24 @@ sub check_info :Local {
  my ($self, $c, $info) = @_;
 
   if (length($info) < 256 ){
-   return 1;
+   $c->stash->{desc_ok}=1;
  }else{
-   return 0;
+   $c->stash->{desc_ok}=0;
  }
+}
+
+sub check_booking : Local {
+  my ($self, $c, $id_resource, $id_event) = @_;
+
+  my $resource = $c->model('DB::Resource')->find({id => $id_resource});
+  my $event = $c->model('DB::Event')->find({id => $id_event});
+
+  if ($resource && $event) {
+    $c->stash->{booking_ok}=1;
+  } else {
+    $c->stash->{booking_ok}=0;
+  }
+
 }
 
 =head1 AUTHOR

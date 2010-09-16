@@ -97,49 +97,62 @@ sub default_POST {
 
     my $new_booking = $c->model('DB::Booking')->find_or_new();
 
-    $new_booking->id_resource($id_resource);
-    $new_booking->id_event($id_event);
-    $new_booking->starts($starts);
-    $new_booking->ends($ends);
+    $c->visit('/check/check_booking', [$id_resource, $id_event]); #Do the resource and the event exist?
 
-    my @old_bookings
-        = $c->model('DB::Booking')->search( { id_resource => $id_resource } )
-        ;    #Recuperem les reserves que utilitzen el recurs
-    $c->log->debug( "Ends: " . $new_booking->ends );
-    my $current_set = DateTime::Span->from_datetimes(
-        start => $new_booking->starts,
-        end   => $new_booking->ends
-    );
+    if ($c->stash->{booking_ok} == 1){
+      $new_booking->id_resource($id_resource);
+      $new_booking->id_event($id_event);
+      $new_booking->starts($starts);
+      $new_booking->ends($ends);
 
-    my $overlap;
+      my @old_bookings
+	  = $c->model('DB::Booking')->search( { id_resource => $id_resource } )
+	  ;    #Recuperem les reserves que utilitzen el recurs
+      $c->log->debug( "Ends: " . $new_booking->ends );
+      my $current_set = DateTime::Span->from_datetimes(
+	  start => $new_booking->starts,
+	  end   => $new_booking->ends
+      );
 
-    foreach (@old_bookings) {
-        $overlap = $_->overlap($current_set);
-        if ($overlap) {
-            last;
-        }
-    }
+      my $overlap;
 
-    if ($overlap) {
-        $c->log->debug("Hi ha solapament \n");
+      foreach (@old_bookings) {
+	  $overlap = $_->overlap($current_set);
+	  if ($overlap) {
+	      last;
+	  }
+      }
 
-	my @message = {
-	   message => "Error: Overlap with another booking",
-	};
-        $c->stash->{content} = \@message;
-        $c->response->status(409);
-	$c->stash->{error} = "Error: Overlap with onather booking";
-	$c->stash->{template} = 'booking/get_list';
-    }
-    else {
-        $new_booking->insert;
+      if ($overlap) {
+	  $c->log->debug("Hi ha solapament \n");
 
-        my @booking = $new_booking->hash_booking;
+	  my @message = {
+	     message => "Error: Overlap with another booking",
+	  };
+	  $c->stash->{content} = \@message;
+	  $c->response->status(409);
+	  $c->stash->{error} = "Error: Overlap with onather booking";
+	  $c->stash->{template} = 'booking/get_list';
+      }
+      else {
+	  $new_booking->insert;
 
-        $c->stash->{content}  = \@booking;
-	$c->stash->{booking} = \@booking;
-	$c->response->status(201);
-	$c->stash->{template} = 'booking/get_booking';
+	  my @booking = $new_booking->hash_booking;
+
+	  $c->stash->{content}  = \@booking;
+	  $c->stash->{booking} = \@booking;
+	  $c->response->status(201);
+	  $c->stash->{template} = 'booking/get_booking';
+
+      }
+    } else {
+	  my @message = {
+	     message => "Error: Check if the event or the resource exist",
+	  };
+	  $c->stash->{content} = \@message;
+	  $c->response->status(400);
+	  $c->stash->{error} = "Error: Check if the event or the resource exist";
+	  $c->stash->{template} = 'booking/get_list';
 
     }
 }
@@ -164,44 +177,57 @@ sub default_PUT {
 
     my $booking = $c->model('DB::Booking')->find( { id => $id } );
 
-    $booking->id_resource($id_resource);
-    $booking->id_event($id_event);
-    $booking->starts($starts);
-    $booking->ends($ends);
+    $c->visit('/check/check_booking', [$id_resource, $id_event]); #Do the resource and the event exist?
 
-    my @old_bookings
-        = $c->model('DB::Booking')->search( { id_resource => $id_resource } )
-        ;    #Recuperem les reserves que utilitzen el recurs
+    if ($c->stash->{booking_ok} == 1){
 
-    my $current_set = DateTime::Span->from_datetimes(
-        start => $starts,
-        end   => $ends->clone->subtract( seconds => 1 )
-    );
+      $booking->id_resource($id_resource);
+      $booking->id_event($id_event);
+      $booking->starts($starts);
+      $booking->ends($ends);
 
-    my $old_booking_set;
-    my $overlap_aux;
-    my $overlap = 0;
+      my @old_bookings
+	  = $c->model('DB::Booking')->search( { id_resource => $id_resource } )
+	  ;    #Recuperem les reserves que utilitzen el recurs
 
-    foreach (@old_bookings) {
-        if ( $_->id ne $id ) { $overlap = $_->overlap($current_set); }
-        if ($overlap) {
-            last;
-        }
-    }
+      my $current_set = DateTime::Span->from_datetimes(
+	  start => $starts,
+	  end   => $ends->clone->subtract( seconds => 1 )
+      );
 
-    if ($overlap) {
-        $c->stash->{template} = 'fail.tt';
-        $c->response->status(409);
-        $c->forward( $c->view('TT') );
-    }
-    else {
-        $booking->update;
+      my $old_booking_set;
+      my $overlap_aux;
+      my $overlap = 0;
 
-        my @booking = $booking->hash_booking;
+      foreach (@old_bookings) {
+	  if ( $_->id ne $id ) { $overlap = $_->overlap($current_set); }
+	  if ($overlap) {
+	      last;
+	  }
+      }
 
-        $c->stash->{content} = \@booking;
-        $c->response->status(200);
-        $c->forward( $c->view('JSON') );
+      if ($overlap) {
+	  $c->stash->{template} = 'fail.tt';
+	  $c->response->status(409);
+	  $c->forward( $c->view('TT') );
+      }
+      else {
+	  $booking->update;
+
+	  my @booking = $booking->hash_booking;
+
+	  $c->stash->{content} = \@booking;
+	  $c->response->status(200);
+	  $c->forward( $c->view('JSON') );
+      }
+    } else {
+      my @message = {
+	 message => "Error: Check if the event or the resource exist",
+      };
+      $c->stash->{content} = \@message;
+      $c->response->status(400);
+      $c->stash->{error} = "Error: Check if the event or the resource exist";
+      $c->stash->{template} = 'booking/get_list';
     }
 
 }

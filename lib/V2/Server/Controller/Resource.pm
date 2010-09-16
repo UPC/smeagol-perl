@@ -96,62 +96,76 @@ sub default_POST {
     my $tags_aux = $req->parameters->{tags};
     my @tags = split( /,/, $tags_aux );
 
-    my $new_resource = $c->model('DB::Resource')->find_or_new();
+    $c->visit('/check/check_event', [$info, $descr]);
+    # If all is correct $c->stash->{event_ok} should be 1, otherwise it will be 0.
 
-    $new_resource->description($descr);
-    $new_resource->info($info);
-    $new_resource->insert;
+    if ($c->stash->{resource_ok}){
 
-    $c->log->debug( "La id del nou recurs és: " . $new_resource->id );
+      my $new_resource = $c->model('DB::Resource')->find_or_new();
 
-#Buscarem si els tags ja existeixen, en cas de no existir els crearem
-#Cal omplir DB::ResourceTag per a establir la relació entre els tags i els recursos
+      $new_resource->description($descr);
+      $new_resource->info($info);
+      $new_resource->insert;
 
-    my $TagID;
+      $c->log->debug( "La id del nou recurs és: " . $new_resource->id );
 
-    foreach (@tags) {
-        $TagID = $c->model('DB::Tag')->find( { id => $_ } );
+  #Buscarem si els tags ja existeixen, en cas de no existir els crearem
+  #Cal omplir DB::ResourceTag per a establir la relació entre els tags i els recursos
 
-        if ($TagID) {
-            $c->log->debug( 'Llista id\'s tag: ' . $TagID->id );
+      my $TagID;
 
-         #Si el tag existeix, fem constar a ResourceTag la relació recurs-tag
-            my $ResTag = $c->model('DB::ResourceTag')->find_or_new();
-            $ResTag->resource_id( $new_resource->id );
-            $ResTag->tag_id( $TagID->id );
-            $ResTag->insert;
+      foreach (@tags) {
+	  $TagID = $c->model('DB::Tag')->find( { id => $_ } );
 
-        }
-        else {
+	  if ($TagID) {
+	      $c->log->debug( 'Llista id\'s tag: ' . $TagID->id );
 
-            #Si el tag no existeix, el creem i repetim com a dalt
-            my $new_tag = $c->model('DB::Tag')->find_or_new();
+	   #Si el tag existeix, fem constar a ResourceTag la relació recurs-tag
+	      my $ResTag = $c->model('DB::ResourceTag')->find_or_new();
+	      $ResTag->resource_id( $new_resource->id );
+	      $ResTag->tag_id( $TagID->id );
+	      $ResTag->insert;
 
-            $new_tag->id($_);
-            $new_tag->insert;
+	  }
+	  else {
 
-            $c->log->debug( 'Nou tag: ' . $new_tag->id );
+	      #Si el tag no existeix, el creem i repetim com a dalt
+	      my $new_tag = $c->model('DB::Tag')->find_or_new();
 
-            my $ResTag = $c->model('DB::ResourceTag')->find_or_new();
-            $ResTag->resource_id( $new_resource->id );
-            $ResTag->tag_id( $new_tag->id );
-            $ResTag->insert;
-        }
+	      $new_tag->id($_);
+	      $new_tag->insert;
+
+	      $c->log->debug( 'Nou tag: ' . $new_tag->id );
+
+	      my $ResTag = $c->model('DB::ResourceTag')->find_or_new();
+	      $ResTag->resource_id( $new_resource->id );
+	      $ResTag->tag_id( $new_tag->id );
+	      $ResTag->insert;
+	  }
+      }
+
+  #Un cop tenim el tema dels tags aclarit, muntem el json amb les dades del recurs
+      my @resource = {
+	  id          => $new_resource->id,
+	  description => $new_resource->description,
+	  info        => $new_resource->info,
+	  tags        => $new_resource->tag_list,
+      };
+
+      $c->stash->{resource} = \@resource;
+      $c->stash->{content} = \@resource;
+      $c->response->status(201);
+      $c->response->content_type('text/html');
+      $c->stash->{template} = 'resource/get_resource.tt';
+    } else {
+      my @message = {
+	 message => "Error: Check the info and description of the resource",
+      };
+      $c->stash->{content} = \@message;
+      $c->response->status(400);
+      $c->stash->{error} = "Error: Check the info and description of the resource";
+      $c->stash->{template} = 'resource/get_list';
     }
-
-#Un cop tenim el tema dels tags aclarit, muntem el json amb les dades del recurs
-    my @resource = {
-        id          => $new_resource->id,
-        description => $new_resource->description,
-        info        => $new_resource->info,
-        tags        => $new_resource->tag_list,
-    };
-
-    $c->stash->{resource} = \@resource;
-    $c->stash->{content} = \@resource;
-    $c->response->status(201);
-    $c->response->content_type('text/html');
-    $c->stash->{template} = 'resource/get_resource.tt';
 }
 
 sub default_PUT {
@@ -171,60 +185,72 @@ sub default_PUT {
     my $resource = $c->model('DB::Resource')->find( { id => $id } );
 
     if ($resource) {
-        $resource->description($descr);
-        $resource->info($info);
-        $resource->update;
+          $c->visit('/check/check_event', [$info, $descr]);
+    # If all is correct $c->stash->{event_ok} should be 1, otherwise it will be 0.
+	  if ($c->stash->{resource_ok}){
+	    $resource->description($descr);
+	    $resource->info($info);
+	    $resource->update;
 
-        my $TagID;
+	    my $TagID;
 
-        my @old_tags
-            = $c->model('DB::ResourceTag')->search( { resource_id => $id } );
+	    my @old_tags
+		= $c->model('DB::ResourceTag')->search( { resource_id => $id } );
 
-        foreach (@old_tags) {
-            $c->log->debug( 'Tags vells: ' . $_->tag_id );
-            $_->delete;
-        }
+	    foreach (@old_tags) {
+		$c->log->debug( 'Tags vells: ' . $_->tag_id );
+		$_->delete;
+	    }
 
-        foreach (@tags) {
-            $TagID = $c->model('DB::Tag')->find( { id => $_ } );
+	    foreach (@tags) {
+		$TagID = $c->model('DB::Tag')->find( { id => $_ } );
 
-            if ($TagID) {
+		if ($TagID) {
 
-         #Si el tag existeix, fem constar a ResourceTag la relació recurs-tag
-                my $ResTag = $c->model('DB::ResourceTag')->find_or_new();
-                $ResTag->resource_id( $resource->id );
-                $ResTag->tag_id( $TagID->id );
-                $ResTag->insert;
+	     #Si el tag existeix, fem constar a ResourceTag la relació recurs-tag
+		    my $ResTag = $c->model('DB::ResourceTag')->find_or_new();
+		    $ResTag->resource_id( $resource->id );
+		    $ResTag->tag_id( $TagID->id );
+		    $ResTag->insert;
 
-            }
-            else {
+		}
+		else {
 
-                #Si el tag no existeix, el creem i repetim com a dalt
-                my $new_tag = $c->model('DB::Tag')->find_or_new();
+		    #Si el tag no existeix, el creem i repetim com a dalt
+		    my $new_tag = $c->model('DB::Tag')->find_or_new();
 
-                $new_tag->id($_);
-                $new_tag->insert;
+		    $new_tag->id($_);
+		    $new_tag->insert;
 
-                $c->log->debug( 'Nou tag: ' . $new_tag->id );
+		    $c->log->debug( 'Nou tag: ' . $new_tag->id );
 
-                my $ResTag = $c->model('DB::ResourceTag')->find_or_new();
-                $ResTag->resource_id( $resource->id );
-                $ResTag->tag_id( $new_tag->id );
-                $ResTag->insert;
-            }
+		    my $ResTag = $c->model('DB::ResourceTag')->find_or_new();
+		    $ResTag->resource_id( $resource->id );
+		    $ResTag->tag_id( $new_tag->id );
+		    $ResTag->insert;
+		}
 
-        }
+	    }
 
-        my @resource = {
-            id          => $resource->id,
-            description => $resource->description,
-            info        => $resource->info,
-            tags        => $resource->tag_list,
-        };
+	    my @resource = {
+		id          => $resource->id,
+		description => $resource->description,
+		info        => $resource->info,
+		tags        => $resource->tag_list,
+	    };
 
-        $c->stash->{resource} = \@resource;
-	$c->stash->{content} = \@resource;
-        $c->response->status(200);
+	    $c->stash->{resource} = \@resource;
+	    $c->stash->{content} = \@resource;
+	    $c->response->status(200);
+	  } else {
+	    my @message = {
+	       message => "Error: Check the info and description of the resource",
+	    };
+	    $c->stash->{content} = \@message;
+	    $c->response->status(400);
+	    $c->stash->{error} = "Error: Check the info and description of the resource";
+	    $c->stash->{template} = 'resource/get_list';
+	}
     }
     else {
 	  my @message = {

@@ -123,7 +123,7 @@ sub default_POST {
     if (!$tag_exist){ #Creation of the new tag if it not exists
       my $new_tag = $c->model('DB::Tag')->find_or_new();
 
-      if ($c->stash->{name_ok} and $c->stash->{desc_ok}) != 0){
+      if (($c->stash->{name_ok} and $c->stash->{desc_ok}) != 0){
 	    $new_tag->id($name);
 	    $new_tag->description($desc);
 	    $new_tag->insert;

@@ -10,9 +10,9 @@ sub check_name :Local {
  my ($self, $c, $name) = @_;
 
  if (length($name) < 64 ){
-   $c->stash->{desc_ok}=1;
+   $c->stash->{name_ok}=1;
  }else{
-    $c->stash->{desc_ok}=0;
+    $c->stash->{name_ok}=0;
  }
 
 }
@@ -33,9 +33,9 @@ sub check_info :Local {
  my ($self, $c, $info) = @_;
 
   if (length($info) < 256 ){
-   $c->stash->{desc_ok}=1;
+   $c->stash->{info_ok}=1;
  }else{
-   $c->stash->{desc_ok}=0;
+   $c->stash->{info_ok}=0;
  }
 }
 

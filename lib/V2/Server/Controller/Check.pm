@@ -66,6 +66,19 @@ sub check_event : Local {
   }
 }
 
+sub check_resource :Local {
+  my ($self, $c, $info, $description) = @_;
+
+  $c->visit('check_info', [$info]);
+  $c->visit('check_desc', [$description]);
+
+  if ($c->stash->{info_ok} && $c->stash->{desc_ok}) {
+    $c->stash->{resource_ok} = 1;
+  }else{
+    $c->stash->{resource_ok} = 0;
+  }
+}
+
 =head1 AUTHOR
 
 Jordi Amorós Andreu,,,

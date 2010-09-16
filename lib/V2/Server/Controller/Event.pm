@@ -100,17 +100,30 @@ sub default_POST {
 
     my $new_event = $c->model('DB::Event')->find_or_new();
 
-    $new_event->info($info);
-    $new_event->description($description);
-    $new_event->starts($starts);
-    $new_event->ends($ends);
-    $new_event->insert;
+    $c->visit('/check/check_event', [$info, $description]);
+    # If all is correct $c->stash->{event_ok} should be 1, otherwise it will be 0.
 
-    my @event = $new_event->hash_event;
+    if ($c->stash->{event_ok} == 1){
+      $new_event->info($info);
+      $new_event->description($description);
+      $new_event->starts($starts);
+      $new_event->ends($ends);
+      $new_event->insert;
 
-    $c->stash->{content} = \@event;
-    $c->response->status(201);
-    $c->forward( $c->view('JSON') );
+      my @event = $new_event->hash_event;
+
+      $c->stash->{content} = \@event;
+      $c->response->status(201);
+      $c->forward( $c->view('JSON') );
+    } else {
+      my @message = {
+	 message => "Error: Check the info and description of the event",
+      };
+      $c->stash->{content} = \@message;
+      $c->response->status(400);
+      $c->stash->{error} = "Error: Check the info and description of the event";
+      $c->stash->{template} = 'event/get_list';
+    }
 }
 
 sub default_PUT {
@@ -130,17 +143,31 @@ sub default_PUT {
     my $event = $c->model('DB::Event')->find( { id => $id } );
 
     if ($event) {
-        $event->info($info);
-        $event->description($description);
-        $event->starts($starts);
-        $event->ends($ends);
-        $event->insert_or_update;
+         $c->visit('/check/check_event', [$info, $description]);
+	 # If all is correct $c->stash->{event_ok} should be 1, otherwise it will be 0.
 
-        my @event = $event->hash_event;
+	 if ($c->stash->{event_ok} == 1){
+	    $event->info($info);
+	    $event->description($description);
+	    $event->starts($starts);
+	    $event->ends($ends);
+	    $event->insert_or_update;
 
-        $c->stash->{content} = \@event;
-        $c->response->status(200);
-        $c->forward( $c->view('JSON') );
+	    my @event = $event->hash_event;
+
+	    $c->stash->{content} = \@event;
+	    $c->response->status(200);
+	    $c->forward( $c->view('JSON') );
+	 } else {
+	         my @message = {
+		     message => "Error: Check the info and description of the event",
+		  };
+		  $c->stash->{content} = \@message;
+		  $c->response->status(400);
+		  $c->stash->{error} = "Error: Check the info and description of the event";
+		  $c->stash->{template} = 'event/get_list';
+
+	 }
     }
     else {
         $c->stash->{template} = 'not_found.tt';

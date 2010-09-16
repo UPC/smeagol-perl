@@ -53,6 +53,19 @@ sub check_booking : Local {
 
 }
 
+sub check_event : Local {
+  my ($self, $c, $info, $description) = @_;
+
+  $c->visit('check_info', [$info]);
+  $c->visit('check_desc', [$description]);
+
+  if ($c->stash->{info_ok} && $c->stash->{desc_ok}) {
+    $c->stash->{event_ok} = 1;
+  }else{
+    $c->stash->{event_ok} = 0;
+  }
+}
+
 =head1 AUTHOR
 
 Jordi Amorós Andreu,,,

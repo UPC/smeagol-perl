@@ -5,7 +5,7 @@
 [% END %]
 <dl clas="tag">
 [% FOREACH tag IN tag_aux%]
-<dt>ID</dt><dd>[% tag.id | html %] <a class='delete' href='/tag/[% tag.id %]'>Esborra</a></dd>
+<dt>ID</dt><dd>[% tag.id | html %]</dd>
 <dt>Description</dt><dd>[% tag.description | html %]</dd>
 
 <dt>List of resources</dt>
@@ -25,6 +25,8 @@
 
 
 <p><a href='[% c.uri_for("/tag")%]'><---- Tornar a la llista de tags</a></p>
+
+<br></br><button class='delete' href='/tag/[% tag.id %]'>Esborra</button>
 
 [%# USE DUMPER %]
 [%# Dumper.dump_html(tag) %]

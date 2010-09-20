@@ -45,14 +45,14 @@ drop table if exists booking;
 	    id_event	INTEGER REFERENCES event(id) ON DELETE CASCADE ON UPDATE CASCADE,
 	    starts	DATETIME,
 	    ends	DATETIME,
-            frequency,
-	    interval,
-	    duration,
-	    per_minuts,
-	    per_hores,
-	    per_dies,
-	    per_mesos,
-	    per_dia_mes
+            frequency   TEXT,
+	    interval    INTEGER,
+	    duration    DATETIME,
+	    per_minuts  INTEGER, --0 to 59
+	    per_hores   INTEGER, --0 to 23
+	    per_dies    TEXT, 
+	    per_mesos   TEXT,
+	    per_dia_mes INTEGER
     );
 
 -- Carreguem uns valors a les taules, sol per a provar
@@ -99,11 +99,11 @@ INSERT INTO event values (2,'Informació 2',"Descripció de l'event",'2010-02-16
 INSERT INTO event values(3,'Informació 3',"Descripció de l'event",'2010-02-16 04:00:00','2010-02-16 05:00:00');
 INSERT INTO event values(4,'Informació 4',"Descripció de l'event",'2010-02-16 04:00:00','2010-02-16 05:00:00');
 
-INSERT INTO booking values (1,3,1,'2010-02-16 04:00:00','2010-02-16 05:00:00','','','','','','','','');
-INSERT INTO booking values (2,4,1,'2010-02-16 04:00:00','2010-02-16 05:00:00','','','','','','','','');
-INSERT INTO booking values (3,5,2,'2010-02-16 04:00:00','2010-02-16 05:00:00','','','','','','','','');
-INSERT INTO booking values (4,2,3,'2010-02-16 04:00:00','2010-02-16 05:00:00','','','','','','','','');
-INSERT INTO booking values (5,1,4,'2010-02-16 04:00:00','2010-02-16 05:00:00','','','','','','','','');
+INSERT INTO booking values (1,3,1,'2010-02-16 04:00:00','2010-02-16 05:00:00','','','','','','','',-1);
+INSERT INTO booking values (2,4,1,'2010-02-16 04:00:00','2010-02-16 05:00:00','','','','','','','',-2);
+INSERT INTO booking values (3,5,2,'2010-02-16 04:00:00','2010-02-16 05:00:00','','','','','','','',0);
+INSERT INTO booking values (4,2,3,'2010-02-16 04:00:00','2010-02-16 05:00:00','','','','','','','',1);
+INSERT INTO booking values (5,1,4,'2010-02-16 04:00:00','2010-02-16 05:00:00','','','','','','','',2);
 
 INSERT INTO tag_event values ('projector',1);
 INSERT INTO tag_event values ('pantalla',1);

@@ -98,9 +98,9 @@ __PACKAGE__->add_columns(
     { data_type => "integer", is_foreign_key => 1, is_nullable => 1 },
     "id_event",
     { data_type => "integer", is_foreign_key => 1, is_nullable => 1 },
-    "starts",
+    "dtstart",
     { data_type => "datetime", is_nullable => 1 },
-    "ends",
+    "dtend",
     { data_type => "datetime", is_nullable => 1 },
     "frequency",
     { data_type => "", is_nullable => 1 },
@@ -108,15 +108,15 @@ __PACKAGE__->add_columns(
     { data_type => "", is_nullable => 1 },
     "duration",
     { data_type => "", is_nullable => 1 },
-    "per_minuts",
+    "by_minute",
     { data_type => "", is_nullable => 1 },
-    "per_hores",
+    "by_hour",
     { data_type => "", is_nullable => 1 },
-    "per_dies",
+    "by_day",
     { data_type => "", is_nullable => 1 },
-    "per_mesos",
+    "by_month",
     { data_type => "", is_nullable => 1 },
-    "per_dia_mes",
+    "by_day_month",
     { data_type => "", is_nullable => 1 },
 );
 __PACKAGE__->set_primary_key("id");
@@ -165,8 +165,8 @@ sub hash_booking {
         id          => $self->id,
         id_resource => $self->id_resource->id,
         id_event    => $self->id_event->id,
-        starts      => $self->starts->iso8601(),
-        ends        => $self->ends->iso8601(),
+        dtstart      => $self->dtstart->iso8601(),
+        dtend        => $self->dtend->iso8601(),
     };
     return @booking;
 }
@@ -175,8 +175,8 @@ sub overlap {
     my ( $self, $current_set ) = @_;
     my $overlap         = 0;
     my $old_booking_set = DateTime::Span->from_datetimes(
-        (   start => $self->starts,
-            end   => $self->ends->clone->subtract( seconds => 1 )
+        (   start => $self->dtstart,
+            end   => $self->dtend->clone->subtract( seconds => 1 )
         )
     );
 

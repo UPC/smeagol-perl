@@ -50,7 +50,7 @@ sub check_booking : Local {
   } else {
     $c->stash->{booking_ok}=0;
   }
-
+  $c->stash->{overlap}=0;
 }
 
 sub check_event : Local {

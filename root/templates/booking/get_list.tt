@@ -13,17 +13,18 @@
 [% END %]
 </ul>
 
-<h3>Create Booking Simple</h3>
+<h3>Create Booking</h3>
 [% USE date(format = '%Y%m%d') %]
 
 <form action="" method="post">
-<p><label>Data (AAAAMMDD): </label><input name="dtstart" placeholder="[% date.format(date.now) %]"></p>
-<p><label>Duration: </label>
+<p><label>Start Date (AAAAMMDD): </label><input name="dtstart" placeholder="[% date.format(date.now) %]">
 
-<select name="hour">
+<label>Start Time: </label>
+
+<select name="shour">
 <OPTION selected value="00">00</OPTION>
 [% SET hour=1 %]
-[% WHILE hour< 23 %]
+[% WHILE hour< 24 %]
   [% IF hour < 10 %]
   <OPTION value="0[% hour %]">0[% hour %]</OPTION>
   [% ELSE %]
@@ -33,16 +34,36 @@
 [% END %]
 </select> hours
 
-<select name="minute">
+<select name="sminute">
 <OPTION selected value="00">00</OPTION>
-[% SET minute=1 %]
+[% SET minute=15 %]
 [% WHILE minute< 60 %]
-  [% IF minute < 10 %]
-  <OPTION value="0[% minute %]">0[% minute %]</OPTION>
-  [% ELSE %]
   <OPTION value="[% minute %]">[% minute %]</OPTION>
+  [% minute = minute +15 %]
+[% END %]
+</select> minutes
+
+<label>  Duration: </label>
+
+<select name="dhour">
+<OPTION selected value="00">00</OPTION>
+[% SET hour=1 %]
+[% WHILE hour< 24 %]
+  [% IF hour < 10 %]
+  <OPTION value="0[% hour %]">0[% hour %]</OPTION>
+  [% ELSE %]
+  <OPTION value="[% hour %]">[% hour %]</OPTION>
   [% END %]
-  [% minute = minute +1 %]
+  [% hour = hour +1 %]
+[% END %]
+</select> hours
+
+<select name="dminute">
+<OPTION selected value="00">00</OPTION>
+[% SET minute=15 %]
+[% WHILE minute< 60 %]
+  <OPTION value="[% minute %]">[% minute %]</OPTION>
+  [% minute = minute +15 %]
 [% END %]
 </select> minutes
 
@@ -53,9 +74,7 @@
   <option value="[% ev.id %]">[% ev.description %]</option>
 [% END %]
 </select>
-</p>
 
-<p>
 <label> Resource: </label>
 <select name='id_resource'>
 [% FOREACH res IN resources %]

@@ -73,6 +73,7 @@ sub booking_list : Private {
 
     foreach (@booking_aux) {
         @booking = $_->hash_booking;
+	$c->log->debug("Fent hash del booking: ".$_->id);
         push( @bookings, @booking );
     }
 
@@ -112,38 +113,40 @@ sub default_POST {
 
     my $id_resource = $req->parameters->{id_resource};
     my $id_event    = $req->parameters->{id_event};
-    my $starts      = $req->parameters->{starts};
-    my $ends        = $req->parameters->{ends};
+    my $dtstart     = $req->parameters->{dtstart};
+    my $dtend       = $req->parameters->{dtend} || $req->parameters->{dtstart};
+    my $frequency   = $req->parameters->{frequency};
+    my $interval    = $req->parameters->{interval};
+    my $dhour       = $req->parameters->{dhour};
+    my $dminute     = $req->parameters->{dminute};
+    my $shour       = $req->parameters->{shour};
+    my $sminute     = $req->parameters->{sminute};
+    my @by_day      = $req->parameters->{byday};
+    my @by_month;
+    my @by_day_month;
+
+    $c->log->debug("\@byday: ".Dumper(@by_day));
 
     my $new_booking = $c->model('DB::Booking')->find_or_new();
 
     $c->visit('/check/check_booking', [$id_resource, $id_event]); #Do the resource and the event exist?
 
     if ($c->stash->{booking_ok} == 1){
+
       $new_booking->id_resource($id_resource);
       $new_booking->id_event($id_event);
-      $new_booking->starts($starts);
-      $new_booking->ends($ends);
+      $new_booking->dtstart($dtstart."T00:00:00");
+      $new_booking->dtend($dtend."T00:00:00");
+      $new_booking->frequency($frequency);
+      $new_booking->interval($interval);
+      $new_booking->duration($dhour.":".$dminute.":00");
+      $new_booking->by_minute($sminute);
+      $new_booking->by_hour($shour);
+      $new_booking->by_day(\@by_day);
+      $new_booking->by_month(\@by_month);
+      $new_booking->by_day_month(\@by_day_month);
 
-      my @old_bookings
-	  = $c->model('DB::Booking')->search( { id_resource => $id_resource } )
-	  ;    #Recuperem les reserves que utilitzen el recurs
-      $c->log->debug( "Ends: " . $new_booking->ends );
-      my $current_set = DateTime::Span->from_datetimes(
-	  start => $new_booking->starts,
-	  end   => $new_booking->ends
-      );
-
-      my $overlap;
-
-      foreach (@old_bookings) {
-	  $overlap = $_->overlap($current_set);
-	  if ($overlap) {
-	      last;
-	  }
-      }
-
-      if ($overlap) {
+      if ($c->stash->{overlap} == 1) {
 	  $c->log->debug("Hi ha solapament \n");
 
 	  my @message = {

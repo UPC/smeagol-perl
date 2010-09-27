@@ -51,7 +51,7 @@ sub get_booking : Private {
 
     if ($booking_aux) {
         my @booking = $booking_aux->hash_booking;
-
+$c->log->debug(Dumper(@booking));
         $c->stash->{content} = \@booking;
 	$c->stash->{booking} = \@booking;
         $c->response->status(200);
@@ -121,9 +121,9 @@ sub default_POST {
     my $dminute     = $req->parameters->{dminute};
     my $shour       = $req->parameters->{shour};
     my $sminute     = $req->parameters->{sminute};
-    my @by_day      = $req->parameters->{byday};
-    my @by_month;
-    my @by_day_month;
+    my $by_day      = $req->parameters->{byday};
+    my $by_month;
+    my $by_day_month;
 
     $c->log->debug("\@byday: ".Dumper(@by_day));
 
@@ -142,9 +142,9 @@ sub default_POST {
       $new_booking->duration($dhour.":".$dminute.":00");
       $new_booking->by_minute($sminute);
       $new_booking->by_hour($shour);
-      $new_booking->by_day(\@by_day);
-      $new_booking->by_month(\@by_month);
-      $new_booking->by_day_month(\@by_day_month);
+      $new_booking->by_day($by_day);
+      $new_booking->by_month($by_month);
+      $new_booking->by_day_month($by_day_month);
 
       if ($c->stash->{overlap} == 1) {
 	  $c->log->debug("Hi ha solapament \n");

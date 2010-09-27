@@ -8,6 +8,14 @@
 <dt>ID event</dt><dd><a href='/event/[% boo.id_event %]'>[% boo.id_event %]</a></dd>
 <dt>Start</dt><dd>[% boo.dtstart %]</dd>
 <dt>End</dt><dd>[% boo.dtend %]</dd>
+<dt>Frequency</dt><dd>[% boo.frequency %]</dd>
+<dt>Interval</dt><dd>[% boo.interval %]</dd>
+<dt>Duration<dt><dd>[% boo.duration %]</dd>
+<dt>By minute</dt><dd>[% boo.by_minute %]</dd>
+<dt>By hour</dt><dd>[% boo.by_hour %]</dd>
+<dt>By day</dt><dd>[% boo.by_day %]</dd>
+<dt>By month</dt><dd>[% boo.by_month %]</dd>
+<dt>By day month</dt><dd>[% boo.by_day_month %]</dd>
 </dl>
 
 [% END %]
@@ -15,3 +23,4 @@
 <button class='delete' href='/booking/[% boo.id %]'>Esborra</button>
 
 <br></br><a href='[% c.uri_for("/booking") | html %]'> <--Tornar a la llista de reserves</a>
+

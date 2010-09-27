@@ -167,6 +167,14 @@ sub hash_booking {
         id_event    => $self->id_event->id,
         dtstart      => $self->dtstart->iso8601(),
         dtend        => $self->dtend->iso8601(),
+        frequency    => $self->frequency,
+        interval     => $self->interval,
+        duration     => $self->duration,
+        by_minute    => $self->by_minute,
+        by_hour      => $self->by_hour,
+        by_day       => $self->by_day,
+        by_month     => $self->by_month,
+        by_day_month => $self->by_day_month
     };
     return @booking;
 }

@@ -47,7 +47,7 @@ drop table if exists booking;
 	    dtend	DATETIME,
             frequency   TEXT,
 	    interval    INTEGER,
-	    duration    DATETIME,
+	    duration    DURATION,
 	    by_minute  INTEGER, --0 to 59
 	    by_hour   INTEGER, --0 to 23
 	    by_day    TEXT,

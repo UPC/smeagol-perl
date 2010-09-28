@@ -14,10 +14,10 @@
 </ul>
 
 <h3>Create Booking</h3>
-[% USE date(format = '%Y%m%d') %]
+[% USE date(format = '%Y-%m-%d') %]
 
 <form action="" method="post">
-<p><label>Start Date (AAAAMMDD): </label><input name="dtstart" placeholder="[% date.format(date.now) %]">
+<p><label>Start Date (AAAA-MM-DD): </label><input name="dtstart" placeholder="[% date.format(date.now) %]">
 
 <label>Start Time: </label>
 

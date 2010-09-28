@@ -51,7 +51,7 @@ sub get_booking : Private {
 
     if ($booking_aux) {
         my @booking = $booking_aux->hash_booking;
-$c->log->debug(Dumper(@booking));
+
         $c->stash->{content} = \@booking;
 	$c->stash->{booking} = \@booking;
         $c->response->status(200);
@@ -114,29 +114,31 @@ sub default_POST {
     my $id_resource = $req->parameters->{id_resource};
     my $id_event    = $req->parameters->{id_event};
     my $dtstart     = $req->parameters->{dtstart};
-    my $dtend       = $req->parameters->{dtend} || $req->parameters->{dtstart};
+    my $dtend       = $req->parameters->{dtend};
     my $frequency   = $req->parameters->{frequency};
     my $interval    = $req->parameters->{interval};
     my $dhour       = $req->parameters->{dhour};
     my $dminute     = $req->parameters->{dminute};
     my $shour       = $req->parameters->{shour};
     my $sminute     = $req->parameters->{sminute};
-    my $by_day      = $req->parameters->{byday};
-    my $by_month;
-    my $by_day_month;
-
-    $c->log->debug("\@byday: ".Dumper(@by_day));
+    my $by_day_aux  = $req->parameters->{byday};
+    my $by_month    = $req->parameters->{by_month};
+    my $by_day_month= $req->parameters->{by_day_month};
 
     my $new_booking = $c->model('DB::Booking')->find_or_new();
 
     $c->visit('/check/check_booking', [$id_resource, $id_event]); #Do the resource and the event exist?
 
+    my $by_day = join(',',@{$by_day_aux});
+
+    $c->log->debug("By_day: ".$by_day);
+    
     if ($c->stash->{booking_ok} == 1){
 
       $new_booking->id_resource($id_resource);
       $new_booking->id_event($id_event);
-      $new_booking->dtstart($dtstart."T00:00:00");
-      $new_booking->dtend($dtend."T00:00:00");
+      $new_booking->dtstart(ParseDate($dtstart));
+      $new_booking->dtend(ParseDate($dtend));
       $new_booking->frequency($frequency);
       $new_booking->interval($interval);
       $new_booking->duration($dhour.":".$dminute.":00");
@@ -146,6 +148,8 @@ sub default_POST {
       $new_booking->by_month($by_month);
       $new_booking->by_day_month($by_day_month);
 
+      $c->visit('/check/check_overlap', [$new_booking]);
+
       if ($c->stash->{overlap} == 1) {
 	  $c->log->debug("Hi ha solapament \n");
 
@@ -154,7 +158,7 @@ sub default_POST {
 	  };
 	  $c->stash->{content} = \@message;
 	  $c->response->status(409);
-	  $c->stash->{error} = "Error: Overlap with onather booking";
+	  $c->stash->{error} = "Error: Overlap with another booking";
 	  $c->stash->{template} = 'booking/get_list';
       }
       else {
@@ -280,17 +284,12 @@ sub default_DELETE {
 sub ParseDate {
   my ($date_str) = @_;
 
-  my ($day,$hour) = split(/T/,$date_str);
-
-  my ($year,$month,$nday) = split(/-/,$day);
-  my ($nhour,$min,$sec) = split(/:/,$hour);
+  my ($year,$month,$nday) = split(/-/,$date_str);
 
   my $date = DateTime->new(year   => $year,
                        month  => $month,
-                       day    => $nday,
-                       hour   => $nhour,
-                       minute => $min,
-                       second => $sec,);
+                       day    => $nday
+			   );
 
   return $date;
 }

@@ -7,8 +7,9 @@ use strict;
 use warnings;
 
 use base 'DBIx::Class::Core';
+use DBIx::Class::InflateColumn::DateTime::Duration;
 
-__PACKAGE__->load_components( "InflateColumn::DateTime", "InflateColumn",
+__PACKAGE__->load_components( "InflateColumn::DateTime",  "InflateColumn::DateTime::Duration", "InflateColumn",
     "TimeStamp" );
 
 =head1 NAME
@@ -107,7 +108,7 @@ __PACKAGE__->add_columns(
     "interval",
     { data_type => "integer", is_nullable => 1 },
     "duration",
-    { data_type => "datetime", is_nullable => 1 },
+    { data_type => "datetime::duration", is_nullable => 1 },
     "by_minute",
     { data_type => "integer", is_nullable => 1 },
     "by_hour",

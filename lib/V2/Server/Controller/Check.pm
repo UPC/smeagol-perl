@@ -53,6 +53,11 @@ sub check_booking : Local {
   $c->stash->{overlap}=0;
 }
 
+sub check_overlap :Local {
+  my ($self, $c, $new_booking) = @_;
+  $c->stash->{overlap}=0;
+}
+
 sub check_event : Local {
   my ($self, $c, $info, $description) = @_;
 

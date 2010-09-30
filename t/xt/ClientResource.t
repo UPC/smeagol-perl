@@ -127,27 +127,128 @@ SKIP: {
 
 # Client::Resource->create()
 {
-    my $desc = 'Sóc una descripció';
-    my $info = 'Sóc una info';
+    my ( $desc, $info ) = ( 'foo', 'bar' );
+    my $id          = 20;                       # whatever
+    my $resourceUrl = "$server/resource/$id";
+    my $jsonStr;    # JSON representation of the resource
 
     my $scr = $module->new( url => $server );
-    my $r = $scr->create( description => $desc, info => $info );
 
+    # the "Client::Resource->create" method is composed by two
+    # calls to the server:
+    #  1) a POST call, which creates the resource and gets the ID
+    #     via "Location" header.
+    #  2) a GET call to the location obtained previously, to get the
+    #     JSON representation of the resource.
     my $lwpUserAgent = new Test::MockModule('LWP::UserAgent');
     $lwpUserAgent->mock(
         'post',
         sub {
+            my ( $self, $parameters ) = @_;
             my $res = HTTP::Response->new();
-            $res->code(HTTP_OK);
+            $jsonStr = JSON::Any->objToJson(
+                {   description => $parameters->{description},
+                    info        => $parameters->{info}
+                }
+            );
+            $res->header( 'Location' => $resourceUrl );
+            $res->code(HTTP_CREATED);
             $res;
         }
     );
+    $lwpUserAgent->mock(
+        'get',
+        sub {
+            my $url = shift;
+            my $res = HTTP::Response->new();
+            if ( $url eq $resourceUrl ) {
+                $res->code(HTTP_OK);
+                $res->content($jsonStr);
+            }
+            else {
+                $res->code(HTTP_NOT_FOUND);
+            }
+            $res;
+        }
+    );
+
+    my $r = $scr->create( description => $desc, info => $info );
+
+    isa_ok( $r, $module );
 
     cmp_deeply(
         $r,
         methods( description => $desc, info => $info ),
         "resource created successfully"
     );
+}
+
+# Client::Resource->get(id)
+{
+    my $id          = 20;                       # whatever
+    my $resourceUrl = "$server/resource/$id";
+    my ( $desc, $info ) = ( 'foo', 'bar' );
+
+    my $scr = $module->new( url => $server );
+
+    my $lwpUserAgent = new Test::MockModule('LWP::UserAgent');
+    $lwpUserAgent->mock(
+        'get',
+        sub {
+            my $url = shift;
+            my $res = HTTP::Response->new();
+            if ( $url eq $resourceUrl ) {
+                $res->code(HTTP_OK);
+                $res->content(
+                    JSON::Any->objectToJson(
+                        { description => $desc, info => $info }
+                    )
+                );
+            }
+            else {
+                $res->code(HTTP_NOT_FOUND);
+            }
+            $res;
+        }
+    );
+
+    my $r = $scr->get($resourceUrl);
+
+    isa_ok( $r, $module );
+
+    cmp_deeply(
+        $r,
+        methods( description => $desc, info => $info, id => $resourceUrl ),
+        "resource retrieved successfully"
+    );
+}
+
+# Client::Resource->update(id, description, info)
+{
+    my ( $desc,    $info )    = ( 'foo',    'bar' );
+    my ( $newdesc, $newinfo ) = ( 'newfoo', 'newbar' );
+    my $resourceUrl = "$server/resource/$id";
+
+    my $scr = $module->new( url => $server );
+
+    # create a new resource first
+    my $r = $scr->create( description => $desc, info => $info );
+
+    cmp_deeply(
+        $r,
+        methods( description => $desc, info => $info, id => $resourceUrl ),
+        "resource created successfully"
+    );
+
+    # update the resource
+    $r->update( description => $newdesc, info => $newinfo );
+
+    cmp_deeply(
+        $r,
+        methods( description => $desc, info => $info, id => $resourceUrl ),
+        "resource retrieved successfully"
+    );
+
 }
 
 done_testing();

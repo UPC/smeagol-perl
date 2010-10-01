@@ -36,10 +36,10 @@
 
 <select name="sminute">
 <OPTION selected value="00">00</OPTION>
-[% SET minute=15 %]
+[% SET minute=5 %]
 [% WHILE minute< 60 %]
   <OPTION value="[% minute %]">[% minute %]</OPTION>
-  [% minute = minute +15 %]
+  [% minute = minute +5 %]
 [% END %]
 </select> minutes
 
@@ -60,10 +60,10 @@
 
 <select name="dminute">
 <OPTION selected value="00">00</OPTION>
-[% SET minute=15 %]
+[% SET minute=5 %]
 [% WHILE minute< 60 %]
   <OPTION value="[% minute %]">[% minute %]</OPTION>
-  [% minute = minute +15 %]
+  [% minute = minute +5 %]
 [% END %]
 </select> minutes
 
@@ -83,7 +83,7 @@
 </select>
 </p>
 
-<p><label>Repete</label>
+<p><label>Repeat</label>
 <select name="frequency">
 <option selected value="no">No</option>
 <option value="daily">Daily</option>

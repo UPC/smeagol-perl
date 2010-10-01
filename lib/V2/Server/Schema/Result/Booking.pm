@@ -102,7 +102,7 @@ __PACKAGE__->add_columns(
     "dtstart",
     { data_type => "datetime", is_nullable => 1 },
     "dtend",
-    { data_type => "datetime", is_nullable => 1 },
+    { data_type => "datetime", is_nullable => 1, datetime_undef_if_invalid => 1},
     "frequency",
     { data_type => "text", is_nullable => 1 },
     "interval",

@@ -55,6 +55,17 @@ sub check_booking : Local {
 
 sub check_overlap :Local {
   my ($self, $c, $new_booking) = @_;
+  
+  my $new_set = DateTime::Event::ICal->recur(
+      dtstart => $new_booking->dtstart,
+      dtend => $new_booking->dtend,
+      freq => $new_booking->frequency,
+      interval => $new_booking->interval,
+      byhour =>  $new_booking->by_hour,
+      byminute => $new_booking->by_minute
+      
+      );
+
   $c->stash->{overlap}=0;
 }
 

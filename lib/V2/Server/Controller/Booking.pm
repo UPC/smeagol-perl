@@ -108,19 +108,19 @@ sub default_POST {
     my ( $self, $c ) = @_;
     my $req = $c->request;
     $c->log->debug( 'Mètode: ' . $req->method );
-    #$c->log->debug(Dumper($req));
     $c->log->debug("El POST funciona");
 
     my $id_resource = $req->parameters->{id_resource};
     my $id_event    = $req->parameters->{id_event};
     my $dtstart     = $req->parameters->{dtstart};
-    my $dtend       = $req->parameters->{dtend};
+    my $dtend;
     my $frequency   = $req->parameters->{frequency};
     my $interval    = $req->parameters->{interval};
     my $dhour       = $req->parameters->{dhour};
     my $dminute     = $req->parameters->{dminute};
     my $shour       = $req->parameters->{shour};
     my $sminute     = $req->parameters->{sminute};
+    my $by_day;
     my $by_day_aux  = $req->parameters->{byday};
     my $by_month    = $req->parameters->{by_month};
     my $by_day_month= $req->parameters->{by_day_month};
@@ -129,7 +129,13 @@ sub default_POST {
 
     $c->visit('/check/check_booking', [$id_resource, $id_event]); #Do the resource and the event exist?
 
-    my $by_day = join(',',@{$by_day_aux});
+      if ($frequency eq 'no'){
+	    if ($by_day_aux) {$by_day = join(',',@{$by_day_aux});}else{$by_day = '';}
+	    $dtend       = ParseDate($req->parameters->{dtstart});
+      }else{
+	    $by_day = '';
+	    if ($req->parameters->{dtend}) {$dtend = ParseDate($req->parameters->{dtend});}else{$dtend = "";}
+      }   
 
     $c->log->debug("By_day: ".$by_day);
     
@@ -138,7 +144,7 @@ sub default_POST {
       $new_booking->id_resource($id_resource);
       $new_booking->id_event($id_event);
       $new_booking->dtstart(ParseDate($dtstart));
-      $new_booking->dtend(ParseDate($dtend));
+      $new_booking->dtend($dtend);
       $new_booking->frequency($frequency);
       $new_booking->interval($interval);
       $new_booking->duration($dhour.":".$dminute.":00");
@@ -169,7 +175,7 @@ sub default_POST {
 	  $c->stash->{content}  = \@booking;
 	  $c->stash->{booking} = \@booking;
 	  $c->response->status(201);
-	  $c->stash->{template} = 'booking/get_booking';
+	  $c->stash->{template} = 'booking/get_booking.tt';
 
       }
     } else {

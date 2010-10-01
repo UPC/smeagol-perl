@@ -49,8 +49,31 @@ sub get_event : Local {
     my $event_aux = $c->model('DB::Event')->find( { id => $id } );
     
     if ($event_aux){
-	  my @event = $event_aux->hash_event;
+	  my $event_aux = $event_aux->hash_event;
 
+	  my @event_booking = $c->model('DB::Booking')->search( { id_event => $id } );
+	  my @booking;
+	  my @bookings;
+	  
+	  foreach (@event_booking) {
+	    @booking = {
+		  id => $_->id,
+		  id_resource => $_->id_resource
+	    };
+	    
+	    push (@bookings, @booking);
+	  };
+	  
+	  my @event = {
+# 	    id => $event_aux->{id},
+# 	    info => $event_aux->{info},
+# 	    description => $event_aux->{description},
+# 	    starts => $event_aux->{starts},
+# 	    ends => $event_aux->{ends},
+	    bookings => \@bookings,
+	    tags => "Yeah!",
+	  };
+	  
 	  $c->stash->{content} = \@event;
 	  $c->stash->{event} = \@event;
 	  $c->response->status(200);

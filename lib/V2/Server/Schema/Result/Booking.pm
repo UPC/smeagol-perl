@@ -102,7 +102,7 @@ __PACKAGE__->add_columns(
     "dtstart",
     { data_type => "datetime", is_nullable => 1 },
     "dtend",
-    { data_type => "datetime", is_nullable => 1, datetime_undef_if_invalid => 1},
+    { data_type => "text", is_nullable => 1},
     "frequency",
     { data_type => "text", is_nullable => 1 },
     "interval",
@@ -156,18 +156,32 @@ __PACKAGE__->belongs_to(
 
 # Created by DBIx::Class::Schema::Loader v0.07000 @ 2010-07-20 18:39:18
 # DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:805sw5JLWdOKhwL7WSDTTg
-
+use DateTime;
 use DateTime::Span;
 
 sub hash_booking {
     my ($self) = @_;
+
+    my $dtend = $self->dtend;
+
+    if ($dtend) {
+      my ($year,$month,$day) = split('-',$dtend);
+
+      $dtend = DateTime->new(
+	year => $year,
+	month => $month,
+	day => $day
+      );
+    }else{
+      $dtend = undef;
+    }
 
     my @booking = {
         id          => $self->id,
         id_resource => $self->id_resource->id,
         id_event    => $self->id_event->id,
         dtstart      => $self->dtstart->iso8601(),
-        dtend        => $self->dtend->iso8601(),
+        dtend        => $dtend,
         frequency    => $self->frequency,
         interval     => $self->interval,
         duration     => $self->duration,

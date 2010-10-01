@@ -44,7 +44,7 @@ drop table if exists booking;
 	    id_resource INTEGER REFERENCES resources(id) ON DELETE CASCADE ON UPDATE CASCADE,
 	    id_event	INTEGER REFERENCES event(id) ON DELETE CASCADE ON UPDATE CASCADE,
 	    dtstart	DATETIME,
-	    dtend	DATETIME,
+	    dtend	TEXT,
             frequency   TEXT,
 	    interval    INTEGER,
 	    duration    DURATION,
@@ -99,12 +99,12 @@ INSERT INTO event values (2,'Informació 2',"Descripció de l'event 2",'2010-02-
 INSERT INTO event values(3,'Informació 3',"Descripció de l'event 3",'2010-02-16 04:00:00','2010-02-16 05:00:00');
 INSERT INTO event values(4,'Informació 4',"Descripció de l'event 4",'2010-02-16 04:00:00','2010-02-16 05:00:00');
 
-INSERT INTO booking values (1,3,1,'2010-02-16 04:00:00','2010-09-16 05:00:00','daily','1','01:00:00','0','04',"mo,tu,th,fr",'2',-1);
-INSERT INTO booking values (2,4,1,'2010-02-16 04:00:00','2010-09-16 05:00:00','daily','2','01:00:00','0','04',"mo,we,th,fr",'2',-2);
-INSERT INTO booking values (3,5,2,'2010-02-16 04:00:00','2010-09-16 05:00:00','daily','3','01:00:00','0','04',"tu,we,th,fr",'2',0);
-INSERT INTO booking values (4,2,3,'2010-02-16 04:00:00','2010-09-16 05:00:00','daily','4','01:00:00','0','04',"mo,tu,we,fr",'2',1);
-INSERT INTO booking values (5,1,4,'2010-02-16 04:00:00','2010-09-16 05:00:00','daily','6','01:00:00','0','04',"mo,tu,we,th",'2',2);
-INSERT INTO booking values (6,1,4,'2010-02-17 04:00:00','2010-09-17 05:00:00','daily','2','01:00:00','0','04',"mo,tu,we,th,fr",'2',2);
+INSERT INTO booking values (1,3,1,'2010-02-16 04:00:00','2010-09-16','daily','1','01:00:00','0','04',"mo,tu,th,fr",'2',-1);
+INSERT INTO booking values (2,4,1,'2010-02-16 04:00:00','2010-09-16','daily','2','01:00:00','0','04',"mo,we,th,fr",'2',-2);
+INSERT INTO booking values (3,5,2,'2010-02-16 04:00:00','2010-09-16','daily','3','01:00:00','0','04',"tu,we,th,fr",'2',0);
+INSERT INTO booking values (4,2,3,'2010-02-16 04:00:00','2010-09-16','daily','4','01:00:00','0','04',"mo,tu,we,fr",'2',1);
+INSERT INTO booking values (5,1,4,'2010-02-16 04:00:00','2010-09-16','daily','6','01:00:00','0','04',"mo,tu,we,th",'2',2);
+INSERT INTO booking values (6,1,4,'2010-02-17 04:00:00','','daily','2','01:00:00','0','04',"mo,tu,we,th,fr",'2',2);
 
 INSERT INTO tag_event values ('projector',1);
 INSERT INTO tag_event values ('pantalla',1);

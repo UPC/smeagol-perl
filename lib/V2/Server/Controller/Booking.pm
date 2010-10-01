@@ -185,7 +185,7 @@ sub default_POST {
 	  $c->stash->{content} = \@message;
 	  $c->response->status(400);
 	  $c->stash->{error} = "Error: Check if the event or the resource exist";
-	  $c->stash->{template} = 'booking/get_list';
+	  $c->stash->{template} = 'booking/get_list.tt';
 
     }
 }

@@ -5,6 +5,7 @@ use warnings;
 use parent 'Catalyst::Controller';
 
 use Data::Dumper;
+use DateTime::Event::ICal;
 
 sub check_name :Local {
  my ($self, $c, $name) = @_;
@@ -50,7 +51,6 @@ sub check_booking : Local {
   } else {
     $c->stash->{booking_ok}=0;
   }
-  $c->stash->{overlap}=0;
 }
 
 sub check_overlap :Local {

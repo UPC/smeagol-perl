@@ -21,10 +21,10 @@ has 'url' => (
 );
 
 has 'ua' => (
-    isa      => 'LWP::UserAgent',
-    is       => 'ro',
-    required => 1,
-    default  => sub {
+    isa => 'LWP::UserAgent',
+    is  => 'ro',
+    lazy    => 1,      # do not create this slot until absolutely necessary
+    default => sub {
         my $self = shift;
         my $ua   = LWP::UserAgent->new();
         $ua->agent( $USER_AGENT_PREFIX . ' ' . $ua->_agent );

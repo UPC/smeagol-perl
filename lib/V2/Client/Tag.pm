@@ -4,40 +4,45 @@ use strict;
 use warnings;
 
 use Moose;
-use Data::Dumper;
+
+#use Data::Dumper;
 
 use HTTP::Request::Common;
 use HTTP::Response;
 use HTTP::Status qw(:constants :is status_message);
-use JSON;
+use JSON::Any;
 
 extends 'V2::Client';
 
+my $TAG_PATH = '/tag';
+
 has 'id' => (
     is       => 'rw',
-    required => 1,
-    default  => sub {
-        my $self = shift;
-        my %args = @_;
-        return $args{id};
-    }
+    isa      => 'Str',
+    required => 0,
+);
+
+has 'description' => (
+    is       => 'rw',
+    isa      => 'Str',
+    required => 0,
 );
 
 sub list {
     my $self = shift;
 
-    my $res = $self->ua->get( $self->url . "/tag" );
+    my $res = $self->ua->get( $self->url . $TAG_PATH );
 
     return unless $res->code == HTTP_OK;
 
     my @tagList;
 
-    my $j = JSON::Any->new;
-    my $objectList = $j->from_json( $res->content, { utf8 => 1 } );
+    my $objectList = JSON::Any->from_json( $res->content, { utf8 => 1 } );
 
     foreach (@$objectList) {
         my $tag = V2::Client::Tag->new( url => $self->url );
-        $tag->{id} = $_->{'id'};
+        $tag->{id}          = $_->{'id'};
+        $tag->{description} = $_->{'description'};
         push @tagList, $tag;
     }
     return @tagList;
@@ -49,7 +54,7 @@ sub create {
     my ($id) = ( $args{id} );
     return unless defined $id;
 
-    my $res = $self->ua->post( $self->url . '/tag', [ id => $id ] );
+    my $res = $self->ua->post( $self->url . $TAG_PATH, [ id => $id ] );
 
     return unless $res->code == HTTP_CREATED;
 
@@ -66,7 +71,7 @@ sub get {
     my $res = $self->ua->get( $self->url . '/tag/' . $id );
 
     if ( $res->code == HTTP_OK ) {
-        my $tag = from_json( $res->content, { utf8 => 1 } );
+        my $tag = JSON::Any->from_json( $res->content, { utf8 => 1 } );
         $self->{id} = $tag->{'id'};
         return $self;
     }
@@ -123,7 +128,7 @@ sub tag {
             && defined $description;
 
     my $req = HTTP::Request->new(
-        POST => $self->url . '/resource/' . $id . '/tag' );
+        POST => $self->url . '/resource/' . $id . $TAG_PATH );
     $req->content_type('text/xml');
     my $tagXML = "<tag>$description</tag>";
     $req->content($tagXML);

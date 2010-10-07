@@ -1,14 +1,10 @@
 package V2::Client::Resource;
 
-use strict;
-use warnings;
 use Moose;
 use Data::Dumper;
 
-#use XML::LibXML;
-#use XML::Simple;
-#use Smeagol::XML;
 use HTTP::Request::Common;
+use HTTP::Status qw(:constants :is status_message);
 use JSON;
 use V2::Client::Tag;
 
@@ -16,28 +12,39 @@ extends 'V2::Client';
 
 has 'desc' => (
     is       => 'rw',
+    isa      => 'Str',
     required => 1,
-    default  => sub {
-        my $self = shift;
-        my %args = @_;
-        return $args{desc};
-    }
+
+    #    default  => sub {
+    #        my $self = shift;
+    #        my %args = @_;
+    #        return $args{desc};
+    #    }
 );
+
 has 'info' => (
     is       => 'rw',
+    isa      => 'Str',
     required => 0,
-    default  => sub {
-        my $self = shift;
-        my %args = @_;
-        return $args{info} if ( defined $args{info} );
-    }
-);
-has 'id' => ( is => 'rw', required => 0 );
 
-has 'tags' => ( is => 'rw', required => 0, );
+    #    default  => sub {
+    #        my $self = shift;
+    #        my %args = @_;
+    #        return $args{info} if ( defined $args{info} );
+    #    }
+);
+
+has 'id' => ( is => 'rw', isa => 'Str', required => 0 );
+has 'tags' => (
+    is       => 'rw',
+    isa      => 'ArrayRef[Str]',
+    required => 0,
+    default  => sub { [] },
+);
 
 #Cal afegir els tags i els events
 
+=pod
 sub list {
     my $self = shift;
 
@@ -152,5 +159,6 @@ sub delete {
 
     return $self;
 }
+=cut
 
 1;

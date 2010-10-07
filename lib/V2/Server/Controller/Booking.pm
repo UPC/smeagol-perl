@@ -51,7 +51,7 @@ sub get_booking : Private {
 
     if ($booking_aux) {
         my @booking = $booking_aux->hash_booking;
-
+$c->log->debug("Booking: ".Dumper(@booking));
         $c->stash->{content} = \@booking;
 	$c->stash->{booking} = \@booking;
         $c->response->status(200);
@@ -295,7 +295,7 @@ sub ParseDate {
   my $date = DateTime->new(year   => $year,
                        month  => $month,
                        day    => $nday
-			   );
+			   ) || DateTime->now;
 
   return $date;
 }

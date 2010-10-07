@@ -165,6 +165,8 @@ sub hash_booking {
     my $dtend = $self->dtend;
 
     if ($dtend) {
+      my $res;
+      ($dtend,$res) = split('T',$dtend);
       my ($year,$month,$day) = split('-',$dtend);
 
       $dtend = DateTime->new(
@@ -172,6 +174,7 @@ sub hash_booking {
 	month => $month,
 	day => $day
       );
+      $dtend = $dtend->iso8601();
     }else{
       $dtend = undef;
     }

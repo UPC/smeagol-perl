@@ -55,17 +55,33 @@ sub check_booking : Local {
 
 sub check_overlap :Local {
   my ($self, $c, $new_booking) = @_;
+
+  my $freq;
+
+  if ($new_booking->frequency eq 'no') {
+    $freq = 'daily';
+  }else{
+    $freq = $new_booking->frequency;
+  }
   
   my $new_set = DateTime::Event::ICal->recur(
       dtstart => $new_booking->dtstart,
       dtend => $new_booking->dtend,
-      freq => $new_booking->frequency,
+      freq => $freq,
       interval => $new_booking->interval,
       byhour =>  $new_booking->by_hour,
       byminute => $new_booking->by_minute
       
       );
 
+  my @book_res = $c->model('DB::Booking')-> find({id_resource => $new_booking->id_resource});
+$c->log->debug("#bookings del recurs: ".@book_res);
+$c->log->debug(\@book_res);
+
+  foreach (@book_res) {
+    $c->log->debug("ID Booking: ".$_->id." del resource ".$_->hash_booking->{id_resource});
+  }
+  
   $c->stash->{overlap}=0;
 }
 

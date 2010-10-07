@@ -130,10 +130,10 @@ sub default_POST {
     $c->visit('/check/check_booking', [$id_resource, $id_event]); #Do the resource and the event exist?
 
       if ($frequency eq 'no'){
-	    if ($by_day_aux) {$by_day = join(',',@{$by_day_aux});}else{$by_day = '';}
+	    $by_day = '';
 	    $dtend       = ParseDate($req->parameters->{dtstart});
       }else{
-	    $by_day = '';
+	    if ($by_day_aux) {$by_day = join(',',@{$by_day_aux});}else{$by_day = '';}
 	    if ($req->parameters->{dtend}) {$dtend = ParseDate($req->parameters->{dtend});}else{$dtend = "";}
       }   
 
@@ -154,7 +154,7 @@ sub default_POST {
       $new_booking->by_month($by_month);
       $new_booking->by_day_month($by_day_month);
 
-      $c->visit('/check/check_overlap', [$new_booking]);
+      $c->visit('/check/check_overlap', [$new_booking->hash_booking]);
 
       if ($c->stash->{overlap} == 1) {
 	  $c->log->debug("Hi ha solapament \n");

@@ -6,6 +6,7 @@ use parent 'Catalyst::Controller';
 
 use Data::Dumper;
 use DateTime::Event::ICal;
+use DateTime::Infinite;
 
 sub check_name :Local {
  my ($self, $c, $name) = @_;
@@ -57,30 +58,57 @@ sub check_overlap :Local {
   my ($self, $c, $new_booking) = @_;
 
   my $freq;
+  my $n_end;
 
-  if ($new_booking->frequency eq 'no') {
+  if ($new_booking->{frequency} eq 'no') {
     $freq = 'daily';
+    my $n_end = $new_booking->{dtstart};    
   }else{
-    $freq = $new_booking->frequency;
+    $freq = $new_booking->{frequency};
+    
+    if ($new_booking->{dtend} ne undef){
+	  my ($n_end,$res) = split('T',$new_booking->{dtend});
+	  my($n_year,$n_month,$n_day) = split('-',$n_end);
+	  
+	  $n_end = DateTime->new(
+	    year => $n_year,
+	    month => $n_month,
+	    day => $n_day
+	  );
+    }else{
+	  $n_end = DateTime::Infinite::Future->new;
+    }
   }
   
-  my $new_set = DateTime::Event::ICal->recur(
-      dtstart => $new_booking->dtstart,
-      dtend => $new_booking->dtend,
-      freq => $freq,
-      interval => $new_booking->interval,
-      byhour =>  $new_booking->by_hour,
-      byminute => $new_booking->by_minute
-      
+  my ($n_start,$res) = split('T',$new_booking->{dtstart});
+  my($ns_year,$ns_month,$ns_day) = split('-',$n_start);
+      $n_start = DateTime->new(
+	    year => $ns_year,
+	    month => $ns_month,
+	    day => $ns_day
       );
+ 
+  
+  my $new_set = DateTime::Event::ICal->recur(
+      dtstart => $n_start,
+      dtend => $n_end,
+      freq => $freq,
+      interval => $new_booking->{interval},
+      byhour =>  $new_booking->{by_hour},
+      byminute => $new_booking->{by_minute}      
+      );
+      
+  $c->log->debug(Dumper($new_set));
 
-  my @book_res = $c->model('DB::Booking')-> find({id_resource => $new_booking->id_resource});
+my @book_res = $c->model('DB::Booking')-> search({id_resource => $new_booking->{id_resource}});
 $c->log->debug("#bookings del recurs: ".@book_res);
-$c->log->debug(\@book_res);
 
-  foreach (@book_res) {
-    $c->log->debug("ID Booking: ".$_->id." del resource ".$_->hash_booking->{id_resource});
-  }
+
+foreach (@book_res){
+      $c->log->debug(Dumper($_->hash_booking));
+      
+      
+}
   
   $c->stash->{overlap}=0;
 }

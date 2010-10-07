@@ -1,6 +1,6 @@
 package V2::Client;
 
-use Moose; # automatically turns on strict and warnings
+use Moose;    # automatically turns on strict and warnings
 
 use LWP::UserAgent;
 
@@ -12,10 +12,10 @@ has 'url' => (
     default  => sub {
         my $self = shift;
         my %args = @_;
-        
+
         my $url = $args{url};
-        $url = chop $url if ($url =~ /\/$/);
-        
+        $url = chop $url if ( $url =~ /\/$/ );
+
         return $url;
     }
 );
@@ -27,7 +27,7 @@ has 'ua' => (
     default  => sub {
         my $self = shift;
         my $ua   = LWP::UserAgent->new();
-        $ua->agent($USER_AGENT_PREFIX . ' ' . $ua->_agent);
+        $ua->agent( $USER_AGENT_PREFIX . ' ' . $ua->_agent );
         return $ua;
     }
 );

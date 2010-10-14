@@ -45,7 +45,7 @@ sub default_GET {
 
 sub get_resource : Private {
     my ( $self, $c, $id ) = @_;
-    my $resource = $c->model('DB::Resource')->find( { id => $id } );
+    my $resource = $c->model('DB::Resources')->find( { id => $id } );
 
     if ( !$resource ) {
 	
@@ -69,7 +69,7 @@ sub get_resource : Private {
 sub resource_list : Private {
     my ( $self, $c ) = @_;
     my @resources;
-    my @res_aux = $c->model('DB::Resource')->all;
+    my @res_aux = $c->model('DB::Resources')->all;
 
     foreach (@res_aux) {
         push( @resources, $_->get_resources );
@@ -101,7 +101,7 @@ sub default_POST {
 
     if ($c->stash->{resource_ok}){
 
-      my $new_resource = $c->model('DB::Resource')->find_or_new();
+      my $new_resource = $c->model('DB::Resources')->find_or_new();
 
       $new_resource->description($descr);
       $new_resource->info($info);
@@ -182,7 +182,7 @@ sub default_PUT {
     my $info     = $req->parameters->{info} || $req->{headers}->{info};
     my @tags     = split( /,/, $tags_aux );
 
-    my $resource = $c->model('DB::Resource')->find( { id => $id } );
+    my $resource = $c->model('DB::Resources')->find( { id => $id } );
 
     if ($resource) {
           $c->visit('/check/check_event', [$info, $descr]);
@@ -271,7 +271,7 @@ sub default_DELETE {
     $c->log->debug( "ID: " . $id );
     $c->log->debug("El DELETE funciona");
 
-    my $resource_aux = $c->model('DB::Resource')->find( { id => $id } );
+    my $resource_aux = $c->model('DB::Resources')->find( { id => $id } );
 
     if ($resource_aux) {
         $resource_aux->delete;

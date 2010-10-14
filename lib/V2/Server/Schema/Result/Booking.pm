@@ -1,190 +1,182 @@
 package V2::Server::Schema::Result::Booking;
 
-# Created by DBIx::Class::Schema::Loader
-# DO NOT MODIFY THE FIRST PART OF THIS FILE
-
 use strict;
 use warnings;
 
-use base 'DBIx::Class::Core';
+use base 'DBIx::Class';
 
-__PACKAGE__->load_components( "InflateColumn::DateTime", "InflateColumn",
-    "TimeStamp" );
-
-=head1 NAME
-
-V2::Server::Schema::Result::Booking
-
-=cut
-
+__PACKAGE__->load_components("InflateColumn::DateTime", "TimeStamp", "InflateColumn", "Core");
 __PACKAGE__->table("booking");
-
-=head1 ACCESSORS
-
-=head2 id
-
-  data_type: 'integer'
-  is_auto_increment: 1
-  is_nullable: 1
-
-=head2 id_resource
-
-  data_type: 'integer'
-  is_foreign_key: 1
-  is_nullable: 1
-
-=head2 id_event
-
-  data_type: 'integer'
-  is_foreign_key: 1
-  is_nullable: 1
-
-=head2 starts
-
-  data_type: 'datetime'
-  is_nullable: 1
-
-=head2 ends
-
-  data_type: 'datetime'
-  is_nullable: 1
-
-=head2 frequency
-
-  data_type: (empty string)
-  is_nullable: 1
-
-=head2 interval
-
-  data_type: (empty string)
-  is_nullable: 1
-
-=head2 duration
-
-  data_type: (empty string)
-  is_nullable: 1
-
-=head2 per_minuts
-
-  data_type: (empty string)
-  is_nullable: 1
-
-=head2 per_hores
-
-  data_type: (empty string)
-  is_nullable: 1
-
-=head2 per_dies
-
-  data_type: (empty string)
-  is_nullable: 1
-
-=head2 per_mesos
-
-  data_type: (empty string)
-  is_nullable: 1
-
-=head2 per_dia_mes
-
-  data_type: (empty string)
-  is_nullable: 1
-
-=cut
-
 __PACKAGE__->add_columns(
-    "id",
-    { data_type => "integer", is_auto_increment => 1, is_nullable => 1 },
-    "id_resource",
-    { data_type => "integer", is_foreign_key => 1, is_nullable => 1 },
-    "id_event",
-    { data_type => "integer", is_foreign_key => 1, is_nullable => 1 },
-    "starts",
-    { data_type => "datetime", is_nullable => 1 },
-    "ends",
-    { data_type => "datetime", is_nullable => 1 },
-    "frequency",
-    { data_type => "", is_nullable => 1 },
-    "interval",
-    { data_type => "", is_nullable => 1 },
-    "duration",
-    { data_type => "", is_nullable => 1 },
-    "per_minuts",
-    { data_type => "", is_nullable => 1 },
-    "per_hores",
-    { data_type => "", is_nullable => 1 },
-    "per_dies",
-    { data_type => "", is_nullable => 1 },
-    "per_mesos",
-    { data_type => "", is_nullable => 1 },
-    "per_dia_mes",
-    { data_type => "", is_nullable => 1 },
+  "id",
+  {
+    data_type => "INTEGER",
+    default_value => undef,
+    is_nullable => 1,
+    size => undef,
+  },
+  "id_resource",
+  {
+    data_type => "INTEGER",
+    default_value => undef,
+    is_nullable => 1,
+    size => undef,
+  },
+  "id_event",
+  {
+    data_type => "INTEGER",
+    default_value => undef,
+    is_nullable => 1,
+    size => undef,
+  },
+  "dtstart",
+  {
+    data_type => "DATETIME",
+    default_value => undef,
+    is_nullable => 1,
+    size => undef,
+  },
+  "dtend",
+  {
+    data_type => "TEXT",
+    default_value => undef,
+    is_nullable => 1,
+    size => undef,
+  },
+  "until",
+  {
+    data_type => "DATETIME",
+    default_value => undef,
+    is_nullable => 1,
+    size => undef,
+  },
+  "frequency",
+  {
+    data_type => "TEXT",
+    default_value => undef,
+    is_nullable => 1,
+    size => undef,
+  },
+  "interval",
+  {
+    data_type => "INTEGER",
+    default_value => undef,
+    is_nullable => 1,
+    size => undef,
+  },
+  "duration",
+  {
+    data_type => "DURATION",
+    default_value => undef,
+    is_nullable => 1,
+    size => undef,
+  },
+  "by_minute",
+  {
+    data_type => "INTEGER",
+    default_value => undef,
+    is_nullable => 1,
+    size => undef,
+  },
+  "by_hour",
+  {
+    data_type => "INTEGER",
+    default_value => undef,
+    is_nullable => 1,
+    size => undef,
+  },
+  "by_day",
+  {
+    data_type => "TEXT",
+    default_value => undef,
+    is_nullable => 1,
+    size => undef,
+  },
+  "by_month",
+  {
+    data_type => "TEXT",
+    default_value => undef,
+    is_nullable => 1,
+    size => undef,
+  },
+  "by_day_month",
+  {
+    data_type => "INTEGER",
+    default_value => undef,
+    is_nullable => 1,
+    size => undef,
+  },
 );
 __PACKAGE__->set_primary_key("id");
-
-=head1 RELATIONS
-
-=head2 id_event
-
-Type: belongs_to
-
-Related object: L<V2::Server::Schema::Result::Event>
-
-=cut
-
 __PACKAGE__->belongs_to(
-    "id_event",
-    "V2::Server::Schema::Result::Event",
-    { id        => "id_event" },
-    { join_type => "LEFT", on_delete => "CASCADE", on_update => "CASCADE" },
+  "id_resource",
+  "V2::Server::Schema::Result::Resources",
+  { id => "id_resource" },
+);
+__PACKAGE__->belongs_to(
+  "id_event",
+  "V2::Server::Schema::Result::Event",
+  { id => "id_event" },
 );
 
-=head2 id_resource
 
-Type: belongs_to
-
-Related object: L<V2::Server::Schema::Result::Resource>
-
-=cut
-
-__PACKAGE__->belongs_to(
-    "id_resource",
-    "V2::Server::Schema::Result::Resource",
-    { id        => "id_resource" },
-    { join_type => "LEFT", on_delete => "CASCADE", on_update => "CASCADE" },
-);
-
-# Created by DBIx::Class::Schema::Loader v0.07000 @ 2010-07-20 18:39:18
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:805sw5JLWdOKhwL7WSDTTg
-
+# Created by DBIx::Class::Schema::Loader v0.04006 @ 2010-10-14 10:30:27
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:Z1pgMjizD80k/u/sfT+P+w
+use DateTime;
 use DateTime::Span;
 
 sub hash_booking {
-    my ($self) = @_;
-
-    my @booking = {
-        id          => $self->id,
-        id_resource => $self->id_resource->id,
-        id_event    => $self->id_event->id,
-        starts      => $self->starts->iso8601(),
-        ends        => $self->ends->iso8601(),
-    };
-    return @booking;
+      my ($self) = @_;
+      
+      my $dtend = $self->dtend;
+      
+      if ($dtend) {
+	    my $res;
+	    ($dtend,$res) = split(' ',$dtend);
+	    my ($year,$month,$day) = split('-',$dtend);
+	    
+	    $dtend = DateTime->new(
+		  year => $year,
+		  month => $month,
+		  day => $day
+		  );
+	    $dtend = $dtend->iso8601();
+      }else{
+	    $dtend = undef;
+      }
+      
+      my @booking = {
+	    id          => $self->id,
+	    id_resource => $self->id_resource->id,
+	    id_event    => $self->id_event->id,
+	    dtstart      => $self->dtstart->iso8601(),
+	    dtend        => $dtend,
+	    frequency    => $self->frequency,
+	    interval     => $self->interval,
+	    duration     => $self->duration,
+	    by_minute    => $self->by_minute,
+	    by_hour      => $self->by_hour,
+	    by_day       => $self->by_day,
+	    by_month     => $self->by_month,
+	    by_day_month => $self->by_day_month
+      };
+      return @booking;
 }
 
 sub overlap {
-    my ( $self, $current_set ) = @_;
-    my $overlap         = 0;
-    my $old_booking_set = DateTime::Span->from_datetimes(
-        (   start => $self->starts,
-            end   => $self->ends->clone->subtract( seconds => 1 )
-        )
-    );
-
-    if ( $old_booking_set->intersects($current_set) ) {
-        $overlap = 1;
-    }
-
-    return $overlap;
+      my ( $self, $current_set ) = @_;
+      my $overlap         = 0;
+      my $old_booking_set = DateTime::Span->from_datetimes(
+      (   start => $self->dtstart,
+	  end   => $self->dtend->clone->subtract( seconds => 1 )
+	  )
+	  );
+	  
+	  if ( $old_booking_set->intersects($current_set) ) {
+		$overlap = 1;
+	  }
+	  
+	  return $overlap;
 }
 
 # You can replace this text with custom content, and it will be preserved on regeneration

@@ -85,8 +85,8 @@ sub get_tag :Private{
     my @resource;
 
     foreach (@resource_tag) {
-	  $resource_aux = $c->model('DB::Resource')->find( { id => $_->resource_id } );
-	  my @resource = $resource_aux->get_resources;
+	  $resource_aux = $c->model('DB::Resources')->find( { id => $_->resource_id->id } );
+	  @resource = $resource_aux->get_resources;
 	  push( @resources, @resource );
     }
 

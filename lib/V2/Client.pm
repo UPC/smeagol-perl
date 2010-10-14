@@ -1,10 +1,10 @@
 package V2::Client;
 
 use Moose;    # automatically turns on strict and warnings
-
 use LWP::UserAgent;
 
-my $USER_AGENT_PREFIX = 'SmeagolClient/2.0';
+our $VERSION           = 2.0;
+our $USER_AGENT_PREFIX = "SmeagolClient/$VERSION";
 
 has 'url' => (
     is       => 'ro',
@@ -32,5 +32,31 @@ has 'ua' => (
     }
 );
 
+# REST path segment ('/tag', '/resource', '/booking', etc.)
+has '_restSegment' => (
+    isa      => 'Str',
+    is       => 'rw',
+    required => 0,
+);
+
+# return full url with REST path segment included (e.g. http://server:port/tag).
+sub _fullPath {
+    $self = shift;
+    my $uri = URI->new( $self->url );
+    $uri->path_segments( $self->_restSegment ) if defined $self->_restSegment;
+    return $self->url;
+}
+
 1;
 
+__END__
+
+=head1 NAME
+
+Smeagol::Client - Base class for Smeagol::Client::* instances
+
+=head1 SYNOPSIS
+
+This class is not intended to be used directly. Use its subclasses instead.
+  
+=cut

@@ -36,6 +36,8 @@ my $module     = 'V2::Client::Tag';
         methods( id => $id, description => $description ),
         "setters and getters ok"
     );
+    
+    note $sct->fullPath;
 }
 
 sub testClientTagList {

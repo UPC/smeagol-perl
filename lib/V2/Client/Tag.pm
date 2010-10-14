@@ -11,6 +11,7 @@ use HTTP::Request::Common;
 use HTTP::Response;
 use HTTP::Status qw(:constants :is status_message);
 use JSON::Any;
+use URI;
 
 extends 'V2::Client';
 
@@ -28,6 +29,19 @@ has 'description' => (
     required => 0,
 );
 
+# return http://server:port + '/tag'
+sub fullPath {
+    my $self = shift;
+
+    my $uri = URI->new( $self->url );
+    $uri->path_segments('tag');
+    return $uri;
+}
+
+#
+# Retrieve all existing tags
+# Arguments: none
+#
 sub list {
     my $self = shift;
 
@@ -48,27 +62,41 @@ sub list {
     return @tagList;
 }
 
+#
+# Create a new tag
+# Arguments:
+#
+#   id (mandatory)
+#   description (mandatory)
+#
 sub create {
     my $self = shift;
     my %args = @_;
-    my ($id) = ( $args{id} );
-    return unless defined $id;
+    my ( $id, $description ) = ( $args{id}, $args{description} );
+    return unless ( defined $id && defined $description );
 
-    my $res = $self->ua->post( $self->url . $TAG_PATH, [ id => $id ] );
+    my $res = $self->ua->post( $self->fullPath,
+        [ id => $id, description => $description ] );
 
     return unless $res->code == HTTP_CREATED;
 
-    # the server returns the location of the new tag as an HTTP header
-    return $self->get($id);
+    # after creation, the server returns the location of the new
+    # tag as an HTTP header, but we must return a Client::Tag instance
+    return $self->get( $res->header('Location') );
 }
 
+#
+# Retrieve tag from server
+# Arguments:
+#   id (mandatory)
+#
 sub get {
     my $self = shift;
     my ($id) = @_;
 
     return unless defined $id;
 
-    my $res = $self->ua->get( $self->url . '/tag/' . $id );
+    my $res = $self->ua->get( $self->url . $TAG_PATH . '/' . $id );
 
     if ( $res->code == HTTP_OK ) {
         my $tag = JSON::Any->from_json( $res->content, { utf8 => 1 } );
@@ -162,3 +190,90 @@ sub untag {
 }
 
 1;
+
+__END__
+
+=head1 NAME
+
+Smeagol::Client::Tag - A Smeagol client for 'tags' management
+
+=head1 SYNOPSIS
+
+ my $ct = Smeagol::Client::Tag->new( $url => 'http://my_smeagol_server/' );
+ 
+ my $t1 = $ct->create( id => 'classroom', 'A classroom');
+ print $t1->id;
+ print $t1->description;
+ 
+ my $t2 = $ct->update( id => 'classroom', 'A NEW classroom');
+ print $t2->description;
+
+ my $t3 = $ct->get( id => 'anotherTag' );
+
+ $ct->del( id => 'classroom' );
+
+ my @tags = $ct->list(); 
+
+=head1 DESCRIPTION
+
+This module implements the Smeagol::Client::Tag class. An instance of this class
+acts as a Smeagol client and is also a representation of the 'tag' entity on the
+client side (as the internal implementation of 'tags' on the server remains
+hidden to the client).
+
+This class provides several methods which allow for CRUD management of 'tag'
+objects on the server.
+
+Tag objects have two attributes, 'id' and 'description'. The id is defined on
+tag creation, and is immutable. The description may be modified after creation,
+and is often used to complement the semantics to the 'id'.
+
+=head1 CONSTRUCTORS
+
+=over 4
+
+=item $ct = Smeagol::Client::Tag->new( url => 'http://server:port');
+
+Return a new Smeagol::Client::Tag instance. A Smeagol server URL is required.
+
+=back
+
+=head1 METHODS
+
+=over 4
+
+=item $tag = $client->create( id => 'myTag', description => 'myDesc' );
+
+Creates a new tag on the server, with specified 'id' and 'description'. The
+returned object is also a Smeagol::Client::Tag instance.
+
+=item $tag->description
+
+=item $tag->description( 'newDesc' );
+
+Getter and setter for tag description. Note that modifying the description using
+the setter will not modify the object on the server (for this purpose, 
+use the update() method).
+
+=item $tag->id
+
+=item $tag->id( 'newId' )
+
+Getter and setter for tag id. Note that modifying the id using the setter will
+not modify the object on the server (for this purpose, use the update() method).
+
+=item $tag = $ct->get( id => 'myTag' )
+
+Retrieve a single tag from server. The 'id' argument is required. If no tag was
+found with the provided id, the result will be C<undef>.
+
+=item @tags = $ct->list()
+
+Retrieve a (possibly empty) list containing all tags in the server.
+
+=item $tag = $ct->update( id => 'newId', description => 'newDesc' )
+
+Update tag attributes on server.
+
+=back
+=cut

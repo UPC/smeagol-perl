@@ -1,40 +1,90 @@
 package V2::Server::Schema::Result::Resources;
 
+# Created by DBIx::Class::Schema::Loader
+# DO NOT MODIFY THE FIRST PART OF THIS FILE
+
 use strict;
 use warnings;
 
-use base 'DBIx::Class';
+use base 'DBIx::Class::Core';
 
-__PACKAGE__->load_components("InflateColumn::DateTime", "TimeStamp", "InflateColumn", "Core");
+__PACKAGE__->load_components("InflateColumn::DateTime", "TimeStamp", "InflateColumn");
+
+=head1 NAME
+
+V2::Server::Schema::Result::Resources
+
+=cut
+
 __PACKAGE__->table("resources");
+
+=head1 ACCESSORS
+
+=head2 id
+
+  data_type: 'integer'
+  is_auto_increment: 1
+  is_nullable: 1
+
+=head2 description
+
+  data_type: 'text'
+  is_nullable: 1
+  size: 128
+
+=head2 info
+
+  data_type: 'text'
+  is_nullable: 1
+  size: 256
+
+=cut
+
 __PACKAGE__->add_columns(
   "id",
-  {
-    data_type => "INTEGER",
-    default_value => undef,
-    is_nullable => 1,
-    size => undef,
-  },
+  { data_type => "integer", is_auto_increment => 1, is_nullable => 1 },
   "description",
-  { data_type => "TEXT", default_value => undef, is_nullable => 1, size => 128 },
+  { data_type => "text", is_nullable => 1, size => 128 },
   "info",
-  { data_type => "TEXT", default_value => undef, is_nullable => 1, size => 256 },
+  { data_type => "text", is_nullable => 1, size => 256 },
 );
 __PACKAGE__->set_primary_key("id");
+
+=head1 RELATIONS
+
+=head2 resource_tags
+
+Type: has_many
+
+Related object: L<V2::Server::Schema::Result::ResourceTag>
+
+=cut
+
 __PACKAGE__->has_many(
   "resource_tags",
   "V2::Server::Schema::Result::ResourceTag",
   { "foreign.resource_id" => "self.id" },
+  {},
 );
+
+=head2 bookings
+
+Type: has_many
+
+Related object: L<V2::Server::Schema::Result::Booking>
+
+=cut
+
 __PACKAGE__->has_many(
   "bookings",
   "V2::Server::Schema::Result::Booking",
   { "foreign.id_resource" => "self.id" },
+  {},
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.04006 @ 2010-10-14 10:30:27
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:0qptKZefrPlliu4ZpfN8hg
+# Created by DBIx::Class::Schema::Loader v0.07000 @ 2010-10-15 15:48:04
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:WQ/+UTsJgiZnFR86zpH7zQ
 sub get_resources {
       my ($self) = @_;
       

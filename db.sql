@@ -44,7 +44,7 @@ CREATE TABLE booking(
       id_resource INTEGER REFERENCES resources(id) ON DELETE CASCADE ON UPDATE CASCADE,
       id_event	INTEGER REFERENCES event(id) ON DELETE CASCADE ON UPDATE CASCADE,
       dtstart	DATETIME,
-      dtend	TEXT,
+      dtend	DATETIME,
       until	DATETIME,
       frequency   TEXT,
       interval    INTEGER,

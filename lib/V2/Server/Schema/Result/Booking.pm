@@ -107,7 +107,7 @@ __PACKAGE__->add_columns(
   "dtend",
   { data_type => "datetime", is_nullable => 1 },
   "until",
-  { data_type => "datetime", is_nullable => 1 },
+  { data_type => "text", is_nullable => 1 },
   "frequency",
   { data_type => "text", is_nullable => 1 },
   "interval",
@@ -166,29 +166,13 @@ use DateTime::Span;
 sub hash_booking {
       my ($self) = @_;
       
-      my $dtend = $self->dtend;
-      
-      if ($dtend) {
-	    my $res;
-	    ($dtend,$res) = split(' ',$dtend);
-	    my ($year,$month,$day) = split('-',$dtend);
-	    
-	    $dtend = DateTime->new(
-		  year => $year,
-		  month => $month,
-		  day => $day
-		  );
-	    $dtend = $dtend->iso8601();
-      }else{
-	    $dtend = undef;
-      }
-      
-      my @booking = {
+     my @booking = {
 	    id          => $self->id,
 	    id_resource => $self->id_resource->id,
 	    id_event    => $self->id_event->id,
 	    dtstart      => $self->dtstart->iso8601(),
-	    dtend        => $dtend,
+	    dtend        => $self->dtend->iso8601(),
+	    until        => $self->until, 
 	    frequency    => $self->frequency,
 	    interval     => $self->interval,
 	    duration     => $self->duration,

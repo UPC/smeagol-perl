@@ -65,42 +65,22 @@ sub get_booking : Private {
 }
 
 sub booking_list : Private {
-      my ( $self, $c ) = @_;
-      
-      my @booking_aux = $c->model('DB::Booking')->all;
-      my @booking;
-      my @bookings;
-      
-      foreach (@booking_aux) {
-	    @booking = $_->hash_booking;
-	    $c->log->debug("Fent hash del booking: ".$_->id);
-	    push( @bookings, @booking );
-      }
-      
-      my @event_aux = $c->model('DB::Event')->all;
-      my @event;
-      my @events;
-      
-      foreach (@event_aux) {
-	    @event = $_->hash_event;
-	    push( @events, @event );
-      }
-      
-      my @res_aux = $c->model('DB::Resource')->all;
-      my @res;
-      my @ress;
-      
-      foreach (@res_aux) {
-	    @res = $_->get_resources;
-	    push( @ress, @res );
-      }
-      
-      $c->stash->{content} = \@bookings;
-      $c->stash->{bookings} = \@bookings;
-      $c->stash->{events} = \@events;
-      $c->stash->{resources} = \@ress;
-      $c->response->status(200);
-      $c->stash->{template} = 'booking/get_list.tt';
+    my ( $self, $c ) = @_;
+
+    my @booking_aux = $c->model('DB::Booking')->all;
+    my @booking;
+    my @bookings;
+
+    foreach (@booking_aux) {
+        @booking = $_->hash_booking;
+        push( @bookings, @booking );
+    }
+
+    $c->stash->{content} = \@bookings;
+    $c->stash->{bookings} = \@bookings;
+    $c->response->status(200);
+    $c->stash->{template} = 'booking/get_list.tt';
+
 }
 
 sub default_POST {
@@ -110,10 +90,10 @@ sub default_POST {
     #$c->log->debug(Dumper($req));
     $c->log->debug("El POST funciona");
 
-    my $id_resource = $req->parameters->{id_resource} ;
-    my $id_event    = $req->parameters->{id_event} ;
-    my $starts      = $req->parameters->{starts} ;
-    my $ends        = $req->parameters->{ends} ;
+    my $id_resource = $req->parameters->{id_resource} || $req->query('id_resource');
+    my $id_event    = $req->parameters->{id_event} || $req->query('id_event');
+    my $starts      = $req->parameters->{starts} || $req->query('starts');
+    my $ends        = $req->parameters->{ends} || $req->query('ends');
 
     my $new_booking = $c->model('DB::Booking')->find_or_new();
 

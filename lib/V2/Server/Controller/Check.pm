@@ -42,7 +42,7 @@ sub check_info :Local {
 sub check_booking : Local {
   my ($self, $c, $id_resource, $id_event) = @_;
 
-  my $resource = $c->model('DB::Resources')->find({id => $id_resource});
+  my $resource = $c->model('DB::Resource')->find({id => $id_resource});
   my $event = $c->model('DB::Event')->find({id => $id_event});
 
   if ($resource && $event) {

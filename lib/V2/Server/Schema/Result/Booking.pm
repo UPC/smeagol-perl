@@ -107,13 +107,13 @@ __PACKAGE__->add_columns(
   "dtend",
   { data_type => "datetime", is_nullable => 1 },
   "until",
-  { data_type => "text", is_nullable => 1 },
+  { data_type => "datetime", is_nullable => 1, datetime_undef_if_invalid => 1},
   "frequency",
   { data_type => "text", is_nullable => 1 },
   "interval",
   { data_type => "integer", is_nullable => 1 },
   "duration",
-  { data_type => "duration", is_nullable => 1 },
+  { data_type => "datetime:duration", is_nullable => 1 },
   "by_minute",
   { data_type => "integer", is_nullable => 1 },
   "by_hour",
@@ -165,14 +165,16 @@ use DateTime::Span;
 
 sub hash_booking {
       my ($self) = @_;
-      
-     my @booking = {
+      my @booking;
+
+#       if ($self->frequency ne 'no'){
+	@booking = {
 	    id          => $self->id,
 	    id_resource => $self->id_resource->id,
 	    id_event    => $self->id_event->id,
 	    dtstart      => $self->dtstart->iso8601(),
 	    dtend        => $self->dtend->iso8601(),
-	    until        => $self->until, 
+	    until        => $self->until,
 	    frequency    => $self->frequency,
 	    interval     => $self->interval,
 	    duration     => $self->duration,
@@ -181,7 +183,18 @@ sub hash_booking {
 	    by_day       => $self->by_day,
 	    by_month     => $self->by_month,
 	    by_day_month => $self->by_day_month
-      };
+	};
+#       }else{
+# 	@booking = {
+# 	    id          => $self->id,
+# 	    id_resource => $self->id_resource->id,
+# 	    id_event    => $self->id_event->id,
+# 	    dtstart      => $self->dtstart->iso8601(),
+# 	    dtend        => $self->dtend->iso8601(),
+# 	    duration     => $self->duration
+# 	};
+#       }
+
       return @booking;
 }
 

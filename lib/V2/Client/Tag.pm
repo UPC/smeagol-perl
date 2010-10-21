@@ -12,10 +12,11 @@ use HTTP::Response;
 use HTTP::Status qw(:constants :is status_message);
 use JSON::Any;
 use URI;
+use Data::Dumper;
 
 extends 'V2::Client';
 
-my $TAG_PATH = '/tag';
+my $REST_SEGMENT = 'tag';    # http://.../tag
 
 has 'id' => (
     is       => 'rw',
@@ -29,14 +30,12 @@ has 'description' => (
     required => 0,
 );
 
-# return http://server:port + '/tag'
-sub fullPath {
+override '_fullPath' => sub {
     my $self = shift;
-
-    my $uri = URI->new( $self->url );
-    $uri->path_segments('tag');
-    return $uri;
-}
+    my $uri  = URI->new( $self->url );
+    $uri->path_segments($REST_SEGMENT);
+    return $uri->as_string;
+};
 
 #
 # Retrieve all existing tags
@@ -45,7 +44,7 @@ sub fullPath {
 sub list {
     my $self = shift;
 
-    my $res = $self->ua->get( $self->url . $TAG_PATH );
+    my $res = $self->ua->get( $self->_fullPath() );
 
     return unless $res->code == HTTP_OK;
 
@@ -75,7 +74,7 @@ sub create {
     my ( $id, $description ) = ( $args{id}, $args{description} );
     return unless ( defined $id && defined $description );
 
-    my $res = $self->ua->post( $self->fullPath,
+    my $res = $self->ua->post( $self->_fullPath,
         [ id => $id, description => $description ] );
 
     return unless $res->code == HTTP_CREATED;
@@ -96,7 +95,7 @@ sub get {
 
     return unless defined $id;
 
-    my $res = $self->ua->get( $self->url . $TAG_PATH . '/' . $id );
+    my $res = $self->ua->get( $self->_fullPath . '/' . $id );
 
     if ( $res->code == HTTP_OK ) {
         my $tag = JSON::Any->from_json( $res->content, { utf8 => 1 } );
@@ -156,7 +155,7 @@ sub tag {
             && defined $description;
 
     my $req = HTTP::Request->new(
-        POST => $self->url . '/resource/' . $id . $TAG_PATH );
+        POST => $self->url . '/resource/' . $id . $REST_SEGMENT );
     $req->content_type('text/xml');
     my $tagXML = "<tag>$description</tag>";
     $req->content($tagXML);

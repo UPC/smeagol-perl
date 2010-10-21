@@ -27,23 +27,16 @@ has 'ua' => (
     default => sub {
         my $self = shift;
         my $ua   = LWP::UserAgent->new();
+        $ua->default_header( 'Accept' => 'application/json' );
         $ua->agent( $USER_AGENT_PREFIX . ' ' . $ua->_agent );
         return $ua;
     }
 );
 
-# REST path segment ('/tag', '/resource', '/booking', etc.)
-has '_restSegment' => (
-    isa      => 'Str',
-    is       => 'rw',
-    required => 0,
-);
-
 # return full url with REST path segment included (e.g. http://server:port/tag).
+# this method MUST BE OVERRIDEN in subclasses
 sub _fullPath {
-    $self = shift;
-    my $uri = URI->new( $self->url );
-    $uri->path_segments( $self->_restSegment ) if defined $self->_restSegment;
+    my $self = shift;
     return $self->url;
 }
 

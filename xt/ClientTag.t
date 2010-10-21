@@ -36,17 +36,18 @@ my $module     = 'V2::Client::Tag';
         methods( id => $id, description => $description ),
         "setters and getters ok"
     );
-    
-    note $sct->fullPath;
+
+    note "_fullPath: ", $sct->_fullPath;
+
 }
 
 sub testClientTagList {
-    my %args = @_;
-    my $mocked = defined $args{wantMock};
+    my %args          = @_;
+    my $mocked        = defined $args{wantMock};
     my $EXPECTED_TAGS = 8;
-    my $lwpUserAgent = new Test::MockModule('LWP::UserAgent');
+    my $lwpUserAgent  = new Test::MockModule('LWP::UserAgent');
 
-    if ( $mocked ) {
+    if ($mocked) {
         $EXPECTED_TAGS = 0;
         my $JSON_TAG_LIST = '[]';    # an empty list, in JSON
 
@@ -66,16 +67,19 @@ sub testClientTagList {
     can_ok( $sct, 'list' );
 
     my @list = $sct->list();
-    is( scalar @list, $EXPECTED_TAGS,
-        "number of elements () in empty tag list (wantMock = " . ($mocked ? 'yes' : 'no') . ")" );
-    
+    is( scalar @list,
+        $EXPECTED_TAGS,
+        "number of elements () in empty tag list (wantMock = "
+            . ( $mocked ? 'yes' : 'no' ) . ")"
+    );
+
     if ($mocked) {
-        $lwpUserAgent->unmock_all();        
+        $lwpUserAgent->unmock_all();
     }
 }
 
 testClientTagList( wantMock => 1 );
-testClientTagList(  );
+testClientTagList();
 
 =pod
 # Testing Client::Tag->list() with empty result list

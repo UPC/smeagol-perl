@@ -20,6 +20,8 @@ my $serverPort = 3000;
 my $server     = "http://localhost:$serverPort";
 my $module     = 'V2::Client::Tag';
 
+note "Tests for $module->new, getters and setters";
+
 # new(), setters and getters
 {
     can_ok( $module, 'new' );
@@ -37,19 +39,28 @@ my $module     = 'V2::Client::Tag';
         "setters and getters ok"
     );
 
-    note "_fullPath: ", $sct->_fullPath;
+    note "$module->_fullPath => ", $sct->_fullPath;
 
 }
 
 sub testClientTagList {
-    my %args          = @_;
-    my $mocked        = defined $args{wantMock};
-    my $EXPECTED_TAGS = 8;
-    my $lwpUserAgent  = new Test::MockModule('LWP::UserAgent');
+    my %args         = @_;
+    my $mocked       = defined $args{wantMock};
+    my $expected     = $args{expectedTags};
+    my $lwpUserAgent = new Test::MockModule('LWP::UserAgent');
 
     if ($mocked) {
-        $EXPECTED_TAGS = 0;
-        my $JSON_TAG_LIST = '[]';    # an empty list, in JSON
+        my $tags;
+        for ( my $i = 1; $i <= $expected; $i++ ) {
+            $tags
+                .= '{ "id" : "id' 
+                . $i
+                . '", "description" : "desc'
+                . $i . '" }';
+            $tags .= ', ' if ( $i < $expected );
+        }
+
+        my $JSON_TAG_LIST = "[ $tags ]";
 
         $lwpUserAgent->mock(
             'get',
@@ -68,8 +79,10 @@ sub testClientTagList {
 
     my @list = $sct->list();
     is( scalar @list,
-        $EXPECTED_TAGS,
-        "number of elements () in empty tag list (wantMock = "
+        $expected,
+        "number of elements ("
+            . ( scalar @list )
+            . ") in tag list (wantMock = "
             . ( $mocked ? 'yes' : 'no' ) . ")"
     );
 
@@ -78,103 +91,60 @@ sub testClientTagList {
     }
 }
 
-testClientTagList( wantMock => 1 );
-testClientTagList();
+note "Tests for $module->list";
 
-=pod
-# Testing Client::Tag->list() with empty result list
-{
-    my $EXPECTED_TAGS = 0;    # expected number of tags returned by server
+testClientTagList( wantMock => 1, expectedTags => 3 );
+testClientTagList( expectedTags => 8 );
 
-    #    my $JSON_TAG_LIST = '[]'; # an empty list, in JSON
+note "Testing $module->get()";
 
-    #    my $lwpUserAgent = new Test::MockModule('LWP::UserAgent');
-    #    $lwpUserAgent->mock(
-    #        'get',
-    #        sub {
-    #            my $res = HTTP::Response->new();
-    #            $res->content($JSON_TAG_LIST);
-    #            $res->code(HTTP_OK);
-    #            $res;
-    #        }
-    #    );
-
-    my $sct = $module->new( url => $server );
-    can_ok( $sct, 'list' );
-
-    my @list = $sct->list();
-    ok( scalar @list == $EXPECTED_TAGS,
-        'number of elements in empty tag list (not mocked)'
-    );
-}
-=cut
-
-# Testing Client::Tag->list() with non-empty result list
-TODO: {
-    my ( $id1, $desc1 ) = ( 'tag1', 'desc1' );
-    my ( $id2, $desc2 ) = ( 'tag2', 'desc2' );
-    my $EXPECTED_TAGS = 2; # expected number of tags returned by mocked server
-    my $JSON_TAG_LIST = '[ 
-             {"id": "' . $id1 . '", "description" : "' . $desc1 . '"},
-             {"id": "' . $id2 . '", "description" : "' . $desc2 . '"} 
-           ]';             # tag list to use when mocking
-
-    my $lwpUserAgent = new Test::MockModule('LWP::UserAgent');
-
-    $lwpUserAgent->mock(
-        'get',
-        sub {
-            my $res = HTTP::Response->new();
-            $res->content($JSON_TAG_LIST);
-            $res->code(HTTP_OK);
-            $res;
-        }
-    );
-
-    my $sct = $module->new( url => $server );
-    isa_ok( $sct, $module );
-    can_ok( $sct, 'list' );
-    my @list = $sct->list();
-    ok( @list == $EXPECTED_TAGS, 'number of elements in non-empty tag list' );
-
-    my ( $tag1, $tag2 ) = @list;
-    isa_ok( $tag1, $module ) || diag explain $tag1;
-    isa_ok( $tag2, $module ) || diag explain $tag2;
-
-    #is( ( $tag1->id, $tag1->description ), ( $id1, $desc1 ), 'tag1 found' );
-    #is( ( $tag2->id, $tag2->description ), ( $id2, $desc2 ), 'tag2 found' );
-}
-
-# Testing Client::Tag->get()
 # TODO: additional test for get(), with non-existent tag, needed
-TODO: {
+
+sub testClientTagGet {
+    my %args   = @_;
+    my $mocked = defined $args{wantMock};
     my ( $id, $desc ) = ( "myId", "myDescription" );
     my $JSON_TAG = '{ "id" : "' . $id . '", "description" : "' . $desc . '"}';
-
     my $lwpUserAgent = new Test::MockModule('LWP::UserAgent');
-    $lwpUserAgent->mock(
-        'get',
-        sub {
-            my $res = HTTP::Response->new();
-            $res->content($JSON_TAG);
-            $res->code(HTTP_OK);
-            $res;
-        }
-    );
+
+    if ($mocked) {
+        $lwpUserAgent->mock(
+            'get',
+            sub {
+                my $res = HTTP::Response->new();
+                $res->content($JSON_TAG);
+                $res->code(HTTP_OK);
+                $res;
+            }
+        );
+    }
 
     my $sct = $module->new( url => $server );
     isa_ok( $sct, $module );
     can_ok( $sct, 'get' );
 
-    my $tag = $sct->get($id);
+    my $tag = $sct->get( id => $id );
 
     isa_ok( $tag, $module );
 
-    #is( ( $tag->id, $tag->description ), ( $id, $desc ), "tag found" );
+    cmp_deeply(
+        $tag,
+        methods( id => $id, description => $desc ),
+        "tag attributes fully retrieved"
+    );
+
+    if ($mocked) {
+        $lwpUserAgent->unmock_all();
+    }
 }
 
-# Testing Client::Tag->create()
+testClientTagGet( wantMock => 1 );
+testClientTagGet();
+
+note "Testing Client::Tag->create()";
+
 #TODO: tests for create() when tag already exists, invalid id/description, etc
+
 TODO: {
     my ( $tagId, $tagDesc )
         = ( 'tagForCreateTests', 'tagForCreateTests description' );
@@ -238,6 +208,8 @@ TODO: {
 
 }
 
+note "Testing $module->update()";
+
 #UPDATE
 {
     my $tagId      = "tagId";
@@ -271,7 +243,8 @@ TODO: {
     is( $tag->description, $descAfter, "description has been updated" );
 }
 
-# Client::Tag->delete()
+note "Testing Client::Tag->delete()";
+
 TODO: {
 
     my $tagId = "id";

@@ -27,6 +27,8 @@ has 'ua' => (
     default => sub {
         my $self = shift;
         my $ua   = LWP::UserAgent->new();
+
+        # Hi, server! I can only speak JSON!
         $ua->default_header( 'Accept' => 'application/json' );
         $ua->agent( $USER_AGENT_PREFIX . ' ' . $ua->_agent );
         return $ua;

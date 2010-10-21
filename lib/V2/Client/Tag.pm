@@ -5,8 +5,6 @@ use warnings;
 
 use Moose;
 
-#use Data::Dumper;
-
 use HTTP::Request::Common;
 use HTTP::Response;
 use HTTP::Status qw(:constants :is status_message);
@@ -81,7 +79,7 @@ sub create {
 
     # after creation, the server returns the location of the new
     # tag as an HTTP header, but we must return a Client::Tag instance
-    return $self->get( $res->header('Location') );
+    return $self->get( id => $res->header('Location') );
 }
 
 #
@@ -91,16 +89,24 @@ sub create {
 #
 sub get {
     my $self = shift;
-    my ($id) = @_;
+    my %args = @_;
 
-    return unless defined $id;
+    return unless defined $args{id};
+    my $id = $args{id};
 
-    my $res = $self->ua->get( $self->_fullPath . '/' . $id );
+    # build url for GET request /tag/ID
+    my $uri = URI->new( $self->_fullPath );
+    $uri->path_segments($id);
+
+    my $res = $self->ua->get( $uri->as_string );
 
     if ( $res->code == HTTP_OK ) {
-        my $tag = JSON::Any->from_json( $res->content, { utf8 => 1 } );
-        $self->{id} = $tag->{'id'};
-        return $self;
+        my $object = JSON::Any->from_json( $res->content, { utf8 => 1 } );
+        print Dumper( $res->content );
+        my $tag = V2::Client::Tag->new( url => $self->url );
+        $tag->{id}          = $object->{'id'};
+        $tag->{description} = $object->{'description'};
+        return $tag;
     }
     return;
 }

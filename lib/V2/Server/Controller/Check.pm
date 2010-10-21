@@ -6,77 +6,83 @@ use parent 'Catalyst::Controller';
 
 use Data::Dumper;
 
-sub check_name :Local {
- my ($self, $c, $name) = @_;
+sub check_name : Local {
+    my ( $self, $c, $name ) = @_;
 
- if (length($name) < 64 ){
-   $c->stash->{name_ok}=1;
- }else{
-    $c->stash->{name_ok}=0;
- }
+    if ( length($name) < 64 ) {
+        $c->stash->{name_ok} = 1;
+    }
+    else {
+        $c->stash->{name_ok} = 0;
+    }
 
 }
 
-sub check_desc :Local {
- my ($self, $c, $desc) = @_;
+sub check_desc : Local {
+    my ( $self, $c, $desc ) = @_;
 
-  if (length($desc) < 128 ){
-    $c->log->debug("Descr OK");
-   $c->stash->{desc_ok}=1;
- }else{
-   $c->log->debug("Descr KO");
-   $c->stash->{desc_ok}=0;
- }
+    if ( length($desc) < 128 ) {
+        $c->log->debug("Descr OK");
+        $c->stash->{desc_ok} = 1;
+    }
+    else {
+        $c->log->debug("Descr KO");
+        $c->stash->{desc_ok} = 0;
+    }
 }
 
-sub check_info :Local {
- my ($self, $c, $info) = @_;
+sub check_info : Local {
+    my ( $self, $c, $info ) = @_;
 
-  if (length($info) < 256 ){
-   $c->stash->{info_ok}=1;
- }else{
-   $c->stash->{info_ok}=0;
- }
+    if ( length($info) < 256 ) {
+        $c->stash->{info_ok} = 1;
+    }
+    else {
+        $c->stash->{info_ok} = 0;
+    }
 }
 
 sub check_booking : Local {
-  my ($self, $c, $id_resource, $id_event) = @_;
+    my ( $self, $c, $id_resource, $id_event ) = @_;
 
-  my $resource = $c->model('DB::Resource')->find({id => $id_resource});
-  my $event = $c->model('DB::Event')->find({id => $id_event});
+    my $resource = $c->model('DB::Resource')->find( { id => $id_resource } );
+    my $event = $c->model('DB::Event')->find( { id => $id_event } );
 
-  if ($resource && $event) {
-    $c->stash->{booking_ok}=1;
-  } else {
-    $c->stash->{booking_ok}=0;
-  }
+    if ( $resource && $event ) {
+        $c->stash->{booking_ok} = 1;
+    }
+    else {
+        $c->stash->{booking_ok} = 0;
+    }
 
 }
 
 sub check_event : Local {
-  my ($self, $c, $info, $description) = @_;
+    my ( $self, $c, $info, $description ) = @_;
 
-  $c->visit('check_info', [$info]);
-  $c->visit('check_desc', [$description]);
+    $c->visit( 'check_info', [$info] );
+    $c->visit( 'check_desc', [$description] );
 
-  if ($c->stash->{info_ok} && $c->stash->{desc_ok}) {
-    $c->stash->{event_ok} = 1;
-  }else{
-    $c->stash->{event_ok} = 0;
-  }
+    if ( $c->stash->{info_ok} && $c->stash->{desc_ok} ) {
+        $c->stash->{event_ok} = 1;
+    }
+    else {
+        $c->stash->{event_ok} = 0;
+    }
 }
 
-sub check_resource :Local {
-  my ($self, $c, $info, $description) = @_;
+sub check_resource : Local {
+    my ( $self, $c, $info, $description ) = @_;
 
-  $c->visit('check_info', [$info]);
-  $c->visit('check_desc', [$description]);
+    $c->visit( 'check_info', [$info] );
+    $c->visit( 'check_desc', [$description] );
 
-  if ($c->stash->{info_ok} && $c->stash->{desc_ok}) {
-    $c->stash->{resource_ok} = 1;
-  }else{
-    $c->stash->{resource_ok} = 0;
-  }
+    if ( $c->stash->{info_ok} && $c->stash->{desc_ok} ) {
+        $c->stash->{resource_ok} = 1;
+    }
+    else {
+        $c->stash->{resource_ok} = 0;
+    }
 }
 
 =head1 AUTHOR

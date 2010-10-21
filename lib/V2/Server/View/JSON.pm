@@ -19,9 +19,8 @@ Catalyst JSON View.
 
 __PACKAGE__->config(
     expose_stash => 'content',
-    allow_nonref => 1 ,
+    allow_nonref => 1,
 );
-
 
 =head1 AUTHOR
 

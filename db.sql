@@ -95,10 +95,10 @@ INSERT INTO resource_tag VALUES (5,'microfons inalambrics');
 INSERT INTO resource_tag VALUES (5,'videoconferencia');
 INSERT INTO resource_tag VALUES (5,'wireless');
 
-INSERT INTO event values(1,'Informació 1',"Descripció de l'event",'2010-02-16 04:00:00','2010-02-16 05:00:00');
-INSERT INTO event values (2,'Informació 2',"Descripció de l'event",'2010-02-16 04:00:00','2010-02-16 05:00:00');
-INSERT INTO event values(3,'Informació 3',"Descripció de l'event",'2010-02-16 04:00:00','2010-02-16 05:00:00');
-INSERT INTO event values(4,'Informació 4',"Descripció de l'event",'2010-02-16 04:00:00','2010-02-16 05:00:00');
+INSERT INTO event values(1,'Informació 1',"Descripció de l'event 1",'2010-02-16 04:00:00','2010-02-16 05:00:00');
+INSERT INTO event values (2,'Informació 2',"Descripció de l'event 2",'2010-02-16 04:00:00','2010-02-16 05:00:00');
+INSERT INTO event values(3,'Informació 3',"Descripció de l'event 3",'2010-02-16 04:00:00','2010-02-16 05:00:00');
+INSERT INTO event values(4,'Informació 4',"Descripció de l'event 4",'2010-02-16 04:00:00','2010-02-16 05:00:00');
 
 INSERT INTO booking values (1,3,1,'2010-02-16 04:00:00','2010-02-16 05:00:00','01:00:00','no','','wewew','','','','','');
 INSERT INTO booking values (2,4,1,'2010-02-16 05:00:00','2010-02-16 06:00:00','01:00:00','daily','2','2011-01-01','00','05','mo,tu,we,th,fr','','');

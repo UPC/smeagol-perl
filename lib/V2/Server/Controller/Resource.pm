@@ -22,12 +22,12 @@ Catalyst Controller.
 
 =cut
 
-sub begin :Private {
-      my ($self, $c) = @_;
+sub begin : Private {
+    my ( $self, $c ) = @_;
 
-      $c->stash->{format} = $c->request->headers->{"accept"} || 'application/json';
+    $c->stash->{format} = $c->request->headers->{"accept"}
+        || 'application/json';
 }
-
 
 sub default : Path : ActionClass('REST') {
 }
@@ -48,19 +48,18 @@ sub get_resource : Private {
     my $resource = $c->model('DB::Resources')->find( { id => $id } );
 
     if ( !$resource ) {
-	
-      my @message = {
-	    message => "We can't find what you are looking for."
-      };
-      $c->stash->{content} = \@message;
-      $c->stash->{template} = 'old_not_found.tt';
-      $c->response->status(404);
+
+        my @message
+            = { message => "We can't find what you are looking for." };
+        $c->stash->{content}  = \@message;
+        $c->stash->{template} = 'old_not_found.tt';
+        $c->response->status(404);
     }
     else {
         my @resource;
         push( @resource, $resource->get_resources );
         $c->stash->{resource} = \@resource;
-	$c->stash->{content} = \@resource;
+        $c->stash->{content}  = \@resource;
         $c->response->status(200);
         $c->stash->{template} = 'resource/get_resource.tt';
     }
@@ -77,7 +76,7 @@ sub resource_list : Private {
     }
 
     $c->stash->{resources} = \@resources;
-    $c->stash->{content} = \@resources;
+    $c->stash->{content}   = \@resources;
     $c->response->status(200);
     $c->stash->{template} = 'resource/get_list.tt';
 }
@@ -96,75 +95,77 @@ sub default_POST {
     my $tags_aux = $req->parameters->{tags};
     my @tags = split( /,/, $tags_aux );
 
-    $c->visit('/check/check_event', [$info, $descr]);
-    # If all is correct $c->stash->{event_ok} should be 1, otherwise it will be 0.
+    $c->visit( '/check/check_event', [ $info, $descr ] );
 
-    if ($c->stash->{resource_ok}){
+# If all is correct $c->stash->{event_ok} should be 1, otherwise it will be 0.
 
-      my $new_resource = $c->model('DB::Resources')->find_or_new();
+    if ( $c->stash->{resource_ok} ) {
 
-      $new_resource->description($descr);
-      $new_resource->info($info);
-      $new_resource->insert;
+        my $new_resource = $c->model('DB::Resources')->find_or_new();
 
-      $c->log->debug( "La id del nou recurs és: " . $new_resource->id );
+        $new_resource->description($descr);
+        $new_resource->info($info);
+        $new_resource->insert;
 
-  #Buscarem si els tags ja existeixen, en cas de no existir els crearem
-  #Cal omplir DB::ResourceTag per a establir la relació entre els tags i els recursos
+        $c->log->debug( "La id del nou recurs és: " . $new_resource->id );
 
-      my $TagID;
+#Buscarem si els tags ja existeixen, en cas de no existir els crearem
+#Cal omplir DB::ResourceTag per a establir la relació entre els tags i els recursos
 
-      foreach (@tags) {
-	  $TagID = $c->model('DB::Tag')->find( { id => $_ } );
+        my $TagID;
 
-	  if ($TagID) {
-	      $c->log->debug( 'Llista id\'s tag: ' . $TagID->id );
+        foreach (@tags) {
+            $TagID = $c->model('DB::Tag')->find( { id => $_ } );
 
-	   #Si el tag existeix, fem constar a ResourceTag la relació recurs-tag
-	      my $ResTag = $c->model('DB::ResourceTag')->find_or_new();
-	      $ResTag->resource_id( $new_resource->id );
-	      $ResTag->tag_id( $TagID->id );
-	      $ResTag->insert;
+            if ($TagID) {
+                $c->log->debug( 'Llista id\'s tag: ' . $TagID->id );
 
-	  }
-	  else {
+         #Si el tag existeix, fem constar a ResourceTag la relació recurs-tag
+                my $ResTag = $c->model('DB::ResourceTag')->find_or_new();
+                $ResTag->resource_id( $new_resource->id );
+                $ResTag->tag_id( $TagID->id );
+                $ResTag->insert;
 
-	      #Si el tag no existeix, el creem i repetim com a dalt
-	      my $new_tag = $c->model('DB::Tag')->find_or_new();
+            }
+            else {
 
-	      $new_tag->id($_);
-	      $new_tag->insert;
+                #Si el tag no existeix, el creem i repetim com a dalt
+                my $new_tag = $c->model('DB::Tag')->find_or_new();
 
-	      $c->log->debug( 'Nou tag: ' . $new_tag->id );
+                $new_tag->id($_);
+                $new_tag->insert;
 
-	      my $ResTag = $c->model('DB::ResourceTag')->find_or_new();
-	      $ResTag->resource_id( $new_resource->id );
-	      $ResTag->tag_id( $new_tag->id );
-	      $ResTag->insert;
-	  }
-      }
+                $c->log->debug( 'Nou tag: ' . $new_tag->id );
 
-  #Un cop tenim el tema dels tags aclarit, muntem el json amb les dades del recurs
-      my @resource = {
-	  id          => $new_resource->id,
-	  description => $new_resource->description,
-	  info        => $new_resource->info,
-	  tags        => $new_resource->tag_list,
-      };
+                my $ResTag = $c->model('DB::ResourceTag')->find_or_new();
+                $ResTag->resource_id( $new_resource->id );
+                $ResTag->tag_id( $new_tag->id );
+                $ResTag->insert;
+            }
+        }
 
-      $c->stash->{resource} = \@resource;
-      $c->stash->{content} = \@resource;
-      $c->response->status(201);
-      $c->response->content_type('text/html');
-      $c->stash->{template} = 'resource/get_resource.tt';
-    } else {
-      my @message = {
-	 message => "Error: Check the info and description of the resource",
-      };
-      $c->stash->{content} = \@message;
-      $c->response->status(400);
-      $c->stash->{error} = "Error: Check the info and description of the resource";
-      $c->stash->{template} = 'resource/get_list';
+#Un cop tenim el tema dels tags aclarit, muntem el json amb les dades del recurs
+        my @resource = {
+            id          => $new_resource->id,
+            description => $new_resource->description,
+            info        => $new_resource->info,
+            tags        => $new_resource->tag_list,
+        };
+
+        $c->stash->{resource} = \@resource;
+        $c->stash->{content}  = \@resource;
+        $c->response->status(201);
+        $c->response->content_type('text/html');
+        $c->stash->{template} = 'resource/get_resource.tt';
+    }
+    else {
+        my @message = { message =>
+                "Error: Check the info and description of the resource", };
+        $c->stash->{content} = \@message;
+        $c->response->status(400);
+        $c->stash->{error}
+            = "Error: Check the info and description of the resource";
+        $c->stash->{template} = 'resource/get_list';
     }
 }
 
@@ -174,89 +175,93 @@ sub default_PUT {
     $c->log->debug( 'Mètode: ' . $req->method );
     $c->log->debug("El PUT funciona");
 
-    my $descr = $req->parameters->{description} || $req->{headers}->{description};
+    my $descr = $req->parameters->{description}
+        || $req->{headers}->{description};
 
     $c->log->debug( "Description: " . $descr );
 
     my $tags_aux = $req->parameters->{tags} || $req->{headers}->{tags};
     my $info     = $req->parameters->{info} || $req->{headers}->{info};
-    my @tags     = split( /,/, $tags_aux );
+    my @tags = split( /,/, $tags_aux );
 
     my $resource = $c->model('DB::Resources')->find( { id => $id } );
 
     if ($resource) {
-          $c->visit('/check/check_event', [$info, $descr]);
-    # If all is correct $c->stash->{event_ok} should be 1, otherwise it will be 0.
-	  if ($c->stash->{resource_ok}){
-	    $resource->description($descr);
-	    $resource->info($info);
-	    $resource->update;
+        $c->visit( '/check/check_event', [ $info, $descr ] );
 
-	    my $TagID;
+# If all is correct $c->stash->{event_ok} should be 1, otherwise it will be 0.
+        if ( $c->stash->{resource_ok} ) {
+            $resource->description($descr);
+            $resource->info($info);
+            $resource->update;
 
-	    my @old_tags
-		= $c->model('DB::ResourceTag')->search( { resource_id => $id } );
+            my $TagID;
 
-	    foreach (@old_tags) {
-		$c->log->debug( 'Tags vells: ' . $_->tag_id );
-		$_->delete;
-	    }
+            my @old_tags = $c->model('DB::ResourceTag')
+                ->search( { resource_id => $id } );
 
-	    foreach (@tags) {
-		$TagID = $c->model('DB::Tag')->find( { id => $_ } );
+            foreach (@old_tags) {
+                $c->log->debug( 'Tags vells: ' . $_->tag_id );
+                $_->delete;
+            }
 
-		if ($TagID) {
+            foreach (@tags) {
+                $TagID = $c->model('DB::Tag')->find( { id => $_ } );
 
-	     #Si el tag existeix, fem constar a ResourceTag la relació recurs-tag
-		    my $ResTag = $c->model('DB::ResourceTag')->find_or_new();
-		    $ResTag->resource_id( $resource->id );
-		    $ResTag->tag_id( $TagID->id );
-		    $ResTag->insert;
+                if ($TagID) {
 
-		}
-		else {
+         #Si el tag existeix, fem constar a ResourceTag la relació recurs-tag
+                    my $ResTag = $c->model('DB::ResourceTag')->find_or_new();
+                    $ResTag->resource_id( $resource->id );
+                    $ResTag->tag_id( $TagID->id );
+                    $ResTag->insert;
 
-		    #Si el tag no existeix, el creem i repetim com a dalt
-		    my $new_tag = $c->model('DB::Tag')->find_or_new();
+                }
+                else {
 
-		    $new_tag->id($_);
-		    $new_tag->insert;
+                    #Si el tag no existeix, el creem i repetim com a dalt
+                    my $new_tag = $c->model('DB::Tag')->find_or_new();
 
-		    $c->log->debug( 'Nou tag: ' . $new_tag->id );
+                    $new_tag->id($_);
+                    $new_tag->insert;
 
-		    my $ResTag = $c->model('DB::ResourceTag')->find_or_new();
-		    $ResTag->resource_id( $resource->id );
-		    $ResTag->tag_id( $new_tag->id );
-		    $ResTag->insert;
-		}
+                    $c->log->debug( 'Nou tag: ' . $new_tag->id );
 
-	    }
+                    my $ResTag = $c->model('DB::ResourceTag')->find_or_new();
+                    $ResTag->resource_id( $resource->id );
+                    $ResTag->tag_id( $new_tag->id );
+                    $ResTag->insert;
+                }
 
-	    my @resource = {
-		id          => $resource->id,
-		description => $resource->description,
-		info        => $resource->info,
-		tags        => $resource->tag_list,
-	    };
+            }
 
-	    $c->stash->{resource} = \@resource;
-	    $c->stash->{content} = \@resource;
-	    $c->response->status(200);
-	  } else {
-	    my @message = {
-	       message => "Error: Check the info and description of the resource",
-	    };
-	    $c->stash->{content} = \@message;
-	    $c->response->status(400);
-	    $c->stash->{error} = "Error: Check the info and description of the resource";
-	    $c->stash->{template} = 'resource/get_list';
-	}
+            my @resource = {
+                id          => $resource->id,
+                description => $resource->description,
+                info        => $resource->info,
+                tags        => $resource->tag_list,
+            };
+
+            $c->stash->{resource} = \@resource;
+            $c->stash->{content}  = \@resource;
+            $c->response->status(200);
+        }
+        else {
+            my @message
+                = { message =>
+                    "Error: Check the info and description of the resource",
+                };
+            $c->stash->{content} = \@message;
+            $c->response->status(400);
+            $c->stash->{error}
+                = "Error: Check the info and description of the resource";
+            $c->stash->{template} = 'resource/get_list';
+        }
     }
     else {
-	  my @message = {
-		message => "We can't find what you are looking for."
-	  };
-	$c->stash->{content} = \@message;
+        my @message
+            = { message => "We can't find what you are looking for." };
+        $c->stash->{content}  = \@message;
         $c->stash->{template} = 'old_not_found.tt';
         $c->response->status(404);
     }
@@ -282,25 +287,25 @@ sub default_DELETE {
         $c->go("/resource/resource_list");
     }
     else {
-	  
-	  my @message = {
-		message => "We can't find what you are looking for."
-	  };
-	  $c->stash->{content} = \@message;
+
+        my @message
+            = { message => "We can't find what you are looking for." };
+        $c->stash->{content}  = \@message;
         $c->stash->{template} = 'old_not_found.tt';
         $c->response->status(404);
     }
 
 }
 
-sub end :Private {
-      my ($self,$c)= @_;
-      
-      if ($c->stash->{format} ne "application/json") {
-	    $c->forward( $c->view('HTML') );      
-      }else{
-	    $c->forward( $c->view('JSON') );	        
-      }
+sub end : Private {
+    my ( $self, $c ) = @_;
+
+    if ( $c->stash->{format} ne "application/json" ) {
+        $c->forward( $c->view('HTML') );
+    }
+    else {
+        $c->forward( $c->view('JSON') );
+    }
 }
 
 =head1 AUTHOR

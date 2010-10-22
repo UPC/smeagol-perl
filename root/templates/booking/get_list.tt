@@ -13,5 +13,111 @@
 [% END %]
 </ul>
 
+<h3>Create Booking</h3>
+[% USE date(format = '%Y-%m-%d') %]
+
+<form action="" method="post">
+<p><label>Date (AAAA-MM-DD): </label><input name="dtstart" placeholder="[% date.format(date.now) %]"></p>
+
+<p><label>Start Time: </label>
+
+<select name="shour">
+<OPTION selected value="00">00</OPTION>
+[% SET hour=1 %]
+[% WHILE hour< 24 %]
+  [% IF hour < 10 %]
+  <OPTION value="0[% hour %]">0[% hour %]</OPTION>
+  [% ELSE %]
+  <OPTION value="[% hour %]">[% hour %]</OPTION>
+  [% END %]
+  [% hour = hour +1 %]
+[% END %]
+</select> hours
+
+<select name="sminute">
+<OPTION selected value="00">00</OPTION>
+[% SET minute=5 %]
+[% WHILE minute< 60 %]
+  <OPTION value="[% minute %]">[% minute %]</OPTION>
+  [% minute = minute +5 %]
+[% END %]
+</select> minutes</p>
+
+<p><label>End Time: </label>
+
+<select name="ehour">
+<OPTION selected value="00">00</OPTION>
+[% SET hour=1 %]
+[% WHILE hour< 24 %]
+  [% IF hour < 10 %]
+  <OPTION value="0[% hour %]">0[% hour %]</OPTION>
+  [% ELSE %]
+  <OPTION value="[% hour %]">[% hour %]</OPTION>
+  [% END %]
+  [% hour = hour +1 %]
+[% END %]
+</select> hours
+
+<select name="eminute">
+<OPTION selected value="00">00</OPTION>
+[% SET minute=5 %]
+[% WHILE minute< 60 %]
+  <OPTION value="[% minute %]">[% minute %]</OPTION>
+  [% minute = minute +5 %]
+[% END %]
+</select> minutes</p>
+
+
+<p>
+<label> Event: </label>
+<select name='id_event'>
+[% FOREACH ev IN events %]
+  <option value="[% ev.id %]">[% ev.description %]</option>
+[% END %]
+</select>
+
+<label> Resource: </label>
+<select name='id_resource'>
+[% FOREACH res IN resources %]
+  <option value="[% res.id %]">[% res.description %]</option>
+[% END %]
+</select>
+</p>
+
+<p><label>Repeat</label>
+<select name="frequency">
+<option selected value="no">No</option>
+<option value="daily">Daily</option>
+<option value="weekly">Weekly</option>
+<option value="monthly">Monthly</option>
+<option value="yearly">Yearly</option>
+</select>
+<label>
+Interval
+</label>
+<select name='interval'>
+[% SET interval=1 %]
+[% WHILE interval< 30 %]
+  [% IF interval < 10 %]
+  <OPTION value="0[% interval %]">0[% interval %]</OPTION>
+  [% ELSE %]
+  <OPTION value="[% interval %]">[% interval %]</OPTION>
+  [% END %]
+  [% interval = interval +1 %]
+[% END %]
+</select></p>
+<p><label>Recurrence end  </label><input name="dtend" placeholder="[% date.format(date.now) %]"></p>
+<label>Repetition days</label>
+<input type="checkbox" name="byday" value="mo"/> Monday
+<input type="checkbox" name="byday" value="tu"/> Tuesday
+<input type="checkbox" name="byday" value="we"/> Wednesday
+<input type="checkbox" name="byday" value="th"/> Thursday
+<input type="checkbox" name="byday" value="fr"/> Friday
+<input type="checkbox" name="byday" value="sa"/> Saturday
+<input type="checkbox" name="byday" value="su"/> Sunday
+
+<p><input type=submit value="New Booking!"><INPUT type="reset"></p>
+</form>
+</p>
 [%# USE Dumper %]
 [%# Dumper.dump_html(resources) %]

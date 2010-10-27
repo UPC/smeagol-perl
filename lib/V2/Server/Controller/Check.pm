@@ -1,10 +1,10 @@
 package V2::Server::Controller::Check;
 
-use strict;
-use warnings;
-use parent 'Catalyst::Controller';
-
+use Moose;
+use namespace::autoclean;
 use Data::Dumper;
+
+BEGIN { extends 'Catalyst::Controller::REST' }
 
 sub check_name :Local {
  my ($self, $c, $name) = @_;
@@ -40,9 +40,14 @@ sub check_info :Local {
 }
 
 sub check_booking : Local {
-  my ($self, $c, $id_resource, $id_event) = @_;
+  my ($self, $c) = @_;
+  my $id_resource = $c->stash->{id_resource};
+  my $id_event = $c->stash->{id_event};
 
-  my $resource = $c->model('DB::Resource')->find({id => $id_resource});
+  $c->log->debug("Check booking. ID resource: ".$id_resource);
+  $c->log->debug("Check booking. ID event: ".$id_event);
+  
+  my $resource = $c->model('DB::Resources')->find({id => $id_resource});
   my $event = $c->model('DB::Event')->find({id => $id_event});
 
   if ($resource && $event) {
@@ -77,6 +82,12 @@ sub check_resource :Local {
   }else{
     $c->stash->{resource_ok} = 0;
   }
+}
+
+sub check_overlap :Local {
+  my ($self, $c, $new_booking) = @_;
+  $c->log->debug("Provant si hi ha solapament");
+  $c->stash->{overlap} = 0;
 }
 
 =head1 AUTHOR

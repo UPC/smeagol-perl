@@ -74,6 +74,7 @@ sub booking_list : Private {
 
     foreach (@booking_aux) {
         @booking = $_->hash_booking;
+	$c->log->debug("Duration booking #".$_->id.": ".$_->duration);
         push( @bookings, @booking );
     }
 
@@ -98,56 +99,49 @@ sub default_POST {
 
     my $id_resource = $req->parameters->{id_resource};
     my $id_event    = $req->parameters->{id_event};
+    
     my $dtstart     = $req->parameters->{dtstart};
     my $dtend       = $req->parameters->{dtend};
+    my $duration;
+
     my $frequency   = $req->parameters->{frequency};
     my $interval    = $req->parameters->{interval};
-    my $dhour       = $req->parameters->{dhour};
-    my $dminute     = $req->parameters->{dminute};
-    my $shour       = $req->parameters->{shour};
-    my $sminute     = $req->parameters->{sminute};
-    my $by_day;
-    my $by_day_aux   = $req->parameters->{byday};
-    my $by_month     = $req->parameters->{by_month};
+    my $until       = $req->parameters->{until};
+
+    my $by_minute = $req->parameters->{by_minute};
+    my $by_hour = $req->parameters->{by_hour};
+    my $by_day = $req->parameters->{by_day};
+    my $by_month = $req->parameters->{by_month};
     my $by_day_month = $req->parameters->{by_day_month};
 
     my $new_booking = $c->model('DB::Booking')->find_or_new();
-$c->log->debug("ID resource ".$id_resource);
-$c->log->debug("ID event ".$id_resource);
-    $c->visit( '/check/check_booking', [ $id_resource, $id_event ] )
+    $c->stash->{id_event} = $id_event;
+    $c->stash->{id_resource} = $id_resource;
+
+    $c->visit( '/check/check_booking', [ ] )
         ;    #Do the resource and the event exist?
 
-    if ( $frequency eq 'no' ) {
-        $by_day = '';
-        $dtend  = ParseDate( $req->parameters->{dtstart} );
-    }
-    else {
-        if ($by_day_aux) { $by_day = join( ',', @{$by_day_aux} ); }
-        else             { $by_day = ''; }
-        if ( $req->parameters->{dtend} ) {
-            $dtend = ParseDate( $req->parameters->{dtend} );
-        }
-        else { $dtend = ""; }
-    }
+    $dtstart = ParseDate($dtstart);
+    $dtend = ParseDate($dtend);
+    $duration = $dtend - $dtstart;
 
-    $c->log->debug( "By_day: " . $by_day );
+    $new_booking->id_resource($id_resource);
+    $new_booking->id_event($id_event);
+    $new_booking->dtstart($dtstart);
+    $new_booking->dtend($dtend);
+    $new_booking->duration($duration->in_units("minutes"));
+    $new_booking->frequency($frequency);
+    $new_booking->interval($interval);
+    $new_booking->until($until);
+    $new_booking->by_minute($by_minute);
+    $new_booking->by_hour($by_hour);
+    $new_booking->by_day($by_day);
+    $new_booking->by_month($by_month);
+    $new_booking->by_day_month($by_day_month);
+
+    $c->visit('/check/check_overlap',[$new_booking]);
 
     if ( $c->stash->{booking_ok} == 1 ) {
-
-        $new_booking->id_resource($id_resource);
-        $new_booking->id_event($id_event);
-        $new_booking->dtstart( ParseDate($dtstart) );
-        $new_booking->dtend($dtend);
-        $new_booking->frequency($frequency);
-        $new_booking->interval($interval);
-        $new_booking->duration( $dhour . ":" . $dminute . ":00" );
-        $new_booking->by_minute($sminute);
-        $new_booking->by_hour($shour);
-        $new_booking->by_day($by_day);
-        $new_booking->by_month($by_month);
-        $new_booking->by_day_month($by_day_month);
-
-        $c->visit( '/check/check_overlap', [ $new_booking->hash_booking ] );
 
         if ( $c->stash->{overlap} == 1 ) {
             $c->log->debug("Hi ha solapament \n");
@@ -298,7 +292,7 @@ sub ParseDate {
     my ( $day, $hour ) = split( /T/, $date_str );
 
     my ( $year,  $month, $nday ) = split( /-/, $day );
-    my ( $nhour, $min,   $sec )  = split( /:/, $hour );
+    my ( $nhour, $min)  = split( /:/, $hour );
 
     my $date = DateTime->new(
         year   => $year,
@@ -306,7 +300,6 @@ sub ParseDate {
         day    => $nday,
         hour   => $nhour,
         minute => $min,
-        second => $sec,
     );
 
     return $date;

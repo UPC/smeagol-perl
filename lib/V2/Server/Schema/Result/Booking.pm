@@ -161,13 +161,14 @@ __PACKAGE__->belongs_to(
 # Created by DBIx::Class::Schema::Loader v0.07000 @ 2010-10-15 15:48:04
 # DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:7kVGJeM2G+qM/nXRN5Xy4A
 use DateTime;
+use DateTime::Duration;
 use DateTime::Span;
 
 sub hash_booking {
       my ($self) = @_;
       my @booking;
 
-#       if ($self->frequency ne 'no'){
+
 	@booking = {
 	    id          => $self->id,
 	    id_resource => $self->id_resource->id,
@@ -177,42 +178,18 @@ sub hash_booking {
 	    until        => $self->until,
 	    frequency    => $self->frequency,
 	    interval     => $self->interval,
-	    duration     => $self->duration,
+	    duration     => $self->duration,#->in_units("minutes"),
 	    by_minute    => $self->by_minute,
 	    by_hour      => $self->by_hour,
 	    by_day       => $self->by_day,
 	    by_month     => $self->by_month,
 	    by_day_month => $self->by_day_month
 	};
-#       }else{
-# 	@booking = {
-# 	    id          => $self->id,
-# 	    id_resource => $self->id_resource->id,
-# 	    id_event    => $self->id_event->id,
-# 	    dtstart      => $self->dtstart->iso8601(),
-# 	    dtend        => $self->dtend->iso8601(),
-# 	    duration     => $self->duration
-# 	};
-#       }
 
       return @booking;
 }
 
-sub overlap {
-      my ( $self, $current_set ) = @_;
-      my $overlap         = 0;
-      my $old_booking_set = DateTime::Span->from_datetimes(
-      (   start => $self->dtstart,
-	  end   => $self->dtend->clone->subtract( seconds => 1 )
-	  )
-	  );
-	  
-	  if ( $old_booking_set->intersects($current_set) ) {
-		$overlap = 1;
-	  }
-	  
-	  return $overlap;
-}
+
 
 # You can replace this text with custom content, and it will be preserved on regeneration
 1;

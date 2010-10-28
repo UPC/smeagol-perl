@@ -100,7 +100,7 @@ INSERT INTO event values (2,'Informació 2',"Descripció de l'event 2",'2010-02-
 INSERT INTO event values(3,'Informació 3',"Descripció de l'event 3",'2010-02-16 04:00:00','2010-02-16 05:00:00');
 INSERT INTO event values(4,'Informació 4',"Descripció de l'event 4",'2010-02-16 04:00:00','2010-02-16 05:00:00');
 
-INSERT INTO booking values (1,3,1,'2010-02-16 04:00:00','2010-02-16 05:00:00','60','no','','wewew','','','','','');
+INSERT INTO booking values (1,3,1,'2010-02-16 04:00:00','2010-02-16 05:00:00','60','daily','1','2010-02-16','00','04','','','');
 INSERT INTO booking values (2,4,1,'2010-02-16 05:00:00','2010-02-16 06:00:00','60','daily','2','2011-01-01','00','05','mo,tu,we,th,fr','','');
 INSERT INTO booking values (3,5,2,'2010-02-16 06:00:00','2010-02-16 07:00:00','60','weekly','2','2011-01-01','00','06','mo,tu,we,th,fr','','');
 INSERT INTO booking values (4,2,3,'2010-02-16 07:00:00','2010-02-16 08:00:00','60','monthly','1','2011-01-01','00','07','mo,tu,we,th,fr','','');

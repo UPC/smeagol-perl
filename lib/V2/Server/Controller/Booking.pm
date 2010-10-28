@@ -104,14 +104,24 @@ sub default_POST {
     my $dtend       = $req->parameters->{dtend};
     my $duration;
 
-    my $frequency   = $req->parameters->{frequency};
-    my $interval    = $req->parameters->{interval};
-    my $until       = $req->parameters->{until};
+    #dtstart and dtend are parsed in case that some needed parameters to build the recurrence of the booking aren't provided
+    
+    $dtstart = ParseDate($dtstart);
+    $dtend = ParseDate($dtend);
+    $duration = $dtend - $dtstart;
 
-    my $by_minute = $req->parameters->{by_minute};
-    my $by_hour = $req->parameters->{by_hour};
-    my $by_day = $req->parameters->{by_day};
-    my $by_month = $req->parameters->{by_month};
+    my $frequency   = $req->parameters->{frequency} || "daily" ;
+    my $interval    = $req->parameters->{interval} || 1;
+    my $until       = $req->parameters->{until} || $req->parameters->{dtend};
+
+    my $by_minute = $req->parameters->{by_minute} || $dtstart->minute;
+    my $by_hour = $req->parameters->{by_hour} || $dtstart->hour;
+
+    #by_day may not be provided, so in order to build a proper ICal object, an array containing proper day abbreviations is needed.
+    my @day_abbr = ('mo','tu','we','th','fr','sa','su');
+    
+    my $by_day = $req->parameters->{by_day} || @day_abbr[$dtstart->day_of_week];
+    my $by_month = $req->parameters->{by_month} || $dtstart->month;
     my $by_day_month = $req->parameters->{by_day_month};
 
     my $new_booking = $c->model('DB::Booking')->find_or_new();
@@ -129,6 +139,8 @@ sub default_POST {
     $new_booking->id_event($id_event);
     $new_booking->dtstart($dtstart);
     $new_booking->dtend($dtend);
+    #Duration is saved in minuntes in the DB in order to make it easier to deal with it when the server builds the JSON objects
+    #It sounds strange, but it works. Don't mess with the duration, the result can be weird.
     $new_booking->duration($duration->in_units("minutes"));
     $new_booking->frequency($frequency);
     $new_booking->interval($interval);

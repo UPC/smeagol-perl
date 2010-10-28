@@ -16,7 +16,7 @@ BEGIN { use_ok 'V2::Server::Controller::Booking' }
 #ok( request('/booking')->is_success, 'Request should succeed' );
 ok( my $response_post = request POST '/booking',
     [
-      dtstart => '2010-10-21T09:00',
+      dtstart => '2010-10-21T9:00',
       dtend => '2010-10-21T10:30',
       id_event => '1',
       id_resource => '1',
@@ -27,6 +27,23 @@ ok( my $response_post = request POST '/booking',
      ],
     HTTP::Headers->new(Accept => 'application/json')
    
+);
+
+diag "Resposta: ".$response_post->content;
+
+ok( $response_post = request POST '/booking',
+    [
+      dtstart => '2010-10-21T9:00',
+      dtend => '2010-10-21T10:30',
+      id_event => '2',
+      id_resource => '2',
+      frequency => 'weekly',
+      interval => '1',
+      until => '',
+      by_day => 'mo,tu,we,th,fr'
+     ],
+    HTTP::Headers->new(Accept => 'application/json')
+
 );
 
 diag "Resposta: ".$response_post->content;

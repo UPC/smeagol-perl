@@ -18,11 +18,12 @@
 <dt>By month</dt><dd>[% boo.by_month %]</dd>
 <dt>By day month</dt><dd>[% boo.by_day_month %]</dd>
 </dl>
-[% USE Dumper %]
-[% Dumper.dump_html(boo.duration) %]
+
 [% END %]
 
 <button class='delete' href='/booking/[% boo.id %]'>Esborra</button>
 
 <br></br><a href='[% c.uri_for("/booking") | html %]'> <--Tornar a la llista de reserves</a>
 
+[%# USE Dumper %]
+[%# Dumper.dump_html(boo.duration) %]

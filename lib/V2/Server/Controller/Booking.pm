@@ -122,7 +122,7 @@ sub default_POST {
     
     my $by_day = $req->parameters->{by_day} || @day_abbr[$dtstart->day_of_week];
     my $by_month = $req->parameters->{by_month} || $dtstart->month;
-    my $by_day_month = $req->parameters->{by_day_month};
+    my $by_day_month = $req->parameters->{by_day_month} || "";
 
     my $new_booking = $c->model('DB::Booking')->find_or_new();
     $c->stash->{id_event} = $id_event;

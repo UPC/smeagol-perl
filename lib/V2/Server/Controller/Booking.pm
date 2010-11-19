@@ -105,8 +105,9 @@ sub default_POST {
     my $duration;
 
     #dtstart and dtend are parsed in case that some needed parameters to build the recurrence of the booking aren't provided
-    
+    $c->log->debug("Ara parsejarem dtsart");
     $dtstart = ParseDate($dtstart);
+    $c->log->debug("Ara parsejarem dtend");
     $dtend = ParseDate($dtend);
     $duration = $dtend - $dtstart;
 
@@ -131,10 +132,6 @@ sub default_POST {
     $c->visit( '/check/check_booking', [ ] )
         ;    #Do the resource and the event exist?
 
-    $dtstart = ParseDate($dtstart);
-    $dtend = ParseDate($dtend);
-    $duration = $dtend - $dtstart;
-
     $new_booking->id_resource($id_resource);
     $new_booking->id_event($id_event);
     $new_booking->dtstart($dtstart);
@@ -151,7 +148,9 @@ sub default_POST {
     $new_booking->by_month($by_month);
     $new_booking->by_day_month($by_day_month);
 
-    $c->visit('/check/check_overlap',[$new_booking]);
+    $c->stash->{new_booking}=$new_booking;
+
+    $c->visit('/check/check_overlap',[]);
 
     if ( $c->stash->{booking_ok} == 1 ) {
 
@@ -287,14 +286,15 @@ sub default_DELETE {
 
     if ($booking_aux) {
         $booking_aux->delete;
+	my @message = { message => "Booking succesfully deleted",
+    };
+	$c->stash->{content} = \@message;
         $c->stash->{template} = 'booking/delete_ok.tt';
         $c->response->status(200);
-        $c->forward( $c->view('TT') );
     }
     else {
         $c->stash->{template} = 'not_found.tt';
         $c->response->status(404);
-        $c->forward( $c->view('TT') );
     }
 }
 

@@ -21,6 +21,13 @@ V2::CatalystREST::Controller::Root - Root Controller for V2::CatalystREST
 
 =cut
 
+sub begin : Private {
+  my ( $self, $c ) = @_;
+  
+  $c->stash->{format} = $c->request->headers->{"accept"}
+  || 'application/json';
+  }
+
 sub index : Path : Args(0) {
     my ( $self, $c ) = @_;
     $c->response->status(200);
@@ -33,7 +40,22 @@ sub default : Private {
 
     $c->response->status(404);
     $c->stash->{template} = 'old_not_found.tt';
+}
+
+sub end : Private {
+  my ( $self, $c ) = @_;
+  
+  if ( $c->stash->{format} ne "application/json" ) {
     $c->forward( $c->view('HTML') );
+  }
+  else {
+    my @message
+    = { message => "Error: Bad request",
+    };
+    $c->stash->{content} = \@message;
+    $c->response->status(400);
+    $c->forward( $c->view('JSON') );
+  }
 }
 
 =head1 AUTHOR

@@ -4,12 +4,10 @@ use Moose;
 use namespace::autoclean;
 use Data::Dumper;
 use DateTime;
-use DateTime::Span; 
-use DateTime::Set;
+use DateTime::Duration;
 use DateTime::SpanSet; 
 use DateTime::Event::ICal;
-use DateTime::Event::Recurrence;
-use DateTime::Format::ICal;
+
 
 
 BEGIN { extends 'Catalyst::Controller::REST' }
@@ -93,15 +91,21 @@ sub check_resource :Local {
 }
 
 sub check_overlap :Local {
-  my ($self, $c, $new_booking) = @_;
+  my ($self, $c) = @_;
+  
+  my $new_booking = $c->stash->{new_booking};
+  
   $c->log->debug("Provant si hi ha solapament");
-  $c->log->debug("Until: ".$new_booking->until);
   $c->stash->{overlap} = 0;
   
   my @byday = split(',',$new_booking->by_day);
   my @bymonth = split(',',$new_booking->by_month);
   my @bymonthday = split(',',$new_booking->by_day_month);
 
+  #$c->log->debug("DTSTART (pre-ICAL): ".Dumper($new_booking->dtstart));
+  $c->log->debug("DTEND (pre-ICAL): ".Dumper($new_booking->dtstart->iso8601()));
+  $c->log->debug("UNTIL (pre-ICAL): ".Dumper($new_booking->until->iso8601()));
+  
   my $current_set = DateTime::Event::ICal->recur(
       dtstart => $new_booking->dtstart,
       dtend => $new_booking->dtend,
@@ -115,23 +119,21 @@ sub check_overlap :Local {
       bymonthday => \@bymonthday
  );
   
-  $c->log->debug(Dumper($current_set));
-  
-# my $duration = DateTime::Duration->new(
-#   minutes => scalar($new_booking->duration),
-# );
+my $duration = DateTime::Duration->new(
+  minutes => $new_booking->duration,
+);
 
-# $c->log->debug("Duració nova reserva:
-# ".$duration->hours."h".$duration->minutes."min");
-# 
-# my $spanSet = DateTime::SpanSet->from_set_and_duration(
-# 	set      => $current_set,
-# 	duration => $duration
-#     );
-# 
-# $c->log->debug("Duration dins de l'spanset:
-# ".$spanSet->duration->hours."h".$spanSet->duration->minutes."min" );
-# 
+$c->log->debug("Duració nova reserva:
+".$duration->hours."h".$duration->minutes."min");
+
+my $spanSet = DateTime::SpanSet->from_set_and_duration(
+	set      => $current_set,
+	duration => $duration
+    );
+
+$c->log->debug("Duration dins de l'spanset:
+".$spanSet->duration->hours."h".$spanSet->duration->minutes."min" );
+
 # $c->log->debug("SpanSet: ".Dumper($spanSet));
 
 #  my $old_set;

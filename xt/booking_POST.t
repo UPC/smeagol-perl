@@ -13,16 +13,23 @@ use DateTime::Duration;
 BEGIN { use_ok 'Catalyst::Test', 'V2::Server' }
 BEGIN { use_ok 'V2::Server::Controller::Booking' }
 
+my $dt1 = DateTime->now;
+
 ok( my $response_post = request POST '/booking',
     [
-      dtstart => '2010-10-21T9:00',
-      dtend => '2010-10-21T10:30',
-      id_event => '1',
-      id_resource => '1',
-      frequency => '',
-      interval => '',
-      until => '',
-      by_day => '',
+#       dtstart => '2010-12-1T9:00',
+#       dtend => '2010-12-1T10:30',
+       id_event => '1',
+       id_resource => '1',
+#       frequency => '',
+#       interval => '',
+#       until => '2010-12-1T11:00',
+    freq => 'yearly',
+    dtstart => $dt1,
+    dtend => $dt1->clone->add( hours => 2 ),
+    until => $dt1->clone->add( years => 2 ),
+    bymonth => 7,
+    byday => '3mo'
      ],
     HTTP::Headers->new(Accept => 'application/json')
    

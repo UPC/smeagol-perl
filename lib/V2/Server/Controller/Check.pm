@@ -108,7 +108,7 @@ sub check_overlap :Local {
   
   my $current_set = DateTime::Event::ICal->recur(
       dtstart => $new_booking->dtstart,
-      dtend => $new_booking->dtend,
+      #dtend => $new_booking->dtend,
       until => $new_booking->until,
       freq => $new_booking->frequency,
       interval => $new_booking->interval,
@@ -119,20 +119,22 @@ sub check_overlap :Local {
       bymonthday => \@bymonthday
  );
   
-my $duration = DateTime::Duration->new(
-  minutes => $new_booking->duration,
-);
+$c->log->debug(Dumper($current_set));
+  
+# my $duration = DateTime::Duration->new(
+#   minutes => $new_booking->duration,
+# );
 
-$c->log->debug("Duració nova reserva:
-".$duration->hours."h".$duration->minutes."min");
-
-my $spanSet = DateTime::SpanSet->from_set_and_duration(
-	set      => $current_set,
-	duration => $duration
-    );
-
-$c->log->debug("Duration dins de l'spanset:
-".$spanSet->duration->hours."h".$spanSet->duration->minutes."min" );
+# $c->log->debug("Duració nova reserva:
+# ".$duration->hours."h".$duration->minutes."min");
+# 
+# my $spanSet = DateTime::SpanSet->from_set_and_duration(
+# 	set      => $current_set,
+# 	duration => $duration
+#     );
+# 
+# $c->log->debug("Duration dins de l'spanset:
+# ".$spanSet->duration->hours."h".$spanSet->duration->minutes."min" );
 
 # $c->log->debug("SpanSet: ".Dumper($spanSet));
 

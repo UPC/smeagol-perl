@@ -27,21 +27,55 @@ Catalyst Controller.
 
 sub begin : Private {
     my ( $self, $c ) = @_;
-
+    $c->stash->{id_resource} = $c->request->query_parameters->{resource};
     $c->stash->{format} = $c->request->headers->{"accept"}
         || 'application/json';
 }
 
 sub default : Local : ActionClass('REST') {
+ my ( $self, $c ) = @_;
+}
+
+sub bookings_resource :Private {
+  my ($self, $c, $id) = @_;
+$c->log->debug("ID: ".$id);
+my @booking_aux = $c->model('DB::Booking')->search( { id_resource =>
+$id });
+
+    my @booking;
+    my @bookings;
+
+    foreach (@booking_aux) {
+        @booking = $_->hash_booking;
+	push( @bookings, @booking );
+    }
+
+    $c->stash->{content}  = \@bookings;
+    $c->stash->{bookings} = \@bookings;
+    my @events = $c->model('DB::Event')->all;
+    $c->stash->{events} = \@events;
+    my @resources = $c->model('DB::Resources')->all;
+    $c->stash->{resources} = \@resources;
+    $c->stash->{content}   = \@bookings;
+    $c->stash->{bookings}  = \@bookings;
+    $c->response->status(200);
+    $c->stash->{template} = 'booking/get_list.tt';
 }
 
 sub default_GET {
     my ( $self, $c, $res, $id ) = @_;
+
+  $c->log->debug("ID RESOURCE: ".$c->stash->{id_resource});
+my $id_resource = $c->stash->{id_resource};
     if ($id) {
         $c->detach( 'get_booking', [$id] );
     }
     else {
-        $c->detach( 'booking_list', [] );
+	if ($id_resource) {
+	    $c->detach('bookings_resource', [$id_resource]);
+	}else{
+	  $c->detach( 'booking_list', [] );
+	}
     }
 }
 
@@ -111,7 +145,7 @@ sub default_POST {
     $dtend = ParseDate($dtend);
     $duration = $dtend - $dtstart;
 
-    my $frequency   = $req->parameters->{frequency} || "daily" ;
+    my $freq   = $req->parameters->{freq} || "daily" ;
     my $interval    = $req->parameters->{interval} || 1;
     my $until       = $req->parameters->{until} || $req->parameters->{dtend};
 
@@ -121,7 +155,8 @@ sub default_POST {
     #by_day may not be provided, so in order to build a proper ICal object, an array containing proper day abbreviations is needed.
     my @day_abbr = ('mo','tu','we','th','fr','sa','su');
     
-    my $by_day = $req->parameters->{by_day} || @day_abbr[$dtstart->day_of_week];
+    my $by_day = $req->parameters->{by_day} ||
+@day_abbr[$dtstart->day_of_week-1];
     my $by_month = $req->parameters->{by_month} || $dtstart->month;
     my $by_day_month = $req->parameters->{by_day_month} || "";
 
@@ -139,7 +174,7 @@ sub default_POST {
     #Duration is saved in minuntes in the DB in order to make it easier to deal with it when the server builds the JSON objects
     #It sounds strange, but it works. Don't mess with the duration, the result can be weird.
     $new_booking->duration($duration->in_units("minutes"));
-    $new_booking->frequency($frequency);
+    $new_booking->frequency($freq);
     $new_booking->interval($interval);
     $new_booking->until($until);
     $new_booking->by_minute($by_minute);

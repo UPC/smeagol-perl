@@ -13,7 +13,7 @@ use DateTime::Duration;
 BEGIN { use_ok 'Catalyst::Test', 'V2::Server' }
 BEGIN { use_ok 'V2::Server::Controller::Booking' }
 
-my $dt1 = DateTime->now;
+my $dt1 = DateTime->now->truncate( to => 'minute' );
 
 ok( my $response_post = request POST '/booking',
     [
@@ -28,8 +28,6 @@ ok( my $response_post = request POST '/booking',
     dtstart => $dt1,
     dtend => $dt1->clone->add( hours => 2 ),
     until => $dt1->clone->add( years => 2 ),
-    bymonth => 7,
-    byday => '3mo'
      ],
     HTTP::Headers->new(Accept => 'application/json')
    

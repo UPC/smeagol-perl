@@ -27,21 +27,55 @@ Catalyst Controller.
 
 sub begin : Private {
     my ( $self, $c ) = @_;
-
+    $c->stash->{id_resource} = $c->request->query_parameters->{resource};
     $c->stash->{format} = $c->request->headers->{"accept"}
         || 'application/json';
 }
 
 sub default : Local : ActionClass('REST') {
+ my ( $self, $c ) = @_;
+}
+
+sub bookings_resource :Private {
+  my ($self, $c, $id) = @_;
+$c->log->debug("ID: ".$id);
+my @booking_aux = $c->model('DB::Booking')->search( { id_resource =>
+$id });
+
+    my @booking;
+    my @bookings;
+
+    foreach (@booking_aux) {
+        @booking = $_->hash_booking;
+	push( @bookings, @booking );
+    }
+
+    $c->stash->{content}  = \@bookings;
+    $c->stash->{bookings} = \@bookings;
+    my @events = $c->model('DB::Event')->all;
+    $c->stash->{events} = \@events;
+    my @resources = $c->model('DB::Resources')->all;
+    $c->stash->{resources} = \@resources;
+    $c->stash->{content}   = \@bookings;
+    $c->stash->{bookings}  = \@bookings;
+    $c->response->status(200);
+    $c->stash->{template} = 'booking/get_list.tt';
 }
 
 sub default_GET {
     my ( $self, $c, $res, $id ) = @_;
+
+  $c->log->debug("ID RESOURCE: ".$c->stash->{id_resource});
+my $id_resource = $c->stash->{id_resource};
     if ($id) {
         $c->detach( 'get_booking', [$id] );
     }
     else {
-        $c->detach( 'booking_list', [] );
+	if ($id_resource) {
+	    $c->detach('bookings_resource', [$id_resource]);
+	}else{
+	  $c->detach( 'booking_list', [] );
+	}
     }
 }
 
@@ -74,7 +108,7 @@ sub booking_list : Private {
 
     foreach (@booking_aux) {
         @booking = $_->hash_booking;
-        $c->log->debug( "Duration booking #" . $_->id . ": " . $_->duration );
+	$c->log->debug("Duration booking #".$_->id.": ".$_->duration);
         push( @bookings, @booking );
     }
 
@@ -99,49 +133,48 @@ sub default_POST {
 
     my $id_resource = $req->parameters->{id_resource};
     my $id_event    = $req->parameters->{id_event};
-
-    my $dtstart = $req->parameters->{dtstart};
-    my $dtend   = $req->parameters->{dtend};
+    
+    my $dtstart     = $req->parameters->{dtstart};
+    my $dtend       = $req->parameters->{dtend};
     my $duration;
 
-#dtstart and dtend are parsed in case that some needed parameters to build the recurrence of the booking aren't provided
+    #dtstart and dtend are parsed in case that some needed parameters to build the recurrence of the booking aren't provided
     $c->log->debug("Ara parsejarem dtsart");
     $dtstart = ParseDate($dtstart);
     $c->log->debug("Ara parsejarem dtend");
-    $dtend    = ParseDate($dtend);
+    $dtend = ParseDate($dtend);
     $duration = $dtend - $dtstart;
 
-    my $frequency = $req->parameters->{frequency} || "daily";
-    my $interval  = $req->parameters->{interval}  || 1;
-    my $until = $req->parameters->{until} || $req->parameters->{dtend};
+    my $freq   = $req->parameters->{freq} || "daily" ;
+    my $interval    = $req->parameters->{interval} || 1;
+    my $until       = $req->parameters->{until} || $req->parameters->{dtend};
 
     my $by_minute = $req->parameters->{by_minute} || $dtstart->minute;
-    my $by_hour   = $req->parameters->{by_hour}   || $dtstart->hour;
+    my $by_hour = $req->parameters->{by_hour} || $dtstart->hour;
 
-#by_day may not be provided, so in order to build a proper ICal object, an array containing proper day abbreviations is needed.
-    my @day_abbr = ( 'mo', 'tu', 'we', 'th', 'fr', 'sa', 'su' );
-
-    my $by_day = $req->parameters->{by_day}
-        || @day_abbr[ $dtstart->day_of_week ];
-    my $by_month     = $req->parameters->{by_month}     || $dtstart->month;
+    #by_day may not be provided, so in order to build a proper ICal object, an array containing proper day abbreviations is needed.
+    my @day_abbr = ('mo','tu','we','th','fr','sa','su');
+    
+    my $by_day = $req->parameters->{by_day} ||
+@day_abbr[$dtstart->day_of_week-1];
+    my $by_month = $req->parameters->{by_month} || $dtstart->month;
     my $by_day_month = $req->parameters->{by_day_month} || "";
 
     my $new_booking = $c->model('DB::Booking')->find_or_new();
-    $c->stash->{id_event}    = $id_event;
+    $c->stash->{id_event} = $id_event;
     $c->stash->{id_resource} = $id_resource;
 
-    $c->visit( '/check/check_booking', [] )
+    $c->visit( '/check/check_booking', [ ] )
         ;    #Do the resource and the event exist?
 
     $new_booking->id_resource($id_resource);
     $new_booking->id_event($id_event);
     $new_booking->dtstart($dtstart);
     $new_booking->dtend($dtend);
-
-#Duration is saved in minuntes in the DB in order to make it easier to deal with it when the server builds the JSON objects
-#It sounds strange, but it works. Don't mess with the duration, the result can be weird.
-    $new_booking->duration( $duration->in_units("minutes") );
-    $new_booking->frequency($frequency);
+    #Duration is saved in minuntes in the DB in order to make it easier to deal with it when the server builds the JSON objects
+    #It sounds strange, but it works. Don't mess with the duration, the result can be weird.
+    $new_booking->duration($duration->in_units("minutes"));
+    $new_booking->frequency($freq);
     $new_booking->interval($interval);
     $new_booking->until($until);
     $new_booking->by_minute($by_minute);
@@ -150,9 +183,9 @@ sub default_POST {
     $new_booking->by_month($by_month);
     $new_booking->by_day_month($by_day_month);
 
-    $c->stash->{new_booking} = $new_booking;
+    $c->stash->{new_booking}=$new_booking;
 
-    $c->visit( '/check/check_overlap', [] );
+    $c->visit('/check/check_overlap',[]);
 
     if ( $c->stash->{booking_ok} == 1 ) {
 
@@ -288,8 +321,9 @@ sub default_DELETE {
 
     if ($booking_aux) {
         $booking_aux->delete;
-        my @message = { message => "Booking succesfully deleted", };
-        $c->stash->{content}  = \@message;
+	my @message = { message => "Booking succesfully deleted",
+    };
+	$c->stash->{content} = \@message;
         $c->stash->{template} = 'booking/delete_ok.tt';
         $c->response->status(200);
     }
@@ -304,8 +338,8 @@ sub ParseDate {
 
     my ( $day, $hour ) = split( /T/, $date_str );
 
-    my ( $year, $month, $nday ) = split( /-/, $day );
-    my ( $nhour, $min ) = split( /:/, $hour );
+    my ( $year,  $month, $nday ) = split( /-/, $day );
+    my ( $nhour, $min)  = split( /:/, $hour );
 
     my $date = DateTime->new(
         year   => $year,

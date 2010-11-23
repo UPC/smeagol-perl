@@ -49,7 +49,7 @@ $id });
         @booking = $_->hash_booking;
 	push( @bookings, @booking );
     }
-
+if (@booking_aux){
     $c->stash->{content}  = \@bookings;
     $c->stash->{bookings} = \@bookings;
     my @events = $c->model('DB::Event')->all;
@@ -60,6 +60,12 @@ $id });
     $c->stash->{bookings}  = \@bookings;
     $c->response->status(200);
     $c->stash->{template} = 'booking/get_list.tt';
+  }else{
+    my @message = { message => "Error: The resource has no bookings or it doesn't exist", };
+    $c->stash->{content} = \@message;
+    $c->stash->{template} = 'not_found.tt';
+    $c->response->status(400); 
+  }
 }
 
 sub default_GET {
@@ -158,7 +164,7 @@ sub default_POST {
     my $by_day = $req->parameters->{by_day} ||
 @day_abbr[$dtstart->day_of_week-1];
     my $by_month = $req->parameters->{by_month} || $dtstart->month;
-    my $by_day_month = $req->parameters->{by_day_month} || "";
+    my $by_day_month = $req->parameters->{by_day_month} || $dtstart->day;
 
     my $new_booking = $c->model('DB::Booking')->find_or_new();
     $c->stash->{id_event} = $id_event;

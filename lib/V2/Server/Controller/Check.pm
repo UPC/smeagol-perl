@@ -108,7 +108,7 @@ sub check_overlap :Local {
   
   my $current_set = DateTime::Event::ICal->recur(
       dtstart => $new_booking->dtstart,
-      #dtend => $new_booking->dtend,
+      dtend => $new_booking->dtend,
       until => $new_booking->until,
       freq => $new_booking->frequency,
       interval => $new_booking->interval,
@@ -121,66 +121,58 @@ sub check_overlap :Local {
   
 $c->log->debug(Dumper($current_set));
   
-# my $duration = DateTime::Duration->new(
-#   minutes => $new_booking->duration,
-# );
+my $duration = DateTime::Duration->new(
+  minutes => $new_booking->duration,
+);
 
-# $c->log->debug("Duració nova reserva:
-# ".$duration->hours."h".$duration->minutes."min");
-# 
-# my $spanSet = DateTime::SpanSet->from_set_and_duration(
-# 	set      => $current_set,
-# 	duration => $duration
-#     );
-# 
-# $c->log->debug("Duration dins de l'spanset:
-# ".$spanSet->duration->hours."h".$spanSet->duration->minutes."min" );
+$c->log->debug("Duració nova reserva:
+".$duration->hours."h".$duration->minutes."min");
 
-# $c->log->debug("SpanSet: ".Dumper($spanSet));
+my $spanSet = DateTime::SpanSet->from_set_and_duration(
+	set      => $current_set,
+	duration => $duration
+    );
 
-#  my $old_set;
-#  my $spanSet2;
-#  my $duration2;
-#  my $overlap;
-#  
-# my @booking_aux =
-#$c->model('DB::Booking')->search({id_resource=>
-#$new_booking->id_resource->id});
-# $c->log->debug("Hi ha ".@booking_aux." que compleixen els criteris de la
-#cerca");
+ my $old_set;
+ my $spanSet2;
+ my $duration2;
+ my $overlap;
+ 
+my @booking_aux = $c->model('DB::Booking')->search({id_resource=> $new_booking->id_resource->id});
+$c->log->debug("Hi ha ".@booking_aux." que compleixen els criteris de la cerca");
 
-# foreach (@booking_aux) {
-#     $c->log->debug("Checking Booking #".$_->id);
-#     @byday = split(',',$_->by_day);
-#     @bymonth = split(',',$_->by_month);
-#     @bymonthday = split(',',$_->by_day_month);
-#     $old_set = DateTime::Event::ICal->recur(
-#       dtstart => $_->dtstart,
-#       until => $_->until,
-#       freq =>    $_->frequency,
-#       interval => $_->interval,
-#       byminute => $_->by_minute,
-#       byhour => $_->by_hour,
-#       byday => \@byday,
-#       bymonth => \@bymonth,
-#       bymonthday => \@bymonthday
-#     );
-# 
-#     $duration2 = DateTime::Duration->new(
-#       minutes => $_->duration
-#     );
-#     $spanSet2 = DateTime::SpanSet->from_set_and_duration(
-# 	set      => $old_set,
-# 	duration => $duration2
-#     );
-#     
-#     $overlap = $spanSet->intersects( $spanSet2 );
-# 
-#     if ($overlap) {
-#       $c->stash->{overlap} = 1;
-#       last;
-#     }
-#   }
+foreach (@booking_aux) {
+    $c->log->debug("Checking Booking #".$_->id);
+    @byday = split(',',$_->by_day);
+    @bymonth = split(',',$_->by_month);
+    @bymonthday = split(',',$_->by_day_month);
+    $old_set = DateTime::Event::ICal->recur(
+      dtstart => $_->dtstart,
+      until => $_->until,
+      freq =>    $_->frequency,
+      interval => $_->interval,
+      byminute => $_->by_minute,
+      byhour => $_->by_hour,
+      byday => \@byday,
+      bymonth => \@bymonth,
+      bymonthday => \@bymonthday
+    );
+
+    $duration2 = DateTime::Duration->new(
+      minutes => $_->duration
+    );
+    $spanSet2 = DateTime::SpanSet->from_set_and_duration(
+	set      => $old_set,
+	duration => $duration2
+    );
+    
+    $overlap = $spanSet->intersects( $spanSet2 );
+
+    if ($overlap) {
+      $c->stash->{overlap} = 1;
+      last;
+    }
+  }
 }
 
 =head1 AUTHOR

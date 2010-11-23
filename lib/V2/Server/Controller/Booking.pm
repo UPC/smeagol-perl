@@ -21,8 +21,10 @@ Catalyst Controller.
 
 =cut
 
-=head2 index
-
+=head2 begin
+Begin is the first function executed when a request directed to /booking is made.
+Some parameters must be saved in the stash, otherwise they are lost once the object
+Catalyst::REST::Request is created (which overwrites the original $c->request).
 =cut
 
 sub begin : Private {
@@ -32,10 +34,19 @@ sub begin : Private {
         || 'application/json';
 }
 
+=head2 default
+/booking is mapped to this function.
+It redirects to default_GET, default_POST, etc depending on the http method used.
+=cut
+
 sub default : Local : ActionClass('REST') {
  my ( $self, $c ) = @_;
 }
 
+=head2 bookings_resource
+It returns the agenda of a resource.
+$id has been got from $c->stash->{id_resource} as you can see in default_GET
+=cut
 sub bookings_resource :Private {
   my ($self, $c, $id) = @_;
 $c->log->debug("ID: ".$id);
@@ -45,28 +56,41 @@ $id });
     my @booking;
     my @bookings;
 
+# hash_booking is a function implemented in Schema/Result/Booking.pm it makes the booking easier to
+# handle
+
     foreach (@booking_aux) {
         @booking = $_->hash_booking;
 	push( @bookings, @booking );
     }
 
+#Whatever is put inside $c->stash->{content} is encoded to JSON, if that's the view requested
     $c->stash->{content}  = \@bookings;
+#The HTML view uses $c->stash->{booking} because it makes clearer and more understandable the TT
+#templates
     $c->stash->{bookings} = \@bookings;
+#Events and Resources are passed to the HTML view in order to build the select menus
     my @events = $c->model('DB::Event')->all;
-    $c->stash->{events} = \@events;
+    $c->stash->{events} = \@events;    
     my @resources = $c->model('DB::Resources')->all;
     $c->stash->{resources} = \@resources;
-    $c->stash->{content}   = \@bookings;
-    $c->stash->{bookings}  = \@bookings;
+
     $c->response->status(200);
     $c->stash->{template} = 'booking/get_list.tt';
 }
 
-sub default_GET {
-    my ( $self, $c, $res, $id ) = @_;
+=head2 default_GET
+There are 3 options:
+  -Complete list of bookings (not very useful): /booking GET which redirects to the Private function
+get_list
+  -A booking: /booking/id GET which redirects to the Private function get_booking
+  -A resource's agenda: /booking?resource=id GET which redirects to bookings_resource
+=cut
 
-  $c->log->debug("ID RESOURCE: ".$c->stash->{id_resource});
-my $id_resource = $c->stash->{id_resource};
+sub default_GET {
+  my ( $self, $c, $res, $id ) = @_;
+
+  my $id_resource = $c->stash->{id_resource};
     if ($id) {
         $c->detach( 'get_booking', [$id] );
     }

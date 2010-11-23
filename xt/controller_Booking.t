@@ -24,15 +24,15 @@ diag 'Booking list: ' . $response->content;
 diag '###################################';
 diag '##Requesting bookings one by one###';
 diag '###################################';
-my $bookings_aux= $j->from_json( $response->content );
-my @bookings = @{$bookings_aux};
+my $bookings_aux = $j->from_json( $response->content );
+my @bookings     = @{$bookings_aux};
 my $id;
 
 foreach (@bookings) {
     $id = $_->{id};
-    diag 'Booking ID: '.$id;
-    ok( $response = request GET '/booking/' .$id, [] );
-    diag 'Booking '.$id.' '.$response->content;
+    diag 'Booking ID: ' . $id;
+    ok( $response = request GET '/booking/' . $id, [] );
+    diag 'Booking ' . $id . ' ' . $response->content;
     diag '###################################';
 }
 
@@ -42,10 +42,9 @@ Create new booking
 
 diag '#########Creating booking#########';
 diag '###################################';
-my $duration = DateTime::Duration->new(hours   => 2);
-my $start = DateTime->now();
-my $end = $start->clone->add_duration($duration);
-
+my $duration = DateTime::Duration->new( hours => 2 );
+my $start    = DateTime->now();
+my $end      = $start->clone->add_duration($duration);
 
 ok( my $response_post = request POST '/booking',
     [   starts      => $start,
@@ -55,16 +54,15 @@ ok( my $response_post = request POST '/booking',
     ]
 );
 diag $response_post->content;
-diag "Status: ".$response_post->headers->{status};
+diag "Status: " . $response_post->headers->{status};
 
-my $booking_aux= $j->from_json( $response_post->content );
-my @booking = @{$booking_aux};
+my $booking_aux = $j->from_json( $response_post->content );
+my @booking     = @{$booking_aux};
 my $bid;
 
-foreach (@booking){
-      $bid = $_->{id};
+foreach (@booking) {
+    $bid = $_->{id};
 }
-
 
 =head1
 Editing the last created booking
@@ -72,36 +70,41 @@ Editing the last created booking
 
 diag '##########Editing booking#########';
 diag '###################################';
-diag "Last Booking ID: ".$bid;
+diag "Last Booking ID: " . $bid;
 
-my $ua_put = LWP::UserAgent->new;
+my $ua_put      = LWP::UserAgent->new;
 my $request_put = HTTP::Request->new(
-    PUT => 'http://localhost:3000/booking/'.$bid.'?starts='.$start.'&ends='.$end.'&id_resource=2&id_event=2',
-      [
-      parameters=>(
-	starts      => $start,
-	ends        => $end,
-	id_resource => "2",
-	id_event    => "2"
-	)
-      ]
-      );
+    PUT => 'http://localhost:3000/booking/' 
+        . $bid
+        . '?starts='
+        . $start
+        . '&ends='
+        . $end
+        . '&id_resource=2&id_event=2',
+    [   parameters => (
+            starts      => $start,
+            ends        => $end,
+            id_resource => "2",
+            id_event    => "2"
+        )
+    ]
+);
 
 #diag Dumper($request_put->headers);
-ok($ua_put->request($request_put) );
+ok( $ua_put->request($request_put) );
 
-ok( $response = request GET '/booking/'.$bid, [] );
-diag 'Edited Booking '.$bid.' '.$response->content;
+ok( $response = request GET '/booking/' . $bid, [] );
+diag 'Edited Booking ' . $bid . ' ' . $response->content;
 
 diag '#########Deleting booking#########';
 diag '###################################';
 
-my $ua          = LWP::UserAgent->new;
-my $request_del = HTTP::Request->new(
-    DELETE => 'http://localhost:3000/booking/' . $bid );
+my $ua = LWP::UserAgent->new;
+my $request_del
+    = HTTP::Request->new( DELETE => 'http://localhost:3000/booking/' . $bid );
 ok( my $response_del = $ua->request($request_del) );
 
 diag $response_del->content;
-diag "Status: ".$response_del->headers->{status};
+diag "Status: " . $response_del->headers->{status};
 
 done_testing();

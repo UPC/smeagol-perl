@@ -95,16 +95,16 @@ INSERT INTO resource_tag VALUES (5,'microfons inalambrics');
 INSERT INTO resource_tag VALUES (5,'videoconferencia');
 INSERT INTO resource_tag VALUES (5,'wireless');
 
-INSERT INTO event values(1,'Informació 1',"Descripció de l'event",'2010-02-16 04:00:00','2010-02-16 05:00:00');
-INSERT INTO event values (2,'Informació 2',"Descripció de l'event",'2010-02-16 04:00:00','2010-02-16 05:00:00');
-INSERT INTO event values(3,'Informació 3',"Descripció de l'event",'2010-02-16 04:00:00','2010-02-16 05:00:00');
-INSERT INTO event values(4,'Informació 4',"Descripció de l'event",'2010-02-16 04:00:00','2010-02-16 05:00:00');
+INSERT INTO event values(1,'Informació 1',"Descripció de l'event 1",'2010-02-16 04:00:00','2010-02-16 05:00:00');
+INSERT INTO event values (2,'Informació 2',"Descripció de l'event 2",'2010-02-16 04:00:00','2010-02-16 05:00:00');
+INSERT INTO event values(3,'Informació 3',"Descripció de l'event 3",'2010-02-16 04:00:00','2010-02-16 05:00:00');
+INSERT INTO event values(4,'Informació 4',"Descripció de l'event 4",'2010-02-16 04:00:00','2010-02-16 05:00:00');
 
-INSERT INTO booking values (1,3,1,'2010-02-16 04:00:00','2010-02-16 05:00:00','01:00:00','no','','wewew','','','','','');
-INSERT INTO booking values (2,4,1,'2010-02-16 05:00:00','2010-02-16 06:00:00','01:00:00','daily','2','2011-01-01','00','05','mo,tu,we,th,fr','','');
-INSERT INTO booking values (3,5,2,'2010-02-16 06:00:00','2010-02-16 07:00:00','01:00:00','weekly','2','2011-01-01','00','06','mo,tu,we,th,fr','','');
-INSERT INTO booking values (4,2,3,'2010-02-16 07:00:00','2010-02-16 08:00:00','01:00:00','monthly','1','2011-01-01','00','07','mo,tu,we,th,fr','','');
-INSERT INTO booking values (5,1,4,'2010-02-16 08:00:00','2010-02-16 09:00:00','01:00:00','yearly','1','2011-01-01','00','08','mo,tu,we,th,fr','','');
+INSERT INTO booking values (1,3,1,'2010-02-16 04:00:00','2010-02-16 05:00:00','60','daily','1','2010-02-16','00','04','','','');
+INSERT INTO booking values (2,4,1,'2010-02-16 05:00:00','2010-02-16 06:00:00','60','daily','2','2011-01-01','00','05','mo,tu,we,th,fr','','');
+INSERT INTO booking values (3,5,2,'2010-02-16 06:00:00','2010-02-16 07:00:00','60','weekly','2','2011-01-01','00','06','mo,tu,we,th,fr','','');
+INSERT INTO booking values (4,2,3,'2010-02-16 07:00:00','2010-02-16 08:00:00','60','monthly','1','2011-01-01','00','07','mo,tu,we,th,fr','','');
+INSERT INTO booking values (5,1,4,'2010-02-16 08:00:00','2010-02-16 09:00:00','60','yearly','1','2011-01-01','00','08','mo,tu,we,th,fr','','');
 
 INSERT INTO tag_event values ('projector',1);
 INSERT INTO tag_event values ('pantalla',1);

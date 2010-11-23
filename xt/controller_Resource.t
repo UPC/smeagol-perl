@@ -41,7 +41,7 @@ diag '#########Creating resource#########';
 diag '###################################';
 
 ok( my $response_post = request POST '/resource',
-    [   info => "Testing resource creation",
+    [   info        => "Testing resource creation",
         description => ":-P",
         tags        => "test,delete me"
     ]
@@ -58,30 +58,29 @@ $resource_aux = $j->decode( $response_post->content );
 @resource     = @{$resource_aux};
 
 foreach (@resource) {
-  $id = $_->{id};
+    $id = $_->{id};
 }
-diag "Last resource created ID: ".$id;
+diag "Last resource created ID: " . $id;
 
-my $ua_put = LWP::UserAgent->new;
+my $ua_put      = LWP::UserAgent->new;
 my $request_put = HTTP::Request->new(
-    PUT => 'http://localhost:3000/resource/'.$id,
-      [
-	info => 'Testing resource edition',
+    PUT => 'http://localhost:3000/resource/' . $id,
+    [   info        => 'Testing resource edition',
         description => ':-P',
         tags        => 'test,edited'
-      ]
-      );
+    ]
+);
 diag Dumper($request_put);
-ok($ua_put->request($request_put) );
+ok( $ua_put->request($request_put) );
 
-ok( $response = request GET '/resource/'.$id, [] );
-diag 'Edited Resource '.$id.' '.$response->content;
+ok( $response = request GET '/resource/' . $id, [] );
+diag 'Edited Resource ' . $id . ' ' . $response->content;
 
 diag '#########Deleting resource#########';
 diag '###################################';
 my $ua_del = LWP::UserAgent->new;
-my $request_del = HTTP::Request->new(
-        DELETE => 'http://localhost:3000/resource/' . $id );
+my $request_del
+    = HTTP::Request->new( DELETE => 'http://localhost:3000/resource/' . $id );
 ok( $ua_del->request($request_del) );
 
 done_testing();

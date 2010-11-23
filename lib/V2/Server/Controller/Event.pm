@@ -23,10 +23,11 @@ Catalyst Controller.
 
 =cut
 
-sub begin :Private {
-      my ($self, $c) = @_;
+sub begin : Private {
+    my ( $self, $c ) = @_;
 
-      $c->stash->{format} = $c->request->headers->{"accept"} || 'application/json';
+    $c->stash->{format} = $c->request->headers->{"accept"}
+        || 'application/json';
 }
 
 sub default : Local : ActionClass('REST') {
@@ -47,24 +48,23 @@ sub get_event : Local {
     my ( $self, $c, $id ) = @_;
 
     my $event_aux = $c->model('DB::Event')->find( { id => $id } );
-    
-    if ($event_aux){
-	  my @event = $event_aux->hash_event;
 
-	  $c->stash->{content} = \@event;
-	  $c->stash->{event} = \@event;
-	  $c->response->status(200);
-	  $c->stash->{template} = 'event/get_event.tt';    
-    }else{
-	  my @message = {
-		message => "We can't find what you are looking for."
-	  };
-	  
-	  $c->stash->{content} = \@message;
-	  $c->stash->{template} = 'old_not_found.tt';
-	  $c->response->status(404);
+    if ($event_aux) {
+        my @event = $event_aux->hash_event;
+
+        $c->stash->{content} = \@event;
+        $c->stash->{event}   = \@event;
+        $c->response->status(200);
+        $c->stash->{template} = 'event/get_event.tt';
     }
+    else {
+        my @message
+            = { message => "We can't find what you are looking for." };
 
+        $c->stash->{content}  = \@message;
+        $c->stash->{template} = 'old_not_found.tt';
+        $c->response->status(404);
+    }
 
 }
 
@@ -82,7 +82,7 @@ sub event_list : Local {
     }
 
     $c->stash->{content} = \@events;
-    $c->stash->{events} = \@events;
+    $c->stash->{events}  = \@events;
     $c->response->status(200);
     $c->stash->{template} = 'event/get_list.tt';
 }
@@ -100,29 +100,33 @@ sub default_POST {
 
     my $new_event = $c->model('DB::Event')->find_or_new();
 
-    $c->visit('/check/check_event', [$info, $description]);
-    # If all is correct $c->stash->{event_ok} should be 1, otherwise it will be 0.
+    $c->visit( '/check/check_event', [ $info, $description ] );
 
-    if ($c->stash->{event_ok} == 1){
-      $new_event->info($info);
-      $new_event->description($description);
-      $new_event->starts($starts);
-      $new_event->ends($ends);
-      $new_event->insert;
+# If all is correct $c->stash->{event_ok} should be 1, otherwise it will be 0.
 
-      my @event = $new_event->hash_event;
+    if ( $c->stash->{event_ok} == 1 ) {
+        $new_event->info($info);
+        $new_event->description($description);
+        $new_event->starts($starts);
+        $new_event->ends($ends);
+        $new_event->insert;
 
-      $c->stash->{content} = \@event;
-      $c->response->status(201);
-      $c->forward( $c->view('JSON') );
-    } else {
-      my @message = {
-	 message => "Error: Check the info and description of the event",
-      };
-      $c->stash->{content} = \@message;
-      $c->response->status(400);
-      $c->stash->{error} = "Error: Check the info and description of the event";
-      $c->stash->{template} = 'event/get_list';
+        my @event = $new_event->hash_event;
+
+        $c->stash->{content} = \@event;
+        $c->response->status(201);
+        $c->forward( $c->view('JSON') );
+    }
+    else {
+        my @message
+            = {
+            message => "Error: Check the info and description of the event",
+            };
+        $c->stash->{content} = \@message;
+        $c->response->status(400);
+        $c->stash->{error}
+            = "Error: Check the info and description of the event";
+        $c->stash->{template} = 'event/get_list';
     }
 }
 
@@ -130,44 +134,47 @@ sub default_PUT {
     my ( $self, $c, $res, $id ) = @_;
     my $req = $c->request;
     $c->log->debug( 'Mètode: ' . $req->method );
-    $c->log->debug("ID: ".$id);
+    $c->log->debug( "ID: " . $id );
     $c->log->debug("El PUT funciona");
 
-    my $info        = $req->parameters->{info} || $req->query('info');
-    my $description = $req->parameters->{description} || $req->query('description');
-    my $starts_aux  = $req->parameters->{starts} || $req->query('starts');
-    my $starts      = $c->forward('ParseDate',[$starts_aux]);
-    my $ends_aux    = $req->parameters->{ends} || $req->query('ends');
-    my $ends        = $c->forward('ParseDate',[$req->parameters->{ends}]);
+    my $info = $req->parameters->{info} || $req->query('info');
+    my $description = $req->parameters->{description}
+        || $req->query('description');
+    my $starts_aux = $req->parameters->{starts} || $req->query('starts');
+    my $starts = $c->forward( 'ParseDate', [$starts_aux] );
+    my $ends_aux = $req->parameters->{ends} || $req->query('ends');
+    my $ends = $c->forward( 'ParseDate', [ $req->parameters->{ends} ] );
 
     my $event = $c->model('DB::Event')->find( { id => $id } );
 
     if ($event) {
-         $c->visit('/check/check_event', [$info, $description]);
-	 # If all is correct $c->stash->{event_ok} should be 1, otherwise it will be 0.
+        $c->visit( '/check/check_event', [ $info, $description ] );
 
-	 if ($c->stash->{event_ok} == 1){
-	    $event->info($info);
-	    $event->description($description);
-	    $event->starts($starts);
-	    $event->ends($ends);
-	    $event->insert_or_update;
+# If all is correct $c->stash->{event_ok} should be 1, otherwise it will be 0.
 
-	    my @event = $event->hash_event;
+        if ( $c->stash->{event_ok} == 1 ) {
+            $event->info($info);
+            $event->description($description);
+            $event->starts($starts);
+            $event->ends($ends);
+            $event->insert_or_update;
 
-	    $c->stash->{content} = \@event;
-	    $c->response->status(200);
-	    $c->forward( $c->view('JSON') );
-	 } else {
-	         my @message = {
-		     message => "Error: Check the info and description of the event",
-		  };
-		  $c->stash->{content} = \@message;
-		  $c->response->status(400);
-		  $c->stash->{error} = "Error: Check the info and description of the event";
-		  $c->stash->{template} = 'event/get_list';
+            my @event = $event->hash_event;
 
-	 }
+            $c->stash->{content} = \@event;
+            $c->response->status(200);
+            $c->forward( $c->view('JSON') );
+        }
+        else {
+            my @message = { message =>
+                    "Error: Check the info and description of the event", };
+            $c->stash->{content} = \@message;
+            $c->response->status(400);
+            $c->stash->{error}
+                = "Error: Check the info and description of the event";
+            $c->stash->{template} = 'event/get_list';
+
+        }
     }
     else {
         $c->stash->{template} = 'not_found.tt';
@@ -198,34 +205,37 @@ sub default_DELETE {
     }
 }
 
-sub ParseDate :Private {
-  my ($self, $c, $date_str) = @_;
+sub ParseDate : Private {
+    my ( $self, $c, $date_str ) = @_;
 
-  $c->log->debug("Date to parse: ".$date_str);
-  
-  my ($day,$hour) = split(/T/,$date_str);
+    $c->log->debug( "Date to parse: " . $date_str );
 
-  my ($year,$month,$nday) = split(/-/,$day);
-  my ($nhour,$min,$sec) = split(/:/,$hour);
+    my ( $day, $hour ) = split( /T/, $date_str );
 
-  my $date = DateTime->new(year   => $year,
-                       month  => $month,
-                       day    => $nday,
-                       hour   => $nhour,
-                       minute => $min,
-                       second => $sec,);
+    my ( $year,  $month, $nday ) = split( /-/, $day );
+    my ( $nhour, $min,   $sec )  = split( /:/, $hour );
 
-  return $date;
+    my $date = DateTime->new(
+        year   => $year,
+        month  => $month,
+        day    => $nday,
+        hour   => $nhour,
+        minute => $min,
+        second => $sec,
+    );
+
+    return $date;
 }
 
-sub end :Private {
-      my ($self,$c)= @_;
+sub end : Private {
+    my ( $self, $c ) = @_;
 
-      if ($c->stash->{format} ne "application/json") {
-	    $c->forward( $c->view('HTML') );
-      }else{
-	    $c->forward( $c->view('JSON') );
-      }
+    if ( $c->stash->{format} ne "application/json" ) {
+        $c->forward( $c->view('HTML') );
+    }
+    else {
+        $c->forward( $c->view('JSON') );
+    }
 }
 
 =head1 AUTHOR

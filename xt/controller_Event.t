@@ -49,12 +49,12 @@ ok( my $response_post = request POST '/event',
 );
 diag $response_post->content;
 
-$event_aux= $j->from_json( $response_post->content );
-@event = @{$event_aux};
+$event_aux = $j->from_json( $response_post->content );
+@event     = @{$event_aux};
 my $eid;
 
-foreach (@event){
-      $eid = $_->{id};
+foreach (@event) {
+    $eid = $_->{id};
 }
 
 =head1
@@ -64,11 +64,13 @@ Editing the last created event
 diag '##########Editing event#########';
 diag '###################################';
 
-
 diag "Editing event " . $eid;
 
 #diag "ID: ".$id;
-ok( my $response_put = request PUT '/event/'.$eid."?starts=2010-02-16T06:00:00&description=:-X&ends=2010-02-16T08:00:00&info='Estem de proves'",
+ok( my $response_put
+        = request PUT '/event/' 
+        . $eid
+        . "?starts=2010-02-16T06:00:00&description=:-X&ends=2010-02-16T08:00:00&info='Estem de proves'",
     [   starts      => '2010-02-16T06:00:00',
         description => ':-X',
         ends        => '2010-02-16T08:00:00',

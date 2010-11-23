@@ -8,7 +8,8 @@ use warnings;
 
 use base 'DBIx::Class::Core';
 
-__PACKAGE__->load_components("InflateColumn::DateTime", "TimeStamp", "InflateColumn");
+__PACKAGE__->load_components( "InflateColumn::DateTime", "TimeStamp",
+    "InflateColumn" );
 
 =head1 NAME
 
@@ -37,17 +38,20 @@ __PACKAGE__->table("resource_tag");
 =cut
 
 __PACKAGE__->add_columns(
-  "resource_id",
-  {
-    data_type         => "integer",
-    is_auto_increment => 1,
-    is_foreign_key    => 1,
-    is_nullable       => 1,
-  },
-  "tag_id",
-  { data_type => "text", is_foreign_key => 1, is_nullable => 1, size => 64 },
+    "resource_id",
+    {   data_type         => "integer",
+        is_auto_increment => 1,
+        is_foreign_key    => 1,
+        is_nullable       => 1,
+    },
+    "tag_id",
+    {   data_type      => "text",
+        is_foreign_key => 1,
+        is_nullable    => 1,
+        size           => 64
+    },
 );
-__PACKAGE__->set_primary_key("resource_id", "tag_id");
+__PACKAGE__->set_primary_key( "resource_id", "tag_id" );
 
 =head1 RELATIONS
 
@@ -60,9 +64,9 @@ Related object: L<V2::Server::Schema::Result::Tag>
 =cut
 
 __PACKAGE__->belongs_to(
-  "tag_id",
-  "V2::Server::Schema::Result::Tag",
-  { id => "tag_id" },
+    "tag_id",
+    "V2::Server::Schema::Result::Tag",
+    { id => "tag_id" },
 );
 
 =head2 resource_id
@@ -74,15 +78,13 @@ Related object: L<V2::Server::Schema::Result::Resources>
 =cut
 
 __PACKAGE__->belongs_to(
-  "resource_id",
-  "V2::Server::Schema::Result::Resources",
-  { id => "resource_id" },
+    "resource_id",
+    "V2::Server::Schema::Result::Resources",
+    { id => "resource_id" },
 );
-
 
 # Created by DBIx::Class::Schema::Loader v0.07000 @ 2010-10-15 15:48:04
 # DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:0DLQZ0zXoBJu7DGjKLvEGQ
-
 
 # You can replace this text with custom content, and it will be preserved on regeneration
 1;

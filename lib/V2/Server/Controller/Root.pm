@@ -9,6 +9,9 @@ use parent 'Catalyst::Controller';
 #
 __PACKAGE__->config->{namespace} = '';
 
+my $name = 'Smeagol Server';
+my $version = '2.0';
+
 =head1 NAME
 
 V2::CatalystREST::Controller::Root - Root Controller for V2::CatalystREST
@@ -42,6 +45,18 @@ sub default : Private {
     $c->stash->{template} = 'old_not_found.tt';
 }
 
+sub version : Local {
+  my ( $self, $c ) = @_;
+
+  $c->response->status(200);
+  
+  my @message = {
+    application =>$name,
+    version => $version
+  };
+  $c->stash->{content} = \@message;
+}
+
 sub end : Private {
     my ( $self, $c ) = @_;
 
@@ -49,9 +64,6 @@ sub end : Private {
         $c->forward( $c->view('HTML') );
     }
     else {
-        my @message = { message => "Error: Bad request", };
-        $c->stash->{content} = \@message;
-        $c->response->status(400);
         $c->forward( $c->view('JSON') );
     }
 }

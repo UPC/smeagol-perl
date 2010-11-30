@@ -288,84 +288,100 @@ sub default_PUT {
     $c->log->debug( 'Mètode: ' . $req->method );
     $c->log->debug("El PUT funciona");
 
-    #$c->log->debug(Dumper($req->headers));
-
-    my $id_resource = $req->parameters->{id_resource}
-        || $req->query('id_resource');
-    my $id_event   = $req->parameters->{id_event} || $req->query('id_event');
-    my $starts_aux = $req->parameters->{starts}   || $req->query('starts');
-    my $ends_aux   = $req->parameters->{ends}     || $req->query('ends');
-
-    my $starts = ParseDate($starts_aux);
-    my $ends   = ParseDate($ends_aux);
-
-    $c->log->debug( "ID resource: "
-            . $id_resource
-            . " ID Event: "
-            . $id_event
-            . " Start: "
-            . $starts
-            . " Ends: "
-            . $ends );
-
-    my $booking = $c->model('DB::Booking')->find( { id => $id } );
-
-    $c->visit( '/check/check_booking', [ $id_resource, $id_event ] )
-        ;    #Do the resource and the event exist?
-
+    my $id_resource = $req->parameters->{id_resource};
+    my $id_event    = $req->parameters->{id_event};
+    
+    my $dtstart     = $req->parameters->{dtstart};
+    my $dtend       = $req->parameters->{dtend};
+    my $duration;
+    
+    #dtstart and dtend are parsed in case that some needed parameters to build the recurrence of the
+    #booking aren't provided
+    $c->log->debug("Ara parsejarem dtsart");
+    $dtstart = ParseDate($dtstart);
+    $c->log->debug("Ara parsejarem dtend");
+    $dtend = ParseDate($dtend);
+    $duration = $dtend - $dtstart;
+    
+    my $freq   = $req->parameters->{freq} || "daily" ;
+    my $interval    = $req->parameters->{interval} || 1;
+    my $until       = $req->parameters->{until} || $req->parameters->{dtend};
+    
+    my $by_minute = $req->parameters->{by_minute} || $dtstart->minute;
+    my $by_hour = $req->parameters->{by_hour} || $dtstart->hour;
+    
+    #by_day may not be provided, so in order to build a proper ICal object, an array containing
+    #English day abbreviations is needed.
+    my @day_abbr = ('mo','tu','we','th','fr','sa','su');
+    
+    my $by_day = $req->parameters->{by_day} ||
+    @day_abbr[$dtstart->day_of_week-1];
+    my $by_month = $req->parameters->{by_month} || $dtstart->month;
+    my $by_day_month = $req->parameters->{by_day_month} || "";
+    
+    my $booking = $c->model('DB::Booking')->find({id => $id});
+    $c->stash->{id_event} = $id_event;
+    $c->stash->{id_resource} = $id_resource;
+    
+    #Do the resource and the event exist?
+    $c->visit( '/check/check_booking', [ ] );    
+    
+    
+    $booking->id_resource($id_resource);
+    $booking->id_event($id_event);
+    $booking->dtstart($dtstart);
+    $booking->dtend($dtend);
+    #Duration is saved in minuntes in the DB in order to make it easier to deal with it when the
+    #server builds the JSON objects
+    #It sounds strange, but it works. Don't mess with the duration, the result can be weird.
+    $booking->duration($duration->in_units("minutes"));
+    $booking->frequency($freq);
+    $booking->interval($interval);
+    $booking->until($until);
+    $booking->by_minute($by_minute);
+    $booking->by_hour($by_hour);
+    $booking->by_day($by_day);
+    $booking->by_month($by_month);
+    $booking->by_day_month($by_day_month);
+    
+    #we are reusing /check/check_overlap that's why $booking is saved in $c->stash->{new_booking}
+    $c->stash->{new_booking}=$booking;
+    
+    $c->visit('/check/check_overlap',[]);
+    
     if ( $c->stash->{booking_ok} == 1 ) {
-
-        $booking->id_resource($id_resource);
-        $booking->id_event($id_event);
-        $booking->starts($starts);
-        $booking->ends($ends);
-
-        my @old_bookings = $c->model('DB::Booking')
-            ->search( { id_resource => $id_resource } )
-            ;    #Recuperem les reserves que utilitzen el recurs
-
-        my $current_set = DateTime::Span->from_datetimes(
-            start => $starts,
-            end   => $ends->clone->subtract( seconds => 1 )
-        );
-
-        my $old_booking_set;
-        my $overlap_aux;
-        my $overlap = 0;
-
-        foreach (@old_bookings) {
-            if ( $_->id ne $id ) { $overlap = $_->overlap($current_set); }
-            if ($overlap) {
-                last;
-            }
-        }
-
-        if ($overlap) {
-            $c->stash->{template} = 'fail.tt';
-            $c->response->status(409);
-            $c->forward( $c->view('TT') );
-        }
-        else {
-            $booking->update;
-
-            my @booking = $booking->hash_booking;
-
-            $c->stash->{content} = \@booking;
-            $c->response->status(200);
-            $c->forward( $c->view('JSON') );
-        }
-    }
-    else {
-        my @message
-            = { message => "Error: Check if the event or the resource exist",
-            };
-        $c->stash->{content} = \@message;
-        $c->response->status(400);
-        $c->stash->{error}
-            = "Error: Check if the event or the resource exist";
-        $c->stash->{template} = 'booking/get_list';
-    }
-
+      
+      if ( $c->stash->{overlap} == 1 ) {
+	my @message
+	= { message => "Error: Overlap with another booking", };
+	$c->stash->{content} = \@message;
+	$c->response->status(409);
+	$c->stash->{error}    = "Error: Overlap with another booking";
+	$c->stash->{template} = 'booking/get_list';
+	}
+	else {
+	  $booking->update;
+	  
+	  my @booking = $booking->hash_booking;
+	  
+	  $c->stash->{content} = \@booking;
+	  $c->stash->{booking} = \@booking;
+	  $c->response->status(201);
+	  $c->stash->{template} = 'booking/get_booking.tt';
+	  
+	}
+      }
+      else {
+	my @message = { 
+	  message => "Error: Check if the event or the resource exist",
+	};
+	$c->stash->{content} = \@message;
+	$c->response->status(400);
+	$c->stash->{error}
+	= "Error: Check if the event or the resource exist";
+	$c->stash->{template} = 'booking/get_list.tt';
+	
+      }
 }
 
 sub default_DELETE {

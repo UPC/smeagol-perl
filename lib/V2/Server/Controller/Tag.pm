@@ -115,24 +115,24 @@ sub default_POST {
     $c->log->debug( 'Mètode: ' . $req->method );
     $c->log->debug("El POST funciona");
 
-    my $name = $req->parameters->{name};
+    my $id = $req->parameters->{id};
     my $desc = $req->parameters->{description};
 
     $c->visit( '/check/check_name', [$name] );
     $c->visit( '/check/check_desc', [$desc] );
 
-    my $tag_exist = $c->model('DB::Tag')->find( { id => $name } );
+    my $tag_exist = $c->model('DB::Tag')->find( { id => $id } );
 
     if ( !$tag_exist ) {    #Creation of the new tag if it not exists
         my $new_tag = $c->model('DB::Tag')->find_or_new();
 
-        if ( ( $c->stash->{name_ok} and $c->stash->{desc_ok} ) != 0 ) {
-            $new_tag->id($name);
+        if ( ( $c->stash->{name_ok} and $c->stash->{desc_ok} ) != 0 and length($id)>1 ) {
+            $new_tag->id($id);
             $new_tag->description($desc);
             $new_tag->insert;
 
             @new_tag = {
-                id          => $name,
+                id          => $id,
                 description => $desc
             };
 
@@ -150,7 +150,7 @@ sub default_POST {
                 };
 
             @new_tag = {
-                id          => $name,
+                id          => $id,
                 description => $desc
             };
 
@@ -186,18 +186,18 @@ sub default_PUT {
     $c->log->debug( 'Mètode: ' . $req->method );
     $c->log->debug("El PUT funciona");
 
-    my $name = $id;
+    my $id = $id;
     my $desc = $req->parameters->{description};
 
     my $tag = $c->model('DB::Tag')->find( { id => $id } );
 
-    $c->visit( '/check/check_name', [$name] );
+    $c->visit( '/check/check_name', [$id] );
     $c->visit( '/check/check_desc', [$desc] );
 
     $c->log->debug( "Desc OK? " . $c->stash->{desc_ok} );
     if ($tag) {
-        if ( ( $c->stash->{name_ok} and $c->stash->{desc_ok} ) != 0 ) {
-            $tag->id($name);
+      if ( ( $c->stash->{name_ok} and $c->stash->{desc_ok} ) != 0 and length($id)>1) {
+            $tag->id($id);
             $tag->description($desc);
             $tag->insert_or_update;
 
@@ -215,11 +215,11 @@ sub default_PUT {
         else {
             my @message
                 = { message =>
-                    'The name of the tag or the description should be shorter.'
+                    'The id of the tag or the description should be shorter.'
                 };
 
             my @new_tag = {
-                id          => $name,
+                id          => $id,
                 description => $desc
             };
 
@@ -228,7 +228,7 @@ sub default_PUT {
             $c->stash->{template} = 'tag/get_tag.tt';
             $c->response->content_type('text/html');
             $c->stash->{error}
-                = 'The name of the tag or the description should be shorter.';
+                = 'The id of the tag or the description should be shorter.';
             $c->response->status(400);
 
         }

@@ -345,8 +345,10 @@ sub default_PUT {
     $booking->by_day_month($by_day_month);
     
     #we are reusing /check/check_overlap that's why $booking is saved in $c->stash->{new_booking}
+    #For the same reason we put to true $c->stash->{PUT} so we'll be able to amply the convenient 
+    #restrictions to the search query (see check module for details)
     $c->stash->{new_booking}=$booking;
-    
+    $c->stash->{PUT} = 1;
     $c->visit('/check/check_overlap',[]);
     
     if ( $c->stash->{booking_ok} == 1 ) {

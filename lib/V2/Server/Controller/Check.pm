@@ -163,8 +163,17 @@ sub check_overlap :Local {
   my $spanSet2;
   my $duration2;
   my $overlap;
-  
-  my @booking_aux = $c->model('DB::Booking')->search({id_resource=> $new_booking->id_resource->id});
+  my @booking_aux;
+  if ($c->stash->{PUT}){
+    @booking_aux = $c->model('DB::Booking')->search({id_resource=>
+    $new_booking->id_resource->id})->search({ id => {'!=' => $new_booking->id}
+})->search({until=>{'>' => DateTime->now } });
+    
+  }else{  
+    @booking_aux = $c->model('DB::Booking')->search({id_resource=>
+$new_booking->id_resource->id});    
+  }
+
   $c->log->debug("Hi ha ".@booking_aux." que compleixen els criteris de la cerca");
   
   foreach (@booking_aux) {

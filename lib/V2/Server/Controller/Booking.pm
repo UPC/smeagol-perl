@@ -166,7 +166,7 @@ sub booking_list : Private {
 This function creates a booking for a resource and associate it to an event.
 
 After checking that the event and the resource actually exist, we proceed to insert the booking in
-the table booking of the DB if, and only if, there isn't not overlapping with another previously
+the table booking of the DB if, and only if, there isn't overlapping with another previously
 existing booking.
 
 Some of the check_[....] functions are reused by other modules, so I've put them together in the
@@ -174,7 +174,7 @@ controller Check.
 
 check_overlap is an special case, some may suggest that it should be placed in the
 Schema/Booking.pm but by doing that the only thing that we achieve is an increase of code
-complexity.
+complexity. $c for the win!
 =cut
 
 sub default_POST {
@@ -412,7 +412,7 @@ sub ParseDate {
 
 =head2
 The last function executed before responding the request.
-Because we saved format in $c->stash->{format} it allow us to choose between the to available views.
+Because we saved format in $c->stash->{format} it allow us to choose between the available views.
 =cut
 
 sub end : Private {

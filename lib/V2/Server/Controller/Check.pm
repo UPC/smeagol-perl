@@ -8,9 +8,12 @@ use DateTime::Duration;
 use DateTime::SpanSet; 
 use DateTime::Event::ICal;
 
-
-
 BEGIN { extends 'Catalyst::Controller::REST' }
+
+=head2 check_name check_desc check_info
+This function are used to verify that the parameter name has a lenght within 
+the correct length range.
+=cut
 
 sub check_name :Local {
  my ($self, $c, $name) = @_;
@@ -45,6 +48,11 @@ sub check_info :Local {
  }
 }
 
+=head2 check_booking
+We verify that the resource exists and that the booking will be associated with an existing event.
+If one of these two conditions isn't not fullfiled, the booking can't be made.
+=cut
+
 sub check_booking : Local {
   my ($self, $c) = @_;
   my $id_resource = $c->stash->{id_resource};
@@ -64,6 +72,10 @@ sub check_booking : Local {
 
 }
 
+=head2 check_event
+Function used to verify that event parameters are within the proper range 
+=cut
+
 sub check_event : Local {
   my ($self, $c, $info, $description) = @_;
 
@@ -77,6 +89,10 @@ sub check_event : Local {
   }
 }
 
+=head2 check_resource
+Function used to verify that resource parameters are within the proper range 
+=cut
+
 sub check_resource :Local {
   my ($self, $c, $info, $description) = @_;
 
@@ -89,6 +105,16 @@ sub check_resource :Local {
     $c->stash->{resource_ok} = 0;
   }
 }
+
+=head2 check_overlap
+With the parameters from the current request we build firstly a DateTime::Event::Ical and secondly
+using the duration parameter we obtain $spanSet (a DateTime::SpanSet which we can check if it
+intersecs with the existing ones).
+
+Once we have $spanSet, the process previously explained is repeated for each one of the existing
+bookings of the resource. If there isn't any overlap: OK. If there is overlap the booking will not
+be inserted in the DB.
+=cut
 
 sub check_overlap :Local {
   my ($self, $c) = @_;

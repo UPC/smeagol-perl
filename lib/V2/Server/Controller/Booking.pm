@@ -21,8 +21,10 @@ Catalyst Controller.
 
 =cut
 
-=head2 index
-
+=head2 begin
+Begin is the first function executed when a request directed to /booking is made.
+Some parameters must be saved in the stash, otherwise they are lost once the object
+Catalyst::REST::Request is created (which overwrites the original $c->request).
 =cut
 
 sub begin : Private {
@@ -32,10 +34,19 @@ sub begin : Private {
         || 'application/json';
 }
 
+=head2 default
+/booking is mapped to this function.
+It redirects to default_GET, default_POST, etc depending on the http method used.
+=cut
+
 sub default : Local : ActionClass('REST') {
  my ( $self, $c ) = @_;
 }
 
+=head2 bookings_resource
+It returns the agenda of a resource.
+$id has been got from $c->stash->{id_resource} as you can see in default_GET
+=cut
 sub bookings_resource :Private {
   my ($self, $c, $id) = @_;
 $c->log->debug("ID: ".$id);
@@ -45,28 +56,41 @@ $id });
     my @booking;
     my @bookings;
 
+# hash_booking is a function implemented in Schema/Result/Booking.pm it makes the booking easier to
+# handle
+
     foreach (@booking_aux) {
         @booking = $_->hash_booking;
 	push( @bookings, @booking );
     }
 
+#Whatever is put inside $c->stash->{content} is encoded to JSON, if that's the view requested
     $c->stash->{content}  = \@bookings;
+#The HTML view uses $c->stash->{booking} because it makes clearer and more understandable the TT
+#templates
     $c->stash->{bookings} = \@bookings;
+#Events and Resources are passed to the HTML view in order to build the select menus
     my @events = $c->model('DB::Event')->all;
-    $c->stash->{events} = \@events;
+    $c->stash->{events} = \@events;    
     my @resources = $c->model('DB::Resources')->all;
     $c->stash->{resources} = \@resources;
-    $c->stash->{content}   = \@bookings;
-    $c->stash->{bookings}  = \@bookings;
+
     $c->response->status(200);
     $c->stash->{template} = 'booking/get_list.tt';
 }
 
-sub default_GET {
-    my ( $self, $c, $res, $id ) = @_;
+=head2 default_GET
+There are 3 options:
+  -Complete list of bookings (not very useful): /booking GET which redirects to the Private function
+get_list
+  -A booking: /booking/id GET which redirects to the Private function get_booking
+  -A resource's agenda: /booking?resource=id GET which redirects to bookings_resource
+=cut
 
-  $c->log->debug("ID RESOURCE: ".$c->stash->{id_resource});
-my $id_resource = $c->stash->{id_resource};
+sub default_GET {
+  my ( $self, $c, $res, $id ) = @_;
+
+  my $id_resource = $c->stash->{id_resource};
     if ($id) {
         $c->detach( 'get_booking', [$id] );
     }
@@ -78,6 +102,13 @@ my $id_resource = $c->stash->{id_resource};
 	}
     }
 }
+
+=head2 get_booking
+This function is not accessible through the url: /booking/get_booking/id but /booking/id hence the
+Private type.
+
+See default_GET for details.
+=cut
 
 sub get_booking : Private {
     my ( $self, $c, $id ) = @_;
@@ -98,6 +129,11 @@ sub get_booking : Private {
         $c->response->status(404);
     }
 }
+
+=head2 booking_list
+Private function accessible through /booking GET 
+It returns every booking of every resource. 
+=cut
 
 sub booking_list : Private {
     my ( $self, $c ) = @_;
@@ -125,6 +161,22 @@ sub booking_list : Private {
 
 }
 
+=head2 default_POST
+/booking POST
+This function creates a booking for a resource and associate it to an event.
+
+After checking that the event and the resource actually exist, we proceed to insert the booking in
+the table booking of the DB if, and only if, there isn't overlapping with another previously
+existing booking.
+
+Some of the check_[....] functions are reused by other modules, so I've put them together in the
+controller Check. 
+
+check_overlap is an special case, some may suggest that it should be placed in the
+Schema/Booking.pm but by doing that the only thing that we achieve is an increase of code
+complexity. $c for the win!
+=cut
+
 sub default_POST {
     my ( $self, $c ) = @_;
     my $req = $c->request;
@@ -138,7 +190,8 @@ sub default_POST {
     my $dtend       = $req->parameters->{dtend};
     my $duration;
 
-    #dtstart and dtend are parsed in case that some needed parameters to build the recurrence of the booking aren't provided
+#dtstart and dtend are parsed in case that some needed parameters to build the recurrence of the
+#booking aren't provided
     $c->log->debug("Ara parsejarem dtsart");
     $dtstart = ParseDate($dtstart);
     $c->log->debug("Ara parsejarem dtend");
@@ -152,7 +205,8 @@ sub default_POST {
     my $by_minute = $req->parameters->{by_minute} || $dtstart->minute;
     my $by_hour = $req->parameters->{by_hour} || $dtstart->hour;
 
-    #by_day may not be provided, so in order to build a proper ICal object, an array containing proper day abbreviations is needed.
+#by_day may not be provided, so in order to build a proper ICal object, an array containing English
+#day abbreviations is needed.
     my @day_abbr = ('mo','tu','we','th','fr','sa','su');
     
     my $by_day = $req->parameters->{by_day} ||
@@ -164,15 +218,17 @@ sub default_POST {
     $c->stash->{id_event} = $id_event;
     $c->stash->{id_resource} = $id_resource;
 
-    $c->visit( '/check/check_booking', [ ] )
-        ;    #Do the resource and the event exist?
+#Do the resource and the event exist?
+    $c->visit( '/check/check_booking', [ ] );    
+
 
     $new_booking->id_resource($id_resource);
     $new_booking->id_event($id_event);
     $new_booking->dtstart($dtstart);
     $new_booking->dtend($dtend);
-    #Duration is saved in minuntes in the DB in order to make it easier to deal with it when the server builds the JSON objects
-    #It sounds strange, but it works. Don't mess with the duration, the result can be weird.
+#Duration is saved in minuntes in the DB in order to make it easier to deal with it when the server
+#builds the JSON objects
+#It sounds strange, but it works. Don't mess with the duration, the result can be weird.
     $new_booking->duration($duration->in_units("minutes"));
     $new_booking->frequency($freq);
     $new_booking->interval($interval);
@@ -190,8 +246,6 @@ sub default_POST {
     if ( $c->stash->{booking_ok} == 1 ) {
 
         if ( $c->stash->{overlap} == 1 ) {
-            $c->log->debug("Hi ha solapament \n");
-
             my @message
                 = { message => "Error: Overlap with another booking", };
             $c->stash->{content} = \@message;
@@ -223,6 +277,10 @@ sub default_POST {
 
     }
 }
+
+=head2
+Same functionality than default_POST but updating an existing booking.
+=cut
 
 sub default_PUT {
     my ( $self, $c, $res, $id ) = @_;
@@ -351,6 +409,11 @@ sub ParseDate {
 
     return $date;
 }
+
+=head2
+The last function executed before responding the request.
+Because we saved format in $c->stash->{format} it allow us to choose between the available views.
+=cut
 
 sub end : Private {
     my ( $self, $c ) = @_;

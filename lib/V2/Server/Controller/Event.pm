@@ -205,6 +205,10 @@ sub default_DELETE {
     }
 }
 
+=head2 ParseDate
+Outrage!! The author is repeting himself. Throw him to the fire!!
+=cut
+
 sub ParseDate : Private {
     my ( $self, $c, $date_str ) = @_;
 

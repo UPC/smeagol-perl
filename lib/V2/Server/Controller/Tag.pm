@@ -118,7 +118,7 @@ sub default_POST {
     my $id = $req->parameters->{id};
     my $desc = $req->parameters->{description};
 
-    $c->visit( '/check/check_name', [$name] );
+    $c->visit( '/check/check_name', [$id] );
     $c->visit( '/check/check_desc', [$desc] );
 
     my $tag_exist = $c->model('DB::Tag')->find( { id => $id } );
@@ -146,7 +146,7 @@ sub default_POST {
 
             my @message
                 = { message =>
-                    'The name of the tag or the description should be shorter.'
+                    'There\'s a problem with the id of the tag or the description is too long'
                 };
 
             @new_tag = {
@@ -159,7 +159,7 @@ sub default_POST {
             $c->stash->{template} = 'tag/get_tag.tt';
             $c->response->content_type('text/html');
             $c->stash->{error}
-                = 'The name of the tag or the description should be shorter.';
+            = 'There\'s a problem with the id of the tag or the description is too long';
             $c->response->status(400);
         }
 
@@ -186,7 +186,6 @@ sub default_PUT {
     $c->log->debug( 'Mètode: ' . $req->method );
     $c->log->debug("El PUT funciona");
 
-    my $id = $id;
     my $desc = $req->parameters->{description};
 
     my $tag = $c->model('DB::Tag')->find( { id => $id } );
@@ -215,7 +214,7 @@ sub default_PUT {
         else {
             my @message
                 = { message =>
-                    'The id of the tag or the description should be shorter.'
+                'There\'s a problem with the id of the tag or the description is too long.'
                 };
 
             my @new_tag = {
@@ -228,13 +227,15 @@ sub default_PUT {
             $c->stash->{template} = 'tag/get_tag.tt';
             $c->response->content_type('text/html');
             $c->stash->{error}
-                = 'The id of the tag or the description should be shorter.';
+            = 'There\'s problem with the id of the tag or the description is too long.';
             $c->response->status(400);
 
         }
     }
     else {
-        @message = { message => "We can't find what you are looking for." };
+        @message = { 
+	  message => "We can't find what you are looking for." 
+	};
 
         $c->stash->{content}  = \@message;
         $c->stash->{template} = 'old_not_found.tt';

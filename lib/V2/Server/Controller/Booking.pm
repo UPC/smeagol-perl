@@ -242,16 +242,16 @@ sub default_POST {
     $c->stash->{new_booking}=$new_booking;
 
     $c->visit('/check/check_overlap',[]);
-
+    my @message;
     if ( $c->stash->{booking_ok} == 1 ) {
 
         if ( $c->stash->{overlap} == 1 or $c->stash->{empty} == 1) {
 	  if ($c->stash->{empty} == 1) {
-	    my @message
+	    @message
 	    = { message => "Bad Request", };
 	    $c->response->status(400);
 	  }else{
-	    my @message
+	    @message
 	    = { message => "Error: Overlap with another booking", };
 	    $c->response->status(409);
 	  }

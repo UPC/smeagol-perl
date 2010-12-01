@@ -207,11 +207,11 @@ sub default_POST {
 
 #by_day may not be provided, so in order to build a proper ICal object, an array containing English
 #day abbreviations is needed.
-    my @day_abbr = ('mo','tu','we','th','fr','sa','su');
+#    my @day_abbr = ('mo','tu','we','th','fr','sa','su');
     
     my $by_day = $req->parameters->{by_day} ||
-@day_abbr[$dtstart->day_of_week-1];
-    my $by_month = $req->parameters->{by_month} || $dtstart->month;
+"";#@day_abbr[$dtstart->day_of_week-1];
+    my $by_month = $req->parameters->{by_month} || "";#$dtstart->month;
     my $by_day_month = $req->parameters->{by_day_month} || "";
 
     my $new_booking = $c->model('DB::Booking')->find_or_new();
@@ -245,12 +245,19 @@ sub default_POST {
 
     if ( $c->stash->{booking_ok} == 1 ) {
 
-        if ( $c->stash->{overlap} == 1 ) {
-            my @message
-                = { message => "Error: Overlap with another booking", };
-            $c->stash->{content} = \@message;
-            $c->response->status(409);
-            $c->stash->{error}    = "Error: Overlap with another booking";
+        if ( $c->stash->{overlap} == 1 or $c->stash->{empty} == 1) {
+	  if ($c->stash->{empty} == 1) {
+	    my @message
+	    = { message => "Bad Request", };
+	    $c->response->status(400);
+	  }else{
+	    my @message
+	    = { message => "Error: Overlap with another booking", };
+	    $c->response->status(409);
+	  }
+
+            $c->stash->{content} = \@message;            
+	    $c->stash->{error}    = "Error: Overlap with another booking or bad parameters";
             $c->stash->{template} = 'booking/get_list';
         }
         else {

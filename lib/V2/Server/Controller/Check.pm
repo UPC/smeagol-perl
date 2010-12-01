@@ -123,13 +123,14 @@ sub check_overlap :Local {
   
   $c->log->debug("Provant si hi ha solapament");
   $c->stash->{overlap} = 0;
+  $c->stash->{empty} = 0;
   
   my @byday = split(',',$new_booking->by_day);
   my @bymonth = split(',',$new_booking->by_month);
   my @bymonthday = split(',',$new_booking->by_day_month);
   
   #$c->log->debug("DTSTART (pre-ICAL): ".Dumper($new_booking->dtstart));
-  $c->log->debug("DTEND (pre-ICAL): ".Dumper($new_booking->dtstart->iso8601()));
+  $c->log->debug("DTEND (pre-ICAL): ".Dumper($new_booking->dtend->iso8601()));
   $c->log->debug("UNTIL (pre-ICAL): ".Dumper($new_booking->until->iso8601()));
   
   my $current_set = DateTime::Event::ICal->recur(
@@ -146,6 +147,13 @@ sub check_overlap :Local {
   );
   
   $c->log->debug(Dumper($current_set));
+if ($current_set->min) {
+  $c->log->debug("L'SpanSet té com a mínim un element");
+  $c->stash->{empty} = 0;
+}else{
+  $c->log->debug("L'SpanSet està buit!");
+  $c->stash->{empty} = 1;
+}
   
   my $duration = DateTime::Duration->new(
     minutes => $new_booking->duration,

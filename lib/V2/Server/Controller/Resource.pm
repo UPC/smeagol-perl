@@ -61,7 +61,7 @@ sub get_resource : Private {
         $c->stash->{resource} = \@resource;
         $c->stash->{content}  = \@resource;
         $c->response->status(200);
-        $c->stash->{template} = 'resource/get_resource.tt';
+        $c->stash->{template} = 'resource/get_resource';
     }
 }
 
@@ -95,7 +95,7 @@ sub default_POST {
     my $tags_aux = $req->parameters->{tags};
     my @tags = split( /,/, $tags_aux );
 
-    $c->visit( '/check/check_event', [ $info, $descr ] );
+    $c->visit( '/check/check_resource', [ $info, $descr ] );
 
 # If all is correct $c->stash->{event_ok} should be 1, otherwise it will be 0.
 
@@ -165,7 +165,8 @@ sub default_POST {
         $c->response->status(400);
         $c->stash->{error}
             = "Error: Check the info and description of the resource";
-        $c->stash->{template} = 'resource/get_list';
+	$c->response->content_type('text/html');
+	$c->stash->{template} = 'resource/get_list.tt';
     }
 }
 
@@ -187,7 +188,7 @@ sub default_PUT {
     my $resource = $c->model('DB::Resources')->find( { id => $id } );
 
     if ($resource) {
-        $c->visit( '/check/check_event', [ $info, $descr ] );
+        $c->visit( '/check/check_resource', [ $info, $descr ] );
 
 # If all is correct $c->stash->{event_ok} should be 1, otherwise it will be 0.
         if ( $c->stash->{resource_ok} ) {
@@ -255,6 +256,7 @@ sub default_PUT {
             $c->response->status(400);
             $c->stash->{error}
                 = "Error: Check the info and description of the resource";
+	    $c->response->content_type('text/html');
             $c->stash->{template} = 'resource/get_list';
         }
     }
@@ -263,6 +265,7 @@ sub default_PUT {
             = { message => "We can't find what you are looking for." };
         $c->stash->{content}  = \@message;
         $c->stash->{template} = 'old_not_found.tt';
+        $c->response->content_type('text/html');
         $c->response->status(404);
     }
 

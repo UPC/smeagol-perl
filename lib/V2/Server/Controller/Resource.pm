@@ -61,7 +61,7 @@ sub get_resource : Private {
         $c->stash->{resource} = \@resource;
         $c->stash->{content}  = \@resource;
         $c->response->status(200);
-        $c->stash->{template} = 'resource/get_resource';
+        $c->stash->{template} = 'resource/get_resource.tt';
     }
 }
 

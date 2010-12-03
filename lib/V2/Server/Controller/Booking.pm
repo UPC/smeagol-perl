@@ -6,6 +6,10 @@ use Data::Dumper;
 use DateTime;
 use DateTime::Duration;
 use DateTime::Span;
+#Voodoo modules
+use Data::ICal;
+use Data::ICal::DateTime; 
+use Data::ICal::Entry::Event;
 
 BEGIN { extends 'Catalyst::Controller::REST' }
 
@@ -30,6 +34,8 @@ Catalyst::REST::Request is created (which overwrites the original $c->request).
 sub begin : Private {
     my ( $self, $c ) = @_;
     $c->stash->{id_resource} = $c->request->query_parameters->{resource};
+    $c->stash->{ical} = $c->request->query_parameters->{ical};
+    $c->log->debug(Dumper($c->request->query_parameters));
     $c->stash->{format} = $c->request->headers->{"accept"}
         || 'application/json';
 }
@@ -43,42 +49,6 @@ sub default : Local : ActionClass('REST') {
  my ( $self, $c ) = @_;
 }
 
-=head2 bookings_resource
-It returns the agenda of a resource.
-$id has been got from $c->stash->{id_resource} as you can see in default_GET
-=cut
-sub bookings_resource :Private {
-  my ($self, $c, $id) = @_;
-$c->log->debug("ID: ".$id);
-my @booking_aux = $c->model('DB::Booking')->search( { id_resource =>
-$id });
-
-    my @booking;
-    my @bookings;
-
-# hash_booking is a function implemented in Schema/Result/Booking.pm it makes the booking easier to
-# handle
-
-    foreach (@booking_aux) {
-        @booking = $_->hash_booking;
-	push( @bookings, @booking );
-    }
-
-#Whatever is put inside $c->stash->{content} is encoded to JSON, if that's the view requested
-    $c->stash->{content}  = \@bookings;
-#The HTML view uses $c->stash->{booking} because it makes clearer and more understandable the TT
-#templates
-    $c->stash->{bookings} = \@bookings;
-#Events and Resources are passed to the HTML view in order to build the select menus
-    my @events = $c->model('DB::Event')->all;
-    $c->stash->{events} = \@events;    
-    my @resources = $c->model('DB::Resources')->all;
-    $c->stash->{resources} = \@resources;
-
-    $c->response->status(200);
-    $c->stash->{template} = 'booking/get_list.tt';
-}
-
 =head2 default_GET
 There are 3 options:
   -Complete list of bookings (not very useful): /booking GET which redirects to the Private function
@@ -90,16 +60,14 @@ get_list
 sub default_GET {
   my ( $self, $c, $res, $id ) = @_;
 
-  my $id_resource = $c->stash->{id_resource};
-    if ($id) {
+  if ($id) {
         $c->detach( 'get_booking', [$id] );
-    }
-    else {
-	if ($id_resource) {
-	    $c->detach('bookings_resource', [$id_resource]);
-	}else{
+    }else {
+      if ($c->stash->{id_resource}) {
+	$c->detach('bookings_resource', []);
+      }else{	  
 	  $c->detach( 'booking_list', [] );
-	}
+      }
     }
 }
 
@@ -159,6 +127,52 @@ sub booking_list : Private {
     $c->response->status(200);
     $c->stash->{template} = 'booking/get_list.tt';
 
+}
+
+=head2 bookings_resource
+It returns the agenda of a resource.
+$id has been got from $c->stash->{id_resource} as you can see in default_GET
+=cut
+sub bookings_resource :Private {
+  my ($self, $c) = @_;
+  
+  my $id = $c->stash->{id_resource};
+  my $ical = $c->stash->{ical};
+  
+  $c->log->debug("ID: ".$id);
+  $c->log->debug("ICal: ".$ical);
+  
+  if ($ical){
+    $c->detach('ical',[]);
+  }
+  
+  my @booking_aux = $c->model('DB::Booking')->search( { id_resource =>
+  $id });
+  
+  my @booking;
+  my @bookings;
+  
+  # hash_booking is a function implemented in Schema/Result/Booking.pm it makes the booking easier
+  # to handle
+  
+  foreach (@booking_aux) {
+    @booking = $_->hash_booking;
+    push( @bookings, @booking );
+  }
+  
+  #Whatever is put inside $c->stash->{content} is encoded to JSON, if that's the view requested
+  $c->stash->{content}  = \@bookings;
+  #The HTML view uses $c->stash->{booking} because it makes clearer and more understandable the TT
+  #templates
+  $c->stash->{bookings} = \@bookings;
+  #Events and Resources are passed to the HTML view in order to build the select menus
+  my @events = $c->model('DB::Event')->all;
+  $c->stash->{events} = \@events;    
+  my @resources = $c->model('DB::Resources')->all;
+  $c->stash->{resources} = \@resources;
+  
+  $c->response->status(200);
+  $c->stash->{template} = 'booking/get_list.tt';
 }
 
 =head2 default_POST
@@ -449,6 +463,26 @@ sub end : Private {
     else {
         $c->forward( $c->view('JSON') );
     }
+}
+
+sub ical :Private {
+  my ($self,$c) = @_;
+  
+  $c->log->debug("Volem l'agenda del recurs ".$c->stash->{id_resource}." en format ICal");
+  
+  my @agenda_aux = $c->model('DB::Booking')->search({id_resource =>
+$c->stash->{id_resource}})->search({until=>{'>'=> DateTime->now }});
+
+  my @genda;
+  
+  foreach (@agenda_aux) {
+    push (@genda,$_->hash_booking);
+  }
+
+  $c->log->debug("Hi ha ".@agenda_aux." que compleixen els criteris de cerca");
+  
+  
+  $c->stash->{content} = \@genda;
 }
 
 =head1 AUTHOR

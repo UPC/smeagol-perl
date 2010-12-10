@@ -19,8 +19,8 @@ my $dtend = $dt1->clone->add(hours => 3);
 
 ok( my $response_post = request POST '/booking',
     [
-      id_event => "2",
-      id_resource => "2",
+      id_event => "1",
+      id_resource => "1",
       dtstart => $dtstart,
       dtend => $dtend,
 #       duration => ,    

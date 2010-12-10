@@ -93,14 +93,14 @@ sub get_tag : Private {
             push( @resources, @resource );
         }
 
-        my @tag = {
+        my $tag = {
             id          => $tag->id,
             description => $tag->description,
             resources   => \@resources
         };
 
-        $c->stash->{content} = \@tag;
-        $c->stash->{tag_aux} = \@tag;
+        $c->stash->{content} = $tag;
+        $c->stash->{tag_aux} = $tag;
         $c->response->status(200);
         $c->stash->{template} = 'tag/get_tag.tt';
     }

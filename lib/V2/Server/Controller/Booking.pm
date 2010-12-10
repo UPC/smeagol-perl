@@ -479,8 +479,18 @@ $c->stash->{id_resource}})->search({until=>{'>'=> DateTime->now }});
     push (@genda,$_->hash_booking);
   }
 
-  $c->log->debug("Hi ha ".@agenda_aux." que compleixen els criteris de cerca");
+  $c->log->debug("Hi ha ".@genda." que compleixen els criteris de cerca");
+  $c->log->debug(Dumper(@genda));
   
+  my $vevent = Data::ICal::Entry::Event->new();
+  $vevent->add_properties(
+    summary => "Agenda",
+    description => "Resource's ".$c->stash->{id_resource}." agenda",
+    # Dat*e*::ICal is not a typo here
+    dtstart   => Date::ICal->new( epoch => time )->ical,
+  );
+  
+  my $calendar->add_entry($vevent);
   
   $c->stash->{content} = \@genda;
 }

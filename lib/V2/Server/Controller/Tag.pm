@@ -93,14 +93,14 @@ sub get_tag : Private {
             push( @resources, @resource );
         }
 
-        my @tag = {
+        my $tag = {
             id          => $tag->id,
             description => $tag->description,
             resources   => \@resources
         };
 
-        $c->stash->{content} = \@tag;
-        $c->stash->{tag_aux} = \@tag;
+        $c->stash->{content} = $tag;
+        $c->stash->{tag_aux} = $tag;
         $c->response->status(200);
         $c->stash->{template} = 'tag/get_tag.tt';
     }
@@ -131,13 +131,13 @@ sub default_POST {
             $new_tag->description($desc);
             $new_tag->insert;
 
-            @new_tag = {
+            $new_tag = {
                 id          => $id,
                 description => $desc
             };
 
-            $c->stash->{content}  = \@new_tag;
-            $c->stash->{tag}      = \@new_tag;
+            $c->stash->{content}  = $new_tag;
+            $c->stash->{tag}      = $new_tag;
             $c->stash->{template} = 'tag/get_tag.tt';
             $c->response->content_type('text/html');
             $c->response->status(201);
@@ -149,13 +149,13 @@ sub default_POST {
                     'There\'s a problem with the id of the tag or the description is too long'
                 };
 
-            @new_tag = {
+            $new_tag = {
                 id          => $id,
                 description => $desc
             };
 
-            $c->stash->{content}  = \@message;
-            $c->stash->{tag}      = \@new_tag;
+            $c->stash->{content}  = @message;
+            $c->stash->{tag}      = $new_tag;
             $c->stash->{template} = 'tag/get_tag.tt';
             $c->response->content_type('text/html');
             $c->stash->{error}
@@ -200,12 +200,12 @@ sub default_PUT {
             $tag->description($desc);
             $tag->insert_or_update;
 
-            my @tag = {
+            my $tag = {
                 id          => $tag->id,
                 description => $tag->description
             };
 
-            $c->stash->{content}  = \@tag;
+            $c->stash->{content}  = $tag;
             $c->stash->{tag}      = $tag;
             $c->stash->{template} = 'tag/get_tag.tt';
             $c->response->content_type('text/html');
@@ -217,13 +217,13 @@ sub default_PUT {
                 'There\'s a problem with the id of the tag or the description is too long.'
                 };
 
-            my @new_tag = {
+            my $new_tag = {
                 id          => $id,
                 description => $desc
             };
 
             $c->stash->{content}  = \@message;
-            $c->stash->{tag}      = \@new_tag;
+            $c->stash->{tag}      = $new_tag;
             $c->stash->{template} = 'tag/get_tag.tt';
             $c->response->content_type('text/html');
             $c->stash->{error}

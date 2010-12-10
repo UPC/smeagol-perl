@@ -116,10 +116,25 @@ sub get_booking : Private {
     my $booking_aux = $c->model('DB::Booking')->find( { id => $id } );
 
     if ($booking_aux) {
-        my @booking = $booking_aux->hash_booking;
+      my $booking = {
+	id           => $booking_aux->id,
+	id_resource  => $booking_aux->id_resource->id,
+	id_event     => $booking_aux->id_event->id,
+	dtstart      => $booking_aux->dtstart->iso8601(),
+	dtend        => $booking_aux->dtend->iso8601(),
+	until        => $booking_aux->until->iso8601(),
+	frequency    => $booking_aux->frequency,
+	interval     => $booking_aux->interval,
+	duration     => $booking_aux->duration,
+	by_minute    => $booking_aux->by_minute,
+	by_hour      => $booking_aux->by_hour,
+	by_day       => $booking_aux->by_day,
+	by_month     => $booking_aux->by_month,
+	by_day_month => $booking_aux->by_day_month
+      };
 
-        $c->stash->{content} = \@booking;
-        $c->stash->{booking} = \@booking;
+        $c->stash->{content} = $booking;
+        $c->stash->{booking} = $booking;
         $c->response->status(200);
         $c->stash->{template} = 'booking/get_booking.tt';
 
@@ -263,10 +278,25 @@ sub default_POST {
         else {
             $new_booking->insert;
 
-            my @booking = $new_booking->hash_booking;
+	    my $booking = {
+	      id           => $new_booking->id,
+	      id_resource  => $new_booking->id_resource->id,
+	      id_event     => $new_booking->id_event->id,
+	      dtstart      => $new_booking->dtstart->iso8601(),
+	      dtend        => $new_booking->dtend->iso8601(),
+	      until        => $new_booking->until->iso8601(),
+	      frequency    => $new_booking->frequency,
+	      interval     => $new_booking->interval,
+	      duration     => $new_booking->duration,
+	      by_minute    => $new_booking->by_minute,
+	      by_hour      => $new_booking->by_hour,
+	      by_day       => $new_booking->by_day,
+	      by_month     => $new_booking->by_month,
+	      by_day_month => $new_booking->by_day_month
+	    };
 
-            $c->stash->{content} = \@booking;
-            $c->stash->{booking} = \@booking;
+            $c->stash->{content} = $booking;
+            $c->stash->{booking} = $booking;
             $c->response->status(201);
             $c->stash->{template} = 'booking/get_booking.tt';
 
@@ -371,10 +401,25 @@ sub default_PUT {
 	else {
 	  $booking->update;
 	  
-	  my @booking = $booking->hash_booking;
+	  $booking = {
+	    id           => $booking->id,
+	    id_resource  => $booking->id_resource->id,
+	    id_event     => $booking->id_event->id,
+	    dtstart      => $booking->dtstart->iso8601(),
+	    dtend        => $booking->dtend->iso8601(),
+	    until        => $booking->until->iso8601(),
+	    frequency    => $booking->frequency,
+	    interval     => $booking->interval,
+	    duration     => $booking->duration,
+	    by_minute    => $booking->by_minute,
+	    by_hour      => $booking->by_hour,
+	    by_day       => $booking->by_day,
+	    by_month     => $booking->by_month,
+	    by_day_month => $booking->by_day_month
+	  };
 	  
-	  $c->stash->{content} = \@booking;
-	  $c->stash->{booking} = \@booking;
+	  $c->stash->{content} = $booking;
+	  $c->stash->{booking} = $booking;
 	  $c->response->status(201);
 	  $c->stash->{template} = 'booking/get_booking.tt';
 	  

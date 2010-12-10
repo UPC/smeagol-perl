@@ -50,10 +50,18 @@ sub get_event : Local {
     my $event_aux = $c->model('DB::Event')->find( { id => $id } );
 
     if ($event_aux) {
-        my @event = $event_aux->hash_event;
+      my $event = {
+	id          => $event_aux->id,
+	info        => $event_aux->info,
+	description => $event_aux->description,
+	starts      => $event_aux->starts->iso8601(),
+	ends        => $event_aux->ends->iso8601(),
+	tags        => $event_aux->tag_list,
+	bookings    => $event_aux->booking_list
+      };
 
-        $c->stash->{content} = \@event;
-        $c->stash->{event}   = \@event;
+        $c->stash->{content} = $event;
+        $c->stash->{event}   = $event;
         $c->response->status(200);
         $c->stash->{template} = 'event/get_event.tt';
     }
@@ -111,9 +119,17 @@ sub default_POST {
         $new_event->ends($ends);
         $new_event->insert;
 
-        my @event = $new_event->hash_event;
+	my $event = {
+	  id          => $new_event->id,
+	  info        => $new_event->info,
+	  description => $new_event->description,
+	  starts      => $new_event->starts->iso8601(),
+	  ends        => $new_event->ends->iso8601(),
+	  tags        => $new_event->tag_list,
+	  bookings    => $new_event->booking_list
+	};
 
-        $c->stash->{content} = \@event;
+        $c->stash->{content} = $event;
         $c->response->status(201);
         $c->forward( $c->view('JSON') );
     }
@@ -159,9 +175,17 @@ sub default_PUT {
             $event->ends($ends);
             $event->insert_or_update;
 
-            my @event = $event->hash_event;
+	    my $event = {
+	      id          => $event->id,
+	      info        => $event->info,
+	      description => $event->description,
+	      starts      => $event->starts->iso8601(),
+	      ends        => $event->ends->iso8601(),
+	      tags        => $event->tag_list,
+	      bookings    => $event->booking_list
+	    };
 
-            $c->stash->{content} = \@event;
+            $c->stash->{content} = $event;
             $c->response->status(200);
             $c->forward( $c->view('JSON') );
         }

@@ -56,10 +56,16 @@ sub get_resource : Private {
         $c->response->status(404);
     }
     else {
-        my @resource;
-        push( @resource, $resource->get_resources );
-        $c->stash->{resource} = \@resource;
-        $c->stash->{content}  = \@resource;
+	my $res = {
+	  id => $resource->id,
+	  description => $resource->description,
+	  info        => $resource->info,
+	  tags        => $resource->tag_list,
+	  bookings    => $resource->book_list
+	};
+
+        $c->stash->{resource} = $res;
+        $c->stash->{content}  = $res;
         $c->response->status(200);
         $c->stash->{template} = 'resource/get_resource.tt';
     }
@@ -145,15 +151,15 @@ sub default_POST {
         }
 
 #Un cop tenim el tema dels tags aclarit, muntem el json amb les dades del recurs
-        my @resource = {
+        my $resource = {
             id          => $new_resource->id,
             description => $new_resource->description,
             info        => $new_resource->info,
             tags        => $new_resource->tag_list,
         };
 
-        $c->stash->{resource} = \@resource;
-        $c->stash->{content}  = \@resource;
+        $c->stash->{resource} = $resource;
+        $c->stash->{content}  = $resource;
         $c->response->status(201);
         $c->response->content_type('text/html');
         $c->stash->{template} = 'resource/get_resource.tt';

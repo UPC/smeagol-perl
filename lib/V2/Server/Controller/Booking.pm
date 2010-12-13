@@ -7,6 +7,7 @@ use DateTime;
 use DateTime::Duration;
 use DateTime::Span;
 #Voodoo modules
+use Date::ICal;
 use Data::ICal;
 use Data::ICal::DateTime; 
 use Data::ICal::Entry::Event;
@@ -457,16 +458,21 @@ Because we saved format in $c->stash->{format} it allow us to choose between the
 sub end : Private {
     my ( $self, $c ) = @_;
 
-    if ( $c->stash->{format} ne "application/json" ) {
-        $c->forward( $c->view('HTML') );
-    }
-    else {
-        $c->forward( $c->view('JSON') );
+    if ($c->stash->{ical}){
+      
+    }else{
+      if ( $c->stash->{format} ne "application/json" ) {
+	$c->forward( $c->view('HTML') );
+      }
+      else {
+	$c->forward( $c->view('JSON') );
+      }
     }
 }
 
-sub ical :Private {
+sub ical : Private {
   my ($self,$c) = @_;
+  my $calendar = Data::ICal->new();
   
   $c->log->debug("Volem l'agenda del recurs ".$c->stash->{id_resource}." en format ICal");
   
@@ -490,9 +496,16 @@ $c->stash->{id_resource}})->search({until=>{'>'=> DateTime->now }});
     dtstart   => Date::ICal->new( epoch => time )->ical,
   );
   
-  my $calendar->add_entry($vevent);
+  $calendar->add_entry($vevent);
+  $calendar->add_properties(
+    calscale => 'GREGORIAN',
+    method => 'PUBLISH',
+    'X-WR-CALNAME' => "Resource's ".$c->stash->{id_resource}." agenda"
+  );
   
   $c->stash->{content} = \@genda;
+  $c->res->content_type("text/calendar");
+  $c->res->output($calendar->as_string);
 }
 
 =head1 AUTHOR

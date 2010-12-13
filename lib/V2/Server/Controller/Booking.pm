@@ -472,6 +472,9 @@ sub end : Private {
 
 sub ical : Private {
   my ($self,$c) = @_;
+  
+  my $filename = "agenda_resource_".$c->stash->{id_resource}.".ics";
+  
   my $calendar = Data::ICal->new();
   
   $c->log->debug("Volem l'agenda del recurs ".$c->stash->{id_resource}." en format ICal");
@@ -488,23 +491,55 @@ $c->stash->{id_resource}})->search({until=>{'>'=> DateTime->now }});
   $c->log->debug("Hi ha ".@genda." que compleixen els criteris de cerca");
   $c->log->debug(Dumper(@genda));
   
-  my $vevent = Data::ICal::Entry::Event->new();
-  $vevent->add_properties(
-    summary => "Agenda",
-    description => "Resource's ".$c->stash->{id_resource}." agenda",
-    # Dat*e*::ICal is not a typo here
-    dtstart   => Date::ICal->new( epoch => time )->ical,
-  );
-  
-  $calendar->add_entry($vevent);
-  $calendar->add_properties(
-    calscale => 'GREGORIAN',
-    method => 'PUBLISH',
-    'X-WR-CALNAME' => "Resource's ".$c->stash->{id_resource}." agenda"
-  );
+  my $s_aux;
+  my $e_aux;
+  my $u_aux;
+  foreach (@genda) {
+    my $vevent = Data::ICal::Entry::Event->new();
+    $s_aux = ParseDate($_->{dtstart});
+    $e_aux = ParseDate($_->{dtend});
+    $u_aux = ParseDate($_->{until});
+    
+    $vevent->add_properties(
+      uid => $_->{id},
+      summary => "Booking #".$_->{id},
+      dtstart => Date::ICal->new(
+	year => $s_aux->year,
+	month => $s_aux->month,
+	day => $s_aux->day,
+	hour => $s_aux->hour,
+	minute => $s_aux->minute,
+      )->ical,
+      dtend => Date::ICal->new(
+	year => $e_aux->year,
+	month => $e_aux->month,
+	day => $e_aux->day,
+	hour => $e_aux->hour,
+	minute => $e_aux->minute,
+      )->ical,
+      until => Date::ICal->new(
+	year => $u_aux->year,
+	month => $u_aux->month,
+	day => $u_aux->day,
+	hour => $u_aux->hour,
+	minute => $u_aux->minute,
+      )->ical,
+      frequency => $_->{frequency},
+      interval => $_->{interval},
+      byminute => $_->{by_minute},
+      byhour => $_->{by_hour},
+      byday => $_->{by_day},
+      bymonth => $_->{by_month},
+      bymonthday => $_->{by_day_month}
+      
+    );
+    $calendar->add_entry($vevent);
+    $c->log->debug("ICal booking #".$_->{id});
+  }
   
   $c->stash->{content} = \@genda;
   $c->res->content_type("text/calendar");
+  #$c->log->debug("Fitxer: ".Dumper($calendar));
   $c->res->output($calendar->as_string);
 }
 

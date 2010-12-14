@@ -524,6 +524,7 @@ $c->stash->{id_resource}})->search({until=>{'>'=> DateTime->now }});
 	hour => $u_aux->hour,
 	minute => $u_aux->minute,
       )->ical,
+      duration => $_->{duration},
       frequency => $_->{frequency},
       interval => $_->{interval},
       byminute => $_->{by_minute},

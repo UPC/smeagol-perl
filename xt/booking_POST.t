@@ -14,8 +14,8 @@ BEGIN { use_ok 'Catalyst::Test', 'V2::Server' }
 BEGIN { use_ok 'V2::Server::Controller::Booking' }
 
 my $dt1 = DateTime->now->truncate( to => 'minute' );
-my $dtstart = $dt1->clone->add(hours => 1);
-my $dtend = $dt1->clone->add(hours => 3);
+my $dtstart = $dt1->clone->add(hours => 2);
+my $dtend = $dt1->clone->add(hours => 4);
 
 ok( my $response_post = request POST '/booking',
     [
@@ -23,15 +23,14 @@ ok( my $response_post = request POST '/booking',
       id_resource => "1",
       dtstart => $dtstart,
       dtend => $dtend,
-#       duration => ,    
-       freq => 'weekly',
-       interval => 1,
-       until => $dtend->add(days => 10),    
+       freq => 'daily',
+       interval => 3,
+       until => $dtend->add(days => 30),    
       by_minute => $dtstart->minute,
       by_hour => $dtstart->hour,
-      by_day => 'mo,we,fr',
-      by_month => $dtstart->month,
-      by_day_month => "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15"
+      #by_day => 'tu',
+      #by_month => $dtstart->month,
+      #by_day_month => ""
       ],
     HTTP::Headers->new(Accept => 'application/json')
     

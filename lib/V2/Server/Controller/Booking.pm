@@ -525,17 +525,21 @@ $c->stash->{id_resource}})->search({until=>{'>'=> DateTime->now }});
 	minute => $u_aux->minute,
       )->ical,
       duration => $_->{duration},
-      frequency => $_->{frequency},
-      interval => $_->{interval},
-      byminute => $_->{by_minute},
-      byhour => $_->{by_hour},
-      byday => $_->{by_day},
-      bymonth => $_->{by_month},
-      bymonthday => $_->{by_day_month}
+      rrule => (
+	freq => $_->{frequency}
+      )
+#       frequency => $_->{frequency},
+#       interval => $_->{interval},
+#       byminute => $_->{by_minute},
+#       byhour => $_->{by_hour},
+#       byday => $_->{by_day},
+#       bymonth => $_->{by_month},
+#       bymonthday => $_->{by_day_month}
       
     );
     $calendar->add_entry($vevent);
     $c->log->debug("ICal booking #".$_->{id});
+
   }
   
   $c->stash->{content} = \@genda;

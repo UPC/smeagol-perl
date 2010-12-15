@@ -28,9 +28,10 @@ ok( my $response_post = request POST '/booking',
        until => $dtend->add(days => 30),    
       by_minute => $dtstart->minute,
       by_hour => $dtstart->hour,
-      #by_day => 'tu',
-      #by_month => $dtstart->month,
-      #by_day_month => ""
+      by_day => 'mo,tu,we,th,fr',
+      by_month => $dtstart->month,
+      by_day_month =>
+"1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31"
       ],
     HTTP::Headers->new(Accept => 'application/json')
     

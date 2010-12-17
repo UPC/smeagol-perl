@@ -28,7 +28,8 @@
   [% END %]
   </ul>
   </dd>
-  
+<dt>Agenda</dt>
+<dd><a href='[% c.uri_for("/booking?resource=$res.id&ical=1") %]'>ICal</a></dd>
 </dl>
 
   <h3>Edit resource</h3>

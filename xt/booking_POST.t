@@ -14,8 +14,8 @@ BEGIN { use_ok 'Catalyst::Test', 'V2::Server' }
 BEGIN { use_ok 'V2::Server::Controller::Booking' }
 
 my $dt1 = DateTime->now->truncate( to => 'minute' );
-my $dtstart = $dt1->clone->add(hours => 2);
-my $dtend = $dt1->clone->add(hours => 4);
+my $dtstart = $dt1->clone->add(days=> 1, hours => 0);
+my $dtend = $dt1->clone->add(days => 1, hours => 2);
 
 ok( my $response_post = request POST '/booking',
     [
@@ -25,7 +25,7 @@ ok( my $response_post = request POST '/booking',
       dtend => $dtend,
        freq => 'daily',
        interval => 3,
-       until => $dtend->add(days => 30),    
+       until => $dtend->clone->add(days => 30),    
       by_minute => $dtstart->minute,
       by_hour => $dtstart->hour,
       by_day => 'mo,tu,we,th,fr',

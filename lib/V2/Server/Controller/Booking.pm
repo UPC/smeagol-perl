@@ -489,16 +489,41 @@ $c->stash->{id_resource}})->search({until=>{'>'=> DateTime->now }});
   }
 
   $c->log->debug("Hi ha ".@genda." que compleixen els criteris de cerca");
-  $c->log->debug(Dumper(@genda));
+  #$c->log->debug(Dumper(@genda));
   
   my $s_aux;
   my $e_aux;
   my $u_aux;
+  my $set_aux;
+  my @byday; my @bymonth; my @bymonthday;
+  
   foreach (@genda) {
     my $vevent = Data::ICal::Entry::Event->new();
     $s_aux = ParseDate($_->{dtstart});
     $e_aux = ParseDate($_->{dtend});
     $u_aux = ParseDate($_->{until});
+    
+    @byday = split(',',$_->{by_day});
+    @bymonth = split(',',$_->{by_month});
+    @bymonthday = split(',',$_->{by_day_month});
+    
+    $set_aux = DateTime::Event::ICal->recur(
+      dtstart => $s_aux,
+      until => $u_aux,
+      freq =>    $_->{frequency},
+      interval => $_->{interval},
+      byminute => $_->{by_minute},
+      byhour => $_->{by_hour},
+      byday => \@byday,
+      bymonth => \@bymonth,
+      bymonthday => \@bymonthday
+    );
+    
+   # $c->log->debug(Dumper($set_aux));
+    #$c->log->debug("Abans de l'split: ".Dumper($set_aux->{as_ical}->[1]));
+    my ($res,$rrule) = split(':',Dumper($set_aux->{as_ical}->[1]));
+    ($rrule,$res) = split('\'',$rrule);
+    #$c->log->debug("RRULE: ".$rrule);
     
     $vevent->add_properties(
       uid => $_->{id},
@@ -517,35 +542,22 @@ $c->stash->{id_resource}})->search({until=>{'>'=> DateTime->now }});
 	hour => $e_aux->hour,
 	minute => $e_aux->minute,
       )->ical,
-      until => Date::ICal->new(
-	year => $u_aux->year,
-	month => $u_aux->month,
-	day => $u_aux->day,
-	hour => $u_aux->hour,
-	minute => $u_aux->minute,
-      )->ical,
       duration => $_->{duration},
-      rrule => (
-	freq => $_->{frequency}
-      )
-#       frequency => $_->{frequency},
-#       interval => $_->{interval},
-#       byminute => $_->{by_minute},
-#       byhour => $_->{by_hour},
-#       byday => $_->{by_day},
-#       bymonth => $_->{by_month},
-#       bymonthday => $_->{by_day_month}
-      
+      rrule => $rrule
+     
     );
     $calendar->add_entry($vevent);
-    $c->log->debug("ICal booking #".$_->{id});
+    #$c->log->debug("ICal booking #".$_->{id});
 
   }
   
   $c->stash->{content} = \@genda;
   $c->res->content_type("text/calendar");
   #$c->log->debug("Fitxer: ".Dumper($calendar));
+  $c->res->header(
+    'Content-Disposition' => qq(inline; filename=$filename) );
   $c->res->output($calendar->as_string);
+  
 }
 
 =head1 AUTHOR

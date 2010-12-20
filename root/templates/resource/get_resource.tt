@@ -1,18 +1,16 @@
 [% META title='Detalls del recurs'%]
 
-[% FOREACH res IN resource %]
-
 <dl class="resource">
-<dt>ID</dt><dd>[% res.id | html %]</dd>
-<dt>Description</dt><dd>[% res.description | html %]</dd>
-<dt>Information</dt><dd>[% res.info %]</dd>
+<dt>ID</dt><dd>[% resource.id | html %]</dd>
+<dt>Description</dt><dd>[% resource.description | html %]</dd>
+<dt>Information</dt><dd>[% resource.info %]</dd>
 <dt>Tags</dt>
   <dd>
   <ul class="list-of-tag">
   [% SET ct=0 %]
-  [% FOREACH tag IN res.tags %]
-  [% SET resource_tag = res.tags.$ct.id %]
-  <li><a href='[% c.uri_for("/tag/$resource_tag") %]'>[% res.tags.$ct.id | html %]</a></li>
+  [% FOREACH tag IN resource.tags %]
+  [% SET resource_tag = resource.tags.$ct.id %]
+  <li><a href='[% c.uri_for("/tag/$resource_tag") %]'>[% resource.tags.$ct.id | html %]</a></li>
   [% SET ct=ct+1 %]
   [% END %]
   </ul>
@@ -21,9 +19,9 @@
   <dd>
   <ul class="list-of-bookings">
   [% SET ct=0 %]
-  [% FOREACH book IN res.bookings %]
-  [% SET book_id = res.bookings.$ct.id %]
-  <li><a href='[% c.uri_for("/booking/$book_id") %]'>[% res.bookings.$ct.id | html %]</a></li>
+  [% FOREACH book IN resource.bookings %]
+  [% SET book_id = resource.bookings.$ct.id %]
+  <li><a href='[% c.uri_for("/booking/$book_id") %]'>[% resource.bookings.$ct.id | html %]</a></li>
   [% SET ct=ct+1 %]
   [% END %]
   </ul>
@@ -39,7 +37,6 @@
     <p><label>Tags (separated by commas): <input name="tags" placeholder="New resource's tags sepatrated by commas"/></label></p>
     <p><button type='submit'>Edit</button></p>
   </form>
-[% END %]
 
 <button class='delete' href='/resource/[% res.id %]'>Esborra</button>
 

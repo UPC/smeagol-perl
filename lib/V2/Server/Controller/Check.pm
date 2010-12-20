@@ -175,7 +175,7 @@ if ($current_set->min) {
   if ($c->stash->{PUT}){
     @booking_aux = $c->model('DB::Booking')->search({id_resource=>
     $new_booking->id_resource->id})->search({ id => {'!=' => $new_booking->id}
-})->search({until=>{'>' => DateTime->now } });
+})->search({until=>{'>' => $new_booking->dtstart } });
     
   }else{  
     @booking_aux = $c->model('DB::Booking')->search({id_resource=>

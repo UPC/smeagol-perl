@@ -4,19 +4,20 @@
   [% error | html %]
 [% END %]
 <dl clas="tag">
-[% FOREACH tag IN tag_aux%]
-<dt>ID</dt><dd>[% tag.id | html %] <a class='delete' href='/tag/[% tag.id %]'>Esborra</a></dd>
-<dt>Description</dt><dd>[% tag.description | html %]</dd>
+
+<dt>ID</dt><dd>[% tag_aux.id | html %] <a class='delete' href='/tag/[% tag_aux.id
+%]'>Esborra</a></dd>
+<dt>Description</dt><dd>[% tag_aux.description | html %]</dd>
 
 <dt>List of resources</dt>
       <dd><ul>
-	    [% FOREACH resource IN tag.resources %]
+	    [% FOREACH resource IN tag_aux.resources %]
 	    <li>ID: [% resource.id %] Description: [% resource.description %] [% SET id = resource.id%] <a href='[% c.uri_for("/resource/$id") %]'>Link</a>  </li>
 	    [% END %]
       </ul></dd>
 
 </dl>
-[% END %]
+
 <h3>Edit tag</h3>
 <form action='/tag/[% tag.id %]' method="put" class=edit id="edit_tag_form">
   <p><label>Description: </label><textarea name="description" placeholder="New tag's description" cols=20 required></textarea></p>

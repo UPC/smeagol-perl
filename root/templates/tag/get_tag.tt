@@ -18,7 +18,7 @@
 </dl>
 
 <h3>Edit tag</h3>
-<form action='/tag/[% tag.id %]' method="put" class=edit id="edit_tag_form">
+<form action='/tag/[% tag_aux.id %]' method="put" class=edit id="edit_tag_form">
   <p><label>Description: </label><textarea name="description" placeholder="New tag's description" cols=20 required></textarea></p>
   <p><button type='submit'>Edit</button></p>
 </form>

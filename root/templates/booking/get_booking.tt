@@ -19,7 +19,7 @@
 </dl>
 
 
-<button class='delete' href='/booking/[% boo.id %]'>Esborra</button>
+<button class='delete' href='/booking/[% booking.id %]'>Esborra</button>
 
 <br></br><a href='[% c.uri_for("/booking") | html %]'> <--Tornar a la llista de reserves</a>
 

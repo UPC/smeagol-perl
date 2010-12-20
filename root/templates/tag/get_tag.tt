@@ -5,8 +5,7 @@
 [% END %]
 <dl clas="tag">
 
-<dt>ID</dt><dd>[% tag_aux.id | html %] <a class='delete' href='/tag/[% tag_aux.id
-%]'>Esborra</a></dd>
+<dt>ID</dt><dd>[% tag_aux.id | html %]</dd>
 <dt>Description</dt><dd>[% tag_aux.description | html %]</dd>
 
 <dt>List of resources</dt>
@@ -24,8 +23,9 @@
   <p><button type='submit'>Edit</button></p>
 </form>
 
-
+<p><button class='delete' href='/tag/[% tag_aux.id %]'>Esborra</button></p>
 <p><a href='[% c.uri_for("/tag")%]'><---- Tornar a la llista de tags</a></p>
+
 
 [%# USE DUMPER %]
 [%# Dumper.dump_html(tag) %]

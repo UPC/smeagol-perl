@@ -38,7 +38,7 @@
     <p><button type='submit'>Edit</button></p>
   </form>
 
-<button class='delete' href='/resource/[% res.id %]'>Esborra</button>
+<button class='delete' href='/resource/[% resource.id %]'>Esborra</button>
 
 <br></br><a href='[% c.uri_for("/resource") | html %]'> <--Tornar a la llista de recursos </a>
 

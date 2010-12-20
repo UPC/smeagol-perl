@@ -9,7 +9,6 @@ use DateTime::Span;
 #Voodoo modules
 use Date::ICal;
 use Data::ICal;
-use Data::ICal::DateTime; 
 use Data::ICal::Entry::Event;
 
 BEGIN { extends 'Catalyst::Controller::REST' }

@@ -1,25 +1,23 @@
 [% META title='Detalls de la reserva'%]
 
-[% FOREACH boo IN booking %]
-
 <dl class="resource">
-<dt>ID</dt><dd>[% boo.id | html %]</dd>
-<dt>ID resource</dt><dd><a href='/resource/[% boo.id_resource %]'>[% boo.id_resource %]</a></dd>
-<dt>ID event</dt><dd><a href='/event/[% boo.id_event %]'>[% boo.id_event %]</a></dd>
-<dt>Start</dt><dd>[% boo.dtstart %]</dd>
-<dt>End</dt><dd>[% boo.dtend %]</dd>
-<dt>Duration<dt><dd>[% boo.duration %]</dd>
-<dt>Frequency</dt><dd>[% boo.frequency %]</dd>
-<dt>Interval</dt><dd>[% boo.interval %]</dd>
-<dt>Until</dt><dd>[% boo.until %]</dd>
-<dt>By minute</dt><dd>[% boo.by_minute %]</dd>
-<dt>By hour</dt><dd>[% boo.by_hour %]</dd>
-<dt>By day</dt><dd>[% boo.by_day %]</dd>
-<dt>By month</dt><dd>[% boo.by_month %]</dd>
-<dt>By day month</dt><dd>[% boo.by_day_month %]</dd>
+<dt>ID</dt><dd>[% booking.id | html %]</dd>
+<dt>ID resource</dt><dd><a href='/resource/[% booking.id_resource %]'>[% booking.id_resource
+%]</a></dd>
+<dt>ID event</dt><dd><a href='/event/[% booking.id_event %]'>[% booking.id_event %]</a></dd>
+<dt>Start</dt><dd>[% booking.dtstart %]</dd>
+<dt>End</dt><dd>[% booking.dtend %]</dd>
+<dt>Duration<dt><dd>[% booking.duration %]</dd>
+<dt>Frequency</dt><dd>[% booking.frequency %]</dd>
+<dt>Interval</dt><dd>[% booking.interval %]</dd>
+<dt>Until</dt><dd>[% booking.until %]</dd>
+<dt>By minute</dt><dd>[% booking.by_minute %]</dd>
+<dt>By hour</dt><dd>[% booking.by_hour %]</dd>
+<dt>By day</dt><dd>[% booking.by_day %]</dd>
+<dt>By month</dt><dd>[% booking.by_month %]</dd>
+<dt>By day month</dt><dd>[% booking.by_day_month %]</dd>
 </dl>
 
-[% END %]
 
 <button class='delete' href='/booking/[% boo.id %]'>Esborra</button>
 

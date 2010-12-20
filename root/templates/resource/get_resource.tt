@@ -31,14 +31,14 @@
 </dl>
 
   <h3>Edit resource</h3>
-  <form action='/resource/[% res.id %]' method="put" class=edit id="edit_resource_form">
+  <form action='/resource/[% resource.id %]' method="put" class=edit id="edit_resource_form">
     <p><label>Description: <textarea name="description" placeholder="New resource's description" cols=20 required></textarea></label></p>
     <p><label>Info: <textarea name="info" placeholder="New resource's info" cols=20 rows=3 required></textarea></label></p>
     <p><label>Tags (separated by commas): <input name="tags" placeholder="New resource's tags sepatrated by commas"/></label></p>
     <p><button type='submit'>Edit</button></p>
   </form>
 
-<button class='delete' href='/resource/[% res.id %]'>Esborra</button>
+<button class='delete' href='/resource/[% resource.id %]'>Esborra</button>
 
 <br></br><a href='[% c.uri_for("/resource") | html %]'> <--Tornar a la llista de recursos </a>
 

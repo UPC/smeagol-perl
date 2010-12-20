@@ -1,15 +1,14 @@
 [% META title='Events details' %]
 
-[% FOREACH ev IN event %]
 <dl class=event>
-<dt>ID</dt> <dd>[% ev.id %]</dd>
-<dt>Info</dt><dd>[% ev.info%]</dd>
-<dt>Description</dt><dd>[% ev.description %]</dd>
-<dt>Starts</dt><dd>[% ev.starts %]</dd>
-<dt>Ends</dt><dd>[% ev.ends %]</dd>
+<dt>ID</dt> <dd>[% event.id %]</dd>
+<dt>Info</dt><dd>[% event.info%]</dd>
+<dt>Description</dt><dd>[% event.description %]</dd>
+<dt>Starts</dt><dd>[% event.starts %]</dd>
+<dt>Ends</dt><dd>[% event.ends %]</dd>
 <dt>Event's tags</dt>
   <dd><ul>
-  [% FOREACH tag IN ev.tags%]
+  [% FOREACH tag IN event.tags%]
       [% SET tagid=tag.id %]
       <li><a href='[% c.uri_for("/tag/$tagid")%]'>[% tag.id %]</a></li>
   [% END %]
@@ -17,7 +16,7 @@
 
   <dt>Event's bookings</dt>
   <dd><ul>
-  [% FOREACH booking IN ev.bookings%]
+  [% FOREACH booking IN event.bookings%]
       [% SET bookid=booking.id %]
       <li><a href='[% c.uri_for("/booking/$bookid")%]'>[% booking.id %]</a></li>
   [% END %]
@@ -25,4 +24,3 @@
 
 
 </dl>
-[% END %]

@@ -13,11 +13,12 @@
 [% END %]
 </ul>
 
-<h3>Create Booking</h3>
+<!--<h3>Create Booking</h3>
 [% USE date(format = '%Y-%m-%d') %]
 
 <form action="" method="post">
-<p><label>Date (AAAA-MM-DD): </label><input name="dtstart" placeholder="[% date.format(date.now) %]"></p>
+<p><label>Date (AAAA-MM-DD): </label><input name="dtstart" placeholder="[% date.format(date.now)
+%]"></p>
 
 <p><label>Start Time: </label>
 
@@ -117,7 +118,7 @@ Interval
 <input type="checkbox" name="byday" value="su"/> Sunday
 
 <p><input type=submit value="New Booking!"><INPUT type="reset"></p>
-</form>
+</form>-->
 </p>
 [%# USE Dumper %]
 [%# Dumper.dump_html(resources) %]

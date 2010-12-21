@@ -34,6 +34,7 @@ Catalyst::REST::Request is created (which overwrites the original $c->request).
 sub begin : Private {
     my ( $self, $c ) = @_;
     $c->stash->{id_resource} = $c->request->query_parameters->{resource};
+    $c->stash->{id_event} = $c->request->query_parameters->{event};
     $c->stash->{ical} = $c->request->query_parameters->{ical};
     $c->log->debug(Dumper($c->request->query_parameters));
     $c->stash->{format} = $c->request->headers->{"accept"}
@@ -65,8 +66,13 @@ sub default_GET {
     }else {
       if ($c->stash->{id_resource}) {
 	$c->detach('bookings_resource', []);
-      }else{	  
+      }else{	
+	if ($c->stash->{id_event}){
+	  $c->detach('bookings_event', []);
+	}else{
 	  $c->detach( 'booking_list', [] );
+	}
+	  
       }
     }
 }
@@ -162,6 +168,50 @@ sub bookings_resource :Private {
   }
   
   my @booking_aux = $c->model('DB::Booking')->search( { id_resource =>
+  $id });
+  
+  my @booking;
+  my @bookings;
+  
+  # hash_booking is a function implemented in Schema/Result/Booking.pm it makes the booking easier
+  # to handle
+  
+  foreach (@booking_aux) {
+    @booking = $_->hash_booking;
+    push( @bookings, @booking );
+  }
+  
+  #Whatever is put inside $c->stash->{content} is encoded to JSON, if that's the view requested
+  $c->stash->{content}  = \@bookings;
+  #The HTML view uses $c->stash->{booking} because it makes clearer and more understandable the TT
+  #templates
+  $c->stash->{bookings} = \@bookings;
+  #Events and Resources are passed to the HTML view in order to build the select menus
+  my @events = $c->model('DB::Event')->all;
+  $c->stash->{events} = \@events;    
+  my @resources = $c->model('DB::Resources')->all;
+  $c->stash->{resources} = \@resources;
+  
+  $c->response->status(200);
+  $c->stash->{template} = 'booking/get_list.tt';
+}
+
+=head2
+=cut
+sub bookings_event :Private {
+  my ($self, $c) = @_;
+  
+  my $id = $c->stash->{id_event};
+  my $ical = $c->stash->{ical};
+  
+  $c->log->debug("ID: ".$id);
+  $c->log->debug("ICal: ".$ical);
+  
+  if ($ical){
+    $c->detach('ical_event',[]);
+  }
+  
+  my @booking_aux = $c->model('DB::Booking')->search( { id_event =>
   $id });
   
   my @booking;

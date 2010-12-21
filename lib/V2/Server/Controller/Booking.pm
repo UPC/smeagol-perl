@@ -34,6 +34,7 @@ Catalyst::REST::Request is created (which overwrites the original $c->request).
 sub begin : Private {
     my ( $self, $c ) = @_;
     $c->stash->{id_resource} = $c->request->query_parameters->{resource};
+    $c->stash->{id_event} = $c->request->query_parameters->{event};
     $c->stash->{ical} = $c->request->query_parameters->{ical};
     $c->log->debug(Dumper($c->request->query_parameters));
     $c->stash->{format} = $c->request->headers->{"accept"}
@@ -65,8 +66,13 @@ sub default_GET {
     }else {
       if ($c->stash->{id_resource}) {
 	$c->detach('bookings_resource', []);
-      }else{	  
+      }else{	
+	if ($c->stash->{id_event}){
+	  $c->detach('bookings_event', []);
+	}else{
 	  $c->detach( 'booking_list', [] );
+	}
+	  
       }
     }
 }
@@ -162,6 +168,50 @@ sub bookings_resource :Private {
   }
   
   my @booking_aux = $c->model('DB::Booking')->search( { id_resource =>
+  $id });
+  
+  my @booking;
+  my @bookings;
+  
+  # hash_booking is a function implemented in Schema/Result/Booking.pm it makes the booking easier
+  # to handle
+  
+  foreach (@booking_aux) {
+    @booking = $_->hash_booking;
+    push( @bookings, @booking );
+  }
+  
+  #Whatever is put inside $c->stash->{content} is encoded to JSON, if that's the view requested
+  $c->stash->{content}  = \@bookings;
+  #The HTML view uses $c->stash->{booking} because it makes clearer and more understandable the TT
+  #templates
+  $c->stash->{bookings} = \@bookings;
+  #Events and Resources are passed to the HTML view in order to build the select menus
+  my @events = $c->model('DB::Event')->all;
+  $c->stash->{events} = \@events;    
+  my @resources = $c->model('DB::Resources')->all;
+  $c->stash->{resources} = \@resources;
+  
+  $c->response->status(200);
+  $c->stash->{template} = 'booking/get_list.tt';
+}
+
+=head2
+=cut
+sub bookings_event :Private {
+  my ($self, $c) = @_;
+  
+  my $id = $c->stash->{id_event};
+  my $ical = $c->stash->{ical};
+  
+  $c->log->debug("ID: ".$id);
+  $c->log->debug("ICal: ".$ical);
+  
+  if ($ical){
+    $c->detach('ical_event',[]);
+  }
+  
+  my @booking_aux = $c->model('DB::Booking')->search( { id_event =>
   $id });
   
   my @booking;
@@ -603,6 +653,96 @@ $c->stash->{id_resource}})->search({until=>{'>'=> DateTime->now }});
   $c->res->output($calendar->as_string);
   
 }
+
+sub ical_event : Private {
+  my ($self,$c) = @_;
+  
+  my $filename = "agenda_event_".$c->stash->{id_event}.".ics";
+  
+  my $calendar = Data::ICal->new();
+  
+  $c->log->debug("Volem l'agenda de l'event' ".$c->stash->{id_event}." en format ICal");
+  
+  my @agenda_aux = $c->model('DB::Booking')->search({id_event =>
+  $c->stash->{id_event}})->search({until=>{'>'=> DateTime->now }});
+  
+  my @genda;
+  
+  foreach (@agenda_aux) {
+    push (@genda,$_->hash_booking);
+  }
+  
+  $c->log->debug("Hi ha ".@genda." que compleixen els criteris de cerca");
+  #$c->log->debug(Dumper(@genda));
+  
+  my $s_aux;
+  my $e_aux;
+  my $u_aux;
+  my $set_aux;
+  my @byday; my @bymonth; my @bymonthday;
+  
+  foreach (@genda) {
+    my $vevent = Data::ICal::Entry::Event->new();
+    $s_aux = ParseDate($_->{dtstart});
+    $e_aux = ParseDate($_->{dtend});
+    $u_aux = ParseDate($_->{until});
+    
+    @byday = split(',',$_->{by_day});
+    @bymonth = split(',',$_->{by_month});
+    @bymonthday = split(',',$_->{by_day_month});
+    
+    $set_aux = DateTime::Event::ICal->recur(
+      dtstart => $s_aux,
+      until => $u_aux,
+      freq =>    $_->{frequency},
+      interval => $_->{interval},
+      byminute => $_->{by_minute},
+      byhour => $_->{by_hour},
+      byday => \@byday,
+      bymonth => \@bymonth,
+      bymonthday => \@bymonthday
+    );
+    
+    # $c->log->debug(Dumper($set_aux));
+    #$c->log->debug("Abans de l'split: ".Dumper($set_aux->{as_ical}->[1]));
+    my ($res,$rrule) = split(':',Dumper($set_aux->{as_ical}->[1]));
+    ($rrule,$res) = split('\'',$rrule);
+    #$c->log->debug("RRULE: ".$rrule);
+    
+    $vevent->add_properties(
+      uid => $_->{id},
+      summary => "Booking #".$_->{id},
+      dtstart => Date::ICal->new(
+	year => $s_aux->year,
+	month => $s_aux->month,
+	day => $s_aux->day,
+	hour => $s_aux->hour,
+	minute => $s_aux->minute,
+      )->ical,
+      dtend => Date::ICal->new(
+	year => $e_aux->year,
+	month => $e_aux->month,
+	day => $e_aux->day,
+	hour => $e_aux->hour,
+	minute => $e_aux->minute,
+      )->ical,
+      duration => $_->{duration},
+      rrule => $rrule
+      
+    );
+    $calendar->add_entry($vevent);
+    #$c->log->debug("ICal booking #".$_->{id});
+    
+  }
+  
+  $c->stash->{content} = \@genda;
+  $c->res->content_type("text/calendar");
+  #$c->log->debug("Fitxer: ".Dumper($calendar));
+  $c->res->header(
+    'Content-Disposition' => qq(inline; filename=$filename) );
+  $c->res->output($calendar->as_string);
+  
+  }
 
 =head1 AUTHOR
 

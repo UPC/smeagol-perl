@@ -5,6 +5,7 @@ package V2::Server::Schema::Result::Booking;
 
 use strict;
 use warnings;
+use feature 'switch';
 
 use base 'DBIx::Class::Core';
 
@@ -171,23 +172,63 @@ sub hash_booking {
     my ($self) = @_;
     my @booking;
 
-    @booking = {
-        id           => $self->id,
-        id_resource  => $self->id_resource->id,
-        id_event     => $self->id_event->id,
-        dtstart      => $self->dtstart->iso8601(),
-        dtend        => $self->dtend->iso8601(),
-        until        => $self->until->iso8601(),
-        frequency    => $self->frequency,
-        interval     => $self->interval,
-        duration     => $self->duration,
-        by_minute    => $self->by_minute,
-        by_hour      => $self->by_hour,
-        by_day       => $self->by_day,
-        by_month     => $self->by_month,
-        by_day_month => $self->by_day_month
+   given ($self->frequency) {
+      when ('daily') {
+	@booking =   {
+	  dtstart => $self->dtstart,
+	  dtend => $self->dtend,
+	  until => $self->until,
+	  freq => $self->frequency,
+	  interval => $self->interval,
+	  byminute => $self->by_minute,
+	  byhour => $self->by_hour,
+	};
+	
+      }
+	
+	when ('weekly') {
+	  @booking =  {
+	    dtstart => $self->dtstart,
+	    dtend => $self->dtend,
+	    until => $self->until,
+	    freq => $self->frequency,
+	    interval => $self->interval,
+	    byminute => $self->by_minute,
+	    byhour => $self->by_hour,
+	    byday => $self->by_day,
+	};
+	  
+	}
+	
+	when ('monthly') {
+	  @booking =   {
+	    dtstart => $self->dtstart,
+	    dtend => $self->dtend,
+	    until => $self->until,
+	    freq => $self->frequency,
+	    interval => $self->interval,
+	    byminute => $self->by_minute,
+	    byhour => $self->by_hour,
+	    bymonth => $self->by_month,
+	    bymonthday => $self->by_day_month
+	    };	  
+	}
+	
+	default {
+	  @booking =   {
+	  dtstart => $self->dtstart,
+	  dtend => $self->dtend,
+	  until => $self->until,
+	  freq => $self->frequency,
+	  interval => $self->interval,
+	  byminute => $self->by_minute,
+	  byhour => $self->by_hour,
+	  bymonth => $self->by_month,
+	  bymonthday => $self->by_day_month
+	  };	  
+	}
     };
-
+    
     return @booking;
 }
 

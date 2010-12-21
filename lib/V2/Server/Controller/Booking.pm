@@ -1,6 +1,7 @@
 package V2::Server::Controller::Booking;
 
 use Moose;
+use feature 'switch';
 use namespace::autoclean;
 use Data::Dumper;
 use DateTime;
@@ -88,24 +89,82 @@ sub get_booking : Private {
     my ( $self, $c, $id ) = @_;
 
     my $booking_aux = $c->model('DB::Booking')->find( { id => $id } );
-
+    my $booking;
+    
     if ($booking_aux) {
-      my $booking = {
-	id           => $booking_aux->id,
-	id_resource  => $booking_aux->id_resource->id,
-	id_event     => $booking_aux->id_event->id,
-	dtstart      => $booking_aux->dtstart->iso8601(),
-	dtend        => $booking_aux->dtend->iso8601(),
-	until        => $booking_aux->until->iso8601(),
-	frequency    => $booking_aux->frequency,
-	interval     => $booking_aux->interval,
-	duration     => $booking_aux->duration,
-	by_minute    => $booking_aux->by_minute,
-	by_hour      => $booking_aux->by_hour,
-	by_day       => $booking_aux->by_day,
-	by_month     => $booking_aux->by_month,
-	by_day_month => $booking_aux->by_day_month
-      };
+#       my $booking = {
+# 	id           => $booking_aux->id,
+# 	id_resource  => $booking_aux->id_resource->id,
+# 	id_event     => $booking_aux->id_event->id,
+# 	dtstart      => $booking_aux->dtstart->iso8601(),
+# 	dtend        => $booking_aux->dtend->iso8601(),
+# 	until        => $booking_aux->until->iso8601(),
+# 	frequency    => $booking_aux->frequency,
+# 	interval     => $booking_aux->interval,
+# 	duration     => $booking_aux->duration,
+# 	by_minute    => $booking_aux->by_minute,
+# 	by_hour      => $booking_aux->by_hour,
+# 	by_day       => $booking_aux->by_day,
+# 	by_month     => $booking_aux->by_month,
+# 	by_day_month => $booking_aux->by_day_month
+#       };
+      
+      given ($booking_aux->frequency) {
+	when ('daily') {
+	  $booking =   {
+	    dtstart => $booking_aux->dtstart->iso8601(),
+	    dtend => $booking_aux->dtend->iso8601(),
+	    until => $booking_aux->until->iso8601(),
+	    freq => $booking_aux->frequency,
+	    interval => $booking_aux->interval,
+	    byminute => $booking_aux->by_minute,
+	    byhour => $booking_aux->by_hour,
+	  };
+	  
+      }
+      
+      when ('weekly') {
+	  $booking =  {
+	    dtstart => $booking_aux->dtstart->iso8601(),
+	    dtend => $booking_aux->dtend->iso8601(),
+	    until => $booking_aux->until->iso8601(),
+	    freq => $booking_aux->frequency,
+	    interval => $booking_aux->interval,
+	    byminute => $booking_aux->by_minute,
+	    byhour => $booking_aux->by_hour,
+	    byday => $booking_aux->by_day,
+	  };
+	  
+      }
+      
+      when ('monthly') {
+	$booking =   {
+	  dtstart => $booking_aux->dtstart->iso8601(),
+	  dtend => $booking_aux->dtend->iso8601(),
+	  until => $booking_aux->until->iso8601(),
+	  freq => $booking_aux->frequency,
+	  interval => $booking_aux->interval,
+	  byminute => $booking_aux->by_minute,
+	  byhour => $booking_aux->by_hour,
+	  bymonth => $booking_aux->by_month,
+	  bymonthday => $booking_aux->by_day_month
+	};	  
+      }
+      
+      default {
+	$booking =   {
+	  dtstart => $booking_aux->dtstart,
+	  dtend => $booking_aux->dtend,
+	  until => $booking_aux->until,
+	  freq => $booking_aux->frequency,
+	  interval => $booking_aux->interval,
+	  byminute => $booking_aux->by_minute,
+	  byhour => $booking_aux->by_hour,
+	  bymonth => $booking_aux->by_month,
+	  bymonthday => $booking_aux->by_day_month
+	};	  
+      }
+    };
 
         $c->stash->{content} = $booking;
         $c->stash->{booking} = $booking;

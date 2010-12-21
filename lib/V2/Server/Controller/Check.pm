@@ -1,6 +1,8 @@
 package V2::Server::Controller::Check;
 
 use Moose;
+use feature 'switch';
+
 use namespace::autoclean;
 use Data::Dumper;
 use DateTime;
@@ -133,19 +135,57 @@ sub check_overlap :Local {
   $c->log->debug("DTEND (pre-ICAL): ".Dumper($new_booking->dtend->iso8601()));
   $c->log->debug("UNTIL (pre-ICAL): ".Dumper($new_booking->until->iso8601()));
   
-  my $current_set = DateTime::Event::ICal->recur(
-    dtstart => $new_booking->dtstart,
-    dtend => $new_booking->dtend,
-    until => $new_booking->until,
-    freq => $new_booking->frequency,
-    interval => $new_booking->interval,
-    byminute => $new_booking->by_minute,
-    byhour => $new_booking->by_hour,
-    byday => \@byday,
-    bymonth => \@bymonth,
-    bymonthday => \@bymonthday
-  );
+  my $current_set;
   
+  given ($new_booking->frequency) {
+    when ('daily') {
+      $current_set =   $current_set= DateTime::Event::ICal->recur(
+      dtstart => $new_booking->dtstart,
+      dtend => $new_booking->dtend,
+      until => $new_booking->until,
+      freq => $new_booking->frequency,
+      interval => $new_booking->interval,
+      byminute => $new_booking->by_minute,
+      byhour => $new_booking->by_hour,
+    );}
+    
+    when ('weekly') {$current_set =   $current_set= DateTime::Event::ICal->recur(
+      dtstart => $new_booking->dtstart,
+      dtend => $new_booking->dtend,
+      until => $new_booking->until,
+      freq => $new_booking->frequency,
+      interval => $new_booking->interval,
+      byminute => $new_booking->by_minute,
+      byhour => $new_booking->by_hour,
+      byday => \@byday,
+    );}
+    
+    when ('monthly') {$current_set =   $current_set= DateTime::Event::ICal->recur(
+      dtstart => $new_booking->dtstart,
+      dtend => $new_booking->dtend,
+      until => $new_booking->until,
+      freq => $new_booking->frequency,
+      interval => $new_booking->interval,
+      byminute => $new_booking->by_minute,
+      byhour => $new_booking->by_hour,
+      bymonth => \@bymonth,
+      bymonthday => \@bymonthday
+    );}
+    
+    default {$current_set =   $current_set= DateTime::Event::ICal->recur(
+      dtstart => $new_booking->dtstart,
+      dtend => $new_booking->dtend,
+      until => $new_booking->until,
+      freq => $new_booking->frequency,
+      interval => $new_booking->interval,
+      byminute => $new_booking->by_minute,
+      byhour => $new_booking->by_hour,
+      bymonth => \@bymonth,
+      bymonthday => \@bymonthday
+    );}
+  };
+  
+ 
   $c->log->debug(Dumper($current_set));
 if ($current_set->min) {
   $c->log->debug("L'SpanSet té com a mínim un element");

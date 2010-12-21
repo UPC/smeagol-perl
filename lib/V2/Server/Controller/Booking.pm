@@ -654,6 +654,96 @@ $c->stash->{id_resource}})->search({until=>{'>'=> DateTime->now }});
   
 }
 
+sub ical_event : Private {
+  my ($self,$c) = @_;
+  
+  my $filename = "agenda_event_".$c->stash->{id_event}.".ics";
+  
+  my $calendar = Data::ICal->new();
+  
+  $c->log->debug("Volem l'agenda de l'event' ".$c->stash->{id_event}." en format ICal");
+  
+  my @agenda_aux = $c->model('DB::Booking')->search({id_event =>
+  $c->stash->{id_event}})->search({until=>{'>'=> DateTime->now }});
+  
+  my @genda;
+  
+  foreach (@agenda_aux) {
+    push (@genda,$_->hash_booking);
+  }
+  
+  $c->log->debug("Hi ha ".@genda." que compleixen els criteris de cerca");
+  #$c->log->debug(Dumper(@genda));
+  
+  my $s_aux;
+  my $e_aux;
+  my $u_aux;
+  my $set_aux;
+  my @byday; my @bymonth; my @bymonthday;
+  
+  foreach (@genda) {
+    my $vevent = Data::ICal::Entry::Event->new();
+    $s_aux = ParseDate($_->{dtstart});
+    $e_aux = ParseDate($_->{dtend});
+    $u_aux = ParseDate($_->{until});
+    
+    @byday = split(',',$_->{by_day});
+    @bymonth = split(',',$_->{by_month});
+    @bymonthday = split(',',$_->{by_day_month});
+    
+    $set_aux = DateTime::Event::ICal->recur(
+      dtstart => $s_aux,
+      until => $u_aux,
+      freq =>    $_->{frequency},
+      interval => $_->{interval},
+      byminute => $_->{by_minute},
+      byhour => $_->{by_hour},
+      byday => \@byday,
+      bymonth => \@bymonth,
+      bymonthday => \@bymonthday
+    );
+    
+    # $c->log->debug(Dumper($set_aux));
+    #$c->log->debug("Abans de l'split: ".Dumper($set_aux->{as_ical}->[1]));
+    my ($res,$rrule) = split(':',Dumper($set_aux->{as_ical}->[1]));
+    ($rrule,$res) = split('\'',$rrule);
+    #$c->log->debug("RRULE: ".$rrule);
+    
+    $vevent->add_properties(
+      uid => $_->{id},
+      summary => "Booking #".$_->{id},
+      dtstart => Date::ICal->new(
+	year => $s_aux->year,
+	month => $s_aux->month,
+	day => $s_aux->day,
+	hour => $s_aux->hour,
+	minute => $s_aux->minute,
+      )->ical,
+      dtend => Date::ICal->new(
+	year => $e_aux->year,
+	month => $e_aux->month,
+	day => $e_aux->day,
+	hour => $e_aux->hour,
+	minute => $e_aux->minute,
+      )->ical,
+      duration => $_->{duration},
+      rrule => $rrule
+      
+    );
+    $calendar->add_entry($vevent);
+    #$c->log->debug("ICal booking #".$_->{id});
+    
+  }
+  
+  $c->stash->{content} = \@genda;
+  $c->res->content_type("text/calendar");
+  #$c->log->debug("Fitxer: ".Dumper($calendar));
+  $c->res->header(
+    'Content-Disposition' => qq(inline; filename=$filename) );
+  $c->res->output($calendar->as_string);
+  
+  }
+
 =head1 AUTHOR
 
 Jordi Amorós Andreu,,,

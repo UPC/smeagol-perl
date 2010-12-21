@@ -21,6 +21,7 @@
       <li><a href='[% c.uri_for("/booking/$bookid")%]'>[% booking.id %]</a></li>
   [% END %]
   </ul></dd>
+  <dt>Agenda</dt><dd><a href='[% c.uri_for("/booking") %]?event=[% event.id %]&ical=1'>ICal</a></dd>
 </dl>
 
 <button class='delete' href='/event/[% event.id %]'>Esborra</button>

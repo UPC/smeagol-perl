@@ -112,10 +112,14 @@ sub get_booking : Private {
       given ($booking_aux->frequency) {
 	when ('daily') {
 	  $booking =   {
+	    id => $booking_aux->id,
+	    id_resource  => $booking_aux->id_resource->id,
+	    id_event     => $booking_aux->id_event->id,
 	    dtstart => $booking_aux->dtstart->iso8601(),
 	    dtend => $booking_aux->dtend->iso8601(),
+	    duration     => $booking_aux->duration,
 	    until => $booking_aux->until->iso8601(),
-	    freq => $booking_aux->frequency,
+	    frequency => $booking_aux->frequency,
 	    interval => $booking_aux->interval,
 	    byminute => $booking_aux->by_minute,
 	    byhour => $booking_aux->by_hour,
@@ -125,10 +129,14 @@ sub get_booking : Private {
       
       when ('weekly') {
 	  $booking =  {
+	    id => $booking_aux->id,
+	    id_resource  => $booking_aux->id_resource->id,
+	    id_event     => $booking_aux->id_event->id,
 	    dtstart => $booking_aux->dtstart->iso8601(),
 	    dtend => $booking_aux->dtend->iso8601(),
+	    duration     => $booking_aux->duration,
 	    until => $booking_aux->until->iso8601(),
-	    freq => $booking_aux->frequency,
+	    frequency => $booking_aux->frequency,
 	    interval => $booking_aux->interval,
 	    byminute => $booking_aux->by_minute,
 	    byhour => $booking_aux->by_hour,
@@ -139,10 +147,14 @@ sub get_booking : Private {
       
       when ('monthly') {
 	$booking =   {
+	  id => $booking_aux->id,
+	  id_resource  => $booking_aux->id_resource->id,
+	  id_event     => $booking_aux->id_event->id,
 	  dtstart => $booking_aux->dtstart->iso8601(),
 	  dtend => $booking_aux->dtend->iso8601(),
+	  duration     => $booking_aux->duration,
 	  until => $booking_aux->until->iso8601(),
-	  freq => $booking_aux->frequency,
+	  frequency => $booking_aux->frequency,
 	  interval => $booking_aux->interval,
 	  byminute => $booking_aux->by_minute,
 	  byhour => $booking_aux->by_hour,
@@ -153,10 +165,14 @@ sub get_booking : Private {
       
       default {
 	$booking =   {
+	  id => $booking_aux->id,
+	  id_resource  => $booking_aux->id_resource->id,
+	  id_event     => $booking_aux->id_event->id,
 	  dtstart => $booking_aux->dtstart,
 	  dtend => $booking_aux->dtend,
+	  duration     => $booking_aux->duration,
 	  until => $booking_aux->until,
-	  freq => $booking_aux->frequency,
+	  frequency => $booking_aux->frequency,
 	  interval => $booking_aux->interval,
 	  byminute => $booking_aux->by_minute,
 	  byhour => $booking_aux->by_hour,
@@ -193,6 +209,7 @@ sub booking_list : Private {
     foreach (@booking_aux) {
         @booking = $_->hash_booking;
 	$c->log->debug("Duration booking #".$_->id.": ".$_->duration);
+	$c->log->debug("hash_booking: ".Dumper(@booking));
         push( @bookings, @booking );
     }
 

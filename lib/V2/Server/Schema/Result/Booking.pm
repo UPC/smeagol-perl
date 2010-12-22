@@ -175,10 +175,14 @@ sub hash_booking {
    given ($self->frequency) {
       when ('daily') {
 	@booking =   {
-	  dtstart => $self->dtstart,
-	  dtend => $self->dtend,
-	  until => $self->until,
-	  freq => $self->frequency,
+	  id => $self->id,
+	  id_resource  => $self->id_resource->id,
+	  id_event     => $self->id_event->id,
+	  dtstart => $self->dtstart->iso8601(),
+	  dtend => $self->dtend->iso8601(),
+	  duration     => $self->duration,
+	  until => $self->until->iso8601(),
+	  frequency => $self->frequency,
 	  interval => $self->interval,
 	  byminute => $self->by_minute,
 	  byhour => $self->by_hour,
@@ -188,10 +192,14 @@ sub hash_booking {
 	
 	when ('weekly') {
 	  @booking =  {
-	    dtstart => $self->dtstart,
-	    dtend => $self->dtend,
-	    until => $self->until,
-	    freq => $self->frequency,
+	    id => $self->id,
+	    id_resource  => $self->id_resource->id,
+	    id_event     => $self->id_event->id,
+	    dtstart => $self->dtstart->iso8601(),
+	    dtend => $self->dtend->iso8601(),
+	    duration     => $self->duration,
+	    until => $self->until->iso8601(),
+	    frequency => $self->frequency,
 	    interval => $self->interval,
 	    byminute => $self->by_minute,
 	    byhour => $self->by_hour,
@@ -202,10 +210,14 @@ sub hash_booking {
 	
 	when ('monthly') {
 	  @booking =   {
-	    dtstart => $self->dtstart,
-	    dtend => $self->dtend,
-	    until => $self->until,
-	    freq => $self->frequency,
+	    id => $self->id,
+	    id_resource  => $self->id_resource->id,
+	    id_event     => $self->id_event->id,
+	    dtstart => $self->dtstart->iso8601(),
+	    dtend => $self->dtend->iso8601(),
+	    duration     => $self->duration,
+	    until => $self->until->iso8601(),
+	    frequency => $self->frequency,
 	    interval => $self->interval,
 	    byminute => $self->by_minute,
 	    byhour => $self->by_hour,
@@ -216,10 +228,14 @@ sub hash_booking {
 	
 	default {
 	  @booking =   {
-	  dtstart => $self->dtstart,
-	  dtend => $self->dtend,
-	  until => $self->until,
-	  freq => $self->frequency,
+	    id => $self->id,
+	    id_resource  => $self->id_resource->id,
+	    id_event     => $self->id_event->id,
+	    dtstart => $self->dtstart->iso8601(),
+	    dtend => $self->dtend->iso8601(),
+	    duration     => $self->duration,
+	    until => $self->until->iso8601(),
+	  frequency => $self->frequency,
 	  interval => $self->interval,
 	  byminute => $self->by_minute,
 	  byhour => $self->by_hour,

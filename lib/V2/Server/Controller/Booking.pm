@@ -780,10 +780,10 @@ sub ical_event : Private {
     );
     
     # $c->log->debug(Dumper($set_aux));
-    #$c->log->debug("Abans de l'split: ".Dumper($set_aux->{as_ical}->[1]));
-    my ($res,$rrule) = split(':',Dumper($set_aux->{as_ical}->[1]));
+    $c->log->debug("Abans de l'split: ".Dumper($set_aux->{as_ical}->[1]));
+    my ($res,$rrule) = split('E:',Dumper($set_aux->{as_ical}->[1]));
     ($rrule,$res) = split('\'',$rrule);
-    #$c->log->debug("RRULE: ".$rrule);
+    $c->log->debug("RRULE: ".$rrule);
     
     $vevent->add_properties(
       uid => $_->{id},

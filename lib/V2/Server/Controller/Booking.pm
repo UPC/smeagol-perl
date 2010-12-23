@@ -659,7 +659,7 @@ $c->stash->{id_resource}})->search({until=>{'>'=> DateTime->now }});
   }
 
   $c->log->debug("Hi ha ".@genda." que compleixen els criteris de cerca");
-  #$c->log->debug(Dumper(@genda));
+  $c->log->debug(Dumper(@genda));
   
   my $s_aux;
   my $e_aux;
@@ -673,27 +673,36 @@ $c->stash->{id_resource}})->search({until=>{'>'=> DateTime->now }});
     $e_aux = ParseDate($_->{dtend});
     $u_aux = ParseDate($_->{until});
     
-    @byday = split(',',$_->{by_day});
-    @bymonth = split(',',$_->{by_month});
-    @bymonthday = split(',',$_->{by_day_month});
+    my $f_aux = $_->{frequency};
+    my $i_aux = $_->{interval};
     
-    $set_aux = DateTime::Event::ICal->recur(
-      dtstart => $s_aux,
-      until => $u_aux,
-      freq =>    $_->{frequency},
-      interval => $_->{interval},
-      byminute => $_->{by_minute},
-      byhour => $_->{by_hour},
-      byday => \@byday,
-      bymonth => \@bymonth,
-      bymonthday => \@bymonthday
-    );
+    my $by_minute_aux = $_->{by_minute};
+    my $by_hour_aux = $_->{by_hour};
     
-   # $c->log->debug(Dumper($set_aux));
-    #$c->log->debug("Abans de l'split: ".Dumper($set_aux->{as_ical}->[1]));
-    my ($res,$rrule) = split(':',Dumper($set_aux->{as_ical}->[1]));
-    ($rrule,$res) = split('\'',$rrule);
-    #$c->log->debug("RRULE: ".$rrule);
+    my $by_day_aux = $_->{byday};
+    $c->log->debug("BYDAY DB: ".$_->{byday});
+    my $by_month_aux = $_->{bymonth};
+    $c->log->debug("BYMONTH DB: ".$_->{by_month_aux});
+    my $by_day_month_aux = $_->{bymonthday};
+    $c->log->debug("BYDAYMONTH DB: ".$_->{by_day_month});
+    
+    my $rrule;
+    
+    given ($f_aux) {
+      when ('daily') {
+	$rrule = 'FREQ=DAILY;INTERVAL='.uc($i_aux).';UNTIL='.uc($u_aux);
+      }
+      when ('weekly') {
+	$c->log->debug("Reserva weekly. BYDAY: ".Dumper($by_day_aux));
+	$rrule = 'FREQ=WEEKLY;INTERVAL='.uc($i_aux).'.;BYDAY='.uc($by_day_aux).';UNTIL='.uc($u_aux);
+      }
+      when ('monthly') {
+	$rrule = 'FREQ=MONTHLY;INTERVAL='.uc($i_aux).';BYMONTHDAY='.$by_day_month_aux.';UNTIL='.uc($u_aux);
+      }
+      when ('yearly') {
+	$rrule = 'FREQ=YEARLY;INTERVAL='.uc($i_aux).';BYMONTH='.$by_month_aux.';BYMONTHDAY='.$by_day_month_aux.';UNTIL='.uc($u_aux);
+      }
+    }
     
     $vevent->add_properties(
       uid => $_->{id},
@@ -730,6 +739,7 @@ $c->stash->{id_resource}})->search({until=>{'>'=> DateTime->now }});
   
 }
 
+=head2
 sub ical_event : Private {
   my ($self,$c) = @_;
   
@@ -772,7 +782,7 @@ sub ical_event : Private {
       until => $u_aux,
       freq =>    $_->{frequency},
       interval => $_->{interval},
-      byminute => $_->{by_minute},
+      byminute => $by_minute_aux,
       byhour => $_->{by_hour},
       byday => \@byday,
       bymonth => \@bymonth,
@@ -819,6 +829,7 @@ sub ical_event : Private {
   $c->res->output($calendar->as_string);
   
   }
+=cut
 
 =head1 AUTHOR
 

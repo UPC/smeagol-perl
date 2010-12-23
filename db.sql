@@ -100,7 +100,14 @@ INSERT INTO event values (2,'Informació 2',"Descripció de l'event 2",'2010-02-
 INSERT INTO event values(3,'Informació 3',"Descripció de l'event 3",'2010-02-16 04:00:00','2010-02-16 05:00:00');
 INSERT INTO event values(4,'Informació 4',"Descripció de l'event 4",'2010-02-16 04:00:00','2010-02-16 05:00:00');
 
+--|id|id_resource|id_event|dtstart|dtend|duration|frequency|interval|until|by_minute|by_hour|by_day|by_month|by_day_month
+
 INSERT INTO booking values (1,3,1,'2010-02-16 04:00:00','2010-02-16 05:00:00','60','daily','1','2010-02-16 00:00:00','00','04','','','');
+INSERT INTO booking values (6,3,1,'2010-12-23 09:00:00','2010-12-23 10:00:00','60','daily','2','2010-12-31 09:00:00','00','09','','','');
+INSERT INTO booking values (7,3,1,'2010-12-23 10:00:00','2010-12-23 11:00:00','60','weekly','1','2010-12-31 09:00:00','00','10','th','','');
+INSERT INTO booking values (8,3,1,'2010-12-23 11:00:00','2010-12-23 12:00:00','60','monthly','1','2011-03-31 09:00:00','00','11','','','23');
+INSERT INTO booking values (9,3,1,'2010-12-23 12:00:00','2010-12-23 13:00:00','60','yearly','1','2012-12-31 09:00:00','00','12','','12','23');
+
 INSERT INTO booking values (2,4,1,'2010-02-16 05:00:00','2010-02-16 06:00:00','60','daily','2','2011-01-01 00:00:00','00','05','mo,tu,we,th,fr','','');
 INSERT INTO booking values (3,5,2,'2010-02-16 06:00:00','2010-02-16 07:00:00','60','weekly','2','2011-01-01 00:00:00','00','06','mo,tu,we,th,fr','','');
 INSERT INTO booking values (4,2,3,'2010-02-16 07:00:00','2010-02-16 08:00:00','60','monthly','1','2011-01-01 00:00:00','00','07','mo,tu,we,th,fr','','');

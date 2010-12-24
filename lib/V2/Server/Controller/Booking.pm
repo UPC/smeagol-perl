@@ -580,22 +580,134 @@ sub default_PUT {
     $c->visit( '/check/check_booking', [ ] );    
     
     
-    $booking->id_resource($id_resource);
-    $booking->id_event($id_event);
-    $booking->dtstart($dtstart);
-    $booking->dtend($dtend);
-    #Duration is saved in minuntes in the DB in order to make it easier to deal with it when the
-    #server builds the JSON objects
-    #It sounds strange, but it works. Don't mess with the duration, the result can be weird.
-    $booking->duration($duration->in_units("minutes"));
-    $booking->frequency($freq);
-    $booking->interval($interval);
-    $booking->until($until);
-    $booking->by_minute($by_minute);
-    $booking->by_hour($by_hour);
-    $booking->by_day($by_day);
-    $booking->by_month($by_month);
-    $booking->by_day_month($by_day_month);
+    my $jbooking;
+    
+    given ($freq) {
+      #Duration is saved in minuntes in the DB in order to make it easier to deal with it when the server
+      #builds the JSON objects
+      #Don't mess with the duration, the result can be weird.
+      when ('daily') {
+	$booking->id_resource($id_resource);
+	$booking->id_event($id_event);
+	$booking->dtstart($dtstart);
+	$booking->dtend($dtend);
+	$booking->duration($duration->in_units("minutes"));
+	$booking->frequency($freq);
+	$booking->interval($interval);
+	$booking->until($until);
+	$booking->by_minute($by_minute);
+	$booking->by_hour($by_hour);
+	
+	$jbooking = {
+	  id           => $booking->id,
+	  id_resource  => $booking->id_resource->id,
+	  id_event     => $booking->id_event->id,
+	  dtstart      => $booking->dtstart->iso8601(),
+	  dtend        => $booking->dtend->iso8601(),
+	  until        => $booking->until->iso8601(),
+	  frequency    => $booking->frequency,
+	  interval     => $booking->interval,
+	  duration     => $booking->duration,
+	  by_minute    => $booking->by_minute,
+	  by_hour      => $booking->by_hour,
+	};
+      }
+      
+      when ('weekly') {
+	$booking->id_resource($id_resource);
+	$booking->id_event($id_event);
+	$booking->dtstart($dtstart);
+	$booking->dtend($dtend);
+	$booking->duration($duration->in_units("minutes"));
+	$booking->frequency($freq);
+	$booking->interval($interval);
+	$booking->until($until);
+	$booking->by_minute($by_minute);
+	$booking->by_hour($by_hour);
+	$booking->by_day($by_day);
+	
+	$jbooking = {
+	  id           => $booking->id,
+	  id_resource  => $booking->id_resource->id,
+	  id_event     => $booking->id_event->id,
+	  dtstart      => $booking->dtstart->iso8601(),
+	  dtend        => $booking->dtend->iso8601(),
+	  until        => $booking->until->iso8601(),
+	  frequency    => $booking->frequency,
+	  interval     => $booking->interval,
+	  duration     => $booking->duration,
+	  by_minute    => $booking->by_minute,
+	  by_hour      => $booking->by_hour,
+	  by_day       => $booking->by_day,
+	};
+	
+      }
+      
+      when ('monthly') {
+	$booking->id_resource($id_resource);
+	$booking->id_event($id_event);
+	$booking->dtstart($dtstart);
+	$booking->dtend($dtend);
+	$booking->duration($duration->in_units("minutes"));
+	$booking->frequency($freq);
+	$booking->interval($interval);
+	$booking->until($until);
+	$booking->by_minute($by_minute);
+	$booking->by_hour($by_hour);
+	$booking->by_month($by_month);
+	$booking->by_day_month($by_day_month);
+	
+	$jbooking = {
+	  id           => $booking->id,
+	  id_resource  => $booking->id_resource->id,
+	  id_event     => $booking->id_event->id,
+	  dtstart      => $booking->dtstart->iso8601(),
+	  dtend        => $booking->dtend->iso8601(),
+	  until        => $booking->until->iso8601(),
+	  frequency    => $booking->frequency,
+	  interval     => $booking->interval,
+	  duration     => $booking->duration,
+	  by_minute    => $booking->by_minute,
+	  by_hour      => $booking->by_hour,
+	  by_month     => $booking->by_month,
+	  by_day_month => $booking->by_day_month
+	};
+      }
+      
+      default {
+	$booking->id_resource($id_resource);
+	$booking->id_event($id_event);
+	$booking->dtstart($dtstart);
+	$booking->dtend($dtend);
+	$booking->duration($duration->in_units("minutes"));
+	$booking->frequency($freq);
+	$booking->interval($interval);
+	$booking->until($until);
+	$booking->by_minute($by_minute);
+	$booking->by_hour($by_hour);
+	$booking->by_day($by_day);
+	$booking->by_month($by_month);
+	$booking->by_day_month($by_day_month);
+	
+	$jbooking = {
+	  id           => $booking->id,
+	  id_resource  => $booking->id_resource->id,
+	  id_event     => $booking->id_event->id,
+	  dtstart      => $booking->dtstart->iso8601(),
+	  dtend        => $booking->dtend->iso8601(),
+	  until        => $booking->until->iso8601(),
+	  frequency    => $booking->frequency,
+	  interval     => $booking->interval,
+	  duration     => $booking->duration,
+	  by_minute    => $booking->by_minute,
+	  by_hour      => $booking->by_hour,
+	  by_day       => $booking->by_day,
+	  by_month     => $booking->by_month,
+	  by_day_month => $booking->by_day_month
+	};
+	
+      }
+    };
     
     #we are reusing /check/check_overlap that's why $booking is saved in $c->stash->{new_booking}
     #For the same reason we put to true $c->stash->{PUT} so we'll be able to amply the convenient 
@@ -617,25 +729,8 @@ sub default_PUT {
 	else {
 	  $booking->update;
 	  
-	  $booking = {
-	    id           => $booking->id,
-	    id_resource  => $booking->id_resource->id,
-	    id_event     => $booking->id_event->id,
-	    dtstart      => $booking->dtstart->iso8601(),
-	    dtend        => $booking->dtend->iso8601(),
-	    until        => $booking->until->iso8601(),
-	    frequency    => $booking->frequency,
-	    interval     => $booking->interval,
-	    duration     => $booking->duration,
-	    by_minute    => $booking->by_minute,
-	    by_hour      => $booking->by_hour,
-	    by_day       => $booking->by_day,
-	    by_month     => $booking->by_month,
-	    by_day_month => $booking->by_day_month
-	  };
-	  
-	  $c->stash->{content} = $booking;
-	  $c->stash->{booking} = $booking;
+	  $c->stash->{content} = $jbooking;
+	  $c->stash->{booking} = $jbooking;
 	  $c->response->status(201);
 	  $c->stash->{template} = 'booking/get_booking.tt';
 	  

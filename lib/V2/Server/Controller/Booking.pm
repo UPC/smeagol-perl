@@ -92,23 +92,6 @@ sub get_booking : Private {
     my $booking;
     
     if ($booking_aux) {
-#       my $booking = {
-# 	id           => $booking_aux->id,
-# 	id_resource  => $booking_aux->id_resource->id,
-# 	id_event     => $booking_aux->id_event->id,
-# 	dtstart      => $booking_aux->dtstart->iso8601(),
-# 	dtend        => $booking_aux->dtend->iso8601(),
-# 	until        => $booking_aux->until->iso8601(),
-# 	frequency    => $booking_aux->frequency,
-# 	interval     => $booking_aux->interval,
-# 	duration     => $booking_aux->duration,
-# 	by_minute    => $booking_aux->by_minute,
-# 	by_hour      => $booking_aux->by_hour,
-# 	by_day       => $booking_aux->by_day,
-# 	by_month     => $booking_aux->by_month,
-# 	by_day_month => $booking_aux->by_day_month
-#       };
-      
       given ($booking_aux->frequency) {
 	when ('daily') {
 	  $booking =   {
@@ -364,8 +347,8 @@ sub default_POST {
 #day abbreviations is needed.
 #    my @day_abbr = ('mo','tu','we','th','fr','sa','su');
     
-    my $by_day = $req->parameters->{by_day} ||
-"";#@day_abbr[$dtstart->day_of_week-1];
+    my $by_day = $req->parameters->{by_day} || "";
+    #@day_abbr[$dtstart->day_of_week-1];
     my $by_month = $req->parameters->{by_month} || "";#$dtstart->month;
     my $by_day_month = $req->parameters->{by_day_month} || "";
 
@@ -375,24 +358,134 @@ sub default_POST {
 
 #Do the resource and the event exist?
     $c->visit( '/check/check_booking', [ ] );    
-
-
-    $new_booking->id_resource($id_resource);
-    $new_booking->id_event($id_event);
-    $new_booking->dtstart($dtstart);
-    $new_booking->dtend($dtend);
-#Duration is saved in minuntes in the DB in order to make it easier to deal with it when the server
-#builds the JSON objects
-#It sounds strange, but it works. Don't mess with the duration, the result can be weird.
-    $new_booking->duration($duration->in_units("minutes"));
-    $new_booking->frequency($freq);
-    $new_booking->interval($interval);
-    $new_booking->until($until);
-    $new_booking->by_minute($by_minute);
-    $new_booking->by_hour($by_hour);
-    $new_booking->by_day($by_day);
-    $new_booking->by_month($by_month);
-    $new_booking->by_day_month($by_day_month);
+    my $booking;
+    
+    given ($freq) {
+      #Duration is saved in minuntes in the DB in order to make it easier to deal with it when the server
+      #builds the JSON objects
+      #Don't mess with the duration, the result can be weird.
+      when ('daily') {
+	$new_booking->id_resource($id_resource);
+	$new_booking->id_event($id_event);
+	$new_booking->dtstart($dtstart);
+	$new_booking->dtend($dtend);
+	$new_booking->duration($duration->in_units("minutes"));
+	$new_booking->frequency($freq);
+	$new_booking->interval($interval);
+	$new_booking->until($until);
+	$new_booking->by_minute($by_minute);
+	$new_booking->by_hour($by_hour);
+	
+	my $booking = {
+	  id           => $new_booking->id,
+	  id_resource  => $new_booking->id_resource->id,
+	  id_event     => $new_booking->id_event->id,
+	  dtstart      => $new_booking->dtstart->iso8601(),
+	  dtend        => $new_booking->dtend->iso8601(),
+	  until        => $new_booking->until->iso8601(),
+	  frequency    => $new_booking->frequency,
+	  interval     => $new_booking->interval,
+	  duration     => $new_booking->duration,
+	  by_minute    => $new_booking->by_minute,
+	  by_hour      => $new_booking->by_hour,
+	};
+      }
+      
+      when ('weekly') {
+	$new_booking->id_resource($id_resource);
+	$new_booking->id_event($id_event);
+	$new_booking->dtstart($dtstart);
+	$new_booking->dtend($dtend);
+	$new_booking->duration($duration->in_units("minutes"));
+	$new_booking->frequency($freq);
+	$new_booking->interval($interval);
+	$new_booking->until($until);
+	$new_booking->by_minute($by_minute);
+	$new_booking->by_hour($by_hour);
+	$new_booking->by_day($by_day);
+	
+	my $booking = {
+	  id           => $new_booking->id,
+	  id_resource  => $new_booking->id_resource->id,
+	  id_event     => $new_booking->id_event->id,
+	  dtstart      => $new_booking->dtstart->iso8601(),
+	  dtend        => $new_booking->dtend->iso8601(),
+	  until        => $new_booking->until->iso8601(),
+	  frequency    => $new_booking->frequency,
+	  interval     => $new_booking->interval,
+	  duration     => $new_booking->duration,
+	  by_minute    => $new_booking->by_minute,
+	  by_hour      => $new_booking->by_hour,
+	  by_day       => $new_booking->by_day,
+	  };
+	
+      }
+      
+      when ('monthly') {
+	$new_booking->id_resource($id_resource);
+	$new_booking->id_event($id_event);
+	$new_booking->dtstart($dtstart);
+	$new_booking->dtend($dtend);
+	$new_booking->duration($duration->in_units("minutes"));
+	$new_booking->frequency($freq);
+	$new_booking->interval($interval);
+	$new_booking->until($until);
+	$new_booking->by_minute($by_minute);
+	$new_booking->by_hour($by_hour);
+	$new_booking->by_month($by_month);
+	$new_booking->by_day_month($by_day_month);
+	
+	my $booking = {
+	  id           => $new_booking->id,
+	  id_resource  => $new_booking->id_resource->id,
+	  id_event     => $new_booking->id_event->id,
+	  dtstart      => $new_booking->dtstart->iso8601(),
+	  dtend        => $new_booking->dtend->iso8601(),
+	  until        => $new_booking->until->iso8601(),
+	  frequency    => $new_booking->frequency,
+	  interval     => $new_booking->interval,
+	  duration     => $new_booking->duration,
+	  by_minute    => $new_booking->by_minute,
+	  by_hour      => $new_booking->by_hour,
+	  by_month     => $new_booking->by_month,
+	  by_day_month => $new_booking->by_day_month
+	};
+      }
+      
+      default {
+	$new_booking->id_resource($id_resource);
+	$new_booking->id_event($id_event);
+	$new_booking->dtstart($dtstart);
+	$new_booking->dtend($dtend);
+	$new_booking->duration($duration->in_units("minutes"));
+	$new_booking->frequency($freq);
+	$new_booking->interval($interval);
+	$new_booking->until($until);
+	$new_booking->by_minute($by_minute);
+	$new_booking->by_hour($by_hour);
+	$new_booking->by_day($by_day);
+	$new_booking->by_month($by_month);
+	$new_booking->by_day_month($by_day_month);
+	
+	my $booking = {
+	  id           => $new_booking->id,
+	  id_resource  => $new_booking->id_resource->id,
+	  id_event     => $new_booking->id_event->id,
+	  dtstart      => $new_booking->dtstart->iso8601(),
+	  dtend        => $new_booking->dtend->iso8601(),
+	  until        => $new_booking->until->iso8601(),
+	  frequency    => $new_booking->frequency,
+	  interval     => $new_booking->interval,
+	  duration     => $new_booking->duration,
+	  by_minute    => $new_booking->by_minute,
+	  by_hour      => $new_booking->by_hour,
+	  by_day       => $new_booking->by_day,
+	  by_month     => $new_booking->by_month,
+	  by_day_month => $new_booking->by_day_month
+	};
+	
+      }
+    };
 
     $c->stash->{new_booking}=$new_booking;
 
@@ -417,23 +510,6 @@ sub default_POST {
         }
         else {
             $new_booking->insert;
-
-	    my $booking = {
-	      id           => $new_booking->id,
-	      id_resource  => $new_booking->id_resource->id,
-	      id_event     => $new_booking->id_event->id,
-	      dtstart      => $new_booking->dtstart->iso8601(),
-	      dtend        => $new_booking->dtend->iso8601(),
-	      until        => $new_booking->until->iso8601(),
-	      frequency    => $new_booking->frequency,
-	      interval     => $new_booking->interval,
-	      duration     => $new_booking->duration,
-	      by_minute    => $new_booking->by_minute,
-	      by_hour      => $new_booking->by_hour,
-	      by_day       => $new_booking->by_day,
-	      by_month     => $new_booking->by_month,
-	      by_day_month => $new_booking->by_day_month
-	    };
 
             $c->stash->{content} = $booking;
             $c->stash->{booking} = $booking;
@@ -680,11 +756,8 @@ $c->stash->{id_resource}})->search({until=>{'>'=> DateTime->now }});
     my $by_hour_aux = $_->{by_hour};
     
     my $by_day_aux = $_->{byday};
-    $c->log->debug("BYDAY DB: ".$_->{byday});
     my $by_month_aux = $_->{bymonth};
-    $c->log->debug("BYMONTH DB: ".$_->{by_month_aux});
     my $by_day_month_aux = $_->{bymonthday};
-    $c->log->debug("BYDAYMONTH DB: ".$_->{by_day_month});
     
     my $rrule;
     
@@ -726,8 +799,6 @@ $c->stash->{id_resource}})->search({until=>{'>'=> DateTime->now }});
      
     );
     $calendar->add_entry($vevent);
-    #$c->log->debug("ICal booking #".$_->{id});
-
   }
   
   $c->stash->{content} = \@genda;

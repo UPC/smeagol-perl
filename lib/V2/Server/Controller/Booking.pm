@@ -514,7 +514,8 @@ sub default_POST {
             $c->stash->{content} = $booking;
             $c->stash->{booking} = $booking;
             $c->response->status(201);
-            $c->stash->{template} = 'booking/get_booking.tt';
+            $c->response->redirect('get_booking',[$new_booking->id]);
+	    #$c->stash->{template} = 'booking/get_booking';
 
         }
     }
@@ -526,7 +527,7 @@ sub default_POST {
         $c->response->status(400);
         $c->stash->{error}
             = "Error: Check if the event or the resource exist";
-        $c->stash->{template} = 'booking/get_list.tt';
+        $c->stash->{template} = 'booking/get_list';
 
     }
 }

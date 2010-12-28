@@ -253,9 +253,13 @@ $new_booking->id_resource->id});
     
     if ($overlap) {
       $c->stash->{overlap} = 1;
+      $c->log->debug("Hi ha solpament");
       last;
     }
   }
+
+$c->log->debug("No hi ha solpament") unless $c->stash->{overlap};
+  
 }
 
 =head1 AUTHOR

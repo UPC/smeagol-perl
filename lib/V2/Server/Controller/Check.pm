@@ -139,49 +139,52 @@ sub check_overlap :Local {
   
   given ($new_booking->frequency) {
     when ('daily') {
-      $current_set =   $current_set= DateTime::Event::ICal->recur(
-      dtstart => $new_booking->dtstart,
-      dtend => $new_booking->dtend,
-      until => $new_booking->until,
-      freq => $new_booking->frequency,
-      interval => $new_booking->interval,
-      byminute => $new_booking->by_minute,
-      byhour => $new_booking->by_hour,
+      $current_set= DateTime::Event::ICal->recur(
+	dtstart => $new_booking->dtstart,
+	dtend => $new_booking->dtend,
+	until => $new_booking->until,
+	freq => $new_booking->frequency,
+	interval => $new_booking->interval,
+	byminute => $new_booking->by_minute,
+	byhour => $new_booking->by_hour,
     );}
     
-    when ('weekly') {$current_set =   $current_set= DateTime::Event::ICal->recur(
-      dtstart => $new_booking->dtstart,
-      dtend => $new_booking->dtend,
-      until => $new_booking->until,
-      freq => $new_booking->frequency,
-      interval => $new_booking->interval,
-      byminute => $new_booking->by_minute,
-      byhour => $new_booking->by_hour,
-      byday => \@byday,
+    when ('weekly') {
+      $current_set= DateTime::Event::ICal->recur(
+	dtstart => $new_booking->dtstart,
+	dtend => $new_booking->dtend,
+	until => $new_booking->until,
+	freq => $new_booking->frequency,
+	interval => $new_booking->interval,
+	byminute => $new_booking->by_minute,
+	byhour => $new_booking->by_hour,
+	byday => \@byday,
     );}
     
-    when ('monthly') {$current_set =   $current_set= DateTime::Event::ICal->recur(
-      dtstart => $new_booking->dtstart,
-      dtend => $new_booking->dtend,
-      until => $new_booking->until,
-      freq => $new_booking->frequency,
-      interval => $new_booking->interval,
-      byminute => $new_booking->by_minute,
-      byhour => $new_booking->by_hour,
-      bymonth => \@bymonth,
-      bymonthday => \@bymonthday
+    when ('monthly') {
+      $current_set= DateTime::Event::ICal->recur(
+	dtstart => $new_booking->dtstart,
+	dtend => $new_booking->dtend,
+	until => $new_booking->until,
+	freq => $new_booking->frequency,
+	interval => $new_booking->interval,
+	byminute => $new_booking->by_minute,
+	byhour => $new_booking->by_hour,
+	bymonth => \@bymonth,
+	bymonthday => \@bymonthday
     );}
     
-    default {$current_set =   $current_set= DateTime::Event::ICal->recur(
-      dtstart => $new_booking->dtstart,
-      dtend => $new_booking->dtend,
-      until => $new_booking->until,
-      freq => $new_booking->frequency,
-      interval => $new_booking->interval,
-      byminute => $new_booking->by_minute,
-      byhour => $new_booking->by_hour,
-      bymonth => \@bymonth,
-      bymonthday => \@bymonthday
+    default {
+      $current_set= DateTime::Event::ICal->recur(
+	dtstart => $new_booking->dtstart,
+	dtend => $new_booking->dtend,
+	until => $new_booking->until,
+	freq => $new_booking->frequency,
+	interval => $new_booking->interval,
+	byminute => $new_booking->by_minute,
+	byhour => $new_booking->by_hour,
+	bymonth => \@bymonth,
+	bymonthday => \@bymonthday
     );}
   };
   
@@ -224,22 +227,79 @@ $new_booking->id_resource->id});
 
   $c->log->debug("Hi ha ".@booking_aux." que compleixen els criteris de la cerca");
   
+  my $dtstart;
+  my $dtend;
+  my $until;
+  my $frequency;
+  my $interval;
+  my $byminute;
+  my $byhour;
+  
   foreach (@booking_aux) {
     $c->log->debug("Checking Booking #".$_->id);
+    
     @byday = split(',',$_->by_day);
     @bymonth = split(',',$_->by_month);
     @bymonthday = split(',',$_->by_day_month);
-    $old_set = DateTime::Event::ICal->recur(
-      dtstart => $_->dtstart,
-      until => $_->until,
-      freq =>    $_->frequency,
-      interval => $_->interval,
-      byminute => $_->by_minute,
-      byhour => $_->by_hour,
-      byday => \@byday,
-      bymonth => \@bymonth,
-      bymonthday => \@bymonthday
-    );
+    
+    $dtstart = $_->dtstart;
+    $dtend = $_->dtend;
+    $until = $_->until;
+    $frequency = $_->frequency;
+    $interval = $_->interval;
+    $byminute = $_->by_minute;
+    $byhour = $_->by_hour;
+    
+    given ($new_booking->frequency) {
+      when ('daily') {
+	$old_set= DateTime::Event::ICal->recur(
+	  dtstart => $dtstart,
+	  dtend => $dtend,
+	  until => $until,
+	  freq => $frequency,
+	  interval => $interval,
+	  byminute => $byminute,
+	  byhour => $byhour,
+	);}
+	
+	when ('weekly') {
+	  $old_set= DateTime::Event::ICal->recur(
+	    dtstart => $dtstart,
+	    dtend => $dtend,
+	    until => $until,
+	    freq => $frequency,
+	    interval => $interval,
+	    byminute => $byminute,
+	    byhour => $byhour,
+	    byday => \@byday,
+	  );}
+	  
+	  when ('monthly') {
+	    $old_set= DateTime::Event::ICal->recur(
+	      dtstart => $dtstart,
+	      dtend => $dtend,
+	      until => $until,
+	      freq => $frequency,
+	      interval => $interval,
+	      byminute => $byminute,
+	      byhour => $byhour,
+	      bymonth => \@bymonth,
+	      bymonthday => \@bymonthday
+	    );}
+	    
+	    default {
+	      $old_set= DateTime::Event::ICal->recur(
+		dtstart => $dtstart,
+		dtend => $dtend,
+		until => $until,
+		freq => $frequency,
+		interval => $interval,
+		byminute => $byminute,
+		byhour => $byhour,
+		bymonth => \@bymonth,
+		bymonthday => \@bymonthday
+	      );}
+    };
     
     $duration2 = DateTime::Duration->new(
       minutes => $_->duration

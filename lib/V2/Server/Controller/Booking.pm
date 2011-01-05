@@ -296,7 +296,7 @@ sub bookings_event :Private {
   $c->stash->{resources} = \@resources;
   
   $c->response->status(200);
-  $c->stash->{template} = 'booking/get_list.tt';
+  $c->stash->{template} = 'booking/get_list';
 }
 
 =head2 default_POST

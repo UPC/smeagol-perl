@@ -514,8 +514,8 @@ sub default_POST {
             $c->stash->{content} = $booking;
             $c->stash->{booking} = $booking;
             $c->response->status(201);
-            $c->response->redirect('get_booking',[$new_booking->id]);
-	    #$c->stash->{template} = 'booking/get_booking';
+	    #$c->stash->{template} = 'booking/get_booking.tt';            
+	    $c->forward('get_booking',[$new_booking->id]);    
 
         }
     }
@@ -804,6 +804,7 @@ sub end : Private {
       
     }else{
       if ( $c->stash->{format} ne "application/json" ) {
+	$c->res->content_type("text/html");
 	$c->forward( $c->view('HTML') );
       }
       else {
@@ -822,7 +823,7 @@ sub ical : Private {
   $c->log->debug("Volem l'agenda del recurs ".$c->stash->{id_resource}." en format ICal");
   
   my @agenda_aux = $c->model('DB::Booking')->search({id_resource =>
-$c->stash->{id_resource}})->search({until=>{'>'=> DateTime->now }});
+$c->stash->{id_resource}});
 
   my @genda;
   

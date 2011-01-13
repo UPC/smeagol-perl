@@ -23,5 +23,5 @@
 
 <br></br><a href='[% c.uri_for("/booking") | html %]'> <--Tornar a la llista de reserves</a>
 
-[% USE Dumper %]
-[% Dumper.dump_html(booking) %]
+[%# USE Dumper %]
+[%# Dumper.dump_html(booking) %]

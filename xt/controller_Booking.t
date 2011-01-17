@@ -35,7 +35,7 @@ foreach (@booking) {
     diag 'Booking ' . $id . ' ' . $response->content;
     diag '###################################';
 }
-
+diag '\n';
 diag '########################################';
 diag '##Creating Booking with no recurrence###';
 diag '########################################';
@@ -50,6 +50,8 @@ ok(my $response_post = request POST '/booking',
       id_resource => "1",
       dtstart => $dtstart,
       dtend => $dtend,
+      freq => 'daily',
+      interval => 1
       ],
     HTTP::Headers->new(Accept => 'application/json'));
 
@@ -69,7 +71,7 @@ $request_del->header(Accept => 'application/json');
 
 ok( $ua_del->request($request_del) );
 
-
+diag '\n';
 diag '###########################################';
 diag '##Creating Booking with daily recurrence###';
 diag '###########################################';
@@ -82,7 +84,7 @@ ok($response_post = request POST '/booking',
       dtend => $dtend,
       freq => 'daily',
       interval => 1,
-      until => $dtend->clone->add(days => 10)
+      until => $dtend->clone->add(days => 10),
       ],
     HTTP::Headers->new(Accept => 'application/json'));
 
@@ -94,5 +96,54 @@ $request_del->header(Accept => 'application/json');
 
 ok( my $response = $ua_del->request($request_del) );
 diag "Esborrem booking amb recurrència diaria: ".$response->content;
+
+diag '\n';
+diag '############################################';
+diag '##Creating Booking with weekly recurrence###';
+diag '############################################';
+
+ok($response_post = request POST '/booking',
+    [
+      id_event => "1",
+      id_resource => "1",
+      dtstart => $dtstart,
+      dtend => $dtend,
+      freq => 'weekly',
+      interval => 1,
+      until => $dtend->clone->add(months => 4),
+      byday => substr(lc($dtstart->day_abbr),0,2)
+      ],
+    HTTP::Headers->new(Accept => 'application/json'));
+
+diag "Booking with weekly recurrence: ".$response_post->content;
+ok ($booking_aux = $j->jsonToObj( $response_post->content));
+$request_del = HTTP::Request->new( DELETE => 'http://localhost:3000/booking/' .$booking_aux->{id});
+$request_del->header(Accept => 'application/json');
+ok( my $response = $ua_del->request($request_del) );
+
+diag '\n';
+diag '############################################';
+diag '##Creating Booking with monthly recurrence##';
+diag '############################################';
+
+ok($response_post = request POST '/booking',
+    [
+      id_event => "1",
+      id_resource => "1",
+      dtstart => $dtstart,
+      dtend => $dtend,
+      freq => 'monthly',
+      interval => 1,
+      until => $dtend->clone->add(months => 4),
+      by_day_month => $dtstart->day
+      ],
+    HTTP::Headers->new(Accept => 'application/json'));
+
+diag "Booking with weekly recurrence: ".$response_post->content;
+ok ($booking_aux = $j->jsonToObj( $response_post->content));
+$request_del = HTTP::Request->new( DELETE => 'http://localhost:3000/booking/' .$booking_aux->{id});
+$request_del->header(Accept => 'application/json');
+ok( my $response = $ua_del->request($request_del) );
+
 
 done_testing();

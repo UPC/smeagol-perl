@@ -90,7 +90,6 @@ sub get_booking : Private {
 
     my $booking_aux = $c->model('DB::Booking')->find( { id => $id } );
     my $booking;
-    
     if ($booking_aux) {
       given ($booking_aux->frequency) {
 	when ('daily') {
@@ -336,7 +335,7 @@ sub default_POST {
     $dtend = ParseDate($dtend);
     $duration = $dtend - $dtstart;
 
-    my $freq   = $req->parameters->{freq} || "daily" ;
+    my $freq   = $req->parameters->{freq};
     my $interval    = $req->parameters->{interval} || 1;
     my $until       = $req->parameters->{until} || $req->parameters->{dtend};
 

@@ -143,7 +143,7 @@ sub check_overlap :Local {
 	dtstart => $new_booking->dtstart,
 	dtend => $new_booking->dtend,
 	until => $new_booking->until,
-	freq => $new_booking->frequency,
+	freq => 'daily',
 	interval => $new_booking->interval,
 	byminute => $new_booking->by_minute,
 	byhour => $new_booking->by_hour,
@@ -155,7 +155,7 @@ sub check_overlap :Local {
 	dtstart => $new_booking->dtstart,
 	dtend => $new_booking->dtend,
 	until => $new_booking->until,
-	freq => $new_booking->frequency,
+	freq => 'weekly',
 	interval => $new_booking->interval,
 	byminute => $new_booking->by_minute,
 	byhour => $new_booking->by_hour,
@@ -163,18 +163,16 @@ sub check_overlap :Local {
     );}
     
     when ('monthly') {
-      @bymonth = split(',',$new_booking->by_month);
       @bymonthday = split(',',$new_booking->by_day_month);
       
       $current_set= DateTime::Event::ICal->recur(
 	dtstart => $new_booking->dtstart,
 	dtend => $new_booking->dtend,
 	until => $new_booking->until,
-	freq => $new_booking->frequency,
+	freq => 'monthly',
 	interval => $new_booking->interval,
 	byminute => $new_booking->by_minute,
 	byhour => $new_booking->by_hour,
-	bymonth => \@bymonth,
 	bymonthday => \@bymonthday
     );}
     
@@ -186,7 +184,7 @@ sub check_overlap :Local {
 	dtstart => $new_booking->dtstart,
 	dtend => $new_booking->dtend,
 	until => $new_booking->until,
-	freq => $new_booking->frequency,
+	freq => 'yearly',
 	interval => $new_booking->interval,
 	byminute => $new_booking->by_minute,
 	byhour => $new_booking->by_hour,

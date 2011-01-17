@@ -11,11 +11,11 @@
 <dt>Frequency</dt><dd>[% booking.frequency %]</dd>
 <dt>Interval</dt><dd>[% booking.interval %]</dd>
 <dt>Until</dt><dd>[% booking.until %]</dd>
-<dt>By minute</dt><dd>[% booking.by_minute %]</dd>
-<dt>By hour</dt><dd>[% booking.by_hour %]</dd>
-<dt>By day</dt><dd>[% booking.by_day %]</dd>
-<dt>By month</dt><dd>[% booking.by_month %]</dd>
-<dt>By day month</dt><dd>[% booking.by_day_month %]</dd>
+<dt>By minute</dt><dd>[% booking.byminute %]</dd>
+<dt>By hour</dt><dd>[% booking.byhour %]</dd>
+<dt>By day</dt><dd>[% booking.byday %]</dd>
+<dt>By month</dt><dd>[% booking.bymonth %]</dd>
+<dt>By day month</dt><dd>[% booking.bymonthday %]</dd>
 </dl>
 
 

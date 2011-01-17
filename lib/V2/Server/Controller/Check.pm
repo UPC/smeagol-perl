@@ -127,9 +127,9 @@ sub check_overlap :Local {
   $c->stash->{overlap} = 0;
   $c->stash->{empty} = 0;
   
-  my @byday = split(',',$new_booking->by_day);
-  my @bymonth = split(',',$new_booking->by_month);
-  my @bymonthday = split(',',$new_booking->by_day_month);
+  my @byday;
+  my @bymonth;
+  my @bymonthday;
   
   #$c->log->debug("DTSTART (pre-ICAL): ".Dumper($new_booking->dtstart));
   $c->log->debug("DTEND (pre-ICAL): ".Dumper($new_booking->dtend->iso8601()));
@@ -150,6 +150,7 @@ sub check_overlap :Local {
     );}
     
     when ('weekly') {
+      @byday = split(',',$new_booking->by_day);
       $current_set= DateTime::Event::ICal->recur(
 	dtstart => $new_booking->dtstart,
 	dtend => $new_booking->dtend,
@@ -162,6 +163,9 @@ sub check_overlap :Local {
     );}
     
     when ('monthly') {
+      @bymonth = split(',',$new_booking->by_month);
+      @bymonthday = split(',',$new_booking->by_day_month);
+      
       $current_set= DateTime::Event::ICal->recur(
 	dtstart => $new_booking->dtstart,
 	dtend => $new_booking->dtend,
@@ -175,6 +179,9 @@ sub check_overlap :Local {
     );}
     
     default {
+      @bymonth = split(',',$new_booking->by_month);
+      @bymonthday = split(',',$new_booking->by_day_month);
+
       $current_set= DateTime::Event::ICal->recur(
 	dtstart => $new_booking->dtstart,
 	dtend => $new_booking->dtend,
@@ -189,7 +196,6 @@ sub check_overlap :Local {
   };
   
  
-  $c->log->debug(Dumper($current_set));
 if ($current_set->min) {
   $c->log->debug("L'SpanSet té com a mínim un element");
   $c->stash->{empty} = 0;
@@ -238,9 +244,9 @@ $new_booking->id_resource->id});
   foreach (@booking_aux) {
     $c->log->debug("Checking Booking #".$_->id);
     
-    @byday = split(',',$_->by_day);
-    @bymonth = split(',',$_->by_month);
-    @bymonthday = split(',',$_->by_day_month);
+    if ($_->by_day) {@byday = split(',',$_->by_day)};
+    if ($_->by_month) {@bymonth = split(',',$_->by_month)};
+    if ($_->by_day_month) {@bymonthday = split(',',$_->by_day_month)};
     
     $dtstart = $_->dtstart;
     $dtend = $_->dtend;

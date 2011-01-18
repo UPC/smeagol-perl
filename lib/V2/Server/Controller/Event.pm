@@ -215,17 +215,24 @@ sub default_DELETE {
     $c->log->debug("El DELETE funciona");
 
     my $event_aux = $c->model('DB::Event')->find( { id => $id } );
+    my $message;
 
     if ($event_aux) {
         $event_aux->delete;
+	$message = {
+	  message => "Event successfully deleted"
+	};
+	$c->stash->{content} = $message;
         $c->stash->{template} = 'event/delete_ok.tt';
         $c->response->status(200);
-        $c->forward( $c->view('TT') );
     }
     else {
+	$message = {
+	  message => "We can't delete an event that we can't find"
+	};
+	$c->stash->{content} = $message;
         $c->stash->{template} = 'not_found.tt';
         $c->response->status(404);
-        $c->forward( $c->view('TT') );
     }
 }
 

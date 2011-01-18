@@ -134,6 +134,7 @@ sub check_overlap :Local {
   #$c->log->debug("DTSTART (pre-ICAL): ".Dumper($new_booking->dtstart));
   $c->log->debug("DTEND (pre-ICAL): ".Dumper($new_booking->dtend->iso8601()));
   $c->log->debug("UNTIL (pre-ICAL): ".Dumper($new_booking->until->iso8601()));
+  $c->log->debug("BYDAY: ".$new_booking->by_day);
   
   my $current_set;
   

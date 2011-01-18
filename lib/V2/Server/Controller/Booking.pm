@@ -342,14 +342,10 @@ sub default_POST {
     my $by_minute = $req->parameters->{by_minute} || $dtstart->minute;
     my $by_hour = $req->parameters->{by_hour} || $dtstart->hour;
 
-#by_day may not be provided, so in order to build a proper ICal object, an array containing English
-#day abbreviations is needed.
-#    my @day_abbr = ('mo','tu','we','th','fr','sa','su');
-    
-    my $by_day = $req->parameters->{by_day} || "";
-    #@day_abbr[$dtstart->day_of_week-1];
-    my $by_month = $req->parameters->{by_month} || "";#$dtstart->month;
-    my $by_day_month = $req->parameters->{by_day_month} || "";
+    my $by_day = $req->parameters->{by_day};
+
+    my $by_month = $req->parameters->{by_month};#$dtstart->month;
+    my $by_day_month = $req->parameters->{by_day_month};
 
     my $new_booking = $c->model('DB::Booking')->find_or_new();
     $c->stash->{id_event} = $id_event;
@@ -391,6 +387,10 @@ sub default_POST {
       }
       
       when ('weekly') {
+	$c->log->debug("Ei!! Tenim un booking setmanal");
+	
+	$c->log->debug("BYDAY: ".$by_day);    
+
 	$new_booking->id_resource($id_resource);
 	$new_booking->id_event($id_event);
 	$new_booking->dtstart($dtstart);

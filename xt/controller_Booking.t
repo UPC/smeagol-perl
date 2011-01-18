@@ -91,8 +91,10 @@ ok($response_post = request POST '/booking',
 diag "Booking with daily recurrence: ".$response_post->content;
 
 ok ($booking_aux = $j->jsonToObj( $response_post->content));
-$request_del = HTTP::Request->new( DELETE => 'http://localhost:3000/booking/' .$booking_aux->{id});
-$request_del->header(Accept => 'application/json');
+my $ua_del = LWP::UserAgent->new;
+my $request_del
+    = HTTP::Request->new( DELETE => 'http://localhost:3000/booking/' . $booking_aux->{id} );
+ok( $ua_del->request($request_del) );
 
 ok( my $response = $ua_del->request($request_del) );
 diag "Esborrem booking amb recurrència diaria: ".$response->content;
@@ -111,7 +113,7 @@ ok($response_post = request POST '/booking',
       freq => 'weekly',
       interval => 1,
       until => $dtend->clone->add(months => 4),
-      byday => substr(lc($dtstart->day_abbr),0,2)
+      by_day => substr(lc($dtstart->day_abbr),0,2).","
       ],
     HTTP::Headers->new(Accept => 'application/json'));
 
@@ -139,7 +141,7 @@ ok($response_post = request POST '/booking',
       ],
     HTTP::Headers->new(Accept => 'application/json'));
 
-diag "Booking with weekly recurrence: ".$response_post->content;
+diag "Booking with monthly recurrence: ".$response_post->content;
 ok ($booking_aux = $j->jsonToObj( $response_post->content));
 $request_del = HTTP::Request->new( DELETE => 'http://localhost:3000/booking/' .$booking_aux->{id});
 $request_del->header(Accept => 'application/json');

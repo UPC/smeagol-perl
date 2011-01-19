@@ -105,8 +105,10 @@ sub default_POST {
     my $description = $req->parameters->{description};
     my $starts      = $req->parameters->{starts};
     my $ends        = $req->parameters->{ends};
+    my @tags = split(',',$req->parameters->{tags});
 
     my $new_event = $c->model('DB::Event')->find_or_new();
+    my $tag_event = $c->model('DB::EventTag')->find_or_new;
 
     $c->visit( '/check/check_event', [ $info, $description ] );
 
@@ -118,6 +120,8 @@ sub default_POST {
         $new_event->starts($starts);
         $new_event->ends($ends);
         $new_event->insert;
+
+	my $tags = $c->model('DB::Tag');
 
 	my $event = {
 	  id          => $new_event->id,

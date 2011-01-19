@@ -50,12 +50,7 @@ ok( my $response_post = request POST '/event',
 diag $response_post->content;
 
 $event_aux = $j->from_json( $response_post->content );
-@event     = @{$event_aux};
-my $eid;
-
-foreach (@event) {
-    $eid = $_->{id};
-}
+my $eid = $event_aux->{id};
 
 =head1
 Editing the last created event

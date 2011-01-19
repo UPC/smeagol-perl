@@ -186,7 +186,7 @@ sub default_PUT {
     $c->log->debug( 'Mètode: ' . $req->method );
     $c->log->debug("El PUT funciona");
 
-    my $desc = $req->parameters->{description};
+    my $desc = $req->parameters->{description} || $req->{headers}->{description};
 
     my $tag = $c->model('DB::Tag')->find( { id => $id } );
 
@@ -208,7 +208,6 @@ sub default_PUT {
             $c->stash->{content}  = $tag;
             $c->stash->{tag}      = $tag;
             $c->stash->{template} = 'tag/get_tag.tt';
-            $c->response->content_type('text/html');
             $c->response->status(200);
         }
         else {

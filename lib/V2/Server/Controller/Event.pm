@@ -59,7 +59,7 @@ sub get_event : Local {
 	tags        => $event_aux->tag_list,
 	bookings    => $event_aux->booking_list
       };
-
+$c->log->debug("Event: ".Dumper($event));
         $c->stash->{content} = $event;
         $c->stash->{event}   = $event;
         $c->response->status(200);
@@ -108,7 +108,7 @@ sub default_POST {
     my @tags = split(',',$req->parameters->{tags});
 
     my $new_event = $c->model('DB::Event')->find_or_new();
-    my $tag_event = $c->model('DB::EventTag')->find_or_new;
+    my $tag_event;
 
     $c->visit( '/check/check_event', [ $info, $description ] );
 
@@ -120,8 +120,34 @@ sub default_POST {
         $new_event->starts($starts);
         $new_event->ends($ends);
         $new_event->insert;
-
-	my $tags = $c->model('DB::Tag');
+	
+	my $tags; 
+	my $id_tag;
+	
+	foreach (@tags) {
+	  $id_tag = $_;
+	  $c->log->debug("Estem afegint el tag: ".$id_tag);
+	  
+	  
+	  $tags = $c->model('DB::Tag')->find({id => $id_tag });
+	  
+	  if ($tags){
+	    $tag_event = $c->model('DB::TagEvent')->find_or_new();
+	    $tag_event->id_tag($id_tag);
+	    $tag_event->id_event($new_event->id);
+	    $tag_event->insert;
+	  }else{
+	    $tags = $c->model('DB::Tag')->find_or_new();
+	    $tags->id($id_tag);
+	    $tags->description('Not yet descrived');
+	    $tags->insert;
+	    
+	    $tag_event = $c->model('DB::TagEvent')->find_or_new();
+	    $tag_event->id_tag($id_tag);
+	    $tag_event->id_event($new_event->id);
+	    $tag_event->insert;
+	   }	  
+	}
 
 	my $event = {
 	  id          => $new_event->id,
@@ -150,6 +176,8 @@ sub default_POST {
     }
 }
 
+
+
 sub default_PUT {
     my ( $self, $c, $res, $id ) = @_;
     my $req = $c->request;
@@ -157,15 +185,19 @@ sub default_PUT {
     $c->log->debug( "ID: " . $id );
     $c->log->debug("El PUT funciona");
 
-    my $info = $req->parameters->{info} || $req->query('info');
-    my $description = $req->parameters->{description}
-        || $req->query('description');
-    my $starts_aux = $req->parameters->{starts} || $req->query('starts');
+    my $info = $req->parameters->{info};
+    my $description = $req->parameters->{description};
+    
+    my $starts_aux = $req->parameters->{starts};
     my $starts = $c->forward( 'ParseDate', [$starts_aux] );
-    my $ends_aux = $req->parameters->{ends} || $req->query('ends');
-    my $ends = $c->forward( 'ParseDate', [ $req->parameters->{ends} ] );
+    
+    my $ends_aux = $req->parameters->{ends} ;
+    my $ends = $c->forward( 'ParseDate', [ $ends_aux ] );
+    
+    my @tags = split(',',$req->parameters->{tags});
 
     my $event = $c->model('DB::Event')->find( { id => $id } );
+    my $tag_event;
 
     if ($event) {
         $c->visit( '/check/check_event', [ $info, $description ] );
@@ -178,6 +210,40 @@ sub default_PUT {
             $event->starts($starts);
             $event->ends($ends);
             $event->insert_or_update;
+	    
+	    my $tags;
+	    
+	    my @tag_event_aux = $c->model('DB::TagEvent')->search({id_event => $event->id});
+	    
+	    foreach (@tag_event_aux) {
+	      $_->delete;
+	    }
+	    
+	  my $id_tag;
+	 foreach (@tags) {
+	  $id_tag = $_;
+	  $c->log->debug("Estem afegint el tag: ".$id_tag);
+	  
+	  
+	  $tags = $c->model('DB::Tag')->find({id => $id_tag });
+	  
+	  if ($tags){
+	    $tag_event =$c->model('DB::TagEvent')->find_or_new();
+	    $tag_event->id_tag($id_tag);
+	    $tag_event->id_event($event->id);
+	    $tag_event->insert;
+	  }else{
+	    $tags = $c->model('DB::Tag')->find_or_new();
+	    $tags->id($id_tag);
+	    $tags->description('Not yet descrived');
+	    $tags->insert;
+	    
+	    $tag_event = $c->model('DB::TagEvent')->find_or_new();
+	    $tag_event->id_tag($id_tag);
+	    $tag_event->id_event($event->id);
+	    $tag_event->insert;
+	   }	  
+	}
 
 	    my $event = {
 	      id          => $event->id,
@@ -252,7 +318,7 @@ sub ParseDate : Private {
     my ( $day, $hour ) = split( /T/, $date_str );
 
     my ( $year,  $month, $nday ) = split( /-/, $day );
-    my ( $nhour, $min,   $sec )  = split( /:/, $hour );
+    my ( $nhour, $min )  = split( /:/, $hour );
 
     my $date = DateTime->new(
         year   => $year,
@@ -260,7 +326,6 @@ sub ParseDate : Private {
         day    => $nday,
         hour   => $nhour,
         minute => $min,
-        second => $sec,
     );
 
     return $date;

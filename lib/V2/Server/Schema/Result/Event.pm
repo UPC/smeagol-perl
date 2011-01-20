@@ -118,11 +118,11 @@ sub tag_list {
     my ($self) = @_;
 
     my @tags;
-    my @tag;
+    my $tag;
 
     foreach my $tag ( $self->tag_events ) {
-        @tag = { id => $tag->id_tag->id };
-        push( @tags, @tag );
+        $tag = { id => $tag->id_tag->id };
+        push( @tags, $tag );
     }
 
     return ( \@tags );

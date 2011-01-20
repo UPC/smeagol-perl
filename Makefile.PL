@@ -1,4 +1,5 @@
 use inc::Module::Install;
+use Module::Install::Catalyst;
 
 name 'Smeagol';
 
@@ -33,13 +34,21 @@ requires 'DateTime::Format::SQLite'         => 0;
 test_requires 'Test::More'    => 0;
 test_requires 'Data::Compare' => 0;
 
-install_script glob 'bin/*';
+catalyst;
 
-install_share;
+# don't install old v1 scripts from bin
+#install_script glob 'bin/*';
+
+# install new v2 scripts
+install_script glob 'scripts/*';
+
+# don't install old share
+#install_share;
 
 # share, t and inc are also added
 no_index directory => qw( doc dtd );
 
+auto_install;
 WriteAll;
 
 # FIXME: symlink may not exist on this platform but it is used

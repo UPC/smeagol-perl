@@ -1,7 +1,7 @@
 use inc::Module::Install;
 use Module::Install::Catalyst;
 
-name 'Smeagol';
+name 'V2-Server';
 
 all_from 'lib/Smeagol.pm';
 
@@ -30,6 +30,7 @@ requires 'DBIx::Class'                      => 0;
 requires 'DBIx::Class::TimeStamp'           => 0;
 requires 'Catalyst::Action::RenderView'     => 0;
 requires 'DateTime::Format::SQLite'         => 0;
+requires 'DateTime::Event::ICal'            => 0;
 
 test_requires 'Test::More'    => 0;
 test_requires 'Data::Compare' => 0;
@@ -40,7 +41,7 @@ catalyst;
 #install_script glob 'bin/*';
 
 # install new v2 scripts
-install_script glob 'scripts/*';
+install_script glob 'script/*';
 
 # don't install old share
 #install_share;

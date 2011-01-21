@@ -1,5 +1,10 @@
 Històric de revisions del projecte smeagol.
 
+2.00   Fri Jan 21 01:53:50 CET 2011
+       - versió alpha de la nova API v2
+       - nou backend del servidor amb catalyst i sqlite
+       - suport per esdeveniments i reserves recurrents
+
 0.1001 Thu Apr  8 10:21:45 CEST 2010
        - resolt el bug #171, que provocaba que l'operació updateResource
          al mòdul Smeagol::Client actualitzés de manera incorrecta els tags

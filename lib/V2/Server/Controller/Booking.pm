@@ -872,7 +872,7 @@ $c->stash->{id_resource}});
       }
       when ('weekly') {
 	$c->log->debug("Reserva weekly. BYDAY: ".Dumper($by_day_aux));
-	$rrule = 'FREQ=WEEKLY;INTERVAL='.uc($i_aux).'.;BYDAY='.uc($by_day_aux).';UNTIL='.uc($until->ical);
+	$rrule = 'FREQ=WEEKLY;INTERVAL='.uc($i_aux).';BYDAY='.uc($by_day_aux).';UNTIL='.uc($until->ical);
       }
       when ('monthly') {
 	$rrule = 'FREQ=MONTHLY;INTERVAL='.uc($i_aux).';BYMONTHDAY='.$by_day_month_aux.';UNTIL='.uc($until->ical);
@@ -974,7 +974,7 @@ $c->stash->{id_event}});
       }
       when ('weekly') {
 	$c->log->debug("Reserva weekly. BYDAY: ".Dumper($by_day_aux));
-	$rrule = 'FREQ=WEEKLY;INTERVAL='.uc($i_aux).'.;BYDAY='.uc($by_day_aux).';UNTIL='.uc($until->ical);
+	$rrule = 'FREQ=WEEKLY;INTERVAL='.uc($i_aux).';BYDAY='.uc($by_day_aux).';UNTIL='.uc($until->ical);
       }
       when ('monthly') {
 	$rrule = 'FREQ=MONTHLY;INTERVAL='.uc($i_aux).';BYMONTHDAY='.$by_day_month_aux.';UNTIL='.uc($until->ical);

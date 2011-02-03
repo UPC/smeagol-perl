@@ -492,14 +492,14 @@ sub default_POST {
     my @message;
     if ( $c->stash->{booking_ok} == 1 ) {
 
-        if ( $c->stash->{overlap} == 1 or $c->stash->{empty} == 1) {
+        if ( $c->stash->{overlap} == 1 or $c->stash->{empty} == 1 or $c->stash->{too_long} == 1) {
 	  if ($c->stash->{empty} == 1) {
 	    @message
 	    = { message => "Bad Request", };
 	    $c->response->status(400);
 	  }else{
 	    @message
-	    = { message => "Error: Overlap with another booking", };
+	    = { message => "Error: The booking you tried to create overlaps with another booking or with itself", };
 	    $c->response->status(409);
 	  }
 
@@ -718,12 +718,12 @@ sub default_PUT {
     
     if ( $c->stash->{booking_ok} == 1 ) {
       
-      if ( $c->stash->{overlap} == 1 ) {
+      if ( $c->stash->{overlap} == 1 or $c->stash->{empty} == 1 or $c->stash->{too_long} == 1) {
 	my @message
-	= { message => "Error: Overlap with another booking", };
+	= { message => "Error: Bad request. Check parameters", };
 	$c->stash->{content} = \@message;
 	$c->response->status(409);
-	$c->stash->{error}    = "Error: Overlap with another booking";
+	$c->stash->{error}    = "Error: Bad request. Check parameters";
 	$c->stash->{template} = 'booking/get_list';
 	}
 	else {

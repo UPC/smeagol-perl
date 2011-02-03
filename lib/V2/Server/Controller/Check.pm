@@ -126,15 +126,11 @@ sub check_overlap :Local {
   $c->log->debug("Provant si hi ha solapament");
   $c->stash->{overlap} = 0;
   $c->stash->{empty} = 0;
+  $c->stash->{too_long} = 0;
   
   my @byday;
   my @bymonth;
   my @bymonthday;
-  
-  #$c->log->debug("DTSTART (pre-ICAL): ".Dumper($new_booking->dtstart));
-  $c->log->debug("DTEND (pre-ICAL): ".Dumper($new_booking->dtend->iso8601()));
-  $c->log->debug("UNTIL (pre-ICAL): ".Dumper($new_booking->until->iso8601()));
-  $c->log->debug("BYDAY: ".$new_booking->by_day);
   
   my $current_set;
   
@@ -206,6 +202,14 @@ if ($current_set->min) {
   my $duration = DateTime::Duration->new(
     minutes => $new_booking->duration,
   );
+  
+# $duration should be shorter than 1 day.
+# Otherwise there will be bookings overlapping with themselves
+# wich is kind of weird.
+  
+if ($duration->in_units('days') ge 1 ) {
+  $c->stash->{too_long} = 1;
+}
   
   $c->log->debug("Duració nova reserva:
   ".$duration->hours."h".$duration->minutes."min");

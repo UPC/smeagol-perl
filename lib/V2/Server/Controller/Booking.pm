@@ -838,6 +838,7 @@ $c->stash->{id_resource}});
   my $u_aux;
   my $set_aux;
   my @byday; my @bymonth; my @bymonthday;
+  my $duration;
   
   foreach (@genda) {
     my $vevent = Data::ICal::Entry::Event->new();
@@ -857,29 +858,48 @@ $c->stash->{id_resource}});
     my $by_day_month_aux = $_->{bymonthday};
     
     my $rrule;
+    my $until = Date::ICal->new(
+    year => $u_aux->year,
+    month => $u_aux->month,
+    day => $u_aux->day,
+    hour => $u_aux->hour,
+    minute => $u_aux->minute,
+  );
     
     given ($f_aux) {
       when ('daily') {
-	$rrule = 'FREQ=DAILY;INTERVAL='.uc($i_aux).';UNTIL='.uc($u_aux);
+	$rrule = 'FREQ=DAILY;INTERVAL='.uc($i_aux).';UNTIL='.uc($until->ical);
       }
       when ('weekly') {
 	$c->log->debug("Reserva weekly. BYDAY: ".Dumper($by_day_aux));
-	$rrule = 'FREQ=WEEKLY;INTERVAL='.uc($i_aux).'.;BYDAY='.uc($by_day_aux).';UNTIL='.uc($u_aux);
+	$rrule = 'FREQ=WEEKLY;INTERVAL='.uc($i_aux).'.;BYDAY='.uc($by_day_aux).';UNTIL='.uc($until->ical);
       }
       when ('monthly') {
-	$rrule = 'FREQ=MONTHLY;INTERVAL='.uc($i_aux).';BYMONTHDAY='.$by_day_month_aux.';UNTIL='.uc($u_aux);
+	$rrule = 'FREQ=MONTHLY;INTERVAL='.uc($i_aux).';BYMONTHDAY='.$by_day_month_aux.';UNTIL='.uc($until->ical);
       }
       when ('yearly') {
-	$rrule = 'FREQ=YEARLY;INTERVAL='.uc($i_aux).';BYMONTH='.$by_month_aux.';BYMONTHDAY='.$by_day_month_aux.';UNTIL='.uc($u_aux);
+	$rrule = 'FREQ=YEARLY;INTERVAL='.uc($i_aux).';BYMONTH='.$by_month_aux.';BYMONTHDAY='.$by_day_month_aux.';UNTIL='.uc($until->ical);
       }
     }
-    
+    $duration =  Date::ICal::Duration->new(minutes => $_->{duration});
     $vevent->add_properties(
       uid => $_->{id},
       summary => "Booking #".$_->{id},
-      dtstart => uc($s_aux),
-      dtend => uc($e_aux),
-      duration => $_->{duration},
+      dtstart => Date::ICal->new(
+	year => $s_aux->year,
+	month => $s_aux->month,
+	day => $s_aux->day,
+	hour => $s_aux->hour,
+	minute => $s_aux->minute,
+      )->ical,
+      dtend => Date::ICal->new(
+	year => $e_aux->year,
+	month => $e_aux->month,
+	day => $e_aux->day,
+	hour => $e_aux->hour,
+	minute => $e_aux->minute,
+      )->ical,
+      duration =>$duration->as_ical,
       rrule => $rrule
      
     );
@@ -921,6 +941,7 @@ $c->stash->{id_event}});
   my $u_aux;
   my $set_aux;
   my @byday; my @bymonth; my @bymonthday;
+  my $duration;
   
   foreach (@genda) {
     my $vevent = Data::ICal::Entry::Event->new();
@@ -939,31 +960,49 @@ $c->stash->{id_event}});
     my $by_day_month_aux = $_->{bymonthday};
     
     my $rrule;
+    my $until = Date::ICal->new(
+      year => $u_aux->year,
+      month => $u_aux->month,
+      day => $u_aux->day,
+      hour => $u_aux->hour,
+      minute => $u_aux->minute,
+    );
     
     given ($f_aux) {
       when ('daily') {
-	$rrule = 'FREQ=DAILY;INTERVAL='.uc($i_aux).';UNTIL='.uc($u_aux);
+	$rrule = 'FREQ=DAILY;INTERVAL='.uc($i_aux).';UNTIL='.uc($until->ical);
       }
       when ('weekly') {
 	$c->log->debug("Reserva weekly. BYDAY: ".Dumper($by_day_aux));
-	$rrule = 'FREQ=WEEKLY;INTERVAL='.uc($i_aux).'.;BYDAY='.uc($by_day_aux).';UNTIL='.uc($u_aux);
+	$rrule = 'FREQ=WEEKLY;INTERVAL='.uc($i_aux).'.;BYDAY='.uc($by_day_aux).';UNTIL='.uc($until->ical);
       }
       when ('monthly') {
-	$rrule = 'FREQ=MONTHLY;INTERVAL='.uc($i_aux).';BYMONTHDAY='.$by_day_month_aux.';UNTIL='.uc($u_aux);
+	$rrule = 'FREQ=MONTHLY;INTERVAL='.uc($i_aux).';BYMONTHDAY='.$by_day_month_aux.';UNTIL='.uc($until->ical);
       }
       when ('yearly') {
-	$rrule = 'FREQ=YEARLY;INTERVAL='.uc($i_aux).';BYMONTH='.$by_month_aux.';BYMONTHDAY='.$by_day_month_aux.';UNTIL='.uc($u_aux);
+	$rrule = 'FREQ=YEARLY;INTERVAL='.uc($i_aux).';BYMONTH='.$by_month_aux.';BYMONTHDAY='.$by_day_month_aux.';UNTIL='.uc($until->ical);
       }
     }
-    
+    $duration =  Date::ICal::Duration->new(minutes => $_->{duration});
     $vevent->add_properties(
       uid => $_->{id},
       summary => "Booking #".$_->{id},
-      dtstart => uc($s_aux),
-      dtend => uc($e_aux),
-      duration => $_->{duration},
-      rrule => $rrule
-     
+      dtstart => Date::ICal->new(
+	year => $s_aux->year,
+	month => $s_aux->month,
+	day => $s_aux->day,
+	hour => $s_aux->hour,
+	minute => $s_aux->minute,
+      )->ical,
+      dtend => Date::ICal->new(
+	year => $e_aux->year,
+	month => $e_aux->month,
+	day => $e_aux->day,
+	hour => $e_aux->hour,
+	minute => $e_aux->minute,
+      )->ical,
+      duration =>$duration->as_ical,
+      rrule => $rrule  
     );
     $calendar->add_entry($vevent);
   }

@@ -59,7 +59,7 @@ sub get_event : Local {
 	tags        => $event_aux->tag_list,
 	bookings    => $event_aux->booking_list
       };
-$c->log->debug("Event: ".Dumper($event));
+
         $c->stash->{content} = $event;
         $c->stash->{event}   = $event;
         $c->response->status(200);

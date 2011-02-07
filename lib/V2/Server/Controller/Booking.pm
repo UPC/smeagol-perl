@@ -838,7 +838,6 @@ $c->stash->{id_resource}});
   my $u_aux;
   my $set_aux;
   my @byday; my @bymonth; my @bymonthday;
-  my $duration;
   
   foreach (@genda) {
     my $vevent = Data::ICal::Entry::Event->new();
@@ -881,7 +880,7 @@ $c->stash->{id_resource}});
 	$rrule = 'FREQ=YEARLY;INTERVAL='.uc($i_aux).';BYMONTH='.$by_month_aux.';BYMONTHDAY='.$by_day_month_aux.';UNTIL='.uc($until->ical);
       }
     }
-    $duration =  Date::ICal::Duration->new(minutes => $_->{duration});
+
     $vevent->add_properties(
       uid => $_->{id},
       summary => "Booking #".$_->{id},
@@ -899,7 +898,6 @@ $c->stash->{id_resource}});
 	hour => $e_aux->hour,
 	minute => $e_aux->minute,
       )->ical,
-      duration =>$duration->as_ical,
       rrule => $rrule
      
     );
@@ -922,6 +920,11 @@ sub ical_event : Private {
   my $filename = "agenda_event_".$c->stash->{id_event}.".ics";
   
   my $calendar = Data::ICal->new();
+  $calendar->add_properties(
+    version 	=> "2.0",
+    prodid	=> "-//Smeagol Server //VERSION 2.x//EN",
+    method      => "PUBLISH",      
+  );
   
   $c->log->debug("Volem l'agenda de l'event ".$c->stash->{id_event}." en format ICal");
   
@@ -941,7 +944,6 @@ $c->stash->{id_event}});
   my $u_aux;
   my $set_aux;
   my @byday; my @bymonth; my @bymonthday;
-  my $duration;
   
   foreach (@genda) {
     my $vevent = Data::ICal::Entry::Event->new();
@@ -983,7 +985,7 @@ $c->stash->{id_event}});
 	$rrule = 'FREQ=YEARLY;INTERVAL='.uc($i_aux).';BYMONTH='.$by_month_aux.';BYMONTHDAY='.$by_day_month_aux.';UNTIL='.uc($until->ical);
       }
     }
-    $duration =  Date::ICal::Duration->new(minutes => $_->{duration});
+
     $vevent->add_properties(
       uid => $_->{id},
       summary => "Booking #".$_->{id},
@@ -1001,7 +1003,6 @@ $c->stash->{id_event}});
 	hour => $e_aux->hour,
 	minute => $e_aux->minute,
       )->ical,
-      duration =>$duration->as_ical,
       rrule => $rrule  
     );
     $calendar->add_entry($vevent);

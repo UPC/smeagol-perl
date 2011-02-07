@@ -920,6 +920,11 @@ sub ical_event : Private {
   my $filename = "agenda_event_".$c->stash->{id_event}.".ics";
   
   my $calendar = Data::ICal->new();
+  $calendar->add_properties(
+    version 	=> "2.0",
+    prodid	=> "-//Smeagol Server //VERSION 2.x//EN",
+    method      => "PUBLISH",      
+  );
   
   $c->log->debug("Volem l'agenda de l'event ".$c->stash->{id_event}." en format ICal");
   

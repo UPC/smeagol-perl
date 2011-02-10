@@ -5,6 +5,7 @@ package V2::Server::Schema::Result::TException;
 
 use strict;
 use warnings;
+use feature 'switch';
 
 use base 'DBIx::Class::Core';
 
@@ -139,7 +140,125 @@ __PACKAGE__->belongs_to(
 
 # Created by DBIx::Class::Schema::Loader v0.07000 @ 2011-02-10 13:00:38
 # DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:JD8ZVuFrITtvGIXgqAdl5Q
+use DateTime;
+use DateTime::Duration;
+use DateTime::Span;
+use Date::ICal;
 
+sub hash_exception {
+my ($self) = @_;
+my @exception;
+my $until = Date::ICal->new(
+year => $self->until->year,
+month => $self->until->month,
+day => $self->until->day,
+hour => $self->until->hour,
+minute => $self->until->minute,
+); 
+
+
+given ($self->frequency) {
+when ('daily') {
+
+@exception =   {
+id => $self->id,
+id_booking  => $self->id_booking->id,
+dtstart => $self->dtstart->iso8601(),
+dtend => $self->dtend->iso8601(),
+duration     => $self->duration,
+until => $self->until->iso8601(),
+frequency => $self->frequency,
+interval => $self->interval,
+byminute => $self->by_minute,
+byhour => $self->by_hour,
+exrule => 'FREQ=DAILY;INTERVAL='.uc($self->interval).';UNTIL='.uc($until->ical)
+};
+
+}
+
+when ('weekly') {
+@exception =  {
+id => $self->id,
+id_booking  => $self->id_booking->id,
+dtstart => $self->dtstart->iso8601(),
+dtend => $self->dtend->iso8601(),
+duration     => $self->duration,
+until => $self->until->iso8601(),
+frequency => $self->frequency,
+interval => $self->interval,
+byminute => $self->by_minute,
+byhour => $self->by_hour,
+byday => $self->by_day,
+exrule => 'FREQ=WEEKLY;INTERVAL='.uc($self->interval).'.;BYDAY='.uc($self->by_day).';UNTIL='.uc($until->ical)
+};
+
+}
+
+when ('monthly') {
+@exception =   {
+id => $self->id,
+id_booking  => $self->id_booking->id,
+dtstart => $self->dtstart->iso8601(),
+dtend => $self->dtend->iso8601(),
+duration     => $self->duration,
+until => $self->until->iso8601(),
+frequency => $self->frequency,
+interval => $self->interval,
+byminute => $self->by_minute,
+byhour => $self->by_hour,
+bymonth => $self->by_month,
+bymonthday => $self->by_day_month,
+exrule => 'FREQ=MONTHLY;INTERVAL='.uc($self->interval).';BYMONTHDAY='.$self->by_day_month.';UNTIL='.uc($until->ical)
+};	  
+}
+
+default {
+@exception =   {
+id => $self->id,
+id_booking  => $self->id_booking->id,
+dtstart => $self->dtstart->iso8601(),
+dtend => $self->dtend->iso8601(),
+duration     => $self->duration,
+until => $self->until->iso8601(),
+frequency => $self->frequency,
+interval => $self->interval,
+byminute => $self->by_minute,
+byhour => $self->by_hour,
+bymonth => $self->by_month,
+bymonthday => $self->by_day_month,
+exrule => 'FREQ=YEARLY;INTERVAL='.uc($self->interval).';BYMONTH='.$self->by_month.';BYMONTHDAY='.$self->by_day_month.';UNTIL='.uc($until->ical)
+};	  
+}
+};
+
+return @exception;
+}
+
+sub exrule {
+my ($self) = @_;
+
+my $exrule;
+
+my $until = Date::ICal->new(
+year => $self->until->year,
+month => $self->until->month,
+day => $self->until->day,
+hour => $self->until->hour,
+minute => $self->until->minute,
+); 
+
+given ($self->frequency) {
+when ('daily') { $exrule = 'FREQ=DAILY;INTERVAL='.uc($self->interval).';UNTIL='.uc($until->ical); }
+
+when ('weekly') { $exrule = 'FREQ=WEEKLY;INTERVAL='.uc($self->interval).'.;BYDAY='.uc($self->by_day).';UNTIL='.uc($until->ical); }
+
+when ('monthly') { $exrule = 'FREQ=MONTHLY;INTERVAL='.uc($self->interval).';BYMONTHDAY='.$self->by_day_month.';UNTIL='.uc($until->ical); }
+
+default { $exrule = 'FREQ=YEARLY;INTERVAL='.uc($self->interval).';BYMONTH='.$self->by_month.';BYMONTHDAY='.$self->by_day_month.';UNTIL='.uc($until->ical); }
+};
+
+return $exrule;
+}
 
 # You can replace this text with custom content, and it will be preserved on regeneration
 1;

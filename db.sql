@@ -141,3 +141,10 @@ INSERT INTO t_tag_event values ('isabel',4);
 INSERT INTO t_tag_event values ('videoconferencia',4);
 INSERT INTO t_tag_event values ('microfons inalambrics',4);
 INSERT INTO t_tag_event values ('wireless',4);
+
+INSERT INTO t_exception values (1,1,'2010-02-16 00:00:00','2010-02-16 23:00:00','1380','weekly','1','2012-01-01 00:00:00','00','00','sa,su','','');
+INSERT INTO t_exception values (2,2,'2010-02-16 00:00:00','2010-02-16 23:00:00','1380','weekly','1','2012-01-01 00:00:00','00','00','sa,su','','');
+INSERT INTO t_exception values (3,3,'2010-02-16 00:00:00','2010-02-16 23:00:00','1380','weekly','1','2012-01-01 00:00:00','00','00','sa,su','','');
+INSERT INTO t_exception values (4,4,'2010-02-16 00:00:00','2010-02-16 23:00:00','1380','weekly','1','2012-01-01 00:00:00','00','00','sa,su','','');
+INSERT INTO t_exception values (5,5,'2010-02-16 00:00:00','2010-02-16 23:00:00','1380','weekly','1','2012-01-01 00:00:00','00','00','sa,su','','');
+INSERT INTO t_exception values (6,6,'2010-02-16 00:00:00','2010-02-16 23:00:00','1380','weekly','1','2012-01-01 00:00:00','00','00','sa,su','','');

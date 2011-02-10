@@ -331,6 +331,87 @@ $c->log->debug("No hi ha solpament") unless $c->stash->{overlap};
   
 }
 
+sub check_exception :Local {
+         my ($self, $c) = @_;
+  
+  my $new_exception = $c->stash->{new_exception};
+  
+  $c->stash->{empty} = 0;
+  
+  my @byday;
+  my @bymonth;
+  my @bymonthday;
+  
+  my $current_set;
+  
+  given ($new_exception->frequency) {
+    when ('daily') {
+      $current_set= DateTime::Event::ICal->recur(
+	dtstart => $new_exception->dtstart,
+	dtend => $new_exception->dtend,
+	until => $new_exception->until,
+	freq => 'daily',
+	interval => $new_exception->interval,
+	byminute => $new_exception->by_minute,
+	byhour => $new_exception->by_hour,
+    );}
+    
+    when ('weekly') {
+      @byday = split(',',$new_exception->by_day);
+      $current_set= DateTime::Event::ICal->recur(
+	dtstart => $new_exception->dtstart,
+	dtend => $new_exception->dtend,
+	until => $new_exception->until,
+	freq => 'weekly',
+	interval => $new_exception->interval,
+	byminute => $new_exception->by_minute,
+	byhour => $new_exception->by_hour,
+	byday => \@byday,
+    );}
+    
+    when ('monthly') {
+      @bymonthday = split(',',$new_exception->by_day_month);
+      
+      $current_set= DateTime::Event::ICal->recur(
+	dtstart => $new_exception->dtstart,
+	dtend => $new_exception->dtend,
+	until => $new_exception->until,
+	freq => 'monthly',
+	interval => $new_exception->interval,
+	byminute => $new_exception->by_minute,
+	byhour => $new_exception->by_hour,
+	bymonthday => \@bymonthday
+    );}
+    
+    default {
+      @bymonth = split(',',$new_exception->by_month);
+      @bymonthday = split(',',$new_exception->by_day_month);
+
+      $current_set= DateTime::Event::ICal->recur(
+	dtstart => $new_exception->dtstart,
+	dtend => $new_exception->dtend,
+	until => $new_exception->until,
+	freq => 'yearly',
+	interval => $new_exception->interval,
+	byminute => $new_exception->by_minute,
+	byhour => $new_exception->by_hour,
+	bymonth => \@bymonth,
+	bymonthday => \@bymonthday
+    );}
+  };
+  
+ 
+       if ($current_set->min) {
+       $c->log->debug("L'SpanSet té com a mínim un element");
+       $c->stash->{empty} = 0;
+       }else{
+       $c->log->debug("L'SpanSet està buit!");
+       $c->stash->{empty} = 1;
+       }
+ 
+}
+
+
 =head1 AUTHOR
 
 Jordi Amorós Andreu,,,

@@ -5,6 +5,7 @@ package V2::Server::Schema::Result::TBooking;
 
 use strict;
 use warnings;
+use feature 'switch';
 
 use base 'DBIx::Class::Core';
 
@@ -177,7 +178,110 @@ __PACKAGE__->has_many(
 
 # Created by DBIx::Class::Schema::Loader v0.07000 @ 2011-02-10 13:00:38
 # DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:tT60IzggQzPowfJ0YygYMw
+use DateTime;
+use DateTime::Duration;
+use DateTime::Span;
 
+sub hash_booking {
+my ($self) = @_;
+my @booking;
+
+given ($self->frequency) {
+when ('daily') {
+@booking =   {
+id => $self->id,
+id_resource  => $self->id_resource->id,
+id_event     => $self->id_event->id,
+dtstart => $self->dtstart->iso8601(),
+dtend => $self->dtend->iso8601(),
+duration     => $self->duration,
+until => $self->until->iso8601(),
+frequency => $self->frequency,
+interval => $self->intterval,
+byminute => $self->by_minute,
+byhour => $self->by_hour,
+exrule_list => $self->exrule_list
+};
+
+}
+
+when ('weekly') {
+@booking =  {
+id => $self->id,
+id_resource  => $self->id_resource->id,
+id_event     => $self->id_event->id,
+dtstart => $self->dtstart->iso8601(),
+dtend => $self->dtend->iso8601(),
+duration     => $self->duration,
+until => $self->until->iso8601(),
+frequency => $self->frequency,
+interval => $self->intterval,
+byminute => $self->by_minute,
+byhour => $self->by_hour,
+byday => $self->by_day,
+exrule_list => $self->exrule_list
+};
+
+}
+
+when ('monthly') {
+@booking =   {
+id => $self->id,
+id_resource  => $self->id_resource->id,
+id_event     => $self->id_event->id,
+dtstart => $self->dtstart->iso8601(),
+dtend => $self->dtend->iso8601(),
+duration     => $self->duration,
+until => $self->until->iso8601(),
+frequency => $self->frequency,
+interval => $self->intterval,
+byminute => $self->by_minute,
+byhour => $self->by_hour,
+bymonth => $self->by_month,
+bymonthday => $self->by_day_month,
+exrule_list => $self->exrule_list
+};	  
+}
+
+default {
+@booking =   {
+id => $self->id,
+id_resource  => $self->id_resource->id,
+id_event     => $self->id_event->id,
+dtstart => $self->dtstart->iso8601(),
+dtend => $self->dtend->iso8601(),
+duration     => $self->duration,
+until => $self->until->iso8601(),
+frequency => $self->frequency,
+interval => $self->intterval,
+byminute => $self->by_minute,
+byhour => $self->by_hour,
+bymonth => $self->by_month,
+bymonthday => $self->by_day_month,
+exrule_list => $self->exrule_list
+};	  
+}
+};
+
+return @booking;
+}
+
+sub exrule_list {
+my ($self) = @_;
+
+my @exception;
+my @exceptions;
+
+foreach my $exception ($self->exception_booking) {
+@exception = {
+exrule => $exception->exrule
+};
+
+push (@exceptions, @exception);
+}
+
+return (\@exceptions)
+}
 
 # You can replace this text with custom content, and it will be preserved on regeneration
 1;

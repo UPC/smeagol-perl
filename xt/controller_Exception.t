@@ -143,6 +143,6 @@ $request_del = HTTP::Request->new( DELETE => 'http://localhost:3000/exception/' 
 $request_del->header(Accept => 'application/json');
 ok( $response = $ua_del->request($request_del) );
 
-
+diag '';
 done_testing();
 

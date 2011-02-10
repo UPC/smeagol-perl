@@ -346,19 +346,19 @@ sub default_POST{
     my $boo_ok;
     
        if ($boo) {
-	      $boo_ok=1;
+	      $c->stash->{boo_ok}=1;
        } else {
-	      $boo_ok=0;
+	      $c->stash->{boo_ok}=0;
        }
     
-    if (1) {
+    if ($c->stash->{boo_ok} = 1 ) {
 
         if ( $c->stash->{empty} == 1 ) {
 	    @message = { message => "Bad Request", };
 	    $c->response->status(400);
 	    $c->stash->{content} = \@message;            
 	    $c->stash->{error}    = "Error: Bad parameters";
-            $c->stash->{template} = 'exception/get_list';
+            $c->stash->{template} = 'exception/get_list.tt';
         }
         else {
             $new_exception->insert;

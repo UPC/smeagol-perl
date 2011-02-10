@@ -58,8 +58,6 @@ diag "Nou exception sense recurrència: ".$response_post->content;
 
 ok ($exception_aux = $j->jsonToObj( $response_post->content));
 
-ok ($exception_aux->{id_event} eq 1,"ID event correct");
-ok ($exception_aux->{id_resource} eq 1,"ID resource correct");
 ok ($exception_aux->{dtstart} eq $dtstart,"DTSTART correct");
 ok ($exception_aux->{dtend} eq $dtend,"DTEND correct");
 

@@ -1,0 +1,9 @@
+^Makefile$
+\.svn/?
+^blib
+^\.perltidyrc$
+^smeagol\.db$
+\.tar\.gz$
+\.bak$
+\.old$
+^dtd$

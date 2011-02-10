@@ -1,7 +1,7 @@
 [% META title='List of bookings'%]
 
 [% IF error %]
-  [% error | html %]
+[% error | html %]
 [% END %]
 
 <ul class='list-of-bookings'>
@@ -13,79 +13,33 @@
 [% END %]
 </ul>
 
-<!--<h3>Create Booking</h3>
-[% USE date(format = '%Y-%m-%d') %]
+<h3>Create Booking</h3>
 
 <form action="" method="post">
-<p><label>Date (AAAA-MM-DD): </label><input name="dtstart" placeholder="[% date.format(date.now)
-%]"></p>
 
-<p><label>Start Time: </label>
+<p><label>DTSTART (YYYY-MM-DDThh:mm): </label>
+<input name="dtstart" placeholder="[% date.format(date.now) %]"></p>
 
-<select name="shour">
-<OPTION selected value="00">00</OPTION>
-[% SET hour=1 %]
-[% WHILE hour< 24 %]
-  [% IF hour < 10 %]
-  <OPTION value="0[% hour %]">0[% hour %]</OPTION>
-  [% ELSE %]
-  <OPTION value="[% hour %]">[% hour %]</OPTION>
-  [% END %]
-  [% hour = hour +1 %]
-[% END %]
-</select> hours
-
-<select name="sminute">
-<OPTION selected value="00">00</OPTION>
-[% SET minute=5 %]
-[% WHILE minute< 60 %]
-  <OPTION value="[% minute %]">[% minute %]</OPTION>
-  [% minute = minute +5 %]
-[% END %]
-</select> minutes</p>
-
-<p><label>End Time: </label>
-
-<select name="ehour">
-<OPTION selected value="00">00</OPTION>
-[% SET hour=1 %]
-[% WHILE hour< 24 %]
-  [% IF hour < 10 %]
-  <OPTION value="0[% hour %]">0[% hour %]</OPTION>
-  [% ELSE %]
-  <OPTION value="[% hour %]">[% hour %]</OPTION>
-  [% END %]
-  [% hour = hour +1 %]
-[% END %]
-</select> hours
-
-<select name="eminute">
-<OPTION selected value="00">00</OPTION>
-[% SET minute=5 %]
-[% WHILE minute< 60 %]
-  <OPTION value="[% minute %]">[% minute %]</OPTION>
-  [% minute = minute +5 %]
-[% END %]
-</select> minutes</p>
-
+<p><label>DTEND (YYYY-MM-DDThh:mm): </label>
+<input name="dtend" placeholder="[% date.format(date.now) %]"></p>
 
 <p>
 <label> Event: </label>
 <select name='id_event'>
 [% FOREACH ev IN events %]
-  <option value="[% ev.id %]">[% ev.description %]</option>
+<option value="[% ev.id %]">[% ev.description %]</option>
 [% END %]
 </select>
 
 <label> Resource: </label>
 <select name='id_resource'>
 [% FOREACH res IN resources %]
-  <option value="[% res.id %]">[% res.description %]</option>
+<option value="[% res.id %]">[% res.description %]</option>
 [% END %]
 </select>
-</p>
 
-<p><label>Repeat</label>
+<h4>Recurrence</h4>
+<p><label>Frequency</label>
 <select name="frequency">
 <option selected value="no">No</option>
 <option value="daily">Daily</option>
@@ -93,21 +47,23 @@
 <option value="monthly">Monthly</option>
 <option value="yearly">Yearly</option>
 </select>
+
 <label>
 Interval
 </label>
 <select name='interval'>
 [% SET interval=1 %]
 [% WHILE interval< 30 %]
-  [% IF interval < 10 %]
-  <OPTION value="0[% interval %]">0[% interval %]</OPTION>
-  [% ELSE %]
-  <OPTION value="[% interval %]">[% interval %]</OPTION>
-  [% END %]
-  [% interval = interval +1 %]
+[% IF interval < 10 %]
+<OPTION value="0[% interval %]">0[% interval %]</OPTION>
+[% ELSE %]
+<OPTION value="[% interval %]">[% interval %]</OPTION>
+[% END %]
+[% interval = interval +1 %]
 [% END %]
 </select></p>
-<p><label>Recurrence end  </label><input name="dtend" placeholder="[% date.format(date.now) %]"></p>
+
+<p><label>UNTIL (YYYY-MM-DDThh:mm): </label><input name="until" placeholder="[% date.format(date.now) %]"></p>
 <label>Repetition days</label>
 <input type="checkbox" name="byday" value="mo"/> Monday
 <input type="checkbox" name="byday" value="tu"/> Tuesday
@@ -117,8 +73,38 @@ Interval
 <input type="checkbox" name="byday" value="sa"/> Saturday
 <input type="checkbox" name="byday" value="su"/> Sunday
 
+<p><label>
+BYMONTH
+</label>
+<select name='by_month'>
+[% SET by_month= 1 %]
+[% WHILE by_month< 13 %]
+  [% IF by_month< 10 %]
+    <OPTION value="0[% by_month %]">0[% by_month %]</OPTION>
+  [% ELSE %]
+    <OPTION value="[% by_month %]">[% by_month %]</OPTION>
+  [% END %]
+  [% by_month = by_month +1 %]
+[% END %]
+</select></p>
+
+<p><label>
+BYMONTHDAY
+</label>
+<select name='by_day_month'>
+[% SET by_day_month=1 %]
+[% WHILE by_day_month< 32 %]
+[% IF by_day_month < 10 %]
+<OPTION value="0[% by_day_month %]">0[% by_day_month %]</OPTION>
+[% ELSE %]
+<OPTION value="[% by_day_month %]">[% by_day_month %]</OPTION>
+[% END %]
+[% by_day_month = by_day_month +1 %]
+[% END %]
+</select></p>
+
 <p><input type=submit value="New Booking!"><INPUT type="reset"></p>
-</form>-->
-</p>
+</form>
+
 [%# USE Dumper %]
 [%# Dumper.dump_html(resources) %]

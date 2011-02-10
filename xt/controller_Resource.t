@@ -55,11 +55,9 @@ Editing the last created resource
 diag '##########Editing resource#########';
 diag '###################################';
 $resource_aux = $j->decode( $response_post->content );
-@resource     = @{$resource_aux};
 
-foreach (@resource) {
-    $id = $_->{id};
-}
+$id = $resource_aux->{id};
+
 diag "Last resource created ID: " . $id;
 
 my $ua_put      = LWP::UserAgent->new;

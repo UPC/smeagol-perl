@@ -1,6 +1,6 @@
 [% META title='Detalls de la reserva'%]
 
-<dl class="resource">
+<dl class="booking">
 <dt>ID</dt><dd>[% booking.id | html %]</dd>
 <dt>ID resource</dt><dd><a href='/resource/[% booking.id_resource %]'>[% booking.id_resource
 %]</a></dd>
@@ -11,11 +11,11 @@
 <dt>Frequency</dt><dd>[% booking.frequency %]</dd>
 <dt>Interval</dt><dd>[% booking.interval %]</dd>
 <dt>Until</dt><dd>[% booking.until %]</dd>
-<dt>By minute</dt><dd>[% booking.by_minute %]</dd>
-<dt>By hour</dt><dd>[% booking.by_hour %]</dd>
-<dt>By day</dt><dd>[% booking.by_day %]</dd>
-<dt>By month</dt><dd>[% booking.by_month %]</dd>
-<dt>By day month</dt><dd>[% booking.by_day_month %]</dd>
+<dt>By minute</dt><dd>[% booking.byminute %]</dd>
+<dt>By hour</dt><dd>[% booking.byhour %]</dd>
+<dt>By day</dt><dd>[% booking.byday %]</dd>
+<dt>By month</dt><dd>[% booking.bymonth %]</dd>
+<dt>By day month</dt><dd>[% booking.bymonthday %]</dd>
 </dl>
 
 
@@ -24,4 +24,4 @@
 <br></br><a href='[% c.uri_for("/booking") | html %]'> <--Tornar a la llista de reserves</a>
 
 [%# USE Dumper %]
-[%# Dumper.dump_html(boo.duration) %]
+[%# Dumper.dump_html(booking) %]

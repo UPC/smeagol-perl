@@ -22,21 +22,21 @@ BEGIN {
     is( ref($xml), "Smeagol::XML", "blessed thy XML" );
 
     my $expected = qq{<?xml version="1.0" encoding="UTF-8"?>\n<foobar/>\n};
-    is( $xml, $expected, "simplest XML as expected" );
+    is( "$xml", $expected, "simplest XML as expected" );
 
     $xml->addPreamble("foobar");
     $expected
         = qq{<?xml version="1.0" encoding="UTF-8"?>\n}
         . qq{<?xml-stylesheet type="application/xml" href="/xsl/foobar.xsl"?>\n}
         . qq{<foobar/>\n};
-    is( $xml, $expected, "added preamble to simplest XML" );
+    is( "$xml", $expected, "added preamble to simplest XML" );
 
     $xml->addXLink( "foobar", "http://foobar/foobar" );
     $expected
         = qq{<?xml version="1.0" encoding="UTF-8"?>\n}
         . qq{<?xml-stylesheet type="application/xml" href="/xsl/foobar.xsl"?>\n}
         . qq{<foobar xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://foobar/foobar"/>\n};
-    is( $xml, $expected, "added XLinks to simplest XML" );
+    is( "$xml", $expected, "added XLinks to simplest XML" );
 };
 
 # complex XML tests
@@ -61,7 +61,7 @@ EndOfXML
     $xml->addXLink( "foobar", "http://foobar/foobar" );
 
     my $expected = do { local $/; <DATA> };
-    is( $xml, $expected, "complex XML worked miracles" );
+    is( "$xml", $expected, "complex XML worked miracles" );
 };
 
 __END__

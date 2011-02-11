@@ -939,6 +939,11 @@ sub ical_event : Private {
   
   my $calendar = Data::ICal->new();
   
+    $calendar->add_property(
+	 prodid => "//UPC//Smeagol Server//EN");
+  
+  $calendar->add_property( version => "2.0" );
+  
   $c->log->debug("Volem l'agenda de l'event ".$c->stash->{id_event}." en format ICal");
   
   my @agenda_aux = $c->model('DB::TBooking')->search({id_event =>

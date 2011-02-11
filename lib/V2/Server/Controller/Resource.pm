@@ -45,7 +45,7 @@ sub default_GET {
 
 sub get_resource : Private {
     my ( $self, $c, $id ) = @_;
-    my $resource = $c->model('DB::Resources')->find( { id => $id } );
+    my $resource = $c->model('DB::TResource')->find( { id => $id } );
 
     if ( !$resource ) {
 
@@ -74,7 +74,7 @@ sub get_resource : Private {
 sub resource_list : Private {
     my ( $self, $c ) = @_;
     my @resources;
-    my @res_aux = $c->model('DB::Resources')->all;
+    my @res_aux = $c->model('DB::TResource')->all;
 
     foreach (@res_aux) {
         push( @resources, $_->get_resources );
@@ -107,7 +107,7 @@ sub default_POST {
 
     if ( $c->stash->{resource_ok} ) {
 
-        my $new_resource = $c->model('DB::Resources')->find_or_new();
+        my $new_resource = $c->model('DB::TResource')->find_or_new();
 
         $new_resource->description($descr);
         $new_resource->info($info);
@@ -121,13 +121,13 @@ sub default_POST {
         my $TagID;
 
         foreach (@tags) {
-            $TagID = $c->model('DB::Tag')->find( { id => $_ } );
+            $TagID = $c->model('DB::TTag')->find( { id => $_ } );
 
             if ($TagID) {
                 $c->log->debug( 'Llista id\'s tag: ' . $TagID->id );
 
          #Si el tag existeix, fem constar a ResourceTag la relació recurs-tag
-                my $ResTag = $c->model('DB::ResourceTag')->find_or_new();
+                my $ResTag = $c->model('DB::TResourceTag')->find_or_new();
                 $ResTag->resource_id( $new_resource->id );
                 $ResTag->tag_id( $TagID->id );
                 $ResTag->insert;
@@ -136,14 +136,14 @@ sub default_POST {
             else {
 
                 #Si el tag no existeix, el creem i repetim com a dalt
-                my $new_tag = $c->model('DB::Tag')->find_or_new();
+                my $new_tag = $c->model('DB::TTag')->find_or_new();
 
                 $new_tag->id($_);
                 $new_tag->insert;
 
                 $c->log->debug( 'Nou tag: ' . $new_tag->id );
 
-                my $ResTag = $c->model('DB::ResourceTag')->find_or_new();
+                my $ResTag = $c->model('DB::TResourceTag')->find_or_new();
                 $ResTag->resource_id( $new_resource->id );
                 $ResTag->tag_id( $new_tag->id );
                 $ResTag->insert;
@@ -191,7 +191,7 @@ sub default_PUT {
     my $info     = $req->parameters->{info} || $req->{headers}->{info};
     my @tags = split( /,/, $tags_aux );
 
-    my $resource = $c->model('DB::Resources')->find( { id => $id } );
+    my $resource = $c->model('DB::TResource')->find( { id => $id } );
 
     if ($resource) {
         $c->visit( '/check/check_resource', [ $info, $descr ] );
@@ -204,7 +204,7 @@ sub default_PUT {
 
             my $TagID;
 
-            my @old_tags = $c->model('DB::ResourceTag')
+            my @old_tags = $c->model('DB::TResourceTag')
                 ->search( { resource_id => $id } );
 
             foreach (@old_tags) {
@@ -213,12 +213,12 @@ sub default_PUT {
             }
 
             foreach (@tags) {
-                $TagID = $c->model('DB::Tag')->find( { id => $_ } );
+                $TagID = $c->model('DB::TTag')->find( { id => $_ } );
 
                 if ($TagID) {
 
          #Si el tag existeix, fem constar a ResourceTag la relació recurs-tag
-                    my $ResTag = $c->model('DB::ResourceTag')->find_or_new();
+                    my $ResTag = $c->model('DB::TResourceTag')->find_or_new();
                     $ResTag->resource_id( $resource->id );
                     $ResTag->tag_id( $TagID->id );
                     $ResTag->insert;
@@ -227,14 +227,14 @@ sub default_PUT {
                 else {
 
                     #Si el tag no existeix, el creem i repetim com a dalt
-                    my $new_tag = $c->model('DB::Tag')->find_or_new();
+                    my $new_tag = $c->model('DB::TTag')->find_or_new();
 
                     $new_tag->id($_);
                     $new_tag->insert;
 
                     $c->log->debug( 'Nou tag: ' . $new_tag->id );
 
-                    my $ResTag = $c->model('DB::ResourceTag')->find_or_new();
+                    my $ResTag = $c->model('DB::TResourceTag')->find_or_new();
                     $ResTag->resource_id( $resource->id );
                     $ResTag->tag_id( $new_tag->id );
                     $ResTag->insert;
@@ -285,7 +285,7 @@ sub default_DELETE {
     $c->log->debug( "ID: " . $id );
     $c->log->debug("El DELETE funciona");
 
-    my $resource_aux = $c->model('DB::Resources')->find( { id => $id } );
+    my $resource_aux = $c->model('DB::TResource')->find( { id => $id } );
 
     if ($resource_aux) {
         $resource_aux->delete;

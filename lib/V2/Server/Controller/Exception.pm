@@ -351,7 +351,7 @@ sub default_POST{
 	      $c->stash->{boo_ok}=0;
        }
     
-    if ($c->stash->{boo_ok} = 1 ) {
+    if ($c->stash->{boo_ok} == 1 ) {
 
         if ( $c->stash->{empty} == 1 ) {
 	    @message = { message => "Bad Request", };

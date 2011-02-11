@@ -100,6 +100,55 @@ __PACKAGE__->has_many(
 # Created by DBIx::Class::Schema::Loader v0.07000 @ 2011-02-10 13:00:38
 # DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:aNC7MABaa/QlI6cH7Xofeg
 
+__PACKAGE__->has_many(
+  "tag_events",
+  "V2::Server::Schema::Result::TTagEvent",
+  { "foreign.id_event" => "self.id" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
 
+sub hash_event {
+    my ($self) = @_;
+
+    my @event = {
+        id          => $self->id,
+        info        => $self->info,
+        description => $self->description,
+        starts      => $self->starts,
+        ends        => $self->ends,
+        tags        => $self->tag_list,
+        bookings    => $self->booking_list,
+    };
+
+    return @event;
+}
+
+sub tag_list {
+    my ($self) = @_;
+
+    my @tags;
+    my $tag;
+
+    foreach my $tag ( $self->tag_events ) {
+        $tag = { id => $tag->id_tag->id };
+        push( @tags, $tag );
+    }
+
+    return ( \@tags );
+}
+
+sub booking_list {
+    my ($self) = @_;
+
+    my @bookings;
+    my @booking;
+
+    foreach my $booking ( $self->t_bookings ) {
+        @booking = { id => $booking->id };
+        push( @bookings, @booking );
+    }
+
+    return ( \@bookings );
+}
 # You can replace this text with custom content, and it will be preserved on regeneration
 1;

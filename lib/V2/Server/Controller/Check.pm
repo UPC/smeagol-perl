@@ -63,8 +63,8 @@ sub check_booking : Local {
   $c->log->debug("Check booking. ID resource: ".$id_resource);
   $c->log->debug("Check booking. ID event: ".$id_event);
   
-  my $resource = $c->model('DB::Resources')->find({id => $id_resource});
-  my $event = $c->model('DB::Event')->find({id => $id_event});
+  my $resource = $c->model('DB::TResource')->find({id => $id_resource});
+  my $event = $c->model('DB::TEvent')->find({id => $id_event});
 
   if ($resource && $event) {
     $c->stash->{booking_ok}=1;
@@ -122,6 +122,7 @@ sub check_overlap :Local {
   my ($self, $c) = @_;
   
   my $new_booking = $c->stash->{new_booking};
+  my @new_booking_exceptions = $c->stash->{new_booking_exceptions};
   
   $c->log->debug("Provant si hi ha solapament");
   $c->stash->{overlap} = 0;
@@ -225,12 +226,12 @@ if ($duration->in_units('days') ge 1 ) {
   my $overlap;
   my @booking_aux;
   if ($c->stash->{PUT}){
-    @booking_aux = $c->model('DB::Booking')->search({id_resource=>
+    @booking_aux = $c->model('DB::TBooking')->search({id_resource=>
     $new_booking->id_resource->id})->search({ id => {'!=' => $new_booking->id}
 })->search({until=>{'>' => $new_booking->dtstart } });
     
   }else{  
-    @booking_aux = $c->model('DB::Booking')->search({id_resource=>
+    @booking_aux = $c->model('DB::TBooking')->search({id_resource=>
 $new_booking->id_resource->id});    
   }
 

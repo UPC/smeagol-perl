@@ -88,7 +88,7 @@ See default_GET for details.
 sub get_booking : Private {
     my ( $self, $c, $id ) = @_;
 
-    my $booking_aux = $c->model('DB::Booking')->find( { id => $id } );
+    my $booking_aux = $c->model('DB::TBooking')->find( { id => $id } );
     my $booking;
     if ($booking_aux) {
       given ($booking_aux->frequency) {
@@ -184,7 +184,7 @@ It returns every booking of every resource.
 sub booking_list : Private {
     my ( $self, $c ) = @_;
 
-    my @booking_aux = $c->model('DB::Booking')->all;
+    my @booking_aux = $c->model('DB::TBooking')->all;
     my @booking;
     my @bookings;
 
@@ -197,9 +197,9 @@ sub booking_list : Private {
 
     $c->stash->{content}  = \@bookings;
     $c->stash->{bookings} = \@bookings;
-    my @events = $c->model('DB::Event')->all;
+    my @events = $c->model('DB::TEvent')->all;
     $c->stash->{events} = \@events;
-    my @resources = $c->model('DB::Resources')->all;
+    my @resources = $c->model('DB::TResource')->all;
     $c->stash->{resources} = \@resources;
     $c->stash->{content}   = \@bookings;
     $c->stash->{bookings}  = \@bookings;
@@ -225,7 +225,7 @@ sub bookings_resource :Private {
     $c->detach('ical',[]);
   }
   
-  my @booking_aux = $c->model('DB::Booking')->search( { id_resource =>
+  my @booking_aux = $c->model('DB::TBooking')->search( { id_resource =>
   $id });
   
   my @booking;
@@ -245,9 +245,9 @@ sub bookings_resource :Private {
   #templates
   $c->stash->{bookings} = \@bookings;
   #Events and Resources are passed to the HTML view in order to build the select menus
-  my @events = $c->model('DB::Event')->all;
+  my @events = $c->model('DB::TEvent')->all;
   $c->stash->{events} = \@events;    
-  my @resources = $c->model('DB::Resources')->all;
+  my @resources = $c->model('DB::TResource')->all;
   $c->stash->{resources} = \@resources;
   
   $c->response->status(200);
@@ -269,7 +269,7 @@ sub bookings_event :Private {
     $c->detach('ical_event',[]);
   }
   
-  my @booking_aux = $c->model('DB::Booking')->search( { id_event =>
+  my @booking_aux = $c->model('DB::TBooking')->search( { id_event =>
   $id });
   
   my @booking;
@@ -289,9 +289,9 @@ sub bookings_event :Private {
   #templates
   $c->stash->{bookings} = \@bookings;
   #Events and Resources are passed to the HTML view in order to build the select menus
-  my @events = $c->model('DB::Event')->all;
+  my @events = $c->model('DB::TEvent')->all;
   $c->stash->{events} = \@events;    
-  my @resources = $c->model('DB::Resources')->all;
+  my @resources = $c->model('DB::TResource')->all;
   $c->stash->{resources} = \@resources;
   
   $c->response->status(200);
@@ -347,7 +347,7 @@ sub default_POST {
     my $by_month = $req->parameters->{by_month};#$dtstart->month;
     my $by_day_month = $req->parameters->{by_day_month};
 
-    my $new_booking = $c->model('DB::Booking')->find_or_new();
+    my $new_booking = $c->model('DB::TBooking')->find_or_new();
     $c->stash->{id_event} = $id_event;
     $c->stash->{id_resource} = $id_resource;
 
@@ -572,7 +572,7 @@ sub default_PUT {
     my $by_month = $req->parameters->{by_month} || $dtstart->month;
     my $by_day_month = $req->parameters->{by_day_month} || "";
     
-    my $booking = $c->model('DB::Booking')->find({id => $id});
+    my $booking = $c->model('DB::TBooking')->find({id => $id});
     $c->stash->{id_event} = $id_event;
     $c->stash->{id_resource} = $id_resource;
     
@@ -756,7 +756,7 @@ sub default_DELETE {
     $c->log->debug( 'Mètode: ' . $req->method );
     $c->log->debug("El DELETE funciona");
 
-    my $booking_aux = $c->model('DB::Booking')->find( { id => $id } );
+    my $booking_aux = $c->model('DB::TBooking')->find( { id => $id } );
 
     if ($booking_aux) {
         $booking_aux->delete;
@@ -819,31 +819,26 @@ sub ical : Private {
   my $filename = "agenda_resource_".$c->stash->{id_resource}.".ics";
   
   my $calendar = Data::ICal->new();
-  
-  $c->log->debug("Volem l'agenda del recurs ".$c->stash->{id_resource}." en format ICal");
-  
-  my @agenda_aux = $c->model('DB::Booking')->search({id_resource =>
-$c->stash->{id_resource}});
+   
+  my @agenda_aux = $c->model('DB::TBooking')->search({id_resource => $c->stash->{id_resource}});
 
   my @genda;
   
   foreach (@agenda_aux) {
     push (@genda,$_->hash_booking);
   }
-
-  $c->log->debug("Hi ha ".@genda." que compleixen els criteris de cerca");
   
   my $s_aux;
   my $e_aux;
   my $u_aux;
   my $set_aux;
   my @byday; my @bymonth; my @bymonthday;
+  my @exrule_list;
   
   foreach (@genda) {
     my $vevent = Data::ICal::Entry::Event->new();
     $s_aux = ParseDate($_->{dtstart});
     $e_aux = ParseDate($_->{dtend});
-    $c->log->debug("DTEND (minutes): ".$e_aux->minute);
     $u_aux = ParseDate($_->{until});
     
     my $f_aux = $_->{frequency};
@@ -858,20 +853,19 @@ $c->stash->{id_resource}});
     
     my $rrule;
     my $until = Date::ICal->new(
-    year => $u_aux->year,
-    month => $u_aux->month,
-    day => $u_aux->day,
-    hour => $u_aux->hour,
-    minute => $u_aux->minute,
-  );
-    
+	year => $u_aux->year,
+	month => $u_aux->month,
+	day => $u_aux->day,
+	hour => $u_aux->hour,
+	minute => $u_aux->minute,
+      );
+
     given ($f_aux) {
       when ('daily') {
 	$rrule = 'FREQ=DAILY;INTERVAL='.uc($i_aux).';UNTIL='.uc($until->ical);
       }
       when ('weekly') {
-	$c->log->debug("Reserva weekly. BYDAY: ".Dumper($by_day_aux));
-	$rrule = 'FREQ=WEEKLY;INTERVAL='.uc($i_aux).';BYDAY='.uc($by_day_aux).';UNTIL='.uc($until->ical);
+	$rrule = 'FREQ=WEEKLY;INTERVAL='.uc($i_aux).'.;BYDAY='.uc($by_day_aux).';UNTIL='.uc($until->ical);
       }
       when ('monthly') {
 	$rrule = 'FREQ=MONTHLY;INTERVAL='.uc($i_aux).';BYMONTHDAY='.$by_day_month_aux.';UNTIL='.uc($until->ical);
@@ -880,7 +874,17 @@ $c->stash->{id_resource}});
 	$rrule = 'FREQ=YEARLY;INTERVAL='.uc($i_aux).';BYMONTH='.$by_month_aux.';BYMONTHDAY='.$by_day_month_aux.';UNTIL='.uc($until->ical);
       }
     }
+    
+    my @exrule_list = @{$_->{exrule_list}};
+    
+    for (my $i=0; $i<@exrule_list; $i++) {
+   $c->log->debug("EXRULE: ".$exrule_list[$i]->{exrule});
+	$vevent->add_properties(
+	       exrule => $exrule_list[$i]->{exrule}
+       );
 
+       }
+    
     $vevent->add_properties(
       uid => $_->{id},
       summary => "Booking #".$_->{id},
@@ -906,13 +910,22 @@ $c->stash->{id_resource}});
   
   $c->stash->{content} = \@genda;
   $c->res->content_type("text/calendar");
-  #$c->log->debug("Fitxer: ".Dumper($calendar));
   $c->res->header(
     'Content-Disposition' => qq(inline; filename=$filename) );
-  $c->res->output($calendar->as_string);
+  
+  #Due to the fact that after numbers within exrule parameters apears \ character we must parse the calendar string
+  #before sending it-
+  #s substitution
+  # \\ is used because we need to scape \
+  # \ is substituted by nothing
+  #g searches all matches along the string
+  
+  my $calendar_ics = $calendar->as_string;
+  $calendar_ics =~ s/\\//g;
+  
+  $c->res->output($calendar_ics);
   
 }
-
 
 sub ical_event : Private {
   my ($self,$c) = @_;
@@ -920,15 +933,10 @@ sub ical_event : Private {
   my $filename = "agenda_event_".$c->stash->{id_event}.".ics";
   
   my $calendar = Data::ICal->new();
-  $calendar->add_properties(
-    version 	=> "2.0",
-    prodid	=> "-//Smeagol Server //VERSION 2.x//EN",
-    method      => "PUBLISH",      
-  );
   
   $c->log->debug("Volem l'agenda de l'event ".$c->stash->{id_event}." en format ICal");
   
-  my @agenda_aux = $c->model('DB::Booking')->search({id_event =>
+  my @agenda_aux = $c->model('DB::TBooking')->search({id_event =>
 $c->stash->{id_event}});
 
   my @genda;
@@ -944,7 +952,7 @@ $c->stash->{id_event}});
   my $u_aux;
   my $set_aux;
   my @byday; my @bymonth; my @bymonthday;
-  
+
   foreach (@genda) {
     my $vevent = Data::ICal::Entry::Event->new();
     $s_aux = ParseDate($_->{dtstart});
@@ -963,12 +971,12 @@ $c->stash->{id_event}});
     
     my $rrule;
     my $until = Date::ICal->new(
-      year => $u_aux->year,
-      month => $u_aux->month,
-      day => $u_aux->day,
-      hour => $u_aux->hour,
-      minute => $u_aux->minute,
-    );
+	year => $u_aux->year,
+	month => $u_aux->month,
+	day => $u_aux->day,
+	hour => $u_aux->hour,
+	minute => $u_aux->minute,
+      );
     
     given ($f_aux) {
       when ('daily') {
@@ -976,7 +984,7 @@ $c->stash->{id_event}});
       }
       when ('weekly') {
 	$c->log->debug("Reserva weekly. BYDAY: ".Dumper($by_day_aux));
-	$rrule = 'FREQ=WEEKLY;INTERVAL='.uc($i_aux).';BYDAY='.uc($by_day_aux).';UNTIL='.uc($until->ical);
+	$rrule = 'FREQ=WEEKLY;INTERVAL='.uc($i_aux).'.;BYDAY='.uc($by_day_aux).';UNTIL='.uc($until->ical);
       }
       when ('monthly') {
 	$rrule = 'FREQ=MONTHLY;INTERVAL='.uc($i_aux).';BYMONTHDAY='.$by_day_month_aux.';UNTIL='.uc($until->ical);
@@ -985,38 +993,46 @@ $c->stash->{id_event}});
 	$rrule = 'FREQ=YEARLY;INTERVAL='.uc($i_aux).';BYMONTH='.$by_month_aux.';BYMONTHDAY='.$by_day_month_aux.';UNTIL='.uc($until->ical);
       }
     }
+   
+    my @exrule_list = @{$_->{exrule_list}};
+    
+    for (my $i=0; $i<@exrule_list; $i++) {
+   $c->log->debug("EXRULE: ".$exrule_list[$i]->{exrule});
+	$vevent->add_properties(
+	       exrule => $exrule_list[$i]->{exrule}
+       );
 
+       }
+    
     $vevent->add_properties(
       uid => $_->{id},
       summary => "Booking #".$_->{id},
-      dtstart => Date::ICal->new(
-	year => $s_aux->year,
-	month => $s_aux->month,
-	day => $s_aux->day,
-	hour => $s_aux->hour,
-	minute => $s_aux->minute,
-      )->ical,
-      dtend => Date::ICal->new(
-	year => $e_aux->year,
-	month => $e_aux->month,
-	day => $e_aux->day,
-	hour => $e_aux->hour,
-	minute => $e_aux->minute,
-      )->ical,
-      rrule => $rrule  
+      dtstart => uc($s_aux),
+      dtend => uc($e_aux),
+      rrule => $rrule
+     
     );
     $calendar->add_entry($vevent);
   }
   
-  $c->stash->{content} = \@genda;
   $c->res->content_type("text/calendar");
-  #$c->log->debug("Fitxer: ".Dumper($calendar));
+  $c->log->debug("Fitxer: ".$calendar->as_string);
   $c->res->header(
     'Content-Disposition' => qq(inline; filename=$filename) );
-  $c->res->output($calendar->as_string);
+  
+  #Due to the fact that after numbers within exrule parameters apears \ character we must parse the calendar string
+  #before sending it-
+  #s substitution
+  # \\ is used because we need to scape \
+  # \ is substituted by nothing
+  #g searches all matches along the string
+  
+  my $calendar_ics = $calendar->as_string;
+  $calendar_ics =~ s/\\//g;
+  
+  $c->res->output($calendar_ics);
 
 }
-
 
 =head1 AUTHOR
 

@@ -197,7 +197,7 @@ dtend => $self->dtend->iso8601(),
 duration     => $self->duration,
 until => $self->until->iso8601(),
 frequency => $self->frequency,
-interval => $self->intterval,
+interval => $self->interval,
 byminute => $self->by_minute,
 byhour => $self->by_hour,
 exrule_list => $self->exrule_list
@@ -215,7 +215,7 @@ dtend => $self->dtend->iso8601(),
 duration     => $self->duration,
 until => $self->until->iso8601(),
 frequency => $self->frequency,
-interval => $self->intterval,
+interval => $self->interval,
 byminute => $self->by_minute,
 byhour => $self->by_hour,
 byday => $self->by_day,
@@ -234,7 +234,7 @@ dtend => $self->dtend->iso8601(),
 duration     => $self->duration,
 until => $self->until->iso8601(),
 frequency => $self->frequency,
-interval => $self->intterval,
+interval => $self->interval,
 byminute => $self->by_minute,
 byhour => $self->by_hour,
 bymonth => $self->by_month,
@@ -253,7 +253,7 @@ dtend => $self->dtend->iso8601(),
 duration     => $self->duration,
 until => $self->until->iso8601(),
 frequency => $self->frequency,
-interval => $self->intterval,
+interval => $self->interval,
 byminute => $self->by_minute,
 byhour => $self->by_hour,
 bymonth => $self->by_month,
@@ -272,7 +272,7 @@ my ($self) = @_;
 my @exception;
 my @exceptions;
 
-foreach my $exception ($self->exception_booking) {
+foreach my $exception ($self->t_exceptions) {
 @exception = {
 exrule => $exception->exrule
 };

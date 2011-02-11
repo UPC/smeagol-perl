@@ -47,18 +47,18 @@ sub default_GET {
 sub get_event : Local {
     my ( $self, $c, $id ) = @_;
 
-    my $event_aux = $c->model('DB::Event')->find( { id => $id } );
+    my $event_aux = $c->model('DB::TEvent')->find( { id => $id } );
 
     if ($event_aux) {
-      my $event = {
-	id          => $event_aux->id,
-	info        => $event_aux->info,
-	description => $event_aux->description,
-	starts      => $event_aux->starts->iso8601(),
-	ends        => $event_aux->ends->iso8601(),
-	tags        => $event_aux->tag_list,
-	bookings    => $event_aux->booking_list
-      };
+        my $event = {
+            id          => $event_aux->id,
+            info        => $event_aux->info,
+            description => $event_aux->description,
+            starts      => $event_aux->starts->iso8601(),
+            ends        => $event_aux->ends->iso8601(),
+            tags        => $event_aux->tag_list,
+            bookings    => $event_aux->booking_list
+        };
 
         $c->stash->{content} = $event;
         $c->stash->{event}   = $event;
@@ -79,7 +79,7 @@ sub get_event : Local {
 sub event_list : Local {
     my ( $self, $c, $id ) = @_;
 
-    my @events_aux = $c->model('DB::Event')->all;
+    my @events_aux = $c->model('DB::TEvent')->all;
     my @event;
     my @events;
 
@@ -105,9 +105,9 @@ sub default_POST {
     my $description = $req->parameters->{description};
     my $starts      = $req->parameters->{starts};
     my $ends        = $req->parameters->{ends};
-    my @tags = split(',',$req->parameters->{tags});
+    my @tags        = split( ',', $req->parameters->{tags} );
 
-    my $new_event = $c->model('DB::Event')->find_or_new();
+    my $new_event = $c->model('DB::TEvent')->find_or_new();
     my $tag_event;
 
     $c->visit( '/check/check_event', [ $info, $description ] );
@@ -120,44 +120,44 @@ sub default_POST {
         $new_event->starts($starts);
         $new_event->ends($ends);
         $new_event->insert;
-	
-	my $tags; 
-	my $id_tag;
-	
-	foreach (@tags) {
-	  $id_tag = $_;
-	  $c->log->debug("Estem afegint el tag: ".$id_tag);
-	  
-	  
-	  $tags = $c->model('DB::Tag')->find({id => $id_tag });
-	  
-	  if ($tags){
-	    $tag_event = $c->model('DB::TagEvent')->find_or_new();
-	    $tag_event->id_tag($id_tag);
-	    $tag_event->id_event($new_event->id);
-	    $tag_event->insert;
-	  }else{
-	    $tags = $c->model('DB::Tag')->find_or_new();
-	    $tags->id($id_tag);
-	    $tags->description('Not yet descrived');
-	    $tags->insert;
-	    
-	    $tag_event = $c->model('DB::TagEvent')->find_or_new();
-	    $tag_event->id_tag($id_tag);
-	    $tag_event->id_event($new_event->id);
-	    $tag_event->insert;
-	   }	  
-	}
 
-	my $event = {
-	  id          => $new_event->id,
-	  info        => $new_event->info,
-	  description => $new_event->description,
-	  starts      => $new_event->starts->iso8601(),
-	  ends        => $new_event->ends->iso8601(),
-	  tags        => $new_event->tag_list,
-	  bookings    => $new_event->booking_list
-	};
+        my $tags;
+        my $id_tag;
+
+        foreach (@tags) {
+            $id_tag = $_;
+            $c->log->debug( "Estem afegint el tag: " . $id_tag );
+
+            $tags = $c->model('DB::TTag')->find( { id => $id_tag } );
+
+            if ($tags) {
+                $tag_event = $c->model('DB::TTagEvent')->find_or_new();
+                $tag_event->id_tag($id_tag);
+                $tag_event->id_event( $new_event->id );
+                $tag_event->insert;
+            }
+            else {
+                $tags = $c->model('DB::TTag')->find_or_new();
+                $tags->id($id_tag);
+                $tags->description('Not yet descrived');
+                $tags->insert;
+
+                $tag_event = $c->model('DB::TTagEvent')->find_or_new();
+                $tag_event->id_tag($id_tag);
+                $tag_event->id_event( $new_event->id );
+                $tag_event->insert;
+            }
+        }
+
+        my $event = {
+            id          => $new_event->id,
+            info        => $new_event->info,
+            description => $new_event->description,
+            starts      => $new_event->starts->iso8601(),
+            ends        => $new_event->ends->iso8601(),
+            tags        => $new_event->tag_list,
+            bookings    => $new_event->booking_list
+        };
 
         $c->stash->{content} = $event;
         $c->response->status(201);
@@ -176,8 +176,6 @@ sub default_POST {
     }
 }
 
-
-
 sub default_PUT {
     my ( $self, $c, $res, $id ) = @_;
     my $req = $c->request;
@@ -185,18 +183,18 @@ sub default_PUT {
     $c->log->debug( "ID: " . $id );
     $c->log->debug("El PUT funciona");
 
-    my $info = $req->parameters->{info};
+    my $info        = $req->parameters->{info};
     my $description = $req->parameters->{description};
-    
+
     my $starts_aux = $req->parameters->{starts};
     my $starts = $c->forward( 'ParseDate', [$starts_aux] );
-    
-    my $ends_aux = $req->parameters->{ends} ;
-    my $ends = $c->forward( 'ParseDate', [ $ends_aux ] );
-    
-    my @tags = split(',',$req->parameters->{tags});
 
-    my $event = $c->model('DB::Event')->find( { id => $id } );
+    my $ends_aux = $req->parameters->{ends};
+    my $ends = $c->forward( 'ParseDate', [$ends_aux] );
+
+    my @tags = split( ',', $req->parameters->{tags} );
+
+    my $event = $c->model('DB::TEvent')->find( { id => $id } );
     my $tag_event;
 
     if ($event) {
@@ -210,50 +208,51 @@ sub default_PUT {
             $event->starts($starts);
             $event->ends($ends);
             $event->insert_or_update;
-	    
-	    my $tags;
-	    
-	    my @tag_event_aux = $c->model('DB::TagEvent')->search({id_event => $event->id});
-	    
-	    foreach (@tag_event_aux) {
-	      $_->delete;
-	    }
-	    
-	  my $id_tag;
-	 foreach (@tags) {
-	  $id_tag = $_;
-	  $c->log->debug("Estem afegint el tag: ".$id_tag);
-	  
-	  
-	  $tags = $c->model('DB::Tag')->find({id => $id_tag });
-	  
-	  if ($tags){
-	    $tag_event =$c->model('DB::TagEvent')->find_or_new();
-	    $tag_event->id_tag($id_tag);
-	    $tag_event->id_event($event->id);
-	    $tag_event->insert;
-	  }else{
-	    $tags = $c->model('DB::Tag')->find_or_new();
-	    $tags->id($id_tag);
-	    $tags->description('Not yet descrived');
-	    $tags->insert;
-	    
-	    $tag_event = $c->model('DB::TagEvent')->find_or_new();
-	    $tag_event->id_tag($id_tag);
-	    $tag_event->id_event($event->id);
-	    $tag_event->insert;
-	   }	  
-	}
 
-	    my $event = {
-	      id          => $event->id,
-	      info        => $event->info,
-	      description => $event->description,
-	      starts      => $event->starts->iso8601(),
-	      ends        => $event->ends->iso8601(),
-	      tags        => $event->tag_list,
-	      bookings    => $event->booking_list
-	    };
+            my $tags;
+
+            my @tag_event_aux = $c->model('DB::TTagEvent')
+                ->search( { id_event => $event->id } );
+
+            foreach (@tag_event_aux) {
+                $_->delete;
+            }
+
+            my $id_tag;
+            foreach (@tags) {
+                $id_tag = $_;
+                $c->log->debug( "Estem afegint el tag: " . $id_tag );
+
+                $tags = $c->model('DB::TTag')->find( { id => $id_tag } );
+
+                if ($tags) {
+                    $tag_event = $c->model('DB::TTagEvent')->find_or_new();
+                    $tag_event->id_tag($id_tag);
+                    $tag_event->id_event( $event->id );
+                    $tag_event->insert;
+                }
+                else {
+                    $tags = $c->model('DB::TTag')->find_or_new();
+                    $tags->id($id_tag);
+                    $tags->description('Not yet descrived');
+                    $tags->insert;
+
+                    $tag_event = $c->model('DB::TTagEvent')->find_or_new();
+                    $tag_event->id_tag($id_tag);
+                    $tag_event->id_event( $event->id );
+                    $tag_event->insert;
+                }
+            }
+
+            my $event = {
+                id          => $event->id,
+                info        => $event->info,
+                description => $event->description,
+                starts      => $event->starts->iso8601(),
+                ends        => $event->ends->iso8601(),
+                tags        => $event->tag_list,
+                bookings    => $event->booking_list
+            };
 
             $c->stash->{content} = $event;
             $c->response->status(200);
@@ -284,23 +283,20 @@ sub default_DELETE {
     $c->log->debug( 'Mètode: ' . $req->method );
     $c->log->debug("El DELETE funciona");
 
-    my $event_aux = $c->model('DB::Event')->find( { id => $id } );
+    my $event_aux = $c->model('DB::TEvent')->find( { id => $id } );
     my $message;
 
     if ($event_aux) {
         $event_aux->delete;
-	$message = {
-	  message => "Event successfully deleted"
-	};
-	$c->stash->{content} = $message;
+        $message = { message => "Event successfully deleted" };
+        $c->stash->{content}  = $message;
         $c->stash->{template} = 'event/delete_ok.tt';
         $c->response->status(200);
     }
     else {
-	$message = {
-	  message => "We can't delete an event that we can't find"
-	};
-	$c->stash->{content} = $message;
+        $message
+            = { message => "We can't delete an event that we can't find" };
+        $c->stash->{content}  = $message;
         $c->stash->{template} = 'not_found.tt';
         $c->response->status(404);
     }
@@ -317,8 +313,8 @@ sub ParseDate : Private {
 
     my ( $day, $hour ) = split( /T/, $date_str );
 
-    my ( $year,  $month, $nday ) = split( /-/, $day );
-    my ( $nhour, $min )  = split( /:/, $hour );
+    my ( $year, $month, $nday ) = split( /-/, $day );
+    my ( $nhour, $min ) = split( /:/, $hour );
 
     my $date = DateTime->new(
         year   => $year,

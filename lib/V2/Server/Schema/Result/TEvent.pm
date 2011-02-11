@@ -1,4 +1,4 @@
-package V2::Server::Schema::Result::Event;
+package V2::Server::Schema::Result::TEvent;
 
 # Created by DBIx::Class::Schema::Loader
 # DO NOT MODIFY THE FIRST PART OF THIS FILE
@@ -8,16 +8,15 @@ use warnings;
 
 use base 'DBIx::Class::Core';
 
-__PACKAGE__->load_components( "InflateColumn::DateTime", "TimeStamp",
-    "InflateColumn" );
+__PACKAGE__->load_components( "InflateColumn::DateTime", "InflateColumn" );
 
 =head1 NAME
 
-V2::Server::Schema::Result::Event
+V2::Server::Schema::Result::TEvent
 
 =cut
 
-__PACKAGE__->table("event");
+__PACKAGE__->table("t_event");
 
 =head1 ACCESSORS
 
@@ -67,36 +66,45 @@ __PACKAGE__->set_primary_key("id");
 
 =head1 RELATIONS
 
-=head2 tag_events
+=head2 t_tag_events
 
 Type: has_many
 
-Related object: L<V2::Server::Schema::Result::TagEvent>
+Related object: L<V2::Server::Schema::Result::TTagEvent>
 
 =cut
+
+__PACKAGE__->has_many(
+    "t_tag_events",
+    "V2::Server::Schema::Result::TTagEvent",
+    { "foreign.id_event" => "self.id" },
+    { cascade_copy       => 0, cascade_delete => 0 },
+);
+
+=head2 t_bookings
+
+Type: has_many
+
+Related object: L<V2::Server::Schema::Result::TBooking>
+
+=cut
+
+__PACKAGE__->has_many(
+    "t_bookings",
+    "V2::Server::Schema::Result::TBooking",
+    { "foreign.id_event" => "self.id" },
+    { cascade_copy       => 0, cascade_delete => 0 },
+);
+
+# Created by DBIx::Class::Schema::Loader v0.07000 @ 2011-02-10 13:00:38
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:aNC7MABaa/QlI6cH7Xofeg
 
 __PACKAGE__->has_many(
     "tag_events",
-    "V2::Server::Schema::Result::TagEvent",
-    { "foreign.id_event" => "self.id" }, {},
+    "V2::Server::Schema::Result::TTagEvent",
+    { "foreign.id_event" => "self.id" },
+    { cascade_copy       => 0, cascade_delete => 0 },
 );
-
-=head2 bookings
-
-Type: has_many
-
-Related object: L<V2::Server::Schema::Result::Booking>
-
-=cut
-
-__PACKAGE__->has_many(
-    "bookings",
-    "V2::Server::Schema::Result::Booking",
-    { "foreign.id_event" => "self.id" }, {},
-);
-
-# Created by DBIx::Class::Schema::Loader v0.07000 @ 2010-10-15 15:48:04
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:otVLoHXbh9Te6dCJYAnhWw
 
 sub hash_event {
     my ($self) = @_;
@@ -105,10 +113,10 @@ sub hash_event {
         id          => $self->id,
         info        => $self->info,
         description => $self->description,
-        starts      => $self->starts->iso8601(),
-        ends        => $self->ends->iso8601(),
+        starts      => $self->starts,
+        ends        => $self->ends,
         tags        => $self->tag_list,
-        bookings    => $self->booking_list
+        bookings    => $self->booking_list,
     };
 
     return @event;
@@ -134,7 +142,7 @@ sub booking_list {
     my @bookings;
     my @booking;
 
-    foreach my $booking ( $self->bookings ) {
+    foreach my $booking ( $self->t_bookings ) {
         @booking = { id => $booking->id };
         push( @bookings, @booking );
     }

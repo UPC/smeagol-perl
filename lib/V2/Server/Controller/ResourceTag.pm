@@ -26,7 +26,7 @@ sub default_GET {
 
     if ($tag) {
         my @resource_tag
-            = $c->model('DB::ResourceTag')->search( { tag_id => $tag } );
+            = $c->model('DB::TResourceTag')->search( { tag_id => $tag } );
         my @resources;
         my $resource_aux;
         my @resource;
@@ -34,7 +34,7 @@ sub default_GET {
         if (@resource_tag) {
 
             foreach (@resource_tag) {
-                $resource_aux = $c->model('DB::Resource')
+                $resource_aux = $c->model('DB::TResource')
                     ->find( { id => $_->resource_id } );
 
                 my @resource = $resource_aux->get_resources;

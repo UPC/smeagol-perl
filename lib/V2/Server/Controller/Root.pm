@@ -9,7 +9,7 @@ use parent 'Catalyst::Controller';
 #
 __PACKAGE__->config->{namespace} = '';
 
-my $name = 'Smeagol Server';
+my $name    = 'Smeagol Server';
 my $version = '2.0';
 
 =head1 NAME
@@ -46,15 +46,15 @@ sub default : Private {
 }
 
 sub version : Local {
-  my ( $self, $c ) = @_;
+    my ( $self, $c ) = @_;
 
-  $c->response->status(200);
-  
-  my @message = {
-    application =>$name,
-    version => $version
-  };
-  $c->stash->{content} = \@message;
+    $c->response->status(200);
+
+    my @message = {
+        application => $name,
+        version     => $version
+    };
+    $c->stash->{content} = \@message;
 }
 
 sub end : Private {

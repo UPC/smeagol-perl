@@ -1,4 +1,4 @@
-package V2::Server::Schema::Result::ResourceTag;
+package V2::Server::Schema::Result::TResourceTag;
 
 # Created by DBIx::Class::Schema::Loader
 # DO NOT MODIFY THE FIRST PART OF THIS FILE
@@ -8,16 +8,15 @@ use warnings;
 
 use base 'DBIx::Class::Core';
 
-__PACKAGE__->load_components( "InflateColumn::DateTime", "TimeStamp",
-    "InflateColumn" );
+__PACKAGE__->load_components( "InflateColumn::DateTime", "InflateColumn" );
 
 =head1 NAME
 
-V2::Server::Schema::Result::ResourceTag
+V2::Server::Schema::Result::TResourceTag
 
 =cut
 
-__PACKAGE__->table("resource_tag");
+__PACKAGE__->table("t_resource_tag");
 
 =head1 ACCESSORS
 
@@ -53,38 +52,28 @@ __PACKAGE__->add_columns(
 );
 __PACKAGE__->set_primary_key( "resource_id", "tag_id" );
 
-=head1 RELATIONS
+# Created by DBIx::Class::Schema::Loader v0.07000 @ 2011-02-10 13:00:38
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:s6KrEh8/rf6MzDrlKL9yPA
+__PACKAGE__->belongs_to(
+    "tag", "gollum::Schema::Result::Tag",
+    { id        => "tag_id" },
+    { join_type => "LEFT", on_delete => "CASCADE", on_update => "CASCADE" },
+);
 
-=head2 tag_id
+=head2 resource
 
 Type: belongs_to
 
-Related object: L<V2::Server::Schema::Result::Tag>
+Related object: L<gollum::Schema::Result::Resource>
 
 =cut
 
 __PACKAGE__->belongs_to(
-    "tag_id",
-    "V2::Server::Schema::Result::Tag",
-    { id => "tag_id" },
+    "resource",
+    "gollum::Schema::Result::Resource",
+    { id        => "resource_id" },
+    { join_type => "LEFT", on_delete => "CASCADE", on_update => "CASCADE" },
 );
-
-=head2 resource_id
-
-Type: belongs_to
-
-Related object: L<V2::Server::Schema::Result::Resources>
-
-=cut
-
-__PACKAGE__->belongs_to(
-    "resource_id",
-    "V2::Server::Schema::Result::Resources",
-    { id => "resource_id" },
-);
-
-# Created by DBIx::Class::Schema::Loader v0.07000 @ 2010-10-15 15:48:04
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:0DLQZ0zXoBJu7DGjKLvEGQ
 
 # You can replace this text with custom content, and it will be preserved on regeneration
 1;

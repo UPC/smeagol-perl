@@ -49,7 +49,7 @@ sub tag_list : Private {
     my @tags;
     my @message;
 
-    my @tag_aux = $c->model('DB::Tag')->all;
+    my @tag_aux = $c->model('DB::TTag')->all;
 
     foreach (@tag_aux) {
         @tag = {
@@ -69,7 +69,7 @@ sub tag_list : Private {
 sub get_tag : Private {
     my ( $self, $c, $id ) = @_;
     my @message;
-    my $tag = $c->model('DB::Tag')->find( { id => $id } );
+    my $tag = $c->model('DB::TTag')->find( { id => $id } );
 
     if ( !$tag ) {
         @message = { message => "We can't find what you are looking for." };
@@ -80,15 +80,15 @@ sub get_tag : Private {
     }
     else {
         my @resource_tag
-            = $c->model('DB::ResourceTag')->search( { tag_id => $id } );
+            = $c->model('DB::TResourceTag')->search( { tag_id => $id } );
 
         my @resources;
         my $resource_aux;
         my @resource;
 
         foreach (@resource_tag) {
-            $resource_aux = $c->model('DB::Resources')
-                ->find( { id => $_->resource_id->id } );
+            $resource_aux = $c->model('DB::TResource')
+                ->find( { id => $_->resource_id } );
             @resource = $resource_aux->get_resources;
             push( @resources, @resource );
         }
@@ -115,18 +115,20 @@ sub default_POST {
     $c->log->debug( 'Mètode: ' . $req->method );
     $c->log->debug("El POST funciona");
 
-    my $id = $req->parameters->{id};
+    my $id   = $req->parameters->{id};
     my $desc = $req->parameters->{description};
 
     $c->visit( '/check/check_name', [$id] );
     $c->visit( '/check/check_desc', [$desc] );
 
-    my $tag_exist = $c->model('DB::Tag')->find( { id => $id } );
+    my $tag_exist = $c->model('DB::TTag')->find( { id => $id } );
 
     if ( !$tag_exist ) {    #Creation of the new tag if it not exists
-        my $new_tag = $c->model('DB::Tag')->find_or_new();
+        my $new_tag = $c->model('DB::TTag')->find_or_new();
 
-        if ( ( $c->stash->{name_ok} and $c->stash->{desc_ok} ) != 0 and length($id)>1 ) {
+        if ( ( $c->stash->{name_ok} and $c->stash->{desc_ok} ) != 0
+            and length($id) > 1 )
+        {
             $new_tag->id($id);
             $new_tag->description($desc);
             $new_tag->insert;
@@ -159,7 +161,7 @@ sub default_POST {
             $c->stash->{template} = 'tag/get_tag.tt';
             $c->response->content_type('text/html');
             $c->stash->{error}
-            = 'There\'s a problem with the id of the tag or the description is too long';
+                = 'There\'s a problem with the id of the tag or the description is too long';
             $c->response->status(400);
         }
 
@@ -186,16 +188,19 @@ sub default_PUT {
     $c->log->debug( 'Mètode: ' . $req->method );
     $c->log->debug("El PUT funciona");
 
-    my $desc = $req->parameters->{description} || $req->{headers}->{description};
+    my $desc = $req->parameters->{description}
+        || $req->{headers}->{description};
 
-    my $tag = $c->model('DB::Tag')->find( { id => $id } );
+    my $tag = $c->model('DB::TTag')->find( { id => $id } );
 
     $c->visit( '/check/check_name', [$id] );
     $c->visit( '/check/check_desc', [$desc] );
 
     $c->log->debug( "Desc OK? " . $c->stash->{desc_ok} );
     if ($tag) {
-      if ( ( $c->stash->{name_ok} and $c->stash->{desc_ok} ) != 0 and length($id)>1) {
+        if ( ( $c->stash->{name_ok} and $c->stash->{desc_ok} ) != 0
+            and length($id) > 1 )
+        {
             $tag->id($id);
             $tag->description($desc);
             $tag->insert_or_update;
@@ -213,7 +218,7 @@ sub default_PUT {
         else {
             my @message
                 = { message =>
-                'There\'s a problem with the id of the tag or the description is too long.'
+                    'There\'s a problem with the id of the tag or the description is too long.'
                 };
 
             my $new_tag = {
@@ -226,15 +231,13 @@ sub default_PUT {
             $c->stash->{template} = 'tag/get_tag.tt';
             $c->response->content_type('text/html');
             $c->stash->{error}
-            = 'There\'s problem with the id of the tag or the description is too long.';
+                = 'There\'s problem with the id of the tag or the description is too long.';
             $c->response->status(400);
 
         }
     }
     else {
-        @message = { 
-	  message => "We can't find what you are looking for." 
-	};
+        @message = { message => "We can't find what you are looking for." };
 
         $c->stash->{content}  = \@message;
         $c->stash->{template} = 'old_not_found.tt';
@@ -250,9 +253,9 @@ sub default_DELETE {
     $c->log->debug( 'Mètode: ' . $req->method );
     $c->log->debug("El DELETE funciona");
 
-    my $tag_aux = $c->model('DB::Tag')->find( { id => $id } );
+    my $tag_aux = $c->model('DB::TTag')->find( { id => $id } );
     my @resource_tag
-        = $c->model('DB::ResourceTag')->search( { tag_id => $id } );
+        = $c->model('DB::TResourceTag')->search( { tag_id => $id } );
 
     if ($tag_aux) {
         $tag_aux->delete;

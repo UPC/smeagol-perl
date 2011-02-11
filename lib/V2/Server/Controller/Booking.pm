@@ -819,7 +819,12 @@ sub ical : Private {
   my $filename = "agenda_resource_".$c->stash->{id_resource}.".ics";
   
   my $calendar = Data::ICal->new();
-   
+  
+  $calendar->add_property(
+	 prodid => "//UPC//Smeagol Server//EN");
+  
+  $calendar->add_property( version => "2.0" );
+
   my @agenda_aux = $c->model('DB::TBooking')->search({id_resource => $c->stash->{id_resource}});
 
   my @genda;
@@ -1016,7 +1021,6 @@ $c->stash->{id_event}});
   }
   
   $c->res->content_type("text/calendar");
-  $c->log->debug("Fitxer: ".$calendar->as_string);
   $c->res->header(
     'Content-Disposition' => qq(inline; filename=$filename) );
   

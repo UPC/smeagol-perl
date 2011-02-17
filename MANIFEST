@@ -2,6 +2,7 @@ AUTHORS
 bin/smeagol-client
 bin/smeagol-server
 bin/smeagol-shell
+BUGS
 Changes
 COPYING
 db.sql
@@ -49,6 +50,7 @@ lib/V2/Server.pm
 lib/V2/Server/Controller/Booking.pm
 lib/V2/Server/Controller/Check.pm
 lib/V2/Server/Controller/Event.pm
+lib/V2/Server/Controller/Exception.pm
 lib/V2/Server/Controller/Resource.pm
 lib/V2/Server/Controller/ResourceTag.pm
 lib/V2/Server/Controller/Root.pm
@@ -63,6 +65,13 @@ lib/V2/Server/Schema/Result/Resources.pm
 lib/V2/Server/Schema/Result/ResourceTag.pm
 lib/V2/Server/Schema/Result/Tag.pm
 lib/V2/Server/Schema/Result/TagEvent.pm
+lib/V2/Server/Schema/Result/TBooking.pm
+lib/V2/Server/Schema/Result/TEvent.pm
+lib/V2/Server/Schema/Result/TException.pm
+lib/V2/Server/Schema/Result/TResource.pm
+lib/V2/Server/Schema/Result/TResourceTag.pm
+lib/V2/Server/Schema/Result/TTag.pm
+lib/V2/Server/Schema/Result/TTagEvent.pm
 lib/V2/Server/View/HTML.pm
 lib/V2/Server/View/JSON.pm
 lib/V2/Server/View/TT.pm
@@ -98,6 +107,9 @@ root/templates/booking/get_list.tt
 root/templates/event/delete_ok.tt
 root/templates/event/get_event.tt
 root/templates/event/get_list.tt
+root/templates/exception/delete_ok.tt
+root/templates/exception/get_exception.tt
+root/templates/exception/get_list.tt
 root/templates/fail.tt
 root/templates/index.tt
 root/templates/not_found.tt
@@ -144,6 +156,7 @@ xt/03podcoverage.t
 xt/booking_POST.t
 xt/controller_Booking.t
 xt/controller_Event.t
+xt/controller_Exception.t
 xt/controller_Resource.t
 xt/controller_ResourceTag.t
 xt/controller_Tag.t

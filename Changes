@@ -1,5 +1,9 @@
 Històric de revisions del projecte smeagol.
 
+2.01   Thu Feb 17 23:44:32 CET 2011
+       - millores en el suport d'ical
+       - restriccions en la durada de les recurrències per evitar solapaments
+
 2.00   Fri Jan 21 01:53:50 CET 2011
        - versió alpha de la nova API v2
        - nou backend del servidor amb catalyst i sqlite

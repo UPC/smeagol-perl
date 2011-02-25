@@ -40,7 +40,7 @@ sub index : Path : Args(0) {
         version     => $version
     };
     $c->stash->{content} = \@message;
-       
+
 }
 
 sub default : Private {

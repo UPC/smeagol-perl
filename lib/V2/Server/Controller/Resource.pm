@@ -263,7 +263,7 @@ sub default_PUT {
             $c->stash->{error}
                 = "Error: Check the info and description of the resource";
             $c->response->content_type('text/html');
-            $c->stash->{template} = 'resource/get_list';
+            $c->stash->{template} = 'resource/get_list.tt';
         }
     }
     else {

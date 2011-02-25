@@ -172,7 +172,7 @@ sub default_POST {
         $c->response->status(400);
         $c->stash->{error}
             = "Error: Check the info and description of the event";
-        $c->stash->{template} = 'event/get_list';
+        $c->stash->{template} = 'event/get_list.tt';
     }
 }
 
@@ -265,7 +265,7 @@ sub default_PUT {
             $c->response->status(400);
             $c->stash->{error}
                 = "Error: Check the info and description of the event";
-            $c->stash->{template} = 'event/get_list';
+            $c->stash->{template} = 'event/get_list.tt';
 
         }
     }

@@ -112,9 +112,6 @@ sub default_POST {
     my $req = $c->request;
     my @new_tag;
 
-    $c->log->debug( 'Mètode: ' . $req->method );
-    $c->log->debug("El POST funciona");
-
     my $id   = $req->parameters->{id};
     my $desc = $req->parameters->{description};
 
@@ -156,7 +153,7 @@ sub default_POST {
                 description => $desc
             };
 
-            $c->stash->{content}  = @message;
+            $c->stash->{content}  = \@message;
             $c->stash->{tag}      = $new_tag;
             $c->stash->{template} = 'tag/get_tag.tt';
             $c->response->content_type('text/html');

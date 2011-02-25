@@ -3,9 +3,7 @@ use warnings;
 
 use Test::More;
 use Data::Dumper;
-use HTTP::Request;
-use HTTP::Request::Common;
-require LWP::UserAgent;
+use HTTP::Request::Common qw/GET POST PUT DELETE/;
 use JSON::Any;
 use DateTime;
 use DateTime::Duration;
@@ -20,7 +18,7 @@ ok( my $response = request GET '/exception',
     HTTP::Headers->new( Accept => 'application/json' )
 );
 
-diag "Llista de exceptions: " . $response->content;
+is( $response->headers->{status}, '200', 'Response status is 200: OK');
 
 diag '###################################';
 diag '##Requesting exceptions one by one###';
@@ -33,8 +31,7 @@ my $id;
 foreach (@exception) {
     $id = $_->{id};
     ok( $response = request GET '/exception/' . $id, [] );
-    diag 'Exception ' . $id . ' ' . $response->content;
-    diag '###################################';
+    is( $response->headers->{status}, '200', 'Response status is 200: OK');
 }
 diag '\n';
 diag '########################################';
@@ -54,20 +51,18 @@ ok( my $response_post = request POST '/exception',
     ],
     HTTP::Headers->new( Accept => 'application/json' )
 );
-
-diag "Nou exception sense recurrència: " . $response_post->content;
+diag $response_post->content;
+is( $response_post->headers->{status}, '201', 'Response status is 201: Created');
 
 ok( $exception_aux = $j->jsonToObj( $response_post->content ) );
 
 ok( $exception_aux->{dtstart} eq $dtstart, "DTSTART correct" );
 ok( $exception_aux->{dtend}   eq $dtend,   "DTEND correct" );
 
-my $ua_del      = LWP::UserAgent->new;
-my $request_del = HTTP::Request->new(
-    DELETE => 'http://localhost:3000/exception/' . $exception_aux->{id} );
-$request_del->header( Accept => 'application/json' );
-
-ok( $ua_del->request($request_del) );
+my $request_DELETE = DELETE( 'exception/'.$exception_aux->{id});
+$request_DELETE->header( Accept => 'application/json' );
+ok(my $response_DELETE = request($request_DELETE), 'Delete request');
+is( $response_DELETE->headers->{status}, '200', 'Response status is 200: OK');
 
 diag '\n';
 diag '###########################################';
@@ -88,13 +83,10 @@ ok( $response_post = request POST '/exception',
 diag "Exception with daily recurrence: " . $response_post->content;
 
 ok( $exception_aux = $j->jsonToObj( $response_post->content ) );
-$ua_del      = LWP::UserAgent->new;
-$request_del = HTTP::Request->new(
-    DELETE => 'http://localhost:3000/exception/' . $exception_aux->{id} );
-ok( $ua_del->request($request_del) );
-
-ok( my $response = $ua_del->request($request_del) );
-diag "Esborrem exception amb recurrència diaria: " . $response->content;
+$request_DELETE = DELETE( 'exception/'.$exception_aux->{id});
+$request_DELETE->header( Accept => 'application/json' );
+ok($response_DELETE = request($request_DELETE), 'Delete request');
+is( $response_DELETE->headers->{status}, '200', 'Response status is 200: OK');
 
 diag '\n';
 diag '############################################';
@@ -115,10 +107,10 @@ ok( $response_post = request POST '/exception',
 
 diag "Exception with weekly recurrence: " . $response_post->content;
 ok( $exception_aux = $j->jsonToObj( $response_post->content ) );
-$request_del = HTTP::Request->new(
-    DELETE => 'http://localhost:3000/exception/' . $exception_aux->{id} );
-$request_del->header( Accept => 'application/json' );
-ok( $response = $ua_del->request($request_del) );
+$request_DELETE = DELETE( 'exception/'.$exception_aux->{id});
+$request_DELETE->header( Accept => 'application/json' );
+ok($response_DELETE = request($request_DELETE), 'Delete request');
+is( $response_DELETE->headers->{status}, '200', 'Response status is 200: OK');
 
 diag '\n';
 diag '############################################';
@@ -139,10 +131,10 @@ ok( $response_post = request POST '/exception',
 
 diag "Exception with monthly recurrence: " . $response_post->content;
 ok( $exception_aux = $j->jsonToObj( $response_post->content ) );
-$request_del = HTTP::Request->new(
-    DELETE => 'http://localhost:3000/exception/' . $exception_aux->{id} );
-$request_del->header( Accept => 'application/json' );
-ok( $response = $ua_del->request($request_del) );
+$request_DELETE = DELETE( 'exception/'.$exception_aux->{id});
+$request_DELETE->header( Accept => 'application/json' );
+ok($response_DELETE = request($request_DELETE), 'Delete request');
+is( $response_DELETE->headers->{status}, '200', 'Response status is 200: OK');
 
 diag '';
 done_testing();

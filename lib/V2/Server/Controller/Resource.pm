@@ -25,8 +25,8 @@ Catalyst Controller.
 sub begin : Private {
     my ( $self, $c ) = @_;
 
-    $c->stash->{format} = $c->request->headers->{"accept"}
-        || 'application/json';
+    $c->stash->{format} = $c->request->headers->{"accept"} || 'application/json';
+
 }
 
 sub default : Path : ActionClass('REST') {
@@ -179,16 +179,11 @@ sub default_POST {
 sub default_PUT {
     my ( $self, $c, $id ) = @_;
     my $req = $c->request;
-    $c->log->debug( 'Mètode: ' . $req->method );
-    $c->log->debug("El PUT funciona");
 
-    my $descr = $req->parameters->{description}
-        || $req->{headers}->{description};
+    my $descr = $req->parameters->{description};
 
-    $c->log->debug( "Description: " . $descr );
-
-    my $tags_aux = $req->parameters->{tags} || $req->{headers}->{tags};
-    my $info     = $req->parameters->{info} || $req->{headers}->{info};
+    my $tags_aux = $req->parameters->{tags};
+    my $info     = $req->parameters->{info};
     my @tags = split( /,/, $tags_aux );
 
     my $resource = $c->model('DB::TResource')->find( { id => $id } );
@@ -208,7 +203,6 @@ sub default_PUT {
                 ->search( { resource_id => $id } );
 
             foreach (@old_tags) {
-                $c->log->debug( 'Tags vells: ' . $_->tag_id );
                 $_->delete;
             }
 

@@ -4,9 +4,7 @@ use Test::More;
 use JSON::Any;
 
 use Data::Dumper;
-require LWP::UserAgent;
-use HTTP::Request;
-use HTTP::Request::Common;
+use HTTP::Request::Common qw/GET POST PUT DELETE/;
 
 BEGIN { use_ok 'Catalyst::Test', 'V2::Server' }
 BEGIN { use_ok 'V2::Server::Controller::Tag' }

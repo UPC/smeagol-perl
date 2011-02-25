@@ -35,7 +35,12 @@ sub index : Path : Args(0) {
     my ( $self, $c ) = @_;
     $c->response->status(200);
     $c->stash->{template} = 'index.tt';
-    $c->forward( $c->view('HTML') );
+    my @message = {
+        application => $name,
+        version     => $version
+    };
+    $c->stash->{content} = \@message;
+       
 }
 
 sub default : Private {

@@ -305,7 +305,7 @@ sub bookings_event : Private {
     $c->stash->{resources} = \@resources;
 
     $c->response->status(200);
-    $c->stash->{template} = 'booking/get_list';
+    $c->stash->{template} = 'booking/get_list.tt';
 }
 
 =head2 default_POST
@@ -522,7 +522,7 @@ sub default_POST {
             $c->stash->{content} = \@message;
             $c->stash->{error}
                 = "Error: Overlap with another booking or bad parameters";
-            $c->stash->{template} = 'booking/get_list';
+            $c->stash->{template} = 'booking/get_list.tt';
         }
         else {
             $new_booking->insert;
@@ -544,7 +544,7 @@ sub default_POST {
         $c->response->status(400);
         $c->stash->{error}
             = "Error: Check if the event or the resource exist";
-        $c->stash->{template} = 'booking/get_list';
+        $c->stash->{template} = 'booking/get_list.tt';
 
     }
 }
@@ -745,7 +745,7 @@ sub default_PUT {
             $c->stash->{content} = \@message;
             $c->response->status(409);
             $c->stash->{error}    = "Error: Bad request. Check parameters";
-            $c->stash->{template} = 'booking/get_list';
+            $c->stash->{template} = 'booking/get_list.tt';
         }
         else {
             $booking->update;

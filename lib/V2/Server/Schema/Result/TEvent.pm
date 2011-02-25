@@ -113,8 +113,8 @@ sub hash_event {
         id          => $self->id,
         info        => $self->info,
         description => $self->description,
-        starts      => $self->starts,
-        ends        => $self->ends,
+        starts      => $self->starts->iso8601(),
+        ends        => $self->ends->iso8601(),
         tags        => $self->tag_list,
         bookings    => $self->booking_list,
     };

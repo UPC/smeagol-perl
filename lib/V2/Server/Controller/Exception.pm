@@ -554,7 +554,7 @@ sub default_PUT {
             $c->response->status(400);
             $c->stash->{content}  = \@message;
             $c->stash->{error}    = "Error: Bad parameters";
-            $c->stash->{template} = 'exception/get_list';
+            $c->stash->{template} = 'exception/get_list.tt';
         }
         else {
             $exception_aux->update;
@@ -571,7 +571,7 @@ sub default_PUT {
         $c->stash->{content} = \@message;
         $c->response->status(400);
         $c->stash->{error}    = "Error: Check if the booking exist";
-        $c->stash->{template} = 'exception/get_list';
+        $c->stash->{template} = 'exception/get_list.tt';
 
     }
 }

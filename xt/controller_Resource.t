@@ -2,9 +2,7 @@ use strict;
 use warnings;
 use Test::More;
 use Data::Dumper;
-use HTTP::Request;
-use HTTP::Request::Common;
-use LWP::UserAgent;
+use HTTP::Request::Common qw/GET POST PUT DELETE/;
 use JSON::Any;
 
 BEGIN { use_ok 'Catalyst::Test', 'V2::Server' }
@@ -17,7 +15,6 @@ ok( request('/resource')->is_success, 'Request should succeed' );
 
 ok( my $response = request GET '/resource', [] );
 
-diag 'Resource list: ' . $response->content;
 diag '###################################';
 diag '##Requesting resources one by one##';
 diag '###################################';
@@ -60,25 +57,22 @@ $id = $resource_aux->{id};
 
 diag "Last resource created ID: " . $id;
 
-my $ua_put      = LWP::UserAgent->new;
-my $request_put = HTTP::Request->new(
-    PUT => 'http://localhost:3000/resource/' . $id,
+ok( my $response_put = request PUT '/resource/'.$id,
     [   info        => 'Testing resource edition',
         description => ':-P',
         tags        => 'test,edited'
     ]
 );
-diag Dumper($request_put);
-ok( $ua_put->request($request_put) );
+
 
 ok( $response = request GET '/resource/' . $id, [] );
 diag 'Edited Resource ' . $id . ' ' . $response->content;
 
 diag '#########Deleting resource#########';
 diag '###################################';
-my $ua_del = LWP::UserAgent->new;
-my $request_del
-    = HTTP::Request->new( DELETE => 'http://localhost:3000/resource/' . $id );
-ok( $ua_del->request($request_del) );
+my $request_DELETE = DELETE( 'resource/'.$id);
+$request_DELETE->header( Accept => 'application/json' );
+ok(my $response_DELETE = request($request_DELETE), 'Delete request');
+is( $response_DELETE->headers->{status}, '200', 'Response status is 200: OK');
 
 done_testing();

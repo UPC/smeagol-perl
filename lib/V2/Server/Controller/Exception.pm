@@ -187,8 +187,6 @@ sub get_exception : Local {
 sub default_POST {
     my ( $self, $c ) = @_;
     my $req = $c->request;
-    $c->log->debug( 'Mètode: ' . $req->method );
-    $c->log->debug("El POST funciona");
 
     my $id_booking = $req->parameters->{id_booking};
 
@@ -198,9 +196,7 @@ sub default_POST {
 
 #dtstart and dtend are parsed in case that some needed parameters to build the recurrence of the
 #booking aren't provided
-    $c->log->debug("Ara parsejarem dtsart");
     $dtstart = ParseDate($dtstart);
-    $c->log->debug("Ara parsejarem dtend");
     $dtend    = ParseDate($dtend);
     $duration = $dtend - $dtstart;
 
@@ -236,9 +232,9 @@ sub default_POST {
             $new_exception->by_minute($by_minute);
             $new_exception->by_hour($by_hour);
 
-            my $exception = {
+            $exception = {
                 id         => $new_exception->id,
-                id_booking => $new_exception->id_booking,
+                id_booking => $new_exception->id_booking->id,
                 dtstart    => $new_exception->dtstart->iso8601(),
                 dtend      => $new_exception->dtend->iso8601(),
                 until      => $new_exception->until->iso8601(),
@@ -262,9 +258,9 @@ sub default_POST {
             $new_exception->by_hour($by_hour);
             $new_exception->by_day($by_day);
 
-            my $exception = {
+            $exception = {
                 id         => $new_exception->id,
-                id_booking => $new_exception->id_booking,
+                id_booking => $new_exception->id_booking->id,
                 dtstart    => $new_exception->dtstart->iso8601(),
                 dtend      => $new_exception->dtend->iso8601(),
                 until      => $new_exception->until->iso8601(),
@@ -291,9 +287,9 @@ sub default_POST {
             $new_exception->by_month($by_month);
             $new_exception->by_day_month($by_day_month);
 
-            my $exception = {
+            $exception = {
                 id           => $new_exception->id,
-                id_booking   => $new_exception->id_booking,
+                id_booking   => $new_exception->id_booking->id,
                 dtstart      => $new_exception->dtstart->iso8601(),
                 dtend        => $new_exception->dtend->iso8601(),
                 until        => $new_exception->until->iso8601(),
@@ -321,9 +317,9 @@ sub default_POST {
             $new_exception->by_month($by_month);
             $new_exception->by_day_month($by_day_month);
 
-            my $exception = {
+            $exception = {
                 id           => $new_exception->id,
-                id_booking   => $new_exception->id_booking,
+                id_booking   => $new_exception->id_booking->id,
                 dtstart      => $new_exception->dtstart->iso8601(),
                 dtend        => $new_exception->dtend->iso8601(),
                 until        => $new_exception->until->iso8601(),
@@ -344,10 +340,8 @@ sub default_POST {
 
     $c->visit( '/check/check_exception', [] );
     my @message;
-
     my $boo = $c->model('DB::TBooking')
-        ->find( { id => $new_exception->id_booking } );
-    my $boo_ok;
+        ->find( { id => $new_exception->id_booking->id } );
 
     if ($boo) {
         $c->stash->{boo_ok} = 1;
@@ -367,11 +361,11 @@ sub default_POST {
         }
         else {
             $new_exception->insert;
-
-            $c->stash->{content} = $exception;
-            $c->stash->{booking} = $exception;
-            $c->response->status(201);
-            $c->forward( 'get_exception', [ $new_exception->id ] );
+	    $exception->{id} = $new_exception->id;  
+        $c->stash->{content}   = $exception;
+        $c->stash->{exception} = $exception;
+        $c->response->status(201);
+        $c->stash->{template} = 'exception/get_exception.tt';
 
         }
     }

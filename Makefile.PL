@@ -31,6 +31,7 @@ requires 'DBIx::Class::TimeStamp'           => 0;
 requires 'Catalyst::Action::RenderView'     => 0;
 requires 'DateTime::Format::SQLite'         => 0;
 requires 'DateTime::Event::ICal'            => 0;
+requires 'DBD::SQLite'                      => 0;
 
 test_requires 'Test::More'    => 0;
 test_requires 'Data::Compare' => 0;

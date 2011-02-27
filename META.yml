@@ -32,6 +32,7 @@ requires:
   Catalyst::Plugin::Unicode: 0
   Catalyst::View::JSON: 0
   Catalyst::View::TT: 0
+  DBD::SQLite: 0
   DBIx::Class: 0
   DBIx::Class::TimeStamp: 0
   Data::ICal: 0

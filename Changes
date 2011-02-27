@@ -1,5 +1,12 @@
 Històric de revisions del projecte smeagol.
 
+2.02   Sun Feb 27 20:48:52 CET 2011
+       - eliminats missatges de log de Catalyst per defecte (bug #287)
+       - passen els tests extesos (bug #277)
+       - el mètode POST /tag retorna status correcte en cas de parametres no
+         valids (bug #291)
+       - resolt bug en la resolució de plantilles Catalyst  (bug #278)
+
 2.01   Thu Feb 17 23:44:32 CET 2011
        - millores en el suport d'ical
        - restriccions en la durada de les recurrències per evitar solapaments

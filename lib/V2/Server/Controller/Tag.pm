@@ -3,6 +3,8 @@ package V2::Server::Controller::Tag;
 use Moose;
 use namespace::autoclean;
 use Data::Dumper;
+use Encode qw(encode decode); 
+my $enc = 'utf-8';
 
 BEGIN { extends 'Catalyst::Controller::REST' }
 
@@ -69,6 +71,11 @@ sub tag_list : Private {
 sub get_tag : Private {
     my ( $self, $c, $id ) = @_;
     my @message;
+    
+    $id   = decode($enc, $id);
+    $id = lc $id;
+    $id = encode($enc, $id);
+    
     my $tag = $c->model('DB::TTag')->find( { id => $id } );
 
     if ( !$tag ) {
@@ -112,8 +119,16 @@ sub default_POST {
     my $req = $c->request;
     my @new_tag;
 
-    my $id   = $req->parameters->{id};
-    my $desc = $req->parameters->{description};
+=head2
+decode($enc, $str); 
+$text_str = lc $text_str; 
+$text_str = encode($enc, $text_str);
+=cut
+    
+    my $id   = decode($enc, $req->parameters->{id});
+    $id = lc $id;
+    $id = encode($enc, $id);
+    my $desc = $req->parameters->{description} || $req->{headers}->{description};
 
     $c->visit( '/check/check_name', [$id] );
     $c->visit( '/check/check_desc', [$desc] );
@@ -182,12 +197,14 @@ sub default_PUT {
     my ( $self, $c, $res, $id ) = @_;
     my @message;
     my $req = $c->request;
-    $c->log->debug( 'Mètode: ' . $req->method );
-    $c->log->debug("El PUT funciona");
+
+    $id   = decode($enc, $id);
+    $id = lc $id;
+    $id = encode($enc, $id);
 
     my $desc = $req->parameters->{description}
         || $req->{headers}->{description};
-
+	
     my $tag = $c->model('DB::TTag')->find( { id => $id } );
 
     $c->visit( '/check/check_name', [$id] );
@@ -244,6 +261,11 @@ sub default_PUT {
 
 sub default_DELETE {
     my ( $self, $c, $res, $id ) = @_;
+    
+    $id   = decode($enc, $id);
+    $id = lc $id;
+    $id = encode($enc, $id);
+    
     my $req = $c->request;
     my @message;
 

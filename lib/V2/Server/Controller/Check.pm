@@ -20,7 +20,7 @@ the correct length range.
 sub check_name : Local {
     my ( $self, $c, $name ) = @_;
 
-    if ( length($name) < 64 && length($name) > 1 ) {
+    if ( length($name) < 64 && length($name) > 3 ) {
         $c->stash->{name_ok} = 1;
     }
     else {

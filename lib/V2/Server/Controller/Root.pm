@@ -10,7 +10,8 @@ use parent 'Catalyst::Controller';
 __PACKAGE__->config->{namespace} = '';
 
 my $name    = 'Smeagol Server';
-my $version = '2.0';
+
+my $VERSION = $V2::Server::VERSION;
 
 =head1 NAME
 
@@ -37,7 +38,7 @@ sub index : Path : Args(0) {
     $c->stash->{template} = 'index.tt';
     my @message = {
         application => $name,
-        version     => $version
+        version     => $VERSION
     };
     $c->stash->{content} = \@message;
 
@@ -57,7 +58,7 @@ sub version : Local {
 
     my @message = {
         application => $name,
-        version     => $version
+        version     => $VERSION
     };
     $c->stash->{content} = \@message;
 }
@@ -66,6 +67,7 @@ sub end : Private {
     my ( $self, $c ) = @_;
 
     if ( $c->stash->{format} ne "application/json" ) {
+	$c->stash->{VERSION} = $VERSION;
         $c->forward( $c->view('HTML') );
     }
     else {

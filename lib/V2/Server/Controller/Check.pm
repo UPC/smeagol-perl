@@ -32,7 +32,10 @@ sub check_name : Local {
 sub check_desc : Local {
     my ( $self, $c, $desc ) = @_;
 
-    if ( length($desc) < 128 ) {
+    $desc =~ s/\t//g; #All tabs substitued by a space 
+    $desc =~ s/\n/ /g; #All new lines substitued by a space
+
+    if ( length($desc) < 128 && $desc =~ m/\S+[A-Z]|[a-z]/) {
         $c->log->debug("Descr OK");
         $c->stash->{desc_ok} = 1;
     }

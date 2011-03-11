@@ -1,3 +1,4 @@
+.directory
 AUTHORS
 bin/smeagol-client
 bin/smeagol-server
@@ -21,15 +22,11 @@ inc/Module/AutoInstall.pm
 inc/Module/Install.pm
 inc/Module/Install/AutoInstall.pm
 inc/Module/Install/Base.pm
-inc/Module/Install/Can.pm
 inc/Module/Install/Catalyst.pm
-inc/Module/Install/Fetch.pm
 inc/Module/Install/Include.pm
 inc/Module/Install/Makefile.pm
 inc/Module/Install/Metadata.pm
 inc/Module/Install/Scripts.pm
-inc/Module/Install/Win32.pm
-inc/Module/Install/WriteAll.pm
 lib/Smeagol.pm
 lib/Smeagol/Agenda.pm
 lib/Smeagol/Agenda/ICal.pm
@@ -46,6 +43,7 @@ lib/Smeagol/Tag.pm
 lib/Smeagol/TagSet.pm
 lib/Smeagol/XML.pm
 lib/V2/Server.pm
+lib/V2/Server.pm~
 lib/V2/Server/Controller/Booking.pm
 lib/V2/Server/Controller/Check.pm
 lib/V2/Server/Controller/Event.pm
@@ -72,6 +70,7 @@ Makefile.PL
 MANIFEST			This list of files
 MANIFEST.SKIP
 META.yml
+pm_to_blib
 README
 root/favicon.ico
 root/lib/config/col
@@ -152,5 +151,3 @@ xt/controller_Resource.t
 xt/controller_ResourceTag.t
 xt/controller_Tag.t
 xt/controller_TagEvent.t
-xt/MyMechanize/Mechanize(perl5_Test_WWW).pm
-xt/MyMechanize/Mechanize(perl5_WWW).pm

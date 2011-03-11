@@ -11,7 +11,7 @@
 
 <h3>Create tag</h3>
 <form action="" method="post">
-<p><label>ID: <input name="name" placeholder="Tag's' identifier"></label></p>
+<p><label>ID: <input name="id" placeholder="Tag's' identifier"></label></p>
 <p><label><textarea name="description" placeholder="Tag\'s description"></textarea></label></p>
 <p><input type=submit value="New tag!"></p>
 </form>

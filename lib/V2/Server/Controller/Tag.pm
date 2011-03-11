@@ -131,7 +131,7 @@ $text_str = encode($enc, $text_str);
     my $desc = $req->parameters->{description} || $req->{headers}->{description};
 
     $c->visit( '/check/check_name', [$id] );
-    $c->visit( '/check/check_desc', [$desc] );
+    $c->visit( '/check/check_desc_tag', [$desc] );
 
     my $tag_exist = $c->model('DB::TTag')->find( { id => $id } );
 

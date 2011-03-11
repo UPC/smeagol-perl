@@ -42,6 +42,19 @@ sub check_desc : Local {
     }
 }
 
+sub check_desc_tag : Local {
+    my ( $self, $c, $desc ) = @_;
+
+    if ( length($desc) < 256 ) {
+        $c->log->debug("Descr OK");
+        $c->stash->{desc_ok} = 1;
+    }
+    else {
+        $c->log->debug("Descr KO");
+        $c->stash->{desc_ok} = 0;
+    }
+}
+
 sub check_info : Local {
     my ( $self, $c, $info ) = @_;
 

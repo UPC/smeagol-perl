@@ -3,7 +3,7 @@ package V2::Server::Controller::Resource;
 use Moose;
 use namespace::autoclean;
 use Data::Dumper;
-
+my $VERSION = $V2::Server::VERSION;
 BEGIN { extends 'Catalyst::Controller::REST' }
 
 =head1 NAME
@@ -326,6 +326,7 @@ sub end : Private {
     my ( $self, $c ) = @_;
 
     if ( $c->stash->{format} ne "application/json" ) {
+	$c->stash->{VERSION} = $VERSION;
         $c->forward( $c->view('HTML') );
     }
     else {

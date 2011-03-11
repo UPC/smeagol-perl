@@ -13,6 +13,7 @@ use Date::ICal;
 use Data::ICal;
 use Data::ICal::Entry::Event;
 
+my $VERSION = $V2::Server::VERSION;
 BEGIN { extends 'Catalyst::Controller::REST' }
 
 =head1 NAME
@@ -828,6 +829,7 @@ sub end : Private {
     else {
         if ( $c->stash->{format} ne "application/json" ) {
             $c->res->content_type("text/html");
+            $c->stash->{VERSION} = $VERSION;
             $c->forward( $c->view('HTML') );
         }
         else {

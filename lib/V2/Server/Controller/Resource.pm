@@ -105,6 +105,10 @@ sub default_POST {
 
 # If all is correct $c->stash->{event_ok} should be 1, otherwise it will be 0.
 
+    my @resource_exist = $c->model('DB::TResource')->search({description => $descr});
+
+    if (@resource_exist > 0) {$c->stash->{resource_ok} = 0; $c->stash->{conflict} = 1;}
+
     if ( $c->stash->{resource_ok} ) {
 
         my $new_resource = $c->model('DB::TResource')->find_or_new();
@@ -165,15 +169,24 @@ sub default_POST {
         $c->stash->{template} = 'resource/get_resource.tt';
     }
     else {
-        my @message = { message =>
-                "Error: Check the info and description of the resource", };
-        $c->stash->{content} = \@message;
-        $c->response->status(400);
-        $c->stash->{error}
-            = "Error: Check the info and description of the resource";
-        $c->response->content_type('text/html');
-        $c->stash->{template} = 'resource/get_list.tt';
-    }
+	if ($c->stash->{conflict}) {
+	  my @message = { message =>
+		  "Error: A resource with the same description already exist", };
+	  $c->stash->{content} = \@message;
+	  $c->response->status(409);
+	  $c->stash->{error}
+	      = "Error: A resource with the same description already exist";
+	  $c->response->content_type('text/html');
+	  $c->stash->{template} = 'resource/get_list.tt';
+	}else {        
+	  my @message = { message =>
+	  "Error: Check the info and description of the resource", };
+	  $c->stash->{content} = \@message;
+	  $c->response->status(400);
+	  $c->stash->{error} = "Error: Check the info and description of the resource";
+	  $c->response->content_type('text/html');
+	  $c->stash->{template} = 'resource/get_list.tt';}
+         }
 }
 
 sub default_PUT {

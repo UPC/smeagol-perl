@@ -262,7 +262,10 @@ sub check_exception : Local {
     my @bymonthday;
 
     my $current_set;
-    $current_set = $c->forward('build_recur', [$new_exception] );
+    
+    $c->stash->{set} = $new_exception;
+    
+    $current_set = $c->forward('build_recur', [] );
 
     if ( $current_set->min ) {
         $c->stash->{empty} = 0;

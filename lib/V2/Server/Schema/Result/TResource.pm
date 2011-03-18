@@ -8,7 +8,7 @@ use warnings;
 
 use base 'DBIx::Class::Core';
 
-__PACKAGE__->load_components("InflateColumn::DateTime", "InflateColumn");
+__PACKAGE__->load_components( "InflateColumn::DateTime", "InflateColumn" );
 
 =head1 NAME
 
@@ -41,12 +41,12 @@ __PACKAGE__->table("t_resource");
 =cut
 
 __PACKAGE__->add_columns(
-  "id",
-  { data_type => "integer", is_auto_increment => 1, is_nullable => 1 },
-  "description",
-  { data_type => "text", is_nullable => 1, size => 128 },
-  "info",
-  { data_type => "text", is_nullable => 1, size => 256 },
+    "id",
+    { data_type => "integer", is_auto_increment => 1, is_nullable => 1 },
+    "description",
+    { data_type => "text", is_nullable => 1, size => 128 },
+    "info",
+    { data_type => "text", is_nullable => 1, size => 256 },
 );
 __PACKAGE__->set_primary_key("id");
 
@@ -61,21 +61,20 @@ Related object: L<V2::Server::Schema::Result::TBooking>
 =cut
 
 __PACKAGE__->has_many(
-  "t_bookings",
-  "V2::Server::Schema::Result::TBooking",
-  { "foreign.id_resource" => "self.id" },
-  { cascade_copy => 0, cascade_delete => 0 },
+    "t_bookings",
+    "V2::Server::Schema::Result::TBooking",
+    { "foreign.id_resource" => "self.id" },
+    { cascade_copy          => 0, cascade_delete => 0 },
 );
-
 
 # Created by DBIx::Class::Schema::Loader v0.07000 @ 2011-02-10 13:00:38
 # DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:ONo+krYW8mb79nvB14G85Q
 
 __PACKAGE__->has_many(
-  "resource_tags",
-  "V2::Server::Schema::Result::TResourceTag",
-  { "foreign.resource_id" => "self.id" },
-  { cascade_copy => 0, cascade_delete => 0 },
+    "resource_tags",
+    "V2::Server::Schema::Result::TResourceTag",
+    { "foreign.resource_id" => "self.id" },
+    { cascade_copy          => 0, cascade_delete => 0 },
 );
 
 sub get_resources {

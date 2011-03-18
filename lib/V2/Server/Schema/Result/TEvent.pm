@@ -8,7 +8,7 @@ use warnings;
 
 use base 'DBIx::Class::Core';
 
-__PACKAGE__->load_components("InflateColumn::DateTime", "InflateColumn");
+__PACKAGE__->load_components( "InflateColumn::DateTime", "InflateColumn" );
 
 =head1 NAME
 
@@ -51,16 +51,16 @@ __PACKAGE__->table("t_event");
 =cut
 
 __PACKAGE__->add_columns(
-  "id",
-  { data_type => "integer", is_auto_increment => 1, is_nullable => 1 },
-  "info",
-  { data_type => "text", is_nullable => 1, size => 256 },
-  "description",
-  { data_type => "text", is_nullable => 1, size => 128 },
-  "starts",
-  { data_type => "datetime", is_nullable => 1 },
-  "ends",
-  { data_type => "datetime", is_nullable => 1 },
+    "id",
+    { data_type => "integer", is_auto_increment => 1, is_nullable => 1 },
+    "info",
+    { data_type => "text", is_nullable => 1, size => 256 },
+    "description",
+    { data_type => "text", is_nullable => 1, size => 128 },
+    "starts",
+    { data_type => "datetime", is_nullable => 1 },
+    "ends",
+    { data_type => "datetime", is_nullable => 1 },
 );
 __PACKAGE__->set_primary_key("id");
 
@@ -75,10 +75,10 @@ Related object: L<V2::Server::Schema::Result::TTagEvent>
 =cut
 
 __PACKAGE__->has_many(
-  "t_tag_events",
-  "V2::Server::Schema::Result::TTagEvent",
-  { "foreign.id_event" => "self.id" },
-  { cascade_copy => 0, cascade_delete => 0 },
+    "t_tag_events",
+    "V2::Server::Schema::Result::TTagEvent",
+    { "foreign.id_event" => "self.id" },
+    { cascade_copy       => 0, cascade_delete => 0 },
 );
 
 =head2 t_bookings
@@ -90,21 +90,20 @@ Related object: L<V2::Server::Schema::Result::TBooking>
 =cut
 
 __PACKAGE__->has_many(
-  "t_bookings",
-  "V2::Server::Schema::Result::TBooking",
-  { "foreign.id_event" => "self.id" },
-  { cascade_copy => 0, cascade_delete => 0 },
+    "t_bookings",
+    "V2::Server::Schema::Result::TBooking",
+    { "foreign.id_event" => "self.id" },
+    { cascade_copy       => 0, cascade_delete => 0 },
 );
-
 
 # Created by DBIx::Class::Schema::Loader v0.07000 @ 2011-02-10 13:00:38
 # DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:aNC7MABaa/QlI6cH7Xofeg
 
 __PACKAGE__->has_many(
-  "tag_events",
-  "V2::Server::Schema::Result::TTagEvent",
-  { "foreign.id_event" => "self.id" },
-  { cascade_copy => 0, cascade_delete => 0 },
+    "tag_events",
+    "V2::Server::Schema::Result::TTagEvent",
+    { "foreign.id_event" => "self.id" },
+    { cascade_copy       => 0, cascade_delete => 0 },
 );
 
 sub hash_event {
@@ -114,8 +113,8 @@ sub hash_event {
         id          => $self->id,
         info        => $self->info,
         description => $self->description,
-        starts      => $self->starts,
-        ends        => $self->ends,
+        starts      => $self->starts->iso8601(),
+        ends        => $self->ends->iso8601(),
         tags        => $self->tag_list,
         bookings    => $self->booking_list,
     };
@@ -150,5 +149,6 @@ sub booking_list {
 
     return ( \@bookings );
 }
+
 # You can replace this text with custom content, and it will be preserved on regeneration
 1;

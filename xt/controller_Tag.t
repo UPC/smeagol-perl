@@ -4,9 +4,7 @@ use Test::More;
 use JSON::Any;
 
 use Data::Dumper;
-require LWP::UserAgent;
-use HTTP::Request;
-use HTTP::Request::Common;
+use HTTP::Request::Common qw/GET POST PUT DELETE/;
 
 BEGIN { use_ok 'Catalyst::Test', 'V2::Server' }
 BEGIN { use_ok 'V2::Server::Controller::Tag' }
@@ -18,11 +16,10 @@ diag '#############################################';
 diag '###########Requesting tag\'s list ###########';
 diag '#############################################';
 
-
 ok( my $response = request GET '/tag',
-    HTTP::Headers->new(Accept => 'application/json'));
+    HTTP::Headers->new( Accept => 'application/json' ) );
 
-diag "Llista de tags: ".$response->content;
+diag "Llista de tags: " . $response->content;
 
 ok( request('/tag')->is_success, 'Request should succeed' );
 
@@ -30,7 +27,7 @@ diag '#################################################';
 diag '###########Requesting tags one by one ###########';
 diag '#################################################';
 
-ok (my $tag_aux = $j->jsonToObj( $response->content ));
+ok( my $tag_aux = $j->jsonToObj( $response->content ) );
 
 my @tag = @{$tag_aux};
 my $id;
@@ -42,49 +39,39 @@ foreach (@tag) {
     diag '###################################';
 }
 
-
 diag '###################################';
 diag '###########Creating tag ###########';
 diag '###################################';
 
-ok(my $response_post = request POST '/tag',
-    [
-      id => 'test',
-      description => 'Testing porpouses. It can be deleted with no consequences'
-      ],
-    HTTP::Headers->new(Accept => 'application/json'));
+ok( my $response_post = request POST '/tag',
+    [   id => 'TeSt',
+        description =>
+            'Testing porpouses. It can be deleted with no consequences'
+    ],
+    HTTP::Headers->new( Accept => 'application/json' )
+);
 
-diag "Nou tag: ".$response_post->content;
+diag "Nou tag: " . $response_post->content;
 
-ok ( $tag_aux = $j->jsonToObj( $response_post->content));
+ok( $tag_aux = $j->jsonToObj( $response_post->content ) );
 
 diag '###################################';
 diag '###########Editing tag ###########';
 diag '###################################';
+my $request_PUT = PUT('/tag/test', []);
+$request_PUT->header( Accept => 'application/json' );
+$request_PUT->header( description => 'Description edited' );
 
-my $ua_put      = LWP::UserAgent->new;
-my $request_put = HTTP::Request->new(
-    PUT => 'http://localhost:3000/tag/test',
-    [ 
-      description => 'Edited'
-    ]
-);
+ok(my $response_PUT = request($request_PUT), 'Delete request');
 
-$request_put->header(Accept => 'application/json');
-
-diag "PUT request: ".Dumper($request_put)."\n";
-
-my $response_put;
-ok($response_put = $ua_put->request($request_put) );
-diag "Edited tag: ".$response_put->content;
+diag "Edited tag: " . $response_PUT->content;
 
 diag '###################################';
 diag '###########Deleting tag ###########';
 diag '###################################';
-my $ua_del      = LWP::UserAgent->new;
-my $request_del = HTTP::Request->new( DELETE => 'http://localhost:3000/tag/test');
-$request_del->header(Accept => 'application/json');
-ok(my $response_del = $ua_del->request($request_del) );
-diag $response_del->content;
+my $request_DELETE = DELETE( 'tag/test');
+$request_DELETE->header( Accept => 'application/json' );
+ok(my $response_DELETE = request($request_DELETE), 'Delete request');
+is( $response_DELETE->headers->{status}, '200', 'Response status is 200: OK');
 
 done_testing();

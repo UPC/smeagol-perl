@@ -9,8 +9,9 @@ use parent 'Catalyst::Controller';
 #
 __PACKAGE__->config->{namespace} = '';
 
-my $name = 'Smeagol Server';
-my $version = '2.0';
+my $name    = 'Smeagol Server';
+
+my $VERSION = $V2::Server::VERSION;
 
 =head1 NAME
 
@@ -35,7 +36,12 @@ sub index : Path : Args(0) {
     my ( $self, $c ) = @_;
     $c->response->status(200);
     $c->stash->{template} = 'index.tt';
-    $c->forward( $c->view('HTML') );
+    my @message = {
+        application => $name,
+        version     => $VERSION
+    };
+    $c->stash->{content} = \@message;
+
 }
 
 sub default : Private {
@@ -46,21 +52,22 @@ sub default : Private {
 }
 
 sub version : Local {
-  my ( $self, $c ) = @_;
+    my ( $self, $c ) = @_;
 
-  $c->response->status(200);
-  
-  my @message = {
-    application =>$name,
-    version => $version
-  };
-  $c->stash->{content} = \@message;
+    $c->response->status(200);
+
+    my @message = {
+        application => $name,
+        version     => $VERSION
+    };
+    $c->stash->{content} = \@message;
 }
 
 sub end : Private {
     my ( $self, $c ) = @_;
 
     if ( $c->stash->{format} ne "application/json" ) {
+	$c->stash->{VERSION} = $VERSION;
         $c->forward( $c->view('HTML') );
     }
     else {

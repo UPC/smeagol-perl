@@ -8,7 +8,7 @@ use base 'Catalyst::View::TT';
 __PACKAGE__->config(
     TEMPLATE_EXTENSION => '.tt',
     INCLUDE_PATH       => [ V2::Server->path_to( 'root', 'templates' ), ],
-    CONTENT_TYPE => 'text/html',
+    CONTENT_TYPE       => 'text/html',
 );
 
 =head1 NAME

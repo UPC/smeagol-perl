@@ -8,7 +8,7 @@ use warnings;
 
 use base 'DBIx::Class::Core';
 
-__PACKAGE__->load_components("InflateColumn::DateTime", "InflateColumn");
+__PACKAGE__->load_components( "InflateColumn::DateTime", "InflateColumn" );
 
 =head1 NAME
 
@@ -35,10 +35,8 @@ __PACKAGE__->table("t_tag");
 =cut
 
 __PACKAGE__->add_columns(
-  "id",
-  { data_type => "text", is_nullable => 1, size => 64 },
-  "description",
-  { data_type => "text", is_nullable => 1, size => 256 },
+    "id",          { data_type => "text", is_nullable => 1, size => 64 },
+    "description", { data_type => "text", is_nullable => 1, size => 256 },
 );
 __PACKAGE__->set_primary_key("id");
 
@@ -53,16 +51,14 @@ Related object: L<V2::Server::Schema::Result::TTagEvent>
 =cut
 
 __PACKAGE__->has_many(
-  "t_tag_events",
-  "V2::Server::Schema::Result::TTagEvent",
-  { "foreign.id_tag" => "self.id" },
-  { cascade_copy => 0, cascade_delete => 0 },
+    "t_tag_events",
+    "V2::Server::Schema::Result::TTagEvent",
+    { "foreign.id_tag" => "self.id" },
+    { cascade_copy     => 0, cascade_delete => 0 },
 );
-
 
 # Created by DBIx::Class::Schema::Loader v0.07000 @ 2011-02-10 13:00:38
 # DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:QZV1/yQTHg1xNhBI5dJh9A
-
 
 # You can replace this text with custom content, and it will be preserved on regeneration
 1;

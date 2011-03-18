@@ -3,7 +3,9 @@ package V2::Server::Controller::Tag;
 use Moose;
 use namespace::autoclean;
 use Data::Dumper;
-
+use Encode qw(encode decode); 
+my $enc = 'utf-8';
+my $VERSION = $V2::Server::VERSION;
 BEGIN { extends 'Catalyst::Controller::REST' }
 
 =head1 NAME
@@ -69,6 +71,11 @@ sub tag_list : Private {
 sub get_tag : Private {
     my ( $self, $c, $id ) = @_;
     my @message;
+    
+    $id   = decode($enc, $id);
+    $id = lc $id;
+    $id = encode($enc, $id);
+    
     my $tag = $c->model('DB::TTag')->find( { id => $id } );
 
     if ( !$tag ) {
@@ -112,21 +119,28 @@ sub default_POST {
     my $req = $c->request;
     my @new_tag;
 
-    $c->log->debug( 'Mètode: ' . $req->method );
-    $c->log->debug("El POST funciona");
-
-    my $id = $req->parameters->{id};
-    my $desc = $req->parameters->{description};
+=head2
+decode($enc, $str); 
+$text_str = lc $text_str; 
+$text_str = encode($enc, $text_str);
+=cut
+    
+    my $id   = decode($enc, $req->parameters->{id});
+    $id = lc $id;
+    $id = encode($enc, $id);
+    my $desc = $req->parameters->{description} || $req->{headers}->{description};
 
     $c->visit( '/check/check_name', [$id] );
-    $c->visit( '/check/check_desc', [$desc] );
+    $c->visit( '/check/check_desc_tag', [$desc] );
 
     my $tag_exist = $c->model('DB::TTag')->find( { id => $id } );
 
     if ( !$tag_exist ) {    #Creation of the new tag if it not exists
         my $new_tag = $c->model('DB::TTag')->find_or_new();
 
-        if ( ( $c->stash->{name_ok} and $c->stash->{desc_ok} ) != 0 and length($id)>1 ) {
+        if ( ( $c->stash->{name_ok} and $c->stash->{desc_ok} ) != 0
+            and length($id) > 1 )
+        {
             $new_tag->id($id);
             $new_tag->description($desc);
             $new_tag->insert;
@@ -154,12 +168,12 @@ sub default_POST {
                 description => $desc
             };
 
-            $c->stash->{content}  = @message;
+            $c->stash->{content}  = \@message;
             $c->stash->{tag}      = $new_tag;
             $c->stash->{template} = 'tag/get_tag.tt';
             $c->response->content_type('text/html');
             $c->stash->{error}
-            = 'There\'s a problem with the id of the tag or the description is too long';
+                = 'There\'s a problem with the id of the tag or the description is too long';
             $c->response->status(400);
         }
 
@@ -183,11 +197,14 @@ sub default_PUT {
     my ( $self, $c, $res, $id ) = @_;
     my @message;
     my $req = $c->request;
-    $c->log->debug( 'Mètode: ' . $req->method );
-    $c->log->debug("El PUT funciona");
 
-    my $desc = $req->parameters->{description} || $req->{headers}->{description};
+    $id   = decode($enc, $id);
+    $id = lc $id;
+    $id = encode($enc, $id);
 
+    my $desc = $req->parameters->{description}
+        || $req->{headers}->{description};
+	
     my $tag = $c->model('DB::TTag')->find( { id => $id } );
 
     $c->visit( '/check/check_name', [$id] );
@@ -195,7 +212,9 @@ sub default_PUT {
 
     $c->log->debug( "Desc OK? " . $c->stash->{desc_ok} );
     if ($tag) {
-      if ( ( $c->stash->{name_ok} and $c->stash->{desc_ok} ) != 0 and length($id)>1) {
+        if ( ( $c->stash->{name_ok} and $c->stash->{desc_ok} ) != 0
+            and length($id) > 1 )
+        {
             $tag->id($id);
             $tag->description($desc);
             $tag->insert_or_update;
@@ -213,7 +232,7 @@ sub default_PUT {
         else {
             my @message
                 = { message =>
-                'There\'s a problem with the id of the tag or the description is too long.'
+                    'There\'s a problem with the id of the tag or the description is too long.'
                 };
 
             my $new_tag = {
@@ -226,15 +245,13 @@ sub default_PUT {
             $c->stash->{template} = 'tag/get_tag.tt';
             $c->response->content_type('text/html');
             $c->stash->{error}
-            = 'There\'s problem with the id of the tag or the description is too long.';
+                = 'There\'s problem with the id of the tag or the description is too long.';
             $c->response->status(400);
 
         }
     }
     else {
-        @message = { 
-	  message => "We can't find what you are looking for." 
-	};
+        @message = { message => "We can't find what you are looking for." };
 
         $c->stash->{content}  = \@message;
         $c->stash->{template} = 'old_not_found.tt';
@@ -244,6 +261,11 @@ sub default_PUT {
 
 sub default_DELETE {
     my ( $self, $c, $res, $id ) = @_;
+    
+    $id   = decode($enc, $id);
+    $id = lc $id;
+    $id = encode($enc, $id);
+    
     my $req = $c->request;
     my @message;
 
@@ -281,6 +303,7 @@ sub end : Private {
     my ( $self, $c ) = @_;
 
     if ( $c->stash->{format} ne "application/json" ) {
+	$c->stash->{VERSION} = $VERSION;
         $c->forward( $c->view('HTML') );
     }
     else {

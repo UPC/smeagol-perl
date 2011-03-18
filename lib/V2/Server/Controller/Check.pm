@@ -151,78 +151,14 @@ sub check_overlap : Local {
     $c->stash->{empty}    = 0;
     $c->stash->{too_long} = 0;
 
-    my @byday;
-    my @bymonth;
-    my @bymonthday;
-
-    my $current_set;
-
-    given ( $new_booking->frequency ) {
-        when ('daily') {
-            $current_set = DateTime::Event::ICal->recur(
-                dtstart  => $new_booking->dtstart,
-                dtend    => $new_booking->dtend,
-                until    => $new_booking->until,
-                freq     => 'daily',
-                interval => $new_booking->interval,
-                byminute => $new_booking->by_minute,
-                byhour   => $new_booking->by_hour,
-            );
-        }
-
-        when ('weekly') {
-            @byday = split( ',', $new_booking->by_day );
-            $current_set = DateTime::Event::ICal->recur(
-                dtstart  => $new_booking->dtstart,
-                dtend    => $new_booking->dtend,
-                until    => $new_booking->until,
-                freq     => 'weekly',
-                interval => $new_booking->interval,
-                byminute => $new_booking->by_minute,
-                byhour   => $new_booking->by_hour,
-                byday    => \@byday,
-            );
-        }
-
-        when ('monthly') {
-            @bymonthday = split( ',', $new_booking->by_day_month );
-
-            $current_set = DateTime::Event::ICal->recur(
-                dtstart    => $new_booking->dtstart,
-                dtend      => $new_booking->dtend,
-                until      => $new_booking->until,
-                freq       => 'monthly',
-                interval   => $new_booking->interval,
-                byminute   => $new_booking->by_minute,
-                byhour     => $new_booking->by_hour,
-                bymonthday => \@bymonthday
-            );
-        }
-
-        default {
-            @bymonth    = split( ',', $new_booking->by_month );
-            @bymonthday = split( ',', $new_booking->by_day_month );
-
-            $current_set = DateTime::Event::ICal->recur(
-                dtstart    => $new_booking->dtstart,
-                dtend      => $new_booking->dtend,
-                until      => $new_booking->until,
-                freq       => 'yearly',
-                interval   => $new_booking->interval,
-                byminute   => $new_booking->by_minute,
-                byhour     => $new_booking->by_hour,
-                bymonth    => \@bymonth,
-                bymonthday => \@bymonthday
-            );
-        }
-    };
-
+    $c->stash->{set} = $new_booking;
+    
+    my $current_set = $c->forward('build_recur', [] );
+    
     if ( $current_set->min ) {
-        $c->log->debug("L'SpanSet té com a mínim un element");
         $c->stash->{empty} = 0;
     }
     else {
-        $c->log->debug("L'SpanSet està buit!");
         $c->stash->{empty} = 1;
     }
 
@@ -236,11 +172,6 @@ sub check_overlap : Local {
     if ( $duration->in_units('days') ge 1 ) {
         $c->stash->{too_long} = 1;
     }
-
-    $c->log->debug(
-        "Duració nova reserva:
-  " . $duration->hours . "h" . $duration->minutes . "min"
-    );
 
     my $spanSet = DateTime::SpanSet->from_set_and_duration(
         set      => $current_set,
@@ -269,91 +200,42 @@ sub check_overlap : Local {
             . @booking_aux
             . " que compleixen els criteris de la cerca" );
 
-    my $dtstart;
-    my $dtend;
-    my $until;
-    my $frequency;
-    my $interval;
-    my $byminute;
-    my $byhour;
+    my @old_exceptions;
 
     foreach (@booking_aux) {
         $c->log->debug( "Checking Booking #" . $_->id );
+	$c->log->debug("Duration (in minutes)".$_->duration);
 
-        if ( $_->by_day )   { @byday   = split( ',', $_->by_day ) }
-        if ( $_->by_month ) { @bymonth = split( ',', $_->by_month ) }
-        if ( $_->by_day_month ) {
-            @bymonthday = split( ',', $_->by_day_month );
-        }
+	$c->stash->{set} = $_;
+	
+	$old_set = $c->forward('build_recur', [] );
 
-        $dtstart   = $_->dtstart;
-        $dtend     = $_->dtend;
-        $until     = $_->until;
-        $frequency = $_->frequency;
-        $interval  = $_->interval;
-        $byminute  = $_->by_minute;
-        $byhour    = $_->by_hour;
-
-        given ( $new_booking->frequency ) {
-            when ('daily') {
-                $old_set = DateTime::Event::ICal->recur(
-                    dtstart  => $dtstart,
-                    dtend    => $dtend,
-                    until    => $until,
-                    freq     => $frequency,
-                    interval => $interval,
-                    byminute => $byminute,
-                    byhour   => $byhour,
-                );
-            }
-
-            when ('weekly') {
-                $old_set = DateTime::Event::ICal->recur(
-                    dtstart  => $dtstart,
-                    dtend    => $dtend,
-                    until    => $until,
-                    freq     => $frequency,
-                    interval => $interval,
-                    byminute => $byminute,
-                    byhour   => $byhour,
-                    byday    => \@byday,
-                );
-            }
-
-            when ('monthly') {
-                $old_set = DateTime::Event::ICal->recur(
-                    dtstart    => $dtstart,
-                    dtend      => $dtend,
-                    until      => $until,
-                    freq       => $frequency,
-                    interval   => $interval,
-                    byminute   => $byminute,
-                    byhour     => $byhour,
-                    bymonth    => \@bymonth,
-                    bymonthday => \@bymonthday
-                );
-            }
-
-            default {
-                $old_set = DateTime::Event::ICal->recur(
-                    dtstart    => $dtstart,
-                    dtend      => $dtend,
-                    until      => $until,
-                    freq       => $frequency,
-                    interval   => $interval,
-                    byminute   => $byminute,
-                    byhour     => $byhour,
-                    bymonth    => \@bymonth,
-                    bymonthday => \@bymonthday
-                );
-            }
-        };
-
-        $duration2 = DateTime::Duration->new( minutes => $_->duration );
+        $duration2 = DateTime::Duration->new( minutes => $_->duration, );
         $spanSet2 = DateTime::SpanSet->from_set_and_duration(
             set      => $old_set,
             duration => $duration2
         );
+	
+	my @old_exceptions = $c->model('DB::TException')->search({id_booking => $_->{id}});
+	my $count = @old_exceptions;
+	my $exc_set;
+	my $exc_spanSet;
+	my $duration_exc;
+	if (@old_exceptions ge 1){
+	  foreach (@old_exceptions) {
+	    $c->log->debug("EXCP: ".Dumper($old_exceptions[$count]));
+	    $exc_set = $c->forward('build_recur', [$old_exceptions[$count]]);
+	    $duration_exc = DateTime::Duration->new( minutes => $old_exceptions[$count]->duration );;
+	    
+	    $exc_spanSet = DateTime::SpanSet->from_set_and_duration(
+	      set      => $exc_set,
+	      duration => $duration_exc
+	    );
+	    $spanSet2 = $spanSet2->complement($exc_spanSet);
+	    
+	    if ($count eq 0) {last;}else{$count--;}
+	  }
+	}
 
         $overlap = $spanSet->intersects($spanSet2);
 
@@ -380,76 +262,94 @@ sub check_exception : Local {
     my @bymonthday;
 
     my $current_set;
+    $current_set = $c->forward('build_recur', [$new_exception] );
 
-    given ( $new_exception->frequency ) {
+    if ( $current_set->min ) {
+        $c->stash->{empty} = 0;
+    }
+    else {
+        $c->stash->{empty} = 1;
+    }
+
+}
+
+sub build_recur :Private {
+  my ($self, $c) =@_;
+  
+  my $set = $c->stash->{set};
+
+  my $recur;
+  my @byday;
+  my @bymonth;
+  my @bymonthday;
+  
+  if ( $set->by_day )   { @byday   = split( ',', $set->by_day ); }
+  if ( $set->by_month ) { @bymonth = split( ',', $set->by_month ); }
+  if ( $set->by_day_month ) {
+     @bymonthday = split( ',', $set->by_day_month );
+  }
+  
+  given ( $set->frequency ) {
         when ('daily') {
-            $current_set = DateTime::Event::ICal->recur(
-                dtstart  => $new_exception->dtstart,
-                dtend    => $new_exception->dtend,
-                until    => $new_exception->until,
+            $recur = DateTime::Event::ICal->recur(
+                dtstart  => $set->dtstart,
+                dtend    => $set->dtend,
+                until    => $set->until,
                 freq     => 'daily',
-                interval => $new_exception->interval,
-                byminute => $new_exception->by_minute,
-                byhour   => $new_exception->by_hour,
+                interval => $set->interval,
+                byminute => $set->by_minute,
+                byhour   => $set->by_hour,
             );
         }
 
         when ('weekly') {
-            @byday = split( ',', $new_exception->by_day );
-            $current_set = DateTime::Event::ICal->recur(
-                dtstart  => $new_exception->dtstart,
-                dtend    => $new_exception->dtend,
-                until    => $new_exception->until,
+            @byday = split( ',', $set->by_day );
+            $recur = DateTime::Event::ICal->recur(
+                dtstart  => $set->dtstart,
+                dtend    => $set->dtend,
+                until    => $set->until,
                 freq     => 'weekly',
-                interval => $new_exception->interval,
-                byminute => $new_exception->by_minute,
-                byhour   => $new_exception->by_hour,
+                interval => $set->interval,
+                byminute => $set->by_minute,
+                byhour   => $set->by_hour,
                 byday    => \@byday,
             );
         }
 
         when ('monthly') {
-            @bymonthday = split( ',', $new_exception->by_day_month );
+            @bymonthday = split( ',', $set->by_day_month );
 
-            $current_set = DateTime::Event::ICal->recur(
-                dtstart    => $new_exception->dtstart,
-                dtend      => $new_exception->dtend,
-                until      => $new_exception->until,
+            $recur = DateTime::Event::ICal->recur(
+                dtstart    => $set->dtstart,
+                dtend      => $set->dtend,
+                until      => $set->until,
                 freq       => 'monthly',
-                interval   => $new_exception->interval,
-                byminute   => $new_exception->by_minute,
-                byhour     => $new_exception->by_hour,
+                interval   => $set->interval,
+                byminute   => $set->by_minute,
+                byhour     => $set->by_hour,
                 bymonthday => \@bymonthday
             );
         }
 
         default {
-            @bymonth    = split( ',', $new_exception->by_month );
-            @bymonthday = split( ',', $new_exception->by_day_month );
+            @bymonth    = split( ',', $set->by_month );
+            @bymonthday = split( ',', $set->by_day_month );
 
-            $current_set = DateTime::Event::ICal->recur(
-                dtstart    => $new_exception->dtstart,
-                dtend      => $new_exception->dtend,
-                until      => $new_exception->until,
+            $recur = DateTime::Event::ICal->recur(
+                dtstart    => $set->dtstart,
+                dtend      => $set->dtend,
+                until      => $set->until,
                 freq       => 'yearly',
-                interval   => $new_exception->interval,
-                byminute   => $new_exception->by_minute,
-                byhour     => $new_exception->by_hour,
+                interval   => $set->interval,
+                byminute   => $set->by_minute,
+                byhour     => $set->by_hour,
                 bymonth    => \@bymonth,
                 bymonthday => \@bymonthday
             );
         }
     };
-
-    if ( $current_set->min ) {
-        $c->log->debug("L'SpanSet té com a mínim un element");
-        $c->stash->{empty} = 0;
-    }
-    else {
-        $c->log->debug("L'SpanSet està buit!");
-        $c->stash->{empty} = 1;
-    }
-
+    
+    return $recur;
 }
 
 =head1 AUTHOR

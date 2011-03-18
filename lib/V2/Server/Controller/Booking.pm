@@ -399,9 +399,6 @@ sub default_POST {
         }
 
         when ('weekly') {
-            $c->log->debug("Ei!! Tenim un booking setmanal");
-
-            $c->log->debug( "BYDAY: " . $by_day );
 
             $new_booking->id_resource($id_resource);
             $new_booking->id_event($id_event);

@@ -289,11 +289,11 @@ sub default_DELETE {
     my $resource_aux = $c->model('DB::TResource')->find( { id => $id } );
 
     if ($resource_aux) {
-	 my @res_tag = $c->model('DB::TResourceTag')->search( {resource_id => $id} );
-	 
-	 foreach (@res_tag) {
-	      $_->delete;
-	 }
+# 	 my @res_tag = $c->model('DB::TResourceTag')->search( {resource_id => $id} );
+# 	 
+# 	 foreach (@res_tag) {
+# 	      $_->delete;
+# 	 }
 	 
         $resource_aux->delete;
 

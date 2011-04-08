@@ -207,15 +207,14 @@ sub default_PUT {
     my $desc = $req->parameters->{description}
         || $req->{headers}->{description};
 	
+	my $tag_ok = try eval {new V2::Server::Obj::Tag(id => $id, description => $desc)};
+    catch my $err;
+	
     my $tag = $c->model('DB::TTag')->find( { id => $id } );
 
-    $c->visit( '/check/check_name', [$id] );
-    $c->visit( '/check/check_desc', [$desc] );
 
-    $c->log->debug( "Desc OK? " . $c->stash->{desc_ok} );
     if ($tag) {
-        if ( ( $c->stash->{name_ok} and $c->stash->{desc_ok} ) != 0
-            and length($id) > 1 )
+        if ( $tag_ok )
         {
             $tag->id($id);
             $tag->description($desc);
@@ -232,10 +231,11 @@ sub default_PUT {
             $c->response->status(200);
         }
         else {
+	     my ($error) = split("\n",$err->message);
+	     ($error) = split('at', $error);
+
             my @message
-                = { message =>
-                    'There\'s a problem with the id of the tag or the description is too long.'
-                };
+                = { message => $error };
 
             my $new_tag = {
                 id          => $id,

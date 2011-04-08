@@ -10,8 +10,8 @@ drop table if exists t_resource;
 
 drop table if exists t_resource_tag;
     CREATE TABLE t_resource_tag (
-            resource_id     INTEGER REFERENCES resources(id) ON DELETE CASCADE,
-            tag_id   TEXT(64) REFERENCES tag(id) ON DELETE CASCADE ON UPDATE CASCADE,
+            resource_id     INTEGER REFERENCES t_resource(id) ON DELETE CASCADE,
+            tag_id   TEXT(64) REFERENCES t_tag(id) ON DELETE CASCADE ON UPDATE CASCADE,
             PRIMARY KEY (resource_id, tag_id)
     );
 

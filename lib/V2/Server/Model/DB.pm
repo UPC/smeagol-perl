@@ -10,6 +10,7 @@ __PACKAGE__->config(
         dsn      => 'dbi:SQLite:smeagol.db',
         user     => '',
         password => '',
+	on_connect_call => 'use_foreign_keys',
     }
 );
 

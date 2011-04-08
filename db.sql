@@ -8,26 +8,19 @@ drop table if exists t_resource;
 	    info	TEXT(256)
     );
 
-drop table if exists t_resource_tag;
-    CREATE TABLE t_resource_tag (
-            resource_id     INTEGER REFERENCES t_resource(id) ON DELETE CASCADE,
-            tag_id   TEXT(64) REFERENCES t_tag(id) ON DELETE CASCADE ON UPDATE CASCADE,
-            PRIMARY KEY (resource_id, tag_id)
-    );
-
 drop table if exists t_tag;
   CREATE TABLE t_tag (
 	    id		TEXT(64),
 	    description TEXT(256),
 	    PRIMARY KEY (id)
     );
-
-drop table if exists t_tag_event;
-   CREATE TABLE t_tag_event (
-	id_tag	TEXT(64) REFERENCES t_tag(id) ON DELETE CASCADE ON UPDATE CASCADE,
-	id_event INTEGER REFERENCES t_event(id) ON DELETE CASCADE,
-	PRIMARY KEY (id_tag,id_event)
-   );
+  
+drop table if exists t_resource_tag;
+CREATE TABLE t_resource_tag (
+      resource_id     INTEGER REFERENCES t_resource(id) ON DELETE CASCADE,
+			      tag_id   TEXT(64) REFERENCES t_tag(id) ON DELETE CASCADE ON UPDATE CASCADE,
+			      PRIMARY KEY (resource_id, tag_id)
+);
 
 drop table if exists t_event;
    CREATE TABLE t_event (
@@ -38,6 +31,13 @@ drop table if exists t_event;
 	ends DATETIME
    );
 
+drop table if exists t_tag_event;
+CREATE TABLE t_tag_event (
+      id_tag	TEXT(64) REFERENCES t_tag(id) ON DELETE CASCADE ON UPDATE CASCADE,
+			id_event INTEGER REFERENCES t_event(id) ON DELETE CASCADE,
+			PRIMARY KEY (id_tag,id_event)
+);
+   
 drop table if exists t_booking;
 CREATE TABLE t_booking(
       id 		INTEGER PRIMARY KEY AUTOINCREMENT,

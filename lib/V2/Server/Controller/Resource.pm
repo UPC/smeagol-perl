@@ -91,10 +91,6 @@ sub default_POST {
     my ( $self, $c, $id ) = @_;
     my $req = $c->request;
 
-    $c->log->debug( 'Mètode: ' . $req->method );
-    $c->log->debug("El POST funciona");
-    $c->log->debug( Dumper( $req->parameters ) );
-
     my $descr = $req->parameters->{description};
     my $info  = $req->parameters->{info};
 
@@ -117,8 +113,6 @@ sub default_POST {
         $new_resource->info($info);
         $new_resource->insert;
 
-        $c->log->debug( "La id del nou recurs és: " . $new_resource->id );
-
 #Buscarem si els tags ja existeixen, en cas de no existir els crearem
 #Cal omplir DB::ResourceTag per a establir la relació entre els tags i els recursos
 
@@ -128,7 +122,6 @@ sub default_POST {
             $TagID = $c->model('DB::TTag')->find( { id => $_ } );
 
             if ($TagID) {
-                $c->log->debug( 'Llista id\'s tag: ' . $TagID->id );
 
          #Si el tag existeix, fem constar a ResourceTag la relació recurs-tag
                 my $ResTag = $c->model('DB::TResourceTag')->find_or_new();
@@ -144,8 +137,6 @@ sub default_POST {
 
                 $new_tag->id($_);
                 $new_tag->insert;
-
-                $c->log->debug( 'Nou tag: ' . $new_tag->id );
 
                 my $ResTag = $c->model('DB::TResourceTag')->find_or_new();
                 $ResTag->resource_id( $new_resource->id );
@@ -241,8 +232,6 @@ sub default_PUT {
                     $new_tag->id($_);
                     $new_tag->insert;
 
-                    $c->log->debug( 'Nou tag: ' . $new_tag->id );
-
                     my $ResTag = $c->model('DB::TResourceTag')->find_or_new();
                     $ResTag->resource_id( $resource->id );
                     $ResTag->tag_id( $new_tag->id );
@@ -297,19 +286,18 @@ sub default_DELETE {
     my ( $self, $c, $id ) = @_;
     my $req = $c->request;
 
-    $c->log->debug( 'Mètode: ' . $req->method );
-    $c->log->debug( "ID: " . $id );
-    $c->log->debug("El DELETE funciona");
-
     my $resource_aux = $c->model('DB::TResource')->find( { id => $id } );
 
     if ($resource_aux) {
+	 my @res_tag = $c->model('DB::TResourceTag')->search( {resource_id => $id} );
+	 
+	 foreach (@res_tag) {
+	      $_->delete;
+	 }
+	 
         $resource_aux->delete;
 
-        #$c->stash->{template} = 'resource/delete_ok.tt';
-        #$c->response->status(200);
-        #$c->forward( $c->view('HTML') );
-        $c->go("/resource/resource_list");
+        $c->forward('resource_list', []);
     }
     else {
 

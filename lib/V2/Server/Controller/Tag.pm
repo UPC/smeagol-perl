@@ -3,6 +3,9 @@ package V2::Server::Controller::Tag;
 use Moose;
 use namespace::autoclean;
 use Data::Dumper;
+use V2::Server::Obj::Tag;
+use Exception::Class::TryCatch;
+
 use Encode qw(encode decode); 
 my $enc = 'utf-8';
 my $VERSION = $V2::Server::VERSION;
@@ -129,17 +132,16 @@ $text_str = encode($enc, $text_str);
     $id = lc $id;
     $id = encode($enc, $id);
     my $desc = $req->parameters->{description} || $req->{headers}->{description};
-
-    $c->visit( '/check/check_name', [$id] );
-    $c->visit( '/check/check_desc_tag', [$desc] );
+    
+    my $tag_ok = try eval {new V2::Server::Obj::Tag(id => $id, description => $desc)};
+    catch my $err;
 
     my $tag_exist = $c->model('DB::TTag')->find( { id => $id } );
 
     if ( !$tag_exist ) {    #Creation of the new tag if it not exists
         my $new_tag = $c->model('DB::TTag')->find_or_new();
 
-        if ( ( $c->stash->{name_ok} and $c->stash->{desc_ok} ) != 0
-            and length($id) > 1 )
+        if ( $tag_ok )
         {
             $new_tag->id($id);
             $new_tag->description($desc);
@@ -157,11 +159,11 @@ $text_str = encode($enc, $text_str);
             $c->response->status(201);
         }
         else {
+	     my ($error) = split("\n",$err->message);
+	     ($error) = split('at', $error);
 
             my @message
-                = { message =>
-                    'There\'s a problem with the id of the tag or the description is too long'
-                };
+                = { message => $error };
 
             $new_tag = {
                 id          => $id,

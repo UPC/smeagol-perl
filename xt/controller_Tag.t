@@ -74,4 +74,37 @@ $request_DELETE->header( Accept => 'application/json' );
 ok(my $response_DELETE = request($request_DELETE), 'Delete request');
 is( $response_DELETE->headers->{status}, '200', 'Response status is 200: OK');
 
+diag '###########################################';
+diag '##Creating tag with invalid id (too long)##';
+diag '###########################################';
+
+ok( $response_post = request POST '/tag',
+    [   id => 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+        description =>
+            'Testing porpouses. It can be deleted with no consequences'
+    ],
+    HTTP::Headers->new( Accept => 'application/json' )
+);
+
+diag "Nou tag: " . $response_post->content;
+
+ok( $tag_aux = $j->jsonToObj( $response_post->content ) );
+
+diag '####################################';
+diag '##Creating tag with invalid desc ##';
+diag '###################################';
+
+ok( $response_post = request POST '/tag',
+    [   id => 'test',
+        description =>
+            'Testing porpouses. It can be deleted with no consequences. Testing porpouses. It can be deleted with no consequences. Testing porpouses. It can be deleted with no consequences. Testing porpouses. It can be deleted with no consequences. Testing porpouses. It can be deleted with no consequences. Testing porpouses. It can be deleted with no consequences. Testing porpouses. It can be deleted with no consequences'
+    ],
+    HTTP::Headers->new( Accept => 'application/json' )
+);
+
+diag "Nou tag: " . $response_post->content;
+
+ok( $tag_aux = $j->jsonToObj( $response_post->content ) );
+
+
 done_testing();

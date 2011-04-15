@@ -13,6 +13,8 @@ use Date::ICal;
 use Data::ICal;
 use Data::ICal::Entry::Event;
 
+use JSON::Any;
+
 my $VERSION = $V2::Server::VERSION;
 BEGIN { extends 'Catalyst::Controller::REST' }
 
@@ -39,7 +41,6 @@ sub begin : Private {
     $c->stash->{id_resource} = $c->request->query_parameters->{resource};
     $c->stash->{id_event}    = $c->request->query_parameters->{event};
     $c->stash->{ical}        = $c->request->query_parameters->{ical};
-    $c->log->debug( Dumper( $c->request->query_parameters ) );
     $c->stash->{format} = $c->request->headers->{"accept"}
         || 'application/json';
 }
@@ -195,8 +196,6 @@ sub booking_list : Private {
 
     foreach (@booking_aux) {
         @booking = $_->hash_booking;
-        $c->log->debug( "Duration booking #" . $_->id . ": " . $_->duration );
-        $c->log->debug( "hash_booking: " . Dumper(@booking) );
         push( @bookings, @booking );
     }
 
@@ -223,9 +222,6 @@ sub bookings_resource : Private {
 
     my $id   = $c->stash->{id_resource};
     my $ical = $c->stash->{ical};
-
-    $c->log->debug( "ID: " . $id );
-    $c->log->debug( "ICal: " . $ical );
 
     if ($ical) {
         $c->detach( 'ical', [] );
@@ -270,9 +266,6 @@ sub bookings_event : Private {
 
     my $id   = $c->stash->{id_event};
     my $ical = $c->stash->{ical};
-
-    $c->log->debug( "ID: " . $id );
-    $c->log->debug( "ICal: " . $ical );
 
     if ($ical) {
         $c->detach( 'ical_event', [] );
@@ -328,8 +321,6 @@ complexity. $c for the win!
 sub default_POST {
     my ( $self, $c ) = @_;
     my $req = $c->request;
-    $c->log->debug( 'Mètode: ' . $req->method );
-    $c->log->debug("El POST funciona");
 
     my $id_resource = $req->parameters->{id_resource};
     my $id_event    = $req->parameters->{id_event};
@@ -337,12 +328,24 @@ sub default_POST {
     my $dtstart = $req->parameters->{dtstart};
     my $dtend   = $req->parameters->{dtend};
     my $duration;
+    
+    my $exception;
+    if ($req->parameters->{exception}){
+	  my $j = JSON::Any->new;
+	  
+	  my $exc_aux = $j->jsonToObj( $req->parameters->{exception} );
+
+	  my ($ex_year, $ex_month, $ex_day) = split('-',$exc_aux->{exception});
+	  $exception = DateTime->new(
+		year => $ex_year,
+		month => $ex_month,
+		day => $ex_day
+          );
+      }
 
 #dtstart and dtend are parsed in case that some needed parameters to build the recurrence of the
 #booking aren't provided
-    $c->log->debug("Ara parsejarem dtsart");
     $dtstart = ParseDate($dtstart);
-    $c->log->debug("Ara parsejarem dtend");
     $dtend    = ParseDate($dtend);
     $duration = $dtend - $dtstart;
 
@@ -496,6 +499,7 @@ sub default_POST {
     };
 
     $c->stash->{new_booking} = $new_booking;
+    if ($c->request->parameters->{exception}) {$c->stash->{new_exception} = $exception};
 
     $c->visit( '/check/check_overlap', [] );
     my @message;
@@ -554,8 +558,6 @@ Same functionality than default_POST but updating an existing booking.
 sub default_PUT {
     my ( $self, $c, $res, $id ) = @_;
     my $req = $c->request;
-    $c->log->debug( 'Mètode: ' . $req->method );
-    $c->log->debug("El PUT funciona");
 
     my $id_resource = $req->parameters->{id_resource};
     my $id_event    = $req->parameters->{id_event};
@@ -566,9 +568,7 @@ sub default_PUT {
 
 #dtstart and dtend are parsed in case that some needed parameters to build the recurrence of the
 #booking aren't provided
-    $c->log->debug("Ara parsejarem dtsart");
     $dtstart = ParseDate($dtstart);
-    $c->log->debug("Ara parsejarem dtend");
     $dtend    = ParseDate($dtend);
     $duration = $dtend - $dtstart;
 
@@ -772,9 +772,6 @@ sub default_DELETE {
     my ( $self, $c, $res, $id ) = @_;
     my $req = $c->request;
 
-    $c->log->debug( 'Mètode: ' . $req->method );
-    $c->log->debug("El DELETE funciona");
-
     my $booking_aux = $c->model('DB::TBooking')->find( { id => $id } );
 
     if ($booking_aux) {
@@ -931,7 +928,6 @@ sub ical : Private {
         my @exrule_list = @{ $_->{exrule_list} };
 
         for ( my $i = 0; $i < @exrule_list; $i++ ) {
-            $c->log->debug( "EXRULE: " . $exrule_list[$i]->{exrule} );
             $vevent->add_properties( exrule => $exrule_list[$i]->{exrule} );
 
         }
@@ -989,10 +985,6 @@ sub ical_event : Private {
 
     $calendar->add_property( version => "2.0" );
 
-    $c->log->debug( "Volem l'agenda de l'event "
-            . $c->stash->{id_event}
-            . " en format ICal" );
-
     my @agenda_aux = $c->model('DB::TBooking')
         ->search( { id_event => $c->stash->{id_event} } );
 
@@ -1001,9 +993,6 @@ sub ical_event : Private {
     foreach (@agenda_aux) {
         push( @genda, $_->hash_booking );
     }
-
-    $c->log->debug(
-        "Hi ha " . @genda . " que compleixen els criteris de cerca" );
 
     my $s_aux;
     my $e_aux;
@@ -1047,8 +1036,6 @@ sub ical_event : Private {
                     . uc( $until->ical );
             }
             when ('weekly') {
-                $c->log->debug(
-                    "Reserva weekly. BYDAY: " . Dumper($by_day_aux) );
                 $rrule
                     = 'FREQ=WEEKLY;INTERVAL='
                     . uc($i_aux)
@@ -1082,7 +1069,6 @@ sub ical_event : Private {
         my @exrule_list = @{ $_->{exrule_list} };
 
         for ( my $i = 0; $i < @exrule_list; $i++ ) {
-            $c->log->debug( "EXRULE: " . $exrule_list[$i]->{exrule} );
             $vevent->add_properties( exrule => $exrule_list[$i]->{exrule} );
 
         }

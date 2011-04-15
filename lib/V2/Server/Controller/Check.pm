@@ -144,7 +144,9 @@ sub check_overlap : Local {
     my ( $self, $c ) = @_;
 
     my $new_booking            = $c->stash->{new_booking};
-    my @new_booking_exceptions = $c->stash->{new_booking_exceptions};
+    my $new_exception = $c->stash->{new_exception};
+    my $new_exc_spanSet;
+    my $new_exc_set;
 
     $c->log->debug("Provant si hi ha solapament");
     $c->stash->{overlap}  = 0;
@@ -154,8 +156,18 @@ sub check_overlap : Local {
     $c->stash->{set} = $new_booking;
     
     my $current_set = $c->forward('build_recur', [] );
-    
-    if ( $current_set->min ) {
+    if ($c->stash->{new_exception}) {
+	$c->forward('build_exc', []);
+	$new_exc_set = $c->stash->{exc_set};
+	my $dur_exc = DateTime::Duration->new(hours => 23);
+	
+	my $new_exc_spanSet = DateTime::SpanSet->from_set_and_duration(
+	      set      => $new_exc_set,
+	      duration => $dur_exc
+	);
+      }
+
+   if ( $current_set->min ) {
         $c->stash->{empty} = 0;
     }
     else {
@@ -173,10 +185,19 @@ sub check_overlap : Local {
         $c->stash->{too_long} = 1;
     }
 
-    my $spanSet = DateTime::SpanSet->from_set_and_duration(
+    my $spanSet_aux = DateTime::SpanSet->from_set_and_duration(
         set      => $current_set,
         duration => $duration
     );
+    my $spanSet;
+    if ($c->stash->{new_exception}) {
+	  $spanSet = $spanSet_aux->complement($new_exc_spanSet);
+	 $c->log->debug("SpanSet_exc: ".Dumper($spanSet));
+      }else{
+	    $spanSet = $spanSet_aux;
+	    $c->log->debug("SpanSet: ".Dumper($spanSet));
+      }
+    
 
     my $old_set;
     my $spanSet2;
@@ -196,15 +217,9 @@ sub check_overlap : Local {
             ->search( { id_resource => $new_booking->id_resource->id } );
     }
 
-    $c->log->debug( "Hi ha "
-            . @booking_aux
-            . " que compleixen els criteris de la cerca" );
-
     my @old_exceptions;
 
     foreach (@booking_aux) {
-        $c->log->debug( "Checking Booking #" . $_->id );
-	$c->log->debug("Duration (in minutes)".$_->duration);
 
 	$c->stash->{set} = $_;
 	
@@ -223,7 +238,6 @@ sub check_overlap : Local {
 	my $duration_exc;
 	if (@old_exceptions ge 1){
 	  foreach (@old_exceptions) {
-	    $c->log->debug("EXCP: ".Dumper($old_exceptions[$count]));
 	    $exc_set = $c->forward('build_recur', [$old_exceptions[$count]]);
 	    $duration_exc = DateTime::Duration->new( minutes => $old_exceptions[$count]->duration );;
 	    
@@ -353,6 +367,29 @@ sub build_recur :Private {
     };
     
     return $recur;
+}
+
+sub build_exc : Private {
+      my ($self, $c) =@_;
+
+      my $set = $c->stash->{new_exception};
+      
+      my $dtstart = $set->clone->set(hour =>0, minute =>0, second => 1 );
+      $c->log->debug("Ex start: ".$dtstart);
+      my $dtend = $set->clone->set(hour =>23, minute =>59, second => 59 );
+      $c->log->debug("Ex ends: ".$dtend);
+      
+      my $exc_set = DateTime::Event::ICal->recur( 
+	    dtstart => $dtstart,
+	    dtend => $dtend,
+	    until => $dtend,
+	    freq =>    'daily',
+	    interval => 1,
+	    byminute   => 0,
+	    byhour     => 0,
+      );
+
+      $c->stash->{exc_set} = $exc_set;
 }
 
 =head1 AUTHOR

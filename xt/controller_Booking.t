@@ -176,7 +176,7 @@ diag '#################################################################';
 diag '##Creating Booking with daily recurrence + 1 simple exception ###';
 diag '#################################################################';
 
-my $exception = $dtend->clone->add( days => 2 )->ymd;
+my $exception = $dtend->clone->add( days => 1 )->ymd;
 
 ok( $response_post = request POST '/booking',
     [   id_event    => "1",
@@ -185,7 +185,7 @@ ok( $response_post = request POST '/booking',
     dtend       => $dtend,
     freq        => 'daily',
     interval    => 1,
-    until       => $dtend->clone->add( days => 10 ),
+    until       => $dtend->clone->add( days => 4 ),
     exception => '{"exception": "'.$exception.'" }',
     ],
     HTTP::Headers->new( Accept => 'application/json' )

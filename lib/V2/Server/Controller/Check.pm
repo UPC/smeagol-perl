@@ -156,15 +156,12 @@ sub check_overlap : Local {
     $c->stash->{set} = $new_booking;
     
     my $current_set = $c->forward('build_recur', [] );
+    
     if ($c->stash->{new_exception}) {
 	$c->forward('build_exc', []);
 	$new_exc_set = $c->stash->{exc_set};
-	my $dur_exc = DateTime::Duration->new(hours => 23);
-	
-	my $new_exc_spanSet = DateTime::SpanSet->from_set_and_duration(
-	      set      => $new_exc_set,
-	      duration => $dur_exc
-	);
+
+	my $new_exc_spanSet = DateTime::SpanSet->from_spans(spans=>[$new_exc_set,]);
       }
 
    if ( $current_set->min ) {
@@ -185,17 +182,18 @@ sub check_overlap : Local {
         $c->stash->{too_long} = 1;
     }
 
-    my $spanSet_aux = DateTime::SpanSet->from_set_and_duration(
+    my $spanSet = DateTime::SpanSet->from_set_and_duration(
         set      => $current_set,
         duration => $duration
     );
-    my $spanSet;
+
+    $c->log->debug("Abans excpecio: ".Dumper($current_set));
+
     if ($c->stash->{new_exception}) {
-	  $spanSet = $spanSet_aux->complement($new_exc_spanSet);
-	 $c->log->debug("SpanSet_exc: ".Dumper($spanSet));
+	  $spanSet = $spanSet->complement($new_exc_spanSet);
+	  #$c->log->debug("SpanSet_exc: ".Dumper($spanSet));
       }else{
-	    $spanSet = $spanSet_aux;
-	    $c->log->debug("SpanSet: ".Dumper($spanSet));
+	    $spanSet = $spanSet;
       }
     
 
@@ -255,7 +253,7 @@ sub check_overlap : Local {
 
         if ($overlap) {
             $c->stash->{overlap} = 1;
-            $c->log->debug("Hi ha solpament");
+            $c->log->debug("Hi ha solpament amb el booking ".$_->id);
             last;
         }
     }
@@ -375,19 +373,9 @@ sub build_exc : Private {
       my $set = $c->stash->{new_exception};
       
       my $dtstart = $set->clone->set(hour =>0, minute =>0, second => 1 );
-      $c->log->debug("Ex start: ".$dtstart);
       my $dtend = $set->clone->set(hour =>23, minute =>59, second => 59 );
-      $c->log->debug("Ex ends: ".$dtend);
-      
-      my $exc_set = DateTime::Event::ICal->recur( 
-	    dtstart => $dtstart,
-	    dtend => $dtend,
-	    until => $dtend,
-	    freq =>    'daily',
-	    interval => 1,
-	    byminute   => 0,
-	    byhour     => 0,
-      );
+
+      my $exc_set = DateTime::Span->from_datetimes( start => $dtstart, end => $dtend );
 
       $c->stash->{exc_set} = $exc_set;
 }

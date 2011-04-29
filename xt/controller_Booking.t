@@ -185,7 +185,7 @@ ok( $response_post = request POST '/booking',
     dtend       => $dtend,
     freq        => 'daily',
     interval    => 1,
-    until       => $dtend->clone->add( days => 4 ),
+    until       => $dtend->clone->add( days => 2 ),
     exception => '{"exception": "'.$exception.'" }',
     ],
     HTTP::Headers->new( Accept => 'application/json' )

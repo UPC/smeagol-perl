@@ -158,9 +158,9 @@ sub check_overlap : Local {
     my $current_set = $c->forward('build_recur', [] );
     
     if ($c->stash->{new_exception}) {
-	$c->forward('build_exc', []);
+	$c->forward('build_exc');
 
-	my $new_exc_spanSet = DateTime::SpanSet->from_spans(spans=>[$c->stash->{exc_set}]);
+	my $new_exc_spanSet = $c->stash->{exc_set};
       }
 
    if ( $current_set->min ) {
@@ -181,18 +181,17 @@ sub check_overlap : Local {
         $c->stash->{too_long} = 1;
     }
 
-    my $spanSet = DateTime::SpanSet->from_set_and_duration(
+    my $spanSet_aux = DateTime::SpanSet->from_set_and_duration(
         set      => $current_set,
         duration => $duration
     );
-
+my $spanSet;
     if ($c->stash->{new_exception}) {
-	  $spanSet = $spanSet->complement($new_exc_spanSet);
-	  $c->log->debug("SpanSet_exc: ".Dumper($spanSet));
+	  $spanSet = $spanSet_aux->complement($new_exc_spanSet);
+	  $c->log->debug("SpanSet+Exc: ".Dumper($spanSet));
       }else{
-	    $spanSet = $spanSet;
+	    $spanSet = $spanSet_aux;
       }
-if ($c->stash->{new_exception}){$c->log->debug("Desprès excpecio: ".Dumper($spanSet));}
 
     my $old_set;
     my $spanSet2;
@@ -233,8 +232,12 @@ if ($c->stash->{new_exception}){$c->log->debug("Desprès excpecio: ".Dumper($spa
 	my $duration_exc;
 	if (@old_exceptions ge 1){
 	  foreach (@old_exceptions) {
-	    $exc_set = $c->forward('build_recur', [$old_exceptions[$count]]);
-	    $duration_exc = DateTime::Duration->new( minutes => $old_exceptions[$count]->duration );;
+	       
+	       $c->stash->{new_exception} = $old_exceptions[$count];
+	       $c->forward('build_exc', []);
+       
+	    $exc_set = $c->stash->{exc_set};
+	    $duration_exc = DateTime::Duration->new( minutes => $old_exceptions[$count]->duration );
 	    
 	    $exc_spanSet = DateTime::SpanSet->from_set_and_duration(
 	      set      => $exc_set,
@@ -356,7 +359,7 @@ sub build_recur :Private {
             );
         }
     };
-
+    
     return $recur;
 }
 
@@ -365,9 +368,9 @@ sub build_exc : Private {
 
       my $set = $c->stash->{new_exception};
 
-      my $dtstart = $set->clone->set(hour =>0, minute =>0, second => 1 );
-      my $dtend = $set->clone->set(hour =>23, minute =>59, second => 59 );
-$c->log->debug("Exception start: ".$dtstart." Exception dtend: ".$dtend);
+      my $dtstart = $set->clone->set(hour =>0, minute =>0, second => 0 );
+      my $dtend = $dtstart->clone->add( days =>1 );
+
       my $exc_set = DateTime::Span->from_datetimes( start => $dtstart, end => $dtend );
 
       $c->stash->{exc_set} = $exc_set;

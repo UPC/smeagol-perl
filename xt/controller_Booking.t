@@ -171,4 +171,41 @@ $request_DELETE->header( Accept => 'application/json' );
 ok($response_DELETE = request($request_DELETE), 'Delete request');
 is( $response_DELETE->headers->{status}, '200', 'Response status is 200: OK');
 
+diag '\n';
+diag '#################################################################';
+diag '##Creating Booking with daily recurrence + 1 simple exception ###';
+diag '#################################################################';
+
+my $exception = $dtend->clone->add( days => 1 )->ymd;
+
+ok( $response_post = request POST '/booking',
+    [   id_event    => "1",
+    id_resource => "1",
+    dtstart     => $dtstart,
+    dtend       => $dtend,
+    freq        => 'daily',
+    interval    => 1,
+    until       => $dtend->clone->add( days => 2 ),
+    exception => '{"exception": "'.$exception.'" }',
+    ],
+    HTTP::Headers->new( Accept => 'application/json' )
+);
+
+diag "Booking with daily recurrence + simple exception: " . $response_post->content;
+
+ok( $booking_aux = $j->jsonToObj( $response_post->content ) );
+
+ok( $booking_aux->{id_event}    eq 1,        "ID event correct" );
+ok( $booking_aux->{id_resource} eq 1,        "ID resource correct" );
+ok( $booking_aux->{dtstart}     eq $dtstart, "DTSTART correct" );
+ok( $booking_aux->{dtend}       eq $dtend,   "DTEND correct" );
+ok( $booking_aux->{frequency}       eq 'daily',   "freq correct" );
+ok( $booking_aux->{interval}       eq 1,   "interval correct" );
+ok( $booking_aux->{until}       eq $dtend->clone->add(days=>2),   "until correct" );
+
+$request_DELETE = DELETE( 'booking/'.$booking_aux->{id});
+$request_DELETE->header( Accept => 'application/json' );
+ok($response_DELETE = request($request_DELETE), 'Delete request');
+is( $response_DELETE->headers->{status}, '200', 'Response status is 200: OK');
+
 done_testing();

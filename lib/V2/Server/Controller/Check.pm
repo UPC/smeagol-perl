@@ -7,6 +7,7 @@ use namespace::autoclean;
 use Data::Dumper;
 use DateTime;
 use DateTime::Duration;
+use DateTime::Span;
 use DateTime::SpanSet;
 use DateTime::Event::ICal;
 
@@ -144,14 +145,15 @@ sub check_overlap : Local {
     my ( $self, $c ) = @_;
 
     my $new_booking            = $c->stash->{new_booking};
-    my @new_booking_exceptions = $c->stash->{new_booking_exceptions};
+    my $new_exception = $c->stash->{new_exception};
+    my $new_exc_spanSet;
 
     $c->log->debug("Provant si hi ha solapament");
     $c->stash->{overlap}  = 0;
     $c->stash->{empty}    = 0;
     $c->stash->{too_long} = 0;
 
-    $c->stash->{set} = $new_booking;
+    $c->stash->{set} = $c->stash->{new_booking};
     
     my $current_set = $c->forward('build_recur', [] );
     
@@ -164,19 +166,31 @@ sub check_overlap : Local {
 
     my $duration
         = DateTime::Duration->new( minutes => $new_booking->duration, );
-
+    
     # $duration should be shorter than 1 day.
     # Otherwise there will be bookings overlapping with themselves
     # wich is kind of weird.
 
     if ( $duration->in_units('days') ge 1 ) {
         $c->stash->{too_long} = 1;
-    }
-
-    my $spanSet = DateTime::SpanSet->from_set_and_duration(
+    }	
+	
+    my $spanSet_aux = DateTime::SpanSet->from_set_and_duration(
         set      => $current_set,
         duration => $duration
     );
+	
+    my $spanSet;    
+    
+    if ($c->stash->{new_exception}) {
+	$c->forward('build_exc');
+
+	my $new_exc_spanSet = $c->stash->{exc_set};
+	$spanSet = $spanSet_aux->complement($new_exc_spanSet);
+     
+    }else{
+      $spanSet = $spanSet_aux->clone;
+      }
 
     my $old_set;
     my $spanSet2;
@@ -196,15 +210,9 @@ sub check_overlap : Local {
             ->search( { id_resource => $new_booking->id_resource->id } );
     }
 
-    $c->log->debug( "Hi ha "
-            . @booking_aux
-            . " que compleixen els criteris de la cerca" );
-
     my @old_exceptions;
 
     foreach (@booking_aux) {
-        $c->log->debug( "Checking Booking #" . $_->id );
-	$c->log->debug("Duration (in minutes)".$_->duration);
 
 	$c->stash->{set} = $_;
 	
@@ -223,9 +231,12 @@ sub check_overlap : Local {
 	my $duration_exc;
 	if (@old_exceptions ge 1){
 	  foreach (@old_exceptions) {
-	    $c->log->debug("EXCP: ".Dumper($old_exceptions[$count]));
-	    $exc_set = $c->forward('build_recur', [$old_exceptions[$count]]);
-	    $duration_exc = DateTime::Duration->new( minutes => $old_exceptions[$count]->duration );;
+	       
+	       $c->stash->{new_exception} = $old_exceptions[$count];
+	       $c->forward('build_exc', []);
+       
+	    $exc_set = $c->stash->{exc_set};
+	    $duration_exc = DateTime::Duration->new( minutes => $old_exceptions[$count]->duration );
 	    
 	    $exc_spanSet = DateTime::SpanSet->from_set_and_duration(
 	      set      => $exc_set,
@@ -241,7 +252,7 @@ sub check_overlap : Local {
 
         if ($overlap) {
             $c->stash->{overlap} = 1;
-            $c->log->debug("Hi ha solpament");
+            $c->log->debug("Hi ha solpament amb el booking ".$_->id);
             last;
         }
     }
@@ -296,7 +307,6 @@ sub build_recur :Private {
         when ('daily') {
             $recur = DateTime::Event::ICal->recur(
                 dtstart  => $set->dtstart,
-                dtend    => $set->dtend,
                 until    => $set->until,
                 freq     => 'daily',
                 interval => $set->interval,
@@ -309,7 +319,6 @@ sub build_recur :Private {
             @byday = split( ',', $set->by_day );
             $recur = DateTime::Event::ICal->recur(
                 dtstart  => $set->dtstart,
-                dtend    => $set->dtend,
                 until    => $set->until,
                 freq     => 'weekly',
                 interval => $set->interval,
@@ -324,7 +333,6 @@ sub build_recur :Private {
 
             $recur = DateTime::Event::ICal->recur(
                 dtstart    => $set->dtstart,
-                dtend      => $set->dtend,
                 until      => $set->until,
                 freq       => 'monthly',
                 interval   => $set->interval,
@@ -340,7 +348,6 @@ sub build_recur :Private {
 
             $recur = DateTime::Event::ICal->recur(
                 dtstart    => $set->dtstart,
-                dtend      => $set->dtend,
                 until      => $set->until,
                 freq       => 'yearly',
                 interval   => $set->interval,
@@ -353,6 +360,21 @@ sub build_recur :Private {
     };
     
     return $recur;
+}
+
+sub build_exc : Private {
+      my ($self, $c) =@_;
+
+      my $set = $c->stash->{new_exception};
+
+      my $dtstart = $set->clone->set(hour =>0, minute =>0, second => 0 );
+      my $dtend = $dtstart->clone->add( days =>1 );
+
+      my $exc_set_aux = DateTime::Span->from_datetimes( start => $dtstart, end => $dtend );
+      
+      my $exc_set = DateTime::SpanSet->from_spans(spans=>[$exc_set_aux]);
+
+      $c->stash->{exc_set} = $exc_set;
 }
 
 =head1 AUTHOR

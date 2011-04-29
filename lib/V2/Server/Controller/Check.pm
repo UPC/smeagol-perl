@@ -157,13 +157,7 @@ sub check_overlap : Local {
     
     my $current_set = $c->forward('build_recur', [] );
     
-    if ($c->stash->{new_exception}) {
-	$c->forward('build_exc');
-
-	my $new_exc_spanSet = $c->stash->{exc_set};
-      }
-
-   if ( $current_set->min ) {
+    if ( $current_set->min ) {
         $c->stash->{empty} = 0;
     }
     else {
@@ -172,25 +166,30 @@ sub check_overlap : Local {
 
     my $duration
         = DateTime::Duration->new( minutes => $new_booking->duration, );
-
+    
     # $duration should be shorter than 1 day.
     # Otherwise there will be bookings overlapping with themselves
     # wich is kind of weird.
 
     if ( $duration->in_units('days') ge 1 ) {
         $c->stash->{too_long} = 1;
-    }
-
+    }	
+	
     my $spanSet_aux = DateTime::SpanSet->from_set_and_duration(
         set      => $current_set,
         duration => $duration
     );
-my $spanSet;
+	
+    my $spanSet;    
+    
     if ($c->stash->{new_exception}) {
-	  $spanSet = $spanSet_aux->complement($new_exc_spanSet);
-	  $c->log->debug("SpanSet+Exc: ".Dumper($spanSet));
-      }else{
-	    $spanSet = $spanSet_aux;
+	$c->forward('build_exc');
+
+	my $new_exc_spanSet = $c->stash->{exc_set};
+	$spanSet = $spanSet_aux->complement($new_exc_spanSet);
+     
+    }else{
+      $spanSet = $spanSet_aux->clone;
       }
 
     my $old_set;
@@ -371,7 +370,9 @@ sub build_exc : Private {
       my $dtstart = $set->clone->set(hour =>0, minute =>0, second => 0 );
       my $dtend = $dtstart->clone->add( days =>1 );
 
-      my $exc_set = DateTime::Span->from_datetimes( start => $dtstart, end => $dtend );
+      my $exc_set_aux = DateTime::Span->from_datetimes( start => $dtstart, end => $dtend );
+      
+      my $exc_set = DateTime::SpanSet->from_spans(spans=>[$exc_set_aux]);
 
       $c->stash->{exc_set} = $exc_set;
 }

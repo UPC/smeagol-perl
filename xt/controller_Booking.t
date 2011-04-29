@@ -201,7 +201,7 @@ ok( $booking_aux->{dtstart}     eq $dtstart, "DTSTART correct" );
 ok( $booking_aux->{dtend}       eq $dtend,   "DTEND correct" );
 ok( $booking_aux->{frequency}       eq 'daily',   "freq correct" );
 ok( $booking_aux->{interval}       eq 1,   "interval correct" );
-ok( $booking_aux->{until}       eq $dtend->clone->add(days=>10),   "until correct" );
+ok( $booking_aux->{until}       eq $dtend->clone->add(days=>4),   "until correct" );
 
 $request_DELETE = DELETE( 'booking/'.$booking_aux->{id});
 $request_DELETE->header( Accept => 'application/json' );

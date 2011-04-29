@@ -370,11 +370,7 @@ sub default_POST {
     my $booking;
 
     given ($freq) {
-
-#Duration is saved in minuntes in the DB in order to make it easier to deal with it when the server
-#builds the JSON objects
-#Don't mess with the duration, the result can be weird.
-        when ('daily') {
+       when ('daily') {
             $new_booking->id_resource($id_resource);
             $new_booking->id_event($id_event);
             $new_booking->dtstart($dtstart);

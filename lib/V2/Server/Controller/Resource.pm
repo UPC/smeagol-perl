@@ -3,6 +3,10 @@ package V2::Server::Controller::Resource;
 use Moose;
 use namespace::autoclean;
 use Data::Dumper;
+
+use Encode qw(encode decode); 
+my $enc = 'utf-8';
+
 my $VERSION = $V2::Server::VERSION;
 BEGIN { extends 'Catalyst::Controller::REST' }
 

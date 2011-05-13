@@ -4,10 +4,6 @@ use Moose;
 use namespace::autoclean;
 use Data::Dumper;
 use DateTime;
-
-use Encode qw(encode decode); 
-my $enc = 'utf-8';
-
 my $VERSION = $V2::Server::VERSION;
 BEGIN { extends 'Catalyst::Controller::REST' }
 
@@ -130,7 +126,6 @@ sub default_POST {
 
         foreach (@tags) {
             $id_tag = $_;
-            $c->log->debug( "Estem afegint el tag: " . $id_tag );
 
             $tags = $c->model('DB::TTag')->find( { id => $id_tag } );
 
@@ -141,15 +136,7 @@ sub default_POST {
                 $tag_event->insert;
             }
             else {
-                $tags = $c->model('DB::TTag')->find_or_new();
-                $tags->id($id_tag);
-                $tags->description('Not yet descrived');
-                $tags->insert;
-
-                $tag_event = $c->model('DB::TTagEvent')->find_or_new();
-                $tag_event->id_tag($id_tag);
-                $tag_event->id_event( $new_event->id );
-                $tag_event->insert;
+                $c->detach('/bad_request', []);
             }
         }
 
@@ -236,15 +223,7 @@ sub default_PUT {
                     $tag_event->insert;
                 }
                 else {
-                    $tags = $c->model('DB::TTag')->find_or_new();
-                    $tags->id($id_tag);
-                    $tags->description('Not yet descrived');
-                    $tags->insert;
-
-                    $tag_event = $c->model('DB::TTagEvent')->find_or_new();
-                    $tag_event->id_tag($id_tag);
-                    $tag_event->id_event( $event->id );
-                    $tag_event->insert;
+                    $c->detach('/bad_request', []);
                 }
             }
 

@@ -15,9 +15,6 @@ use Data::ICal::Entry::Event;
 
 use JSON::Any;
 
-use Encode qw(encode decode); 
-my $enc = 'utf-8';
-
 my $VERSION = $V2::Server::VERSION;
 BEGIN { extends 'Catalyst::Controller::REST' }
 

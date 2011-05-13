@@ -3,6 +3,9 @@ package V2::Server::Controller::Resource;
 use Moose;
 use namespace::autoclean;
 use Data::Dumper;
+
+use Encode qw(encode decode); 
+my $enc = 'utf-8';
 my $VERSION = $V2::Server::VERSION;
 BEGIN { extends 'Catalyst::Controller::REST' }
 
@@ -58,8 +61,8 @@ sub get_resource : Private {
     else {
         my $res = {
             id          => $resource->id,
-            description => $resource->description,
-            info        => $resource->info,
+            description => decode($enc, $resource->description),
+            info        => decode($enc, $resource->info),
             tags        => $resource->tag_list,
             bookings    => $resource->book_list
         };
@@ -140,8 +143,8 @@ sub default_POST {
 #Un cop tenim el tema dels tags aclarit, muntem el json amb les dades del recurs
         my $resource = {
             id          => $new_resource->id,
-            description => $new_resource->description,
-            info        => $new_resource->info,
+            description => decode($enc, $new_resource->description),
+	    info        => decode($enc, $new_resource->info),
             tags        => $new_resource->tag_list,
         };
 
@@ -224,8 +227,8 @@ sub default_PUT {
 
             my @resource = {
                 id          => $resource->id,
-                description => $resource->description,
-                info        => $resource->info,
+                description => decode($enc, $resource->description),
+		info        => decode($enc, $resource->info),
                 tags        => $resource->tag_list,
             };
 

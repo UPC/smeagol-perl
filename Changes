@@ -1,11 +1,19 @@
 Històric de revisions del projecte smeagol.
 
-2.03	Fri March 11 16:16:00 CET 2011
-	- resolt el bug en la comprovació de la longitud dels tags
-	- modificacions necessaries per a que no hi hagi recursos amb la mateixa descripció
-	- descripció dels en els recursos passa a ser obligatoria
-	- arreglat el nom del formulari de creació de tags
-	- al peu de les plantilles ara s'inclou el número de versió
+2.04   Tue May 10 22:27:00 CEST 2011
+       - resolts els errors en les comprovacions de les longituds
+         dels atributs
+       - resolt l'error en obtenir un tag que pertanyia a un recurs
+         esborrat prèviament
+       - afegida la dependència a Exception::Class::TryCatch
+       - suport per a les excepcions simples a les reserves
+
+2.03   Fri March 11 16:16:00 CET 2011
+       - resolt el bug en la comprovació de la longitud dels tags
+	   - modificacions necessaries per a que no hi hagi recursos amb la mateixa descripció
+	   - descripció dels en els recursos passa a ser obligatoria
+	   - arreglat el nom del formulari de creació de tags
+	   - al peu de les plantilles ara s'inclou el número de versió
 
 2.02   Sun Feb 27 20:48:52 CET 2011
        - eliminats missatges de log de Catalyst per defecte (bug #287)

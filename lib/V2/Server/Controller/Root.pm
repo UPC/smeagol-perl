@@ -56,11 +56,24 @@ sub version : Local {
 
     $c->response->status(200);
 
-    my @message = {
+    my $message = {
         application => $name,
         version     => $VERSION
     };
-    $c->stash->{content} = \@message;
+    $c->stash->{content} = $message;
+}
+
+sub bad_request : Path : Args(0) {
+     my ( $self, $c ) = @_;
+     
+     $c->response->status(400);
+     
+     my @message = {
+	  status => "400",
+	  error => "Bad request"
+     };
+     
+     $c->stash->{content} = \@message;
 }
 
 sub end : Private {

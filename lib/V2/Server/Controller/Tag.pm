@@ -58,8 +58,8 @@ sub tag_list : Private {
 
     foreach (@tag_aux) {
         @tag = {
-            id          => $_->id,
-            description => $_->description,
+	     id          => decode($enc, $_->id),
+             description => decode($enc, $_->description),
         };
 
         push( @tags, @tag );
@@ -104,8 +104,8 @@ sub get_tag : Private {
         }
 
         my $tag = {
-            id          => $tag->id,
-            description => $tag->description,
+	    id          => decode($enc, $tag->id),
+	    description => decode($enc, $tag->description),
             resources   => \@resources
         };
 
@@ -148,8 +148,8 @@ $text_str = encode($enc, $text_str);
             $new_tag->insert;
 
             $new_tag = {
-                id          => $id,
-                description => $desc
+		id          => decode($enc, $id),
+		description => decode($enc, $desc)
             };
 
             $c->stash->{content}  = $new_tag;
@@ -221,8 +221,8 @@ sub default_PUT {
             $tag->insert_or_update;
 
             my $tag = {
-                id          => $tag->id,
-                description => $tag->description
+		id          => decode($enc, $tag->id),
+		description => decode($enc, $tag->description)
             };
 
             $c->stash->{content}  = $tag;

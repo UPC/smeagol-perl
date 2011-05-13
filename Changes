@@ -1,5 +1,9 @@
 Històric de revisions del projecte smeagol.
 
+2.05   Fri May 13 20:04:13 CEST 2011
+       - evitar que es creïn tags nous en la creació d'altres recursos
+       - corregir la codificació del JSON en UTF-8
+
 2.04   Tue May 10 22:27:00 CEST 2011
        - resolts els errors en les comprovacions de les longituds
          dels atributs

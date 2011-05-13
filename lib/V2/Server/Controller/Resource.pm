@@ -133,15 +133,7 @@ sub default_POST {
             else {
 
                 #Si el tag no existeix, el creem i repetim com a dalt
-                my $new_tag = $c->model('DB::TTag')->find_or_new();
-
-                $new_tag->id($_);
-                $new_tag->insert;
-
-                my $ResTag = $c->model('DB::TResourceTag')->find_or_new();
-                $ResTag->resource_id( $new_resource->id );
-                $ResTag->tag_id( $new_tag->id );
-                $ResTag->insert;
+                $c->detach('/bad_request', []);
             }
         }
 
@@ -225,17 +217,7 @@ sub default_PUT {
 
                 }
                 else {
-
-                    #Si el tag no existeix, el creem i repetim com a dalt
-                    my $new_tag = $c->model('DB::TTag')->find_or_new();
-
-                    $new_tag->id($_);
-                    $new_tag->insert;
-
-                    my $ResTag = $c->model('DB::TResourceTag')->find_or_new();
-                    $ResTag->resource_id( $resource->id );
-                    $ResTag->tag_id( $new_tag->id );
-                    $ResTag->insert;
+		     $c->detach('/bad_request', []);
                 }
 
             }

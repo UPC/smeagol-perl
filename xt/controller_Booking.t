@@ -45,6 +45,7 @@ my $dtend   = $dt1->clone->add( days => 0, hours => 2 );
 ok( my $response_post = request POST '/booking',
     [   id_event    => "1",
         id_resource => "1",
+	info        => "Info testing",
         dtstart     => $dtstart,
         dtend       => $dtend,
         freq        => 'daily',
@@ -58,6 +59,7 @@ diag "Nou booking sense recurrència: " . $response_post->content;
 ok( $booking_aux = $j->jsonToObj( $response_post->content ) );
 
 ok( $booking_aux->{id_event}    eq 1,        "ID event correct" );
+ok( $booking_aux->{info}        eq "Info testing", "Info correct" );
 ok( $booking_aux->{id_resource} eq 1,        "ID resource correct" );
 ok( $booking_aux->{dtstart}     eq $dtstart, "DTSTART correct" );
 ok( $booking_aux->{dtend}       eq $dtend,   "DTEND correct" );
@@ -75,6 +77,7 @@ diag '###########################################';
 ok( $response_post = request POST '/booking',
     [   id_event    => "1",
         id_resource => "1",
+    info        => "Info testing",
         dtstart     => $dtstart,
         dtend       => $dtend,
         freq        => 'daily',
@@ -89,6 +92,7 @@ diag "Booking with daily recurrence: " . $response_post->content;
 ok( $booking_aux = $j->jsonToObj( $response_post->content ) );
 
 ok( $booking_aux->{id_event}    eq 1,        "ID event correct" );
+ok( $booking_aux->{info}        eq "Info testing", "Info correct" );
 ok( $booking_aux->{id_resource} eq 1,        "ID resource correct" );
 ok( $booking_aux->{dtstart}     eq $dtstart, "DTSTART correct" );
 ok( $booking_aux->{dtend}       eq $dtend,   "DTEND correct" );
@@ -109,6 +113,7 @@ diag '############################################';
 ok( $response_post = request POST '/booking',
     [   id_event    => "1",
         id_resource => "1",
+    info        => "Info testing",
         dtstart     => $dtstart,
         dtend       => $dtend,
         freq        => 'weekly',
@@ -124,6 +129,7 @@ diag "Booking with weekly recurrence: " . $response_post->content;
 ok( $booking_aux = $j->jsonToObj( $response_post->content ) );
 
 ok( $booking_aux->{id_event}    eq 1,        "ID event correct" );
+ok( $booking_aux->{info}        eq "Info testing", "Info correct" );
 ok( $booking_aux->{id_resource} eq 1,        "ID resource correct" );
 ok( $booking_aux->{dtstart}     eq $dtstart, "DTSTART correct" );
 ok( $booking_aux->{dtend}       eq $dtend,   "DTEND correct" );
@@ -144,6 +150,7 @@ diag '############################################';
 ok( $response_post = request POST '/booking',
     [   id_event     => "1",
         id_resource  => "1",
+    info        => "Info testing",
         dtstart      => $dtstart,
         dtend        => $dtend,
         freq         => 'monthly',
@@ -159,6 +166,7 @@ diag "Booking with monthly recurrence: " . $response_post->content;
 ok( $booking_aux = $j->jsonToObj( $response_post->content ) );
 
 ok( $booking_aux->{id_event}    eq 1,        "ID event correct" );
+ok( $booking_aux->{info}        eq "Info testing", "Info correct" );
 ok( $booking_aux->{id_resource} eq 1,        "ID resource correct" );
 ok( $booking_aux->{dtstart}     eq $dtstart, "DTSTART correct" );
 ok( $booking_aux->{dtend}       eq $dtend,   "DTEND correct" );
@@ -181,6 +189,7 @@ my $exception = $dtend->clone->add( days => 1 )->ymd;
 ok( $response_post = request POST '/booking',
     [   id_event    => "1",
     id_resource => "1",
+    info        => "Info testing",
     dtstart     => $dtstart,
     dtend       => $dtend,
     freq        => 'daily',
@@ -196,6 +205,7 @@ diag "Booking with daily recurrence + simple exception: " . $response_post->cont
 ok( $booking_aux = $j->jsonToObj( $response_post->content ) );
 
 ok( $booking_aux->{id_event}    eq 1,        "ID event correct" );
+ok( $booking_aux->{info}        eq "Info testing", "Info correct" );
 ok( $booking_aux->{id_resource} eq 1,        "ID resource correct" );
 ok( $booking_aux->{dtstart}     eq $dtstart, "DTSTART correct" );
 ok( $booking_aux->{dtend}       eq $dtend,   "DTEND correct" );

@@ -179,6 +179,14 @@ __PACKAGE__->has_many(
 
 # Created by DBIx::Class::Schema::Loader v0.07000 @ 2011-02-10 13:00:38
 # DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:tT60IzggQzPowfJ0YygYMw
+
+__PACKAGE__->has_many(
+     "tag_bookings",
+     "V2::Server::Schema::Result::TTagBooking",
+     { "foreign.id_booking" => "self.id" },
+     { cascade_copy       => 0, cascade_delete => 0 },
+);
+
 use DateTime;
 use DateTime::Duration;
 use DateTime::Span;
@@ -270,6 +278,21 @@ sub hash_booking {
 
     return @booking;
 }
+
+sub tag_list {
+     my ($self) = @_;
+     
+     my @tags;
+     my $tag;
+     
+     foreach my $tag ( $self->tag_bookings ) {
+	  $tag = { id => $tag->id_tag->id };
+	  push( @tags, $tag );
+     }
+     
+         return ( \@tags );
+}
+
 
 sub exrule_list {
     my ($self) = @_;

@@ -57,6 +57,13 @@ CREATE TABLE t_booking(
       by_day_month INTEGER
 );
 
+drop table if exists t_tag_booking;
+CREATE TABLE t_tag_booking (
+      id_tag	TEXT(64) REFERENCES t_tag(id) ON DELETE CASCADE ON UPDATE CASCADE,
+      id_booking INTEGER REFERENCES t_booking(id) ON DELETE CASCADE,
+      PRIMARY KEY (id_tag,id_booking)
+);
+
 drop table if exists t_exception;
 CREATE TABLE t_exception(
       id 		INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -91,6 +98,7 @@ INSERT INTO t_tag VALUES ('punter laser','descr 5');
 INSERT INTO t_tag VALUES ('microfons inalambrics','descr 6');
 INSERT INTO t_tag VALUES ('isabel','descr 7');
 INSERT INTO t_tag VALUES ('wireless','descr 8');
+INSERT INTO t_tag VALUES ('tag_booking','tag booking');
 
 INSERT INTO t_resource_tag VALUES (1,'projector');
 INSERT INTO t_resource_tag VALUES (1,'pantalla');
@@ -130,6 +138,16 @@ INSERT INTO t_booking values (2,'Info booking #2',4,1,'2011-02-16 05:00:00','201
 INSERT INTO t_booking values (3,'Info booking #3',5,2,'2011-02-16 06:00:00','2011-02-16 07:00:00','60','weekly','2','2011-01-01 00:00:00','00','06','','','');
 INSERT INTO t_booking values (4,'Info booking #4',2,3,'2011-02-16 07:00:00','2011-02-16 08:00:00','60','monthly','1','2011-01-01 00:00:00','00','07','','','');
 INSERT INTO t_booking values (5,'Info booking #5',1,4,'2011-02-16 08:00:00','2011-02-16 09:00:00','60','yearly','1','2014-02-16 09:00:00','00','08','','02','16');
+
+INSERT INTO t_tag_booking values ('tag_booking',1);
+INSERT INTO t_tag_booking values ('tag_booking',2);
+INSERT INTO t_tag_booking values ('tag_booking',3);
+INSERT INTO t_tag_booking values ('tag_booking',4);
+INSERT INTO t_tag_booking values ('tag_booking',5);
+INSERT INTO t_tag_booking values ('tag_booking',6);
+INSERT INTO t_tag_booking values ('tag_booking',7);
+INSERT INTO t_tag_booking values ('tag_booking',9);
+
 
 INSERT INTO t_tag_event values ('projector',1);
 INSERT INTO t_tag_event values ('pantalla',1);

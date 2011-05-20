@@ -112,6 +112,7 @@ sub get_booking : Private {
                         interval    => $booking_aux->interval,
                         byminute    => $booking_aux->by_minute,
                         byhour      => $booking_aux->by_hour,
+                        tags        => $booking_aux->tag_list,
                 };
 
             }
@@ -131,6 +132,7 @@ sub get_booking : Private {
                         byminute    => $booking_aux->by_minute,
                         byhour      => $booking_aux->by_hour,
                         byday       => $booking_aux->by_day,
+                        tags        => $booking_aux->tag_list,                        
                 };
 
             }
@@ -150,8 +152,9 @@ sub get_booking : Private {
                         byminute    => $booking_aux->by_minute,
                         byhour      => $booking_aux->by_hour,
                         bymonth     => $booking_aux->by_month,
-                        bymonthday  => $booking_aux->by_day_month
-                };
+                        bymonthday  => $booking_aux->by_day_month,
+                        tags        => $booking_aux->tag_list,
+		};
             }
 
             default {
@@ -169,7 +172,8 @@ sub get_booking : Private {
                         byminute    => $booking_aux->by_minute,
                         byhour      => $booking_aux->by_hour,
                         bymonth     => $booking_aux->by_month,
-                        bymonthday  => $booking_aux->by_day_month
+                        bymonthday  => $booking_aux->by_day_month,
+                        tags        => $booking_aux->tag_list,
                 };
             }
         };
@@ -348,6 +352,8 @@ sub default_POST {
             day   => $ex_day
         );
     }
+    
+    my @tags        = split( ',', $req->parameters->{tags} );
 
 #dtstart and dtend are parsed in case that some needed parameters to build the recurrence of the
 #booking aren't provided
@@ -402,6 +408,7 @@ sub default_POST {
                 duration    => $new_booking->duration,
                 by_minute   => $new_booking->by_minute,
                 by_hour     => $new_booking->by_hour,
+                tags        => \@tags,
             };
         }
 
@@ -434,6 +441,7 @@ sub default_POST {
                 by_minute   => $new_booking->by_minute,
                 by_hour     => $new_booking->by_hour,
                 by_day      => $new_booking->by_day,
+                tags        => \@tags,
             };
 
         }
@@ -467,7 +475,8 @@ sub default_POST {
                 by_minute    => $new_booking->by_minute,
                 by_hour      => $new_booking->by_hour,
                 by_month     => $new_booking->by_month,
-                by_day_month => $new_booking->by_day_month
+                by_day_month => $new_booking->by_day_month,
+                tags        => \@tags,
             };
         }
 
@@ -502,7 +511,8 @@ sub default_POST {
                 by_hour      => $new_booking->by_hour,
                 by_day       => $new_booking->by_day,
                 by_month     => $new_booking->by_month,
-                by_day_month => $new_booking->by_day_month
+                by_day_month => $new_booking->by_day_month,
+                tags        => \@tags,
             };
 
         }
@@ -515,8 +525,11 @@ sub default_POST {
 
     $c->visit( '/check/check_overlap', [] );
     my @message;
+    
+    my $id_tag; my $tags;
+    
     if ( $c->stash->{booking_ok} == 1 ) {
-
+	 
         if (   $c->stash->{overlap} == 1
             or $c->stash->{empty} == 1
             or $c->stash->{too_long} == 1 )
@@ -539,7 +552,24 @@ sub default_POST {
             $c->stash->{template} = 'booking/get_list.tt';
         }
         else {
-            $new_booking->insert;
+
+	     $new_booking->insert;
+	    
+	     foreach (@tags) {
+		  $id_tag = $_;
+		  
+		  $tags = $c->model('DB::TTag')->find( { id => $id_tag } );
+		  
+		  if ($tags) {
+		       my $tag_booking = $c->model('DB::TTagBooking')->find_or_new();
+		       $tag_booking->id_tag($id_tag);
+		       $tag_booking->id_booking( $new_booking->id );
+		       $tag_booking->insert;
+		  }
+		  else {
+		       $c->detach( '/bad_request', [] );
+		  }
+	     }
 
             $c->stash->{content} = $booking;
             $c->stash->{booking} = $booking;
@@ -605,6 +635,8 @@ sub default_PUT {
     $c->stash->{id_event}    = $id_event;
     $c->stash->{id_resource} = $id_resource;
 
+    my @tags        = split( ',', $req->parameters->{tags} );
+    
     #Do the resource and the event exist?
     $c->visit( '/check/check_booking', [] );
 
@@ -641,6 +673,7 @@ sub default_PUT {
                 duration    => $booking->duration,
                 by_minute   => $booking->by_minute,
                 by_hour     => $booking->by_hour,
+                tags        => \@tags,
             };
         }
 
@@ -672,6 +705,7 @@ sub default_PUT {
                 by_minute   => $booking->by_minute,
                 by_hour     => $booking->by_hour,
                 by_day      => $booking->by_day,
+                tags        => \@tags,
             };
 
         }
@@ -705,7 +739,8 @@ sub default_PUT {
                 by_minute    => $booking->by_minute,
                 by_hour      => $booking->by_hour,
                 by_month     => $booking->by_month,
-                by_day_month => $booking->by_day_month
+                by_day_month => $booking->by_day_month,
+                tags        => \@tags,
             };
         }
 
@@ -740,7 +775,8 @@ sub default_PUT {
                 by_hour      => $booking->by_hour,
                 by_day       => $booking->by_day,
                 by_month     => $booking->by_month,
-                by_day_month => $booking->by_day_month
+                by_day_month => $booking->by_day_month,
+                tags        => \@tags,
             };
 
         }
@@ -753,6 +789,8 @@ sub default_PUT {
     $c->stash->{PUT}         = 1;
     $c->visit( '/check/check_overlap', [] );
 
+    my $id_tag; my $tags;
+    
     if ( $c->stash->{booking_ok} == 1 ) {
 
         if (   $c->stash->{overlap} == 1
@@ -768,6 +806,23 @@ sub default_PUT {
         }
         else {
             $booking->update;
+	    
+	    foreach (@tags) {
+		 $id_tag = $_;
+		 
+		 $tags = $c->model('DB::TTag')->find( { id => $id_tag } );
+		 
+		 if ($tags) {
+		      my $tag_booking = $c->model('DB::TTagBooking')->find_or_new();
+		      $tag_booking->id_tag($id_tag);
+		      $tag_booking->id_booking( $booking->id );
+		      $tag_booking->insert;
+		 }
+		   else {
+			$c->detach( '/bad_request', [] );
+		   }
+	    }
+	    
 
             $c->stash->{content} = $jbooking;
             $c->stash->{booking} = $jbooking;

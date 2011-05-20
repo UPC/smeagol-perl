@@ -196,7 +196,7 @@ sub default_POST {
 
 #dtstart and dtend are parsed in case that some needed parameters to build the recurrence of the
 #booking aren't provided
-    $dtstart = ParseDate($dtstart);
+    $dtstart  = ParseDate($dtstart);
     $dtend    = ParseDate($dtend);
     $duration = $dtend - $dtstart;
 
@@ -361,11 +361,11 @@ sub default_POST {
         }
         else {
             $new_exception->insert;
-	    $exception->{id} = $new_exception->id;  
-        $c->stash->{content}   = $exception;
-        $c->stash->{exception} = $exception;
-        $c->response->status(201);
-        $c->stash->{template} = 'exception/get_exception.tt';
+            $exception->{id}       = $new_exception->id;
+            $c->stash->{content}   = $exception;
+            $c->stash->{exception} = $exception;
+            $c->response->status(201);
+            $c->stash->{template} = 'exception/get_exception.tt';
 
         }
     }

@@ -99,8 +99,8 @@ __PACKAGE__->table("t_booking");
 __PACKAGE__->add_columns(
     "id",
     { data_type => "integer", is_auto_increment => 1, is_nullable => 1 },
-     "info",
-     { data_type => "text", is_nullable => 1, size => 256 },			 
+    "info",
+    { data_type => "text", is_nullable => 1, size => 256 },
     "id_resource",
     { data_type => "integer", is_foreign_key => 1, is_nullable => 1 },
     "id_event",
@@ -191,7 +191,7 @@ sub hash_booking {
         when ('daily') {
             @booking = {
                 id              => $self->id,
-                                info => $self->info,
+                    info        => $self->info,
                     id_resource => $self->id_resource->id,
                     id_event    => $self->id_event->id,
                     dtstart     => $self->dtstart->iso8601(),
@@ -210,7 +210,7 @@ sub hash_booking {
         when ('weekly') {
             @booking = {
                 id              => $self->id,
-                                info => $self->info,
+                    info        => $self->info,
                     id_resource => $self->id_resource->id,
                     id_event    => $self->id_event->id,
                     dtstart     => $self->dtstart->iso8601(),
@@ -230,7 +230,7 @@ sub hash_booking {
         when ('monthly') {
             @booking = {
                 id              => $self->id,
-                                info => $self->info,
+                    info        => $self->info,
                     id_resource => $self->id_resource->id,
                     id_event    => $self->id_event->id,
                     dtstart     => $self->dtstart->iso8601(),
@@ -250,7 +250,7 @@ sub hash_booking {
         default {
             @booking = {
                 id              => $self->id,
-                                info => $self->info,
+                    info        => $self->info,
                     id_resource => $self->id_resource->id,
                     id_event    => $self->id_event->id,
                     dtstart     => $self->dtstart->iso8601(),

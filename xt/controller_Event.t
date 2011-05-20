@@ -28,7 +28,7 @@ my $id;
 foreach (@event) {
     $id = $_->{"id"};
     ok( $response = request GET '/event/' . $id, [] );
-    is( $response->headers->{status}, '200', 'Response status is 200: OK');
+    is( $response->headers->{status}, '200', 'Response status is 200: OK' );
 }
 
 =head1
@@ -46,8 +46,9 @@ ok( my $response_post = request POST '/event',
         tags        => 'test,prova'
     ]
 );
-diag "Resposta: ".$response_post->content;
-is( $response_post->headers->{status}, '201', 'Response status is 201: Created');
+diag "Resposta: " . $response_post->content;
+is( $response_post->headers->{status},
+    '201', 'Response status is 201: Created' );
 
 $event_aux = $j->from_json( $response_post->content );
 my $eid = $event_aux->{id};
@@ -78,21 +79,23 @@ diag $response_put->content;
 diag '#########Deleting event#########';
 diag '###################################';
 
-my $request_DELETE = DELETE( 'event/'.$eid);
+my $request_DELETE = DELETE( 'event/' . $eid );
 $request_DELETE->header( Accept => 'application/json' );
-ok(my $response_DELETE = request($request_DELETE), 'Delete request');
-is( $response_DELETE->headers->{status}, '200', 'Response status is 200: OK');
+ok( my $response_DELETE = request($request_DELETE), 'Delete request' );
+is( $response_DELETE->headers->{status}, '200',
+    'Response status is 200: OK' );
 
-$request_DELETE = DELETE( 'tag/edited event');
+$request_DELETE = DELETE('tag/edited event');
 $request_DELETE->header( Accept => 'application/json' );
-ok($response_DELETE = request($request_DELETE), 'Delete request first tag');
+ok( $response_DELETE = request($request_DELETE), 'Delete request first tag' );
 
-$request_DELETE = DELETE( 'tag/trololo');
+$request_DELETE = DELETE('tag/trololo');
 $request_DELETE->header( Accept => 'application/json' );
-ok($response_DELETE = request($request_DELETE), 'Delete request second tag');
+ok( $response_DELETE = request($request_DELETE),
+    'Delete request second tag' );
 
-$request_DELETE = DELETE( 'tag/test');
+$request_DELETE = DELETE('tag/test');
 $request_DELETE->header( Accept => 'application/json' );
-ok($response_DELETE = request($request_DELETE), 'Delete request third tag');
+ok( $response_DELETE = request($request_DELETE), 'Delete request third tag' );
 
 done_testing();

@@ -57,22 +57,22 @@ $id = $resource_aux->{id};
 
 diag "Last resource created ID: " . $id;
 
-ok( my $response_put = request PUT '/resource/'.$id,
+ok( my $response_put = request PUT '/resource/' . $id,
     [   info        => 'Testing resource edition',
         description => ':-P',
         tags        => 'test,edited'
     ]
 );
 
-
 ok( $response = request GET '/resource/' . $id, [] );
 diag 'Edited Resource ' . $id . ' ' . $response->content;
 
 diag '#########Deleting resource#########';
 diag '###################################';
-my $request_DELETE = DELETE( 'resource/'.$id);
+my $request_DELETE = DELETE( 'resource/' . $id );
 $request_DELETE->header( Accept => 'application/json' );
-ok(my $response_DELETE = request($request_DELETE), 'Delete request');
-is( $response_DELETE->headers->{status}, '200', 'Response status is 200: OK');
+ok( my $response_DELETE = request($request_DELETE), 'Delete request' );
+is( $response_DELETE->headers->{status}, '200',
+    'Response status is 200: OK' );
 
 done_testing();

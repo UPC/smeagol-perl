@@ -41,7 +41,7 @@ sub begin : Private {
     $c->stash->{id_resource} = $c->request->query_parameters->{resource};
     $c->stash->{id_event}    = $c->request->query_parameters->{event};
     $c->stash->{ical}        = $c->request->query_parameters->{ical};
-    $c->stash->{format} = $c->request->headers->{"accept"}
+    $c->stash->{format}      = $c->request->headers->{"accept"}
         || 'application/json';
 }
 
@@ -101,7 +101,7 @@ sub get_booking : Private {
             when ('daily') {
                 $booking = {
                     id              => $booking_aux->id,
-                    info => $booking_aux->info,
+                        info        => $booking_aux->info,
                         id_resource => $booking_aux->id_resource->id,
                         id_event    => $booking_aux->id_event->id,
                         dtstart     => $booking_aux->dtstart->iso8601(),
@@ -119,7 +119,7 @@ sub get_booking : Private {
             when ('weekly') {
                 $booking = {
                     id              => $booking_aux->id,
-                                        info => $booking_aux->info,
+                        info        => $booking_aux->info,
                         id_resource => $booking_aux->id_resource->id,
                         id_event    => $booking_aux->id_event->id,
                         dtstart     => $booking_aux->dtstart->iso8601(),
@@ -138,7 +138,7 @@ sub get_booking : Private {
             when ('monthly') {
                 $booking = {
                     id              => $booking_aux->id,
-                                        info => $booking_aux->info,
+                        info        => $booking_aux->info,
                         id_resource => $booking_aux->id_resource->id,
                         id_event    => $booking_aux->id_event->id,
                         dtstart     => $booking_aux->dtstart->iso8601(),
@@ -157,7 +157,7 @@ sub get_booking : Private {
             default {
                 $booking = {
                     id              => $booking_aux->id,
-                                        info => $booking_aux->info,
+                        info        => $booking_aux->info,
                         id_resource => $booking_aux->id_resource->id,
                         id_event    => $booking_aux->id_event->id,
                         dtstart     => $booking_aux->dtstart->iso8601(),
@@ -326,31 +326,32 @@ sub default_POST {
     my ( $self, $c ) = @_;
     my $req = $c->request;
 
-    my $info = $req->parameters->{info};
+    my $info        = $req->parameters->{info};
     my $id_resource = $req->parameters->{id_resource};
     my $id_event    = $req->parameters->{id_event};
 
     my $dtstart = $req->parameters->{dtstart};
     my $dtend   = $req->parameters->{dtend};
     my $duration;
-    
-    my $exception;
-    if ($req->parameters->{exception}){
-	  my $j = JSON::Any->new;
-	  
-	  my $exc_aux = $j->jsonToObj( $req->parameters->{exception} );
 
-	  my ($ex_year, $ex_month, $ex_day) = split('-',$exc_aux->{exception});
-	  $exception = DateTime->new(
-		year => $ex_year,
-		month => $ex_month,
-		day => $ex_day
-          );
-      }
+    my $exception;
+    if ( $req->parameters->{exception} ) {
+        my $j = JSON::Any->new;
+
+        my $exc_aux = $j->jsonToObj( $req->parameters->{exception} );
+
+        my ( $ex_year, $ex_month, $ex_day )
+            = split( '-', $exc_aux->{exception} );
+        $exception = DateTime->new(
+            year  => $ex_year,
+            month => $ex_month,
+            day   => $ex_day
+        );
+    }
 
 #dtstart and dtend are parsed in case that some needed parameters to build the recurrence of the
 #booking aren't provided
-    $dtstart = ParseDate($dtstart);
+    $dtstart  = ParseDate($dtstart);
     $dtend    = ParseDate($dtend);
     $duration = $dtend - $dtstart;
 
@@ -375,8 +376,8 @@ sub default_POST {
     my $booking;
 
     given ($freq) {
-       when ('daily') {
-	    $new_booking->info($info);
+        when ('daily') {
+            $new_booking->info($info);
             $new_booking->id_resource($id_resource);
             $new_booking->id_event($id_event);
             $new_booking->dtstart($dtstart);
@@ -405,8 +406,8 @@ sub default_POST {
         }
 
         when ('weekly') {
-	     
-	     $new_booking->info($info);
+
+            $new_booking->info($info);
             $new_booking->id_resource($id_resource);
             $new_booking->id_event($id_event);
             $new_booking->dtstart($dtstart);
@@ -421,7 +422,7 @@ sub default_POST {
 
             my $booking = {
                 id          => $new_booking->id,
-                                info        => $new_booking->info,
+                info        => $new_booking->info,
                 id_resource => $new_booking->id_resource->id,
                 id_event    => $new_booking->id_event->id,
                 dtstart     => $new_booking->dtstart->iso8601(),
@@ -438,7 +439,7 @@ sub default_POST {
         }
 
         when ('monthly') {
-	     $new_booking->info($info);
+            $new_booking->info($info);
             $new_booking->id_resource($id_resource);
             $new_booking->id_event($id_event);
             $new_booking->dtstart($dtstart);
@@ -454,7 +455,7 @@ sub default_POST {
 
             my $booking = {
                 id           => $new_booking->id,
-                                info        => $new_booking->info,
+                info         => $new_booking->info,
                 id_resource  => $new_booking->id_resource->id,
                 id_event     => $new_booking->id_event->id,
                 dtstart      => $new_booking->dtstart->iso8601(),
@@ -471,7 +472,7 @@ sub default_POST {
         }
 
         default {
-	     $new_booking->info($info);
+            $new_booking->info($info);
             $new_booking->id_resource($id_resource);
             $new_booking->id_event($id_event);
             $new_booking->dtstart($dtstart);
@@ -488,7 +489,7 @@ sub default_POST {
 
             my $booking = {
                 id           => $new_booking->id,
-                                info        => $new_booking->info,
+                info         => $new_booking->info,
                 id_resource  => $new_booking->id_resource->id,
                 id_event     => $new_booking->id_event->id,
                 dtstart      => $new_booking->dtstart->iso8601(),
@@ -508,7 +509,9 @@ sub default_POST {
     };
 
     $c->stash->{new_booking} = $new_booking;
-    if ($c->request->parameters->{exception}) {$c->stash->{new_exception} = $exception};
+    if ( $c->request->parameters->{exception} ) {
+        $c->stash->{new_exception} = $exception;
+    }
 
     $c->visit( '/check/check_overlap', [] );
     my @message;
@@ -568,7 +571,7 @@ sub default_PUT {
     my ( $self, $c, $res, $id ) = @_;
     my $req = $c->request;
 
-    my $info = $req->parameters->{info};
+    my $info        = $req->parameters->{info};
     my $id_resource = $req->parameters->{id_resource};
     my $id_event    = $req->parameters->{id_event};
 
@@ -578,7 +581,7 @@ sub default_PUT {
 
 #dtstart and dtend are parsed in case that some needed parameters to build the recurrence of the
 #booking aren't provided
-    $dtstart = ParseDate($dtstart);
+    $dtstart  = ParseDate($dtstart);
     $dtend    = ParseDate($dtend);
     $duration = $dtend - $dtstart;
 
@@ -613,7 +616,7 @@ sub default_PUT {
 #builds the JSON objects
 #Don't mess with the duration, the result can be weird.
         when ('daily') {
-	     $booking->info($info);
+            $booking->info($info);
             $booking->id_resource($id_resource);
             $booking->id_event($id_event);
             $booking->dtstart($dtstart);
@@ -642,7 +645,7 @@ sub default_PUT {
         }
 
         when ('weekly') {
-	     $booking->info($info);
+            $booking->info($info);
             $booking->id_resource($id_resource);
             $booking->id_event($id_event);
             $booking->dtstart($dtstart);
@@ -657,7 +660,7 @@ sub default_PUT {
 
             $jbooking = {
                 id          => $booking->id,
-                                info        => $booking->info,
+                info        => $booking->info,
                 id_resource => $booking->id_resource->id,
                 id_event    => $booking->id_event->id,
                 dtstart     => $booking->dtstart->iso8601(),
@@ -674,7 +677,7 @@ sub default_PUT {
         }
 
         when ('monthly') {
-	     $booking->info($info);
+            $booking->info($info);
             $booking->id_resource($id_resource);
             $booking->id_event($id_event);
             $booking->dtstart($dtstart);
@@ -690,7 +693,7 @@ sub default_PUT {
 
             $jbooking = {
                 id           => $booking->id,
-                                info        => $booking->info,
+                info         => $booking->info,
                 id_resource  => $booking->id_resource->id,
                 id_event     => $booking->id_event->id,
                 dtstart      => $booking->dtstart->iso8601(),
@@ -707,7 +710,7 @@ sub default_PUT {
         }
 
         default {
-	     $booking->info($info);
+            $booking->info($info);
             $booking->id_resource($id_resource);
             $booking->id_event($id_event);
             $booking->dtstart($dtstart);
@@ -724,7 +727,7 @@ sub default_PUT {
 
             $jbooking = {
                 id           => $booking->id,
-                                info        => $booking->info,
+                info         => $booking->info,
                 id_resource  => $booking->id_resource->id,
                 id_event     => $booking->id_event->id,
                 dtstart      => $booking->dtstart->iso8601(),

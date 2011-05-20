@@ -5,8 +5,8 @@ use namespace::autoclean;
 use Data::Dumper;
 use DateTime;
 
-use Encode qw(encode decode); 
-my $enc = 'utf-8';
+use Encode qw(encode decode);
+my $enc     = 'utf-8';
 my $VERSION = $V2::Server::VERSION;
 BEGIN { extends 'Catalyst::Controller::REST' }
 
@@ -55,8 +55,8 @@ sub get_event : Local {
     if ($event_aux) {
         my $event = {
             id          => $event_aux->id,
-            info        => decode($enc, $event_aux->info),
-            description => decode($enc, $event_aux->description),
+            info        => decode( $enc, $event_aux->info ),
+            description => decode( $enc, $event_aux->description ),
             starts      => $event_aux->starts->iso8601(),
             ends        => $event_aux->ends->iso8601(),
             tags        => $event_aux->tag_list,
@@ -139,14 +139,14 @@ sub default_POST {
                 $tag_event->insert;
             }
             else {
-                $c->detach('/bad_request', []);
+                $c->detach( '/bad_request', [] );
             }
         }
 
         my $event = {
             id          => $new_event->id,
-            info        => decode($enc, $new_event->info),
-            description => decode($enc, $new_event->description),
+            info        => decode( $enc, $new_event->info ),
+            description => decode( $enc, $new_event->description ),
             starts      => $new_event->starts->iso8601(),
             ends        => $new_event->ends->iso8601(),
             tags        => $new_event->tag_list,
@@ -226,14 +226,14 @@ sub default_PUT {
                     $tag_event->insert;
                 }
                 else {
-                    $c->detach('/bad_request', []);
+                    $c->detach( '/bad_request', [] );
                 }
             }
 
             my $event = {
                 id          => $event->id,
-                info        => decode($enc, $event->info),
-                description => decode($enc, $event->description),
+                info        => decode( $enc, $event->info ),
+                description => decode( $enc, $event->description ),
                 starts      => $event->starts->iso8601(),
                 ends        => $event->ends->iso8601(),
                 tags        => $event->tag_list,
@@ -317,7 +317,7 @@ sub end : Private {
     my ( $self, $c ) = @_;
 
     if ( $c->stash->{format} ne "application/json" ) {
-	$c->stash->{VERSION} = $VERSION;
+        $c->stash->{VERSION} = $VERSION;
         $c->forward( $c->view('HTML') );
     }
     else {

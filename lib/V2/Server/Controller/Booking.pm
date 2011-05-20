@@ -101,6 +101,7 @@ sub get_booking : Private {
             when ('daily') {
                 $booking = {
                     id              => $booking_aux->id,
+                    info => $booking_aux->info,
                         id_resource => $booking_aux->id_resource->id,
                         id_event    => $booking_aux->id_event->id,
                         dtstart     => $booking_aux->dtstart->iso8601(),
@@ -118,6 +119,7 @@ sub get_booking : Private {
             when ('weekly') {
                 $booking = {
                     id              => $booking_aux->id,
+                                        info => $booking_aux->info,
                         id_resource => $booking_aux->id_resource->id,
                         id_event    => $booking_aux->id_event->id,
                         dtstart     => $booking_aux->dtstart->iso8601(),
@@ -136,6 +138,7 @@ sub get_booking : Private {
             when ('monthly') {
                 $booking = {
                     id              => $booking_aux->id,
+                                        info => $booking_aux->info,
                         id_resource => $booking_aux->id_resource->id,
                         id_event    => $booking_aux->id_event->id,
                         dtstart     => $booking_aux->dtstart->iso8601(),
@@ -154,6 +157,7 @@ sub get_booking : Private {
             default {
                 $booking = {
                     id              => $booking_aux->id,
+                                        info => $booking_aux->info,
                         id_resource => $booking_aux->id_resource->id,
                         id_event    => $booking_aux->id_event->id,
                         dtstart     => $booking_aux->dtstart->iso8601(),

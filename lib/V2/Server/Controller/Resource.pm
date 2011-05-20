@@ -4,8 +4,8 @@ use Moose;
 use namespace::autoclean;
 use Data::Dumper;
 
-use Encode qw(encode decode); 
-my $enc = 'utf-8';
+use Encode qw(encode decode);
+my $enc     = 'utf-8';
 my $VERSION = $V2::Server::VERSION;
 BEGIN { extends 'Catalyst::Controller::REST' }
 
@@ -28,7 +28,8 @@ Catalyst Controller.
 sub begin : Private {
     my ( $self, $c ) = @_;
 
-    $c->stash->{format} = $c->request->headers->{"accept"} || 'application/json';
+    $c->stash->{format} = $c->request->headers->{"accept"}
+        || 'application/json';
 
 }
 
@@ -61,8 +62,8 @@ sub get_resource : Private {
     else {
         my $res = {
             id          => $resource->id,
-            description => decode($enc, $resource->description),
-            info        => decode($enc, $resource->info),
+            description => decode( $enc, $resource->description ),
+            info        => decode( $enc, $resource->info ),
             tags        => $resource->tag_list,
             bookings    => $resource->book_list
         };
@@ -104,9 +105,13 @@ sub default_POST {
 
 # If all is correct $c->stash->{event_ok} should be 1, otherwise it will be 0.
 
-    my @resource_exist = $c->model('DB::TResource')->search({description => $descr});
+    my @resource_exist
+        = $c->model('DB::TResource')->search( { description => $descr } );
 
-    if (@resource_exist > 0) {$c->stash->{resource_ok} = 0; $c->stash->{conflict} = 1;}
+    if ( @resource_exist > 0 ) {
+        $c->stash->{resource_ok} = 0;
+        $c->stash->{conflict}    = 1;
+    }
 
     if ( $c->stash->{resource_ok} ) {
 
@@ -136,15 +141,15 @@ sub default_POST {
             else {
 
                 #Si el tag no existeix, el creem i repetim com a dalt
-                $c->detach('/bad_request', []);
+                $c->detach( '/bad_request', [] );
             }
         }
 
 #Un cop tenim el tema dels tags aclarit, muntem el json amb les dades del recurs
         my $resource = {
             id          => $new_resource->id,
-            description => decode($enc, $new_resource->description),
-	    info        => decode($enc, $new_resource->info),
+            description => decode( $enc, $new_resource->description ),
+            info        => decode( $enc, $new_resource->info ),
             tags        => $new_resource->tag_list,
         };
 
@@ -155,24 +160,31 @@ sub default_POST {
         $c->stash->{template} = 'resource/get_resource.tt';
     }
     else {
-	if ($c->stash->{conflict}) {
-	  my @message = { message =>
-		  "Error: A resource with the same description already exist", };
-	  $c->stash->{content} = \@message;
-	  $c->response->status(409);
-	  $c->stash->{error}
-	      = "Error: A resource with the same description already exist";
-	  $c->response->content_type('text/html');
-	  $c->stash->{template} = 'resource/get_list.tt';
-	}else {        
-	  my @message = { message =>
-	  "Error: Check the info and description of the resource", };
-	  $c->stash->{content} = \@message;
-	  $c->response->status(400);
-	  $c->stash->{error} = "Error: Check the info and description of the resource";
-	  $c->response->content_type('text/html');
-	  $c->stash->{template} = 'resource/get_list.tt';}
-         }
+        if ( $c->stash->{conflict} ) {
+            my @message
+                = { message =>
+                    "Error: A resource with the same description already exist",
+                };
+            $c->stash->{content} = \@message;
+            $c->response->status(409);
+            $c->stash->{error}
+                = "Error: A resource with the same description already exist";
+            $c->response->content_type('text/html');
+            $c->stash->{template} = 'resource/get_list.tt';
+        }
+        else {
+            my @message
+                = { message =>
+                    "Error: Check the info and description of the resource",
+                };
+            $c->stash->{content} = \@message;
+            $c->response->status(400);
+            $c->stash->{error}
+                = "Error: Check the info and description of the resource";
+            $c->response->content_type('text/html');
+            $c->stash->{template} = 'resource/get_list.tt';
+        }
+    }
 }
 
 sub default_PUT {
@@ -183,15 +195,20 @@ sub default_PUT {
 
     my $tags_aux = $req->parameters->{tags};
     my $info     = $req->parameters->{info};
-    my @tags = split( /,/, $tags_aux );
+    my @tags     = split( /,/, $tags_aux );
 
     my $resource = $c->model('DB::TResource')->find( { id => $id } );
 
     if ($resource) {
         $c->visit( '/check/check_resource', [ $info, $descr ] );
-	my @resource_exist = $c->model('DB::TResource')->search({description => $descr});
+        my @resource_exist
+            = $c->model('DB::TResource')->search( { description => $descr } );
 
-	if (@resource_exist > 0) {$c->stash->{resource_ok} = 0; $c->stash->{conflict} = 1;}
+        if ( @resource_exist > 0 ) {
+            $c->stash->{resource_ok} = 0;
+            $c->stash->{conflict}    = 1;
+        }
+
 # If all is correct $c->stash->{event_ok} should be 1, otherwise it will be 0.
         if ( $c->stash->{resource_ok} ) {
             $resource->description($descr);
@@ -220,15 +237,15 @@ sub default_PUT {
 
                 }
                 else {
-		     $c->detach('/bad_request', []);
+                    $c->detach( '/bad_request', [] );
                 }
 
             }
 
             my @resource = {
                 id          => $resource->id,
-                description => decode($enc, $resource->description),
-		info        => decode($enc, $resource->info),
+                description => decode( $enc, $resource->description ),
+                info        => decode( $enc, $resource->info ),
                 tags        => $resource->tag_list,
             };
 
@@ -237,25 +254,32 @@ sub default_PUT {
             $c->response->status(200);
         }
         else {
-	  if ($c->stash->{conflict}) {
-	    my @message = { message =>
-		    "Error: A resource with the same description already exist", };
-	    $c->stash->{content} = \@message;
-	    $c->response->status(409);
-	    $c->stash->{error}
-		= "Error: A resource with the same description already exist";
-	    $c->response->content_type('text/html');
-	    $c->stash->{template} = 'resource/get_list.tt';
-	  }else {        
-	    my @message = { message =>
-	    "Error: Check the info and description of the resource", };
-	    $c->stash->{content} = \@message;
-	    $c->response->status(400);
-	    $c->stash->{error} = "Error: Check the info and description of the resource";
-	    $c->response->content_type('text/html');
-	    $c->stash->{template} = 'resource/get_list.tt';}
-	  }
+            if ( $c->stash->{conflict} ) {
+                my @message
+                    = { message =>
+                        "Error: A resource with the same description already exist",
+                    };
+                $c->stash->{content} = \@message;
+                $c->response->status(409);
+                $c->stash->{error}
+                    = "Error: A resource with the same description already exist";
+                $c->response->content_type('text/html');
+                $c->stash->{template} = 'resource/get_list.tt';
+            }
+            else {
+                my @message
+                    = { message =>
+                        "Error: Check the info and description of the resource",
+                    };
+                $c->stash->{content} = \@message;
+                $c->response->status(400);
+                $c->stash->{error}
+                    = "Error: Check the info and description of the resource";
+                $c->response->content_type('text/html');
+                $c->stash->{template} = 'resource/get_list.tt';
+            }
         }
+    }
     else {
         my @message
             = { message => "We can't find what you are looking for." };
@@ -274,15 +298,16 @@ sub default_DELETE {
     my $resource_aux = $c->model('DB::TResource')->find( { id => $id } );
 
     if ($resource_aux) {
+
 # 	 my @res_tag = $c->model('DB::TResourceTag')->search( {resource_id => $id} );
-# 	 
+#
 # 	 foreach (@res_tag) {
 # 	      $_->delete;
 # 	 }
-	 
+
         $resource_aux->delete;
 
-        $c->forward('resource_list', []);
+        $c->forward( 'resource_list', [] );
     }
     else {
 
@@ -299,7 +324,7 @@ sub end : Private {
     my ( $self, $c ) = @_;
 
     if ( $c->stash->{format} ne "application/json" ) {
-	$c->stash->{VERSION} = $VERSION;
+        $c->stash->{VERSION} = $VERSION;
         $c->forward( $c->view('HTML') );
     }
     else {

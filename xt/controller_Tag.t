@@ -58,28 +58,30 @@ ok( $tag_aux = $j->jsonToObj( $response_post->content ) );
 diag '###################################';
 diag '###########Editing tag ###########';
 diag '###################################';
-my $request_PUT = PUT('/tag/test', []);
-$request_PUT->header( Accept => 'application/json' );
+my $request_PUT = PUT( '/tag/test', [] );
+$request_PUT->header( Accept      => 'application/json' );
 $request_PUT->header( description => 'Description edited' );
 
-ok(my $response_PUT = request($request_PUT), 'Delete request');
+ok( my $response_PUT = request($request_PUT), 'Delete request' );
 
 diag "Edited tag: " . $response_PUT->content;
 
 diag '###################################';
 diag '###########Deleting tag ###########';
 diag '###################################';
-my $request_DELETE = DELETE( 'tag/test');
+my $request_DELETE = DELETE('tag/test');
 $request_DELETE->header( Accept => 'application/json' );
-ok(my $response_DELETE = request($request_DELETE), 'Delete request');
-is( $response_DELETE->headers->{status}, '200', 'Response status is 200: OK');
+ok( my $response_DELETE = request($request_DELETE), 'Delete request' );
+is( $response_DELETE->headers->{status}, '200',
+    'Response status is 200: OK' );
 
 diag '###########################################';
 diag '##Creating tag with invalid id (too long)##';
 diag '###########################################';
 
 ok( $response_post = request POST '/tag',
-    [   id => 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+    [   id =>
+            'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
         description =>
             'Testing porpouses. It can be deleted with no consequences'
     ],
@@ -105,6 +107,5 @@ ok( $response_post = request POST '/tag',
 diag "Nou tag: " . $response_post->content;
 
 ok( $tag_aux = $j->jsonToObj( $response_post->content ) );
-
 
 done_testing();

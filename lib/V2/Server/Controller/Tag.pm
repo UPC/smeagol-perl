@@ -6,8 +6,8 @@ use Data::Dumper;
 use V2::Server::Obj::Tag;
 use Exception::Class::TryCatch;
 
-use Encode qw(encode decode); 
-my $enc = 'utf-8';
+use Encode qw(encode decode);
+my $enc     = 'utf-8';
 my $VERSION = $V2::Server::VERSION;
 BEGIN { extends 'Catalyst::Controller::REST' }
 
@@ -58,8 +58,8 @@ sub tag_list : Private {
 
     foreach (@tag_aux) {
         @tag = {
-	     id          => decode($enc, $_->id),
-             description => decode($enc, $_->description),
+            id          => decode( $enc, $_->id ),
+            description => decode( $enc, $_->description ),
         };
 
         push( @tags, @tag );
@@ -74,11 +74,11 @@ sub tag_list : Private {
 sub get_tag : Private {
     my ( $self, $c, $id ) = @_;
     my @message;
-    
-    $id   = decode($enc, $id);
+
+    $id = decode( $enc, $id );
     $id = lc $id;
-    $id = encode($enc, $id);
-    
+    $id = encode( $enc, $id );
+
     my $tag = $c->model('DB::TTag')->find( { id => $id } );
 
     if ( !$tag ) {
@@ -104,8 +104,8 @@ sub get_tag : Private {
         }
 
         my $tag = {
-	    id          => decode($enc, $tag->id),
-	    description => decode($enc, $tag->description),
+            id          => decode( $enc, $tag->id ),
+            description => decode( $enc, $tag->description ),
             resources   => \@resources
         };
 
@@ -127,13 +127,15 @@ decode($enc, $str);
 $text_str = lc $text_str; 
 $text_str = encode($enc, $text_str);
 =cut
-    
-    my $id   = decode($enc, $req->parameters->{id});
+
+    my $id = decode( $enc, $req->parameters->{id} );
     $id = lc $id;
-    $id = encode($enc, $id);
-    my $desc = $req->parameters->{description} || $req->{headers}->{description};
-    
-    my $tag_ok = try eval {new V2::Server::Obj::Tag(id => $id, description => $desc)};
+    $id = encode( $enc, $id );
+    my $desc = $req->parameters->{description}
+        || $req->{headers}->{description};
+
+    my $tag_ok = try
+        eval { new V2::Server::Obj::Tag( id => $id, description => $desc ) };
     catch my $err;
 
     my $tag_exist = $c->model('DB::TTag')->find( { id => $id } );
@@ -141,15 +143,14 @@ $text_str = encode($enc, $text_str);
     if ( !$tag_exist ) {    #Creation of the new tag if it not exists
         my $new_tag = $c->model('DB::TTag')->find_or_new();
 
-        if ( $tag_ok )
-        {
+        if ($tag_ok) {
             $new_tag->id($id);
             $new_tag->description($desc);
             $new_tag->insert;
 
             $new_tag = {
-		id          => decode($enc, $id),
-		description => decode($enc, $desc)
+                id          => decode( $enc, $id ),
+                description => decode( $enc, $desc )
             };
 
             $c->stash->{content}  = $new_tag;
@@ -159,11 +160,10 @@ $text_str = encode($enc, $text_str);
             $c->response->status(201);
         }
         else {
-	     my ($error) = split("\n",$err->message);
-	     ($error) = split('at', $error);
+            my ($error) = split( "\n", $err->message );
+            ($error) = split( 'at', $error );
 
-            my @message
-                = { message => $error };
+            my @message = { message => $error };
 
             $new_tag = {
                 id          => $id,
@@ -200,29 +200,28 @@ sub default_PUT {
     my @message;
     my $req = $c->request;
 
-    $id   = decode($enc, $id);
+    $id = decode( $enc, $id );
     $id = lc $id;
-    $id = encode($enc, $id);
+    $id = encode( $enc, $id );
 
     my $desc = $req->parameters->{description}
         || $req->{headers}->{description};
-	
-	my $tag_ok = try eval {new V2::Server::Obj::Tag(id => $id, description => $desc)};
+
+    my $tag_ok = try
+        eval { new V2::Server::Obj::Tag( id => $id, description => $desc ) };
     catch my $err;
-	
+
     my $tag = $c->model('DB::TTag')->find( { id => $id } );
 
-
     if ($tag) {
-        if ( $tag_ok )
-        {
+        if ($tag_ok) {
             $tag->id($id);
             $tag->description($desc);
             $tag->insert_or_update;
 
             my $tag = {
-		id          => decode($enc, $tag->id),
-		description => decode($enc, $tag->description)
+                id          => decode( $enc, $tag->id ),
+                description => decode( $enc, $tag->description )
             };
 
             $c->stash->{content}  = $tag;
@@ -231,11 +230,10 @@ sub default_PUT {
             $c->response->status(200);
         }
         else {
-	     my ($error) = split("\n",$err->message);
-	     ($error) = split('at', $error);
+            my ($error) = split( "\n", $err->message );
+            ($error) = split( 'at', $error );
 
-            my @message
-                = { message => $error };
+            my @message = { message => $error };
 
             my $new_tag = {
                 id          => $id,
@@ -263,11 +261,11 @@ sub default_PUT {
 
 sub default_DELETE {
     my ( $self, $c, $res, $id ) = @_;
-    
-    $id   = decode($enc, $id);
+
+    $id = decode( $enc, $id );
     $id = lc $id;
-    $id = encode($enc, $id);
-    
+    $id = encode( $enc, $id );
+
     my $req = $c->request;
     my @message;
 
@@ -305,7 +303,7 @@ sub end : Private {
     my ( $self, $c ) = @_;
 
     if ( $c->stash->{format} ne "application/json" ) {
-	$c->stash->{VERSION} = $VERSION;
+        $c->stash->{VERSION} = $VERSION;
         $c->forward( $c->view('HTML') );
     }
     else {

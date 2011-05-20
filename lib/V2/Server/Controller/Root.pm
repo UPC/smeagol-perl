@@ -9,7 +9,7 @@ use parent 'Catalyst::Controller';
 #
 __PACKAGE__->config->{namespace} = '';
 
-my $name    = 'Smeagol Server';
+my $name = 'Smeagol Server';
 
 my $VERSION = $V2::Server::VERSION;
 
@@ -64,23 +64,23 @@ sub version : Local {
 }
 
 sub bad_request : Path : Args(0) {
-     my ( $self, $c ) = @_;
-     
-     $c->response->status(400);
-     
-     my @message = {
-	  status => "400",
-	  error => "Bad request"
-     };
-     
-     $c->stash->{content} = \@message;
+    my ( $self, $c ) = @_;
+
+    $c->response->status(400);
+
+    my @message = {
+        status => "400",
+        error  => "Bad request"
+    };
+
+    $c->stash->{content} = \@message;
 }
 
 sub end : Private {
     my ( $self, $c ) = @_;
 
     if ( $c->stash->{format} ne "application/json" ) {
-	$c->stash->{VERSION} = $VERSION;
+        $c->stash->{VERSION} = $VERSION;
         $c->forward( $c->view('HTML') );
     }
     else {

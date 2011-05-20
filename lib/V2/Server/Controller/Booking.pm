@@ -326,6 +326,7 @@ sub default_POST {
     my ( $self, $c ) = @_;
     my $req = $c->request;
 
+    my $info = $req->parameters->{info};
     my $id_resource = $req->parameters->{id_resource};
     my $id_event    = $req->parameters->{id_event};
 
@@ -375,6 +376,7 @@ sub default_POST {
 
     given ($freq) {
        when ('daily') {
+	    $new_booking->info($info);
             $new_booking->id_resource($id_resource);
             $new_booking->id_event($id_event);
             $new_booking->dtstart($dtstart);
@@ -388,6 +390,7 @@ sub default_POST {
 
             my $booking = {
                 id          => $new_booking->id,
+                info        => $new_booking->info,
                 id_resource => $new_booking->id_resource->id,
                 id_event    => $new_booking->id_event->id,
                 dtstart     => $new_booking->dtstart->iso8601(),
@@ -402,7 +405,8 @@ sub default_POST {
         }
 
         when ('weekly') {
-
+	     
+	     $new_booking->info($info);
             $new_booking->id_resource($id_resource);
             $new_booking->id_event($id_event);
             $new_booking->dtstart($dtstart);
@@ -417,6 +421,7 @@ sub default_POST {
 
             my $booking = {
                 id          => $new_booking->id,
+                                info        => $new_booking->info,
                 id_resource => $new_booking->id_resource->id,
                 id_event    => $new_booking->id_event->id,
                 dtstart     => $new_booking->dtstart->iso8601(),
@@ -433,6 +438,7 @@ sub default_POST {
         }
 
         when ('monthly') {
+	     $new_booking->info($info);
             $new_booking->id_resource($id_resource);
             $new_booking->id_event($id_event);
             $new_booking->dtstart($dtstart);
@@ -448,6 +454,7 @@ sub default_POST {
 
             my $booking = {
                 id           => $new_booking->id,
+                                info        => $new_booking->info,
                 id_resource  => $new_booking->id_resource->id,
                 id_event     => $new_booking->id_event->id,
                 dtstart      => $new_booking->dtstart->iso8601(),
@@ -464,6 +471,7 @@ sub default_POST {
         }
 
         default {
+	     $new_booking->info($info);
             $new_booking->id_resource($id_resource);
             $new_booking->id_event($id_event);
             $new_booking->dtstart($dtstart);
@@ -480,6 +488,7 @@ sub default_POST {
 
             my $booking = {
                 id           => $new_booking->id,
+                                info        => $new_booking->info,
                 id_resource  => $new_booking->id_resource->id,
                 id_event     => $new_booking->id_event->id,
                 dtstart      => $new_booking->dtstart->iso8601(),
@@ -559,6 +568,7 @@ sub default_PUT {
     my ( $self, $c, $res, $id ) = @_;
     my $req = $c->request;
 
+    my $info = $req->parameters->{info};
     my $id_resource = $req->parameters->{id_resource};
     my $id_event    = $req->parameters->{id_event};
 
@@ -603,6 +613,7 @@ sub default_PUT {
 #builds the JSON objects
 #Don't mess with the duration, the result can be weird.
         when ('daily') {
+	     $booking->info($info);
             $booking->id_resource($id_resource);
             $booking->id_event($id_event);
             $booking->dtstart($dtstart);
@@ -616,6 +627,7 @@ sub default_PUT {
 
             $jbooking = {
                 id          => $booking->id,
+                info        => $booking->info,
                 id_resource => $booking->id_resource->id,
                 id_event    => $booking->id_event->id,
                 dtstart     => $booking->dtstart->iso8601(),
@@ -630,6 +642,7 @@ sub default_PUT {
         }
 
         when ('weekly') {
+	     $booking->info($info);
             $booking->id_resource($id_resource);
             $booking->id_event($id_event);
             $booking->dtstart($dtstart);
@@ -644,6 +657,7 @@ sub default_PUT {
 
             $jbooking = {
                 id          => $booking->id,
+                                info        => $booking->info,
                 id_resource => $booking->id_resource->id,
                 id_event    => $booking->id_event->id,
                 dtstart     => $booking->dtstart->iso8601(),
@@ -660,6 +674,7 @@ sub default_PUT {
         }
 
         when ('monthly') {
+	     $booking->info($info);
             $booking->id_resource($id_resource);
             $booking->id_event($id_event);
             $booking->dtstart($dtstart);
@@ -675,6 +690,7 @@ sub default_PUT {
 
             $jbooking = {
                 id           => $booking->id,
+                                info        => $booking->info,
                 id_resource  => $booking->id_resource->id,
                 id_event     => $booking->id_event->id,
                 dtstart      => $booking->dtstart->iso8601(),
@@ -691,6 +707,7 @@ sub default_PUT {
         }
 
         default {
+	     $booking->info($info);
             $booking->id_resource($id_resource);
             $booking->id_event($id_event);
             $booking->dtstart($dtstart);
@@ -707,6 +724,7 @@ sub default_PUT {
 
             $jbooking = {
                 id           => $booking->id,
+                                info        => $booking->info,
                 id_resource  => $booking->id_resource->id,
                 id_event     => $booking->id_event->id,
                 dtstart      => $booking->dtstart->iso8601(),

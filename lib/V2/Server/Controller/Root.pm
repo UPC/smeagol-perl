@@ -32,7 +32,7 @@ sub begin : Private {
         || 'application/json';
 }
 
-sub index : Path : Args(0) {
+sub index :Local {
     my ( $self, $c ) = @_;
     $c->response->status(200);
     $c->stash->{template} = 'index.tt';
@@ -45,13 +45,17 @@ sub index : Path : Args(0) {
 }
 
 sub default : Private {
-    my ( $self, $c ) = @_;
-
-    $c->response->status(404);
-    $c->stash->{template} = 'old_not_found.tt';
+     my ( $self, $c ) = @_;
+     $c->response->status(200);
+     $c->stash->{template} = 'index.tt';
+     my @message = {
+	  application => $name,
+	          version     => $VERSION
+     };
+     $c->stash->{content} = \@message;
 }
 
-sub version : Local {
+sub version : Path('/version') :Args(0) {
     my ( $self, $c ) = @_;
 
     $c->response->status(200);
@@ -63,7 +67,7 @@ sub version : Local {
     $c->stash->{content} = $message;
 }
 
-sub bad_request : Path : Args(0) {
+sub bad_request : Path('bad_request') : Args(0) {
     my ( $self, $c ) = @_;
 
     $c->response->status(400);

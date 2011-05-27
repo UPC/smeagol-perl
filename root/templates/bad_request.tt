@@ -1,6 +1,6 @@
-[% META title='No s\'ha trobat' %]
+[% META title='Bad request' %]
 
-<h1>No hem trobat el què busques :(</h1>
+<h1>Bad request</h1>
 
 <p><a href='[% c.uri_for("/resource")%]'>Tornar a la llista de recursos</a></p>
 <p><a href='[% c.uri_for("/tag")%]'>Tornar a la llista de tags</a></p>

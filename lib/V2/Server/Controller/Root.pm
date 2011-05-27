@@ -71,7 +71,7 @@ sub bad_request : Path('bad_request') : Args(0) {
     my ( $self, $c ) = @_;
 
     $c->response->status(400);
-
+    $c->stash->{template} = 'bad_request.tt';
     my @message = {
         status => "400",
         error  => "Bad request"

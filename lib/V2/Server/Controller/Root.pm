@@ -50,12 +50,12 @@ sub default : Private {
      $c->stash->{template} = 'index.tt';
      my @message = {
 	  application => $name,
-	          version     => $VERSION
+	  version     => $VERSION
      };
      $c->stash->{content} = \@message;
 }
 
-sub version : Path('/version') :Args(0) {
+sub version : Local {
     my ( $self, $c ) = @_;
 
     $c->response->status(200);
@@ -67,11 +67,11 @@ sub version : Path('/version') :Args(0) {
     $c->stash->{content} = $message;
 }
 
-sub bad_request : Path('bad_request') : Args(0) {
+sub bad_request : Local {
     my ( $self, $c ) = @_;
 
     $c->response->status(400);
-
+    $c->stash->{template} = 'bad_request.tt';
     my @message = {
         status => "400",
         error  => "Bad request"

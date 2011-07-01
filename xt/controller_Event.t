@@ -46,7 +46,7 @@ ok( my $response_post = request POST '/event',
         description => ':-P',
         ends        => '2010-02-16T06:00:00',
         info        => 'Estem provant',
-        tags        => 'test,prova'
+        tags        => ''
     ]
 );
 diag "Resposta: " . $response_post->content;
@@ -87,7 +87,7 @@ diag "Editing event which doesn't exist";
 #diag "ID: ".$id;
 ok( my $response_put
         = request PUT '/event/' 
-        . '10000000'
+        . '100'
         . "?starts=2010-02-16T06:00:00&description=:-X&ends=2010-02-16T08:00:00&info='Estem de proves'&tags=edited event,trololo",
     [   starts      => '2010-02-16T06:00:00',
         description => ':-X',
@@ -108,18 +108,5 @@ $request_DELETE->header( Accept => 'application/json' );
 ok( my $response_DELETE = request($request_DELETE), 'Delete request' );
 is( $response_DELETE->headers->{status}, '200',
     'Response status is 200: OK' );
-
-$request_DELETE = DELETE('tag/edited event');
-$request_DELETE->header( Accept => 'application/json' );
-ok( $response_DELETE = request($request_DELETE), 'Delete request first tag' );
-
-$request_DELETE = DELETE('tag/trololo');
-$request_DELETE->header( Accept => 'application/json' );
-ok( $response_DELETE = request($request_DELETE),
-    'Delete request second tag' );
-
-$request_DELETE = DELETE('tag/test');
-$request_DELETE->header( Accept => 'application/json' );
-ok( $response_DELETE = request($request_DELETE), 'Delete request third tag' );
 
 done_testing();

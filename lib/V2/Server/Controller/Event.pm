@@ -191,7 +191,7 @@ sub default_PUT {
     my $event = $c->model('DB::TEvent')->find( { id => $id } );
     my $tag_event;
 
-    if ($event->in_storage) {
+    if ($event) {
         $c->visit( '/check/check_event', [ $info, $description ] );
 
 # If all is correct $c->stash->{event_ok} should be 1, otherwise it will be 0.
@@ -256,9 +256,11 @@ sub default_PUT {
         }
     }
     else {
+        my @message = { message =>
+                    "404. Not found", };
+        $c->stash->{content} = \@message;
         $c->stash->{template} = 'not_found.tt';
         $c->response->status(404);
-        $c->forward( $c->view('TT') );
     }
 }
 

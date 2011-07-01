@@ -134,9 +134,19 @@ $text_str = encode($enc, $text_str);
     my $desc = $req->parameters->{description}
         || $req->{headers}->{description};
 
-    my $tag_ok = try
+my $tag_ok;
+my $err;
+
+if($req->parameters->{description} || $req->{headers}->{description}){	
+    $tag_ok = try
         eval { new V2::Server::Obj::Tag( id => $id, description => $desc ) };
-    catch my $err;
+    catch $err;
+  
+}else{
+    $tag_ok = try
+        eval { new V2::Server::Obj::Tag( id => $id ) };
+    catch $err;
+}
 
     my $tag_exist = $c->model('DB::TTag')->find( { id => $id } );
 
@@ -156,7 +166,6 @@ $text_str = encode($enc, $text_str);
             $c->stash->{content}  = $new_tag;
             $c->stash->{tag}      = $new_tag;
             $c->stash->{template} = 'tag/get_tag.tt';
-            $c->response->content_type('text/html');
             $c->response->status(201);
         }
         else {

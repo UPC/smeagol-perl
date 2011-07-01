@@ -108,4 +108,20 @@ diag "Nou tag: " . $response_post->content;
 
 ok( $tag_aux = $j->jsonToObj( $response_post->content ) );
 
+
+diag '####################################';
+diag '#####Creating tag without desc #####';
+diag '###################################';
+
+ok( $response_post = request POST '/tag',
+    [   id => 'no_desc_tag',
+        ],
+    HTTP::Headers->new( Accept => 'application/json' )
+);
+
+diag "Nou tag: " . $response_post->content;
+is( $response_post->headers->{status}, '201',
+    'Response status is 201: Created' );
+ok( $tag_aux = $j->jsonToObj( $response_post->content ) );
+
 done_testing();

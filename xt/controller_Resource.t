@@ -40,7 +40,7 @@ diag '###################################';
 ok( my $response_post = request POST '/resource',
     [   info        => "Testing resource creation",
         description => ":-P",
-        tags        => "test,delete me"
+        tags        => "isabel"
     ]
 );
 diag $response_post->content;
@@ -60,7 +60,7 @@ diag "Last resource created ID: " . $id;
 ok( my $response_put = request PUT '/resource/' . $id,
     [   info        => 'Testing resource edition',
         description => ':-P',
-        tags        => 'test,edited'
+        tags        => 'videoconferencia'
     ]
 );
 

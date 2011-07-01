@@ -191,7 +191,7 @@ sub default_PUT {
     my $event = $c->model('DB::TEvent')->find( { id => $id } );
     my $tag_event;
 
-    if ($event) {
+    if ($event->in_storage) {
         $c->visit( '/check/check_event', [ $info, $description ] );
 
 # If all is correct $c->stash->{event_ok} should be 1, otherwise it will be 0.

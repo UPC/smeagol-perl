@@ -1,5 +1,10 @@
 Històric de revisions del projecte smeagol.
 
+2.06   Thu Jul 21 14:01:45 CEST 2011
+       - afegir tags als bookings
+       - afegir el camp info als bookings
+       - error 400 en fer GET /
+
 2.05   Fri May 13 20:04:13 CEST 2011
        - evitar que es creïn tags nous en la creació d'altres recursos
        - corregir la codificació del JSON en UTF-8

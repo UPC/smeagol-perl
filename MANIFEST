@@ -67,6 +67,7 @@ lib/V2/Server/Schema/Result/TException.pm
 lib/V2/Server/Schema/Result/TResource.pm
 lib/V2/Server/Schema/Result/TResourceTag.pm
 lib/V2/Server/Schema/Result/TTag.pm
+lib/V2/Server/Schema/Result/TTagBooking.pm
 lib/V2/Server/Schema/Result/TTagEvent.pm
 lib/V2/Server/View/HTML.pm
 lib/V2/Server/View/JSON.pm
@@ -97,6 +98,7 @@ root/static/js/delete.js
 root/static/js/jquery.min.js
 root/static/js/sort.js
 root/static/js/update.js
+root/templates/bad_request.tt
 root/templates/booking/delete_ok.tt
 root/templates/booking/get_booking.tt
 root/templates/booking/get_list.tt

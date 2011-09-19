@@ -8,6 +8,7 @@ use JSON::Any;
 use DateTime;
 use DateTime::Duration;
 
+BEGIN { $ENV{'TESTING_DB'} ||= 't/smeagol.db' }
 BEGIN { use_ok 'Catalyst::Test', 'V2::Server' }
 BEGIN { use_ok 'V2::Server::Controller::Booking' }
 

@@ -3,11 +3,13 @@ package V2::Server::Model::DB;
 use strict;
 use base 'Catalyst::Model::DBIC::Schema';
 
+my $db = $ENV{TESTING_DB} ||= 'smeagol.db';
+
 __PACKAGE__->config(
     schema_class => 'V2::Server::Schema',
 
     connect_info => {
-        dsn      => 'dbi:SQLite:smeagol.db',
+        dsn      => "dbi:SQLite:$db",
         user     => '',
         password => '',
 	on_connect_call => 'use_foreign_keys',

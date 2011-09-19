@@ -5,6 +5,7 @@ use Data::Dumper;
 use HTTP::Request::Common qw/GET POST PUT DELETE/;
 use JSON::Any;
 
+BEGIN { $ENV{'TESTING_DB'} ||= 't/smeagol.db' }
 BEGIN { use_ok 'Catalyst::Test', 'V2::Server' }
 BEGIN { use_ok 'V2::Server::Controller::Resource' }
 

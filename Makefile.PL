@@ -34,6 +34,8 @@ requires 'DateTime::Event::ICal'            => 0;
 requires 'DBD::SQLite'                      => 0;
 requires 'Exception::Class::TryCatch' => 0;
 
+test_requires 'Path::Class'         => 0;
+test_requires 'File::Copy'          => 0;
 test_requires 'Test::More'          => 0;
 test_requires 'Data::Compare'       => 0;
 test_requires 'Test::Pod'           => 0;

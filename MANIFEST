@@ -147,6 +147,7 @@ t/Server.t
 t/smeagol.db
 t/Tag.t
 t/TagSet.t
+t/TestingDB.pl
 t/XML.t
 xt/01app.t
 xt/02pod.t

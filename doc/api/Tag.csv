@@ -1,0 +1,7 @@
+Número,Descripció,Test,Operació,URI,Entrada,Estat,Capçaleres,Sortida
+1,Crea un tag nou,testCreateTag,POST,/tag,id=ID&description=DESCRIPTION,201 Created,Location: http,"{""id"":""id"",""description"":""DESCRIPTION""}"
+2,Consulta un tag,testGetTag,GET,/tag/ID,,200 OK,,"{""id"":""id"",""description"":""DESCRIPTION""}"
+3,Llista els tags,testGetTags,GET,/tag,,200 OK,,"[{""id"":""id"",""description"":""DESCRIPTION""}]"
+4,Modifica un tag,testUpdateTag,PUT,/tag/ID,id=ID&description=DESCRIPTION2,200 OK
+5,Consulta un tag modificat,testGetTag,GET,/tag/ID,,200 OK,,"{""id"":""id"",""description"":""DESCRIPTION2""}"
+6,Elimina un tag,testDeleteTag,DELETE,/tag/ID,,200 OK

@@ -27,7 +27,6 @@ $csv->column_names(@$titles);
 
 while ( my $row = $csv->getline( $fh ) ) {
     test_smeagol_tag($row);
-    last;
 }
 
 $csv->eof or $csv->error_diag();
@@ -39,12 +38,22 @@ done_testing();
 sub test_smeagol_tag {
     my ($row) = @_;
 
-    my ( $nr, $desc, $call, $op, $uri, $input, $code, $head, $expected ) = @$row;
+    my ( $nr, $desc, $call, $op, $uri, $input, $status, $headers, $output ) = @$row;
 
+    my $prefix = "Test[$nr]: $call";
     my $req = do { no strict 'refs'; \&$op };
-    my $res = request( $req->( $uri, Accept => 'application/json', Content => $input ) );
+    my $r = request(
+        $req->( $uri, Accept => 'application/json', Content => $input )
+    );
 
-    is  ( $res->code(),               int($code), "$nr.1/3[$call]: $desc" );
-    like( $res->headers->as_string(), qr/$head/,  "$nr.2/3[$call]: $desc" );
-    is  ( $res->decoded_content(),    $expected,  "$nr.3/3[$call]: $desc" );
+    is ( $r->code().' '.$r->message(), $status, "$prefix.status" );
+
+    SKIP: {
+        skip "$prefix.headers", 1
+            unless defined $headers && $headers ne '';
+
+        like( $r->headers->as_string(), qr/$headers/, "$prefix.headers" );
+    };
+
+    is  ( $r->decoded_content(), $output, "$prefix.output" );
 }

@@ -5,7 +5,9 @@ bin/smeagol-shell
 BUGS
 Changes
 COPYING
-db.sql
+doc/api/Tag.csv
+doc/db/create.sql
+doc/db/insert.sql
 doc/diagrams/arquitectura-88.dia
 doc/diagrams/arquitectura-88.png
 doc/examples/booking.ics
@@ -138,6 +140,7 @@ share/xsl/resource.xsl
 share/xsl/resources.xsl
 share/xsl/tags.xsl
 t/Agenda.t
+t/api_Tag.t
 t/Booking.t
 t/Client.t
 t/DataStore.t

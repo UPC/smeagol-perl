@@ -2,7 +2,7 @@
 
 use strict;
 use warnings;
-use utf8::all;
+#use utf8::all;
 
 use Test::More;
 use Text::CSV;

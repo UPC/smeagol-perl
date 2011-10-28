@@ -89,24 +89,10 @@ sub get_tag : Private {
         $c->response->status(404);
     }
     else {
-        my @resource_tag
-            = $c->model('DB::TResourceTag')->search( { tag_id => $id } );
-
-        my @resources;
-        my $resource_aux;
-        my @resource;
-
-        foreach (@resource_tag) {
-            $resource_aux = $c->model('DB::TResource')
-                ->find( { id => $_->resource_id } );
-            @resource = $resource_aux->get_resources;
-            push( @resources, @resource );
-        }
-
+ # FIXME: aixo es obligacio del V2::Server::Schema::Result::Tag
         my $tag = {
             id          => decode( $enc, $tag->id ),
             description => decode( $enc, $tag->description ),
-            resources   => \@resources
         };
 
         $c->stash->{content} = $tag;

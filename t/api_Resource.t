@@ -8,6 +8,7 @@ use Test::More;
 use HTTP::Request::Common qw( GET POST PUT DELETE );
 use HTTP::Status qw(:constants :is status_message);
 use Data::Dumper::Simple;
+use JSON;
 
 BEGIN {
     require 't/TestingDB.pl';
@@ -20,27 +21,31 @@ BEGIN {
 #   op      => operador (GET, POST, PUT, DELETE),
 #   uri     => la url (p.ex. /resource/NN),
 #   entrada => [ nom_parametre1 => val, nom_param2 => val2, ... ],
-#   status  => status HTTP,
-#   headers => { header_name => value, header_name => value, ... },
-#   sortida => string JSON,
+#   sortida => {
+#                 status => HTTP status,
+#                 headers => { header1 => val1, ... },
+#                 body => json string
+#              },
 # }
 
 my @tests = (
     {    # Crear un nou recurs
         op      => 'POST',
         uri     => '/resource',
-        entrada => [
-            description => 'aula',
-            info        => 'resource info',
-        ],
-        status  => HTTP_CREATED,
-        sortida => {
-            status      => HTTP_CREATED,
-            headers     => { Location => '/resource/' },
+        entrada => {
             description => 'aula',
             info        => 'resource info',
         },
-    }
+        sortida => {
+            status  => HTTP_CREATED,
+            headers => { Location => qr{/resource/\d+} },
+            body    => {
+                id          => qr/\d+/,
+                description => 'aula',
+                info        => 'resource info',
+            },
+        },
+    },
 );
 
 my %helpers = (
@@ -56,21 +61,21 @@ for my $t (@tests) {
 
 done_testing();
 
+
 sub test_smeagol_resource {
     my ($test) = @_;
     my ($id)   = crea_recurs();
     like( $id, qr/\d+/, "id ben format" );
-    my $response = request $helpers{ $test->{'op'} }->( $test->{'entrada'} );
-    warn Dumper($response);
+    my $sub    = $helpers{ $test->{'op'} };
+    my $result = $sub->( $test->{'entrada'} );
 
     #is( $test->{entrada}, $test->{'sortida'}{'description'}, "desc" );
 }
 
 sub llista_ids_abans {
-
-    #my $rp = request(GET '/resource');
-    #warn Dumper($rp);
-    return qw( 1 2 3 );
+    my $rp = request( GET('/resource') );
+    
+    return parse_resource_ids($rp->content);
 }
 
 sub llista_ids_despres {
@@ -99,3 +104,10 @@ sub modifica_recurs { }
 
 sub esborra_recurs { }
 
+sub parse_resource_ids {
+    my ($json) = @_;
+    my @result;
+    for my $r ( decode_json($json) ) {
+        push @result, $r{'id'};
+    }
+}

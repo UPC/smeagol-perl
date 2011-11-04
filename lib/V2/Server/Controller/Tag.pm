@@ -2,7 +2,6 @@ package V2::Server::Controller::Tag;
 
 use Moose;
 use namespace::autoclean;
-use Data::Dumper;
 use V2::Server::Obj::Tag;
 use Exception::Class::TryCatch;
 
@@ -83,7 +82,6 @@ sub get_tag : Private {
 
     if ( !$tag ) {
         @message = { message => "We can't find what you are looking for." };
-
         $c->stash->{content}  = \@message;
         $c->stash->{template} = 'old_not_found.tt';
         $c->response->status(404);
@@ -264,9 +262,6 @@ sub default_DELETE {
     my $req = $c->request;
     my @message;
 
-    $c->log->debug( 'Mètode: ' . $req->method );
-    $c->log->debug("El DELETE funciona");
-
     my $tag_aux = $c->model('DB::TTag')->find( { id => $id } );
     my @resource_tag
         = $c->model('DB::TResourceTag')->search( { tag_id => $id } );
@@ -278,15 +273,14 @@ sub default_DELETE {
             $_->delete;
         }
 
-        @message = { message => "Tag succesfully deleted" };
-        $c->stash->{content}  = \@message;
+                
+        $c->stash->{content}  =  \@message;
         $c->stash->{template} = 'tag/delete_ok.tt';
         $c->response->status(200);
     }
     else {
 
         @message = { message => "We can't find what you are looking for." };
-
         $c->stash->{content}  = \@message;
         $c->stash->{template} = 'old_not_found.tt';
         $c->response->status(404);

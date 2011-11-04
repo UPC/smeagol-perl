@@ -2,6 +2,6 @@ Número,Descripció,Test,Operació,URI,Entrada,Estat,Capçaleres,Sortida
 1,Crea un tag nou,testCreateTag,POST,/tag,id=tagname&description=TAG DESCRIPTION,201 Created,Location: http,"{""id"":""tagname"",""description"":""TAG DESCRIPTION""}"
 2,Consulta un tag,testGetTag,GET,/tag/tagname,,200 OK,,"{""id"":""tagname"",""description"":""TAG DESCRIPTION""}"
 3,Llista els tags,testGetTags,GET,/tag,,200 OK,,"[{""id"":""tagname"",""description"":""TAG DESCRIPTION""}]"
-4,Modifica un tag,testUpdateTag,PUT,/tag/tagname,id=tagname&description=TAG DESCRIPTION2,200 OK,,"[]"
+4,Modifica un tag,testUpdateTag,PUT,/tag/tagname?id=tagname&description=TAG DESCRIPTION2,,200 OK,,"[]"
 5,Consulta un tag modificat,testGetTag,GET,/tag/tagname,,200 OK,,"{""id"":""tagname"",""description"":""TAG DESCRIPTION2""}"
 6,Elimina un tag,testDeleteTag,DELETE,/tag/tagname,,200 OK,,"[]"

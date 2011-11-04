@@ -2,7 +2,6 @@ package V2::Server::Controller::Tag;
 
 use Moose;
 use namespace::autoclean;
-use Data::Dumper;
 use V2::Server::Obj::Tag;
 use Exception::Class::TryCatch;
 
@@ -205,10 +204,10 @@ sub default_PUT {
     my $tag_ok = try
         eval { new V2::Server::Obj::Tag( id => $id, description => $desc ) };
     catch my $err;
-    $c->log->debug( "Valor de err: " .$err );
+
 
     my $tag = $c->model('DB::TTag')->find( { id => $id } );
-    $c->log->debug( "Valor de tag: " .$tag );
+  
 
     if ($tag) {
         if ($tag_ok) {
@@ -219,9 +218,10 @@ sub default_PUT {
             my $tag = {
                 id          => decode( $enc, $tag->id ),
                 description => decode( $enc, $tag->description )
-            };
+            };    
 
-            $c->stash->{content}  = $tag;
+            #TODO: message: tag creat correctament
+            $c->stash->{content}  = \@message;
             $c->stash->{tag}      = $tag;
             $c->stash->{template} = 'tag/get_tag.tt';
             $c->response->status(200);
@@ -231,7 +231,7 @@ sub default_PUT {
             ($error) = split( 'at', $error );
 
             my @message = { message => $error };
-            $c->log->debug( "Message Error: " . Dumper( @message) );
+           
             
 
             my $new_tag = {
@@ -279,7 +279,7 @@ sub default_DELETE {
         foreach (@resource_tag) {
             $_->delete;
         }
-
+        #TODO: message: tag eliminat correctament    
         $c->stash->{content}  = \@message;
         $c->stash->{template} = 'tag/delete_ok.tt';
         $c->response->status(200);

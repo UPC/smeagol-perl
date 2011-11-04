@@ -6,7 +6,9 @@ use utf8::all;
 
 use Test::More;
 use Text::CSV;
-use HTTP::Request::Common qw( GET POST PUT DELETE );
+
+use lib 't/lib';
+use HTTP::Request::Common::Bug65843 qw( GET POST PUT DELETE );
 
 BEGIN {
     require 't/TestingDB.pl';
@@ -42,15 +44,9 @@ sub test_smeagol_tag {
 
     my $prefix = "Test[$nr]: $call";
     my $req = do { no strict 'refs'; \&$op };
-	my $r;
-
-	if($op eq "PUT"){
-		$req = POST $uri, Content => $input, Accept => 'application/json' ;
-		$req->method('PUT');
-		$r = request($req);
-	}else{
-    	$r = request($req->( $uri, Accept => 'application/json', Content => $input ));
-	}
+    my $r = request(
+        $req->( $uri, Accept => 'application/json', Content => $input )
+    );
 
     is ( $r->code().' '.$r->message(), $status, "$prefix.status" );
 

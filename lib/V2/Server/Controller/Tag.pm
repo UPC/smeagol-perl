@@ -203,10 +203,11 @@ sub default_PUT {
     my $tag_ok = try
         eval { new V2::Server::Obj::Tag( id => $id, description => $desc ) };
     catch my $err;
+    $c->log->debug( "Valor de err: " .$err );
 
 
     my $tag = $c->model('DB::TTag')->find( { id => $id } );
-  
+    $c->log->debug( "Valor de tag: " .$tag );
 
     if ($tag) {
         if ($tag_ok) {
@@ -230,7 +231,7 @@ sub default_PUT {
             ($error) = split( 'at', $error );
 
             my @message = { message => $error };
-           
+            $c->log->debug( "Message Error: " . Dumper( @message) );
             
 
             my $new_tag = {

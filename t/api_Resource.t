@@ -9,6 +9,7 @@ use HTTP::Request::Common qw( GET POST PUT DELETE );
 use HTTP::Status qw(:constants :is status_message);
 use Data::Dumper::Simple;
 use JSON;
+use List::Compare;
 
 BEGIN {
     require 't/TestingDB.pl';
@@ -27,6 +28,8 @@ BEGIN {
 #                 body => json string
 #              },
 # }
+
+my $RESOURCE_ID_GLOBAL;
 
 my @tests = (
     {    # Crear un nou recurs
@@ -61,7 +64,6 @@ for my $t (@tests) {
 
 done_testing();
 
-
 sub test_smeagol_resource {
     my ($test) = @_;
     my ($id)   = crea_recurs();
@@ -69,45 +71,50 @@ sub test_smeagol_resource {
     my $sub    = $helpers{ $test->{'op'} };
     my $result = $sub->( $test->{'entrada'} );
 
-    #is( $test->{entrada}, $test->{'sortida'}{'description'}, "desc" );
+    like(
+        $result->{headers}{location},
+        qr{/resource/$RESOURCE_ID_GLOBAL},
+        "resource location header"
+    );
 }
 
-sub llista_ids_abans {
+sub llista_ids {
     my $rp = request( GET('/resource') );
-    
-    return parse_resource_ids($rp->content);
-}
 
-sub llista_ids_despres {
-
-    # GET '/resource'
-    return qw( 1 2 3 4 );
+    return parse_resource_ids( $rp->content );
 }
 
 sub crea_recurs {
-    my @abans = llista_ids_abans();
+    my ($entrada) = @_;
 
-    # POST '/resource' ...
-    my @despres = llista_ids_despres();
+    my @abans = llista_ids();
 
-    my $id = 4;
+    my $rp = request( POST '/resource', $entrada );
 
-    return $id;
+    my @despres = llista_ids();
+
+    my $lc = List::Compare->new( \@abans, \@despres );
+    my @ids = $lc->get_complement;
+
+    fail("obtenir l'identificador del resource acabat de crear")
+        if @ids == 0;
+
+    $RESOURCE_ID_GLOBAL = $ids[0];
+    
+    
 }
 
-sub consulta_recurs {
-    my $response = GET '/resource';
-    warn Dumper($response);
-}
+sub consulta_recurs { }
 
 sub modifica_recurs { }
 
 sub esborra_recurs { }
 
+#
+# extracts the ids from a resource list, given the JSON representation of the list
+#
 sub parse_resource_ids {
     my ($json) = @_;
-    my @result;
-    for my $r ( decode_json($json) ) {
-        push @result, $r{'id'};
-    }
+
+    return map { $_->{id}; } @{ decode_json($json) };
 }

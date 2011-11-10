@@ -157,6 +157,7 @@ sub default_POST {
         $c->stash->{content}  = $resource;
         $c->response->status(201);
         $c->response->content_type('text/html');
+        $c->response->header('Location' => $c->uri_for($c->action, $new_resource->id));
         $c->stash->{template} = 'resource/get_resource.tt';
     }
     else {

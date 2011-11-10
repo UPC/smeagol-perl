@@ -41,7 +41,7 @@ my @tests = (
         },
         sortida => {
             status  => HTTP_CREATED,
-            headers => { Location => qr{/resource/\d+} },
+            headers => { Location => qr{/resource/$RESOURCE_ID_GLOBAL} },
             body    => {
                 id          => qr/\d+/,
                 description => 'aula',
@@ -70,12 +70,16 @@ sub test_smeagol_resource {
     like( $id, qr/\d+/, "id ben format" );
     my $sub    = $helpers{ $test->{'op'} };
     my $result = $sub->( $test->{'entrada'} );
-
-    like(
-        $result->{headers}{location},
-        qr{/resource/$RESOURCE_ID_GLOBAL},
-        "resource location header"
-    );
+    
+    is( $result->code, $test->{sortida}{status}, 'response status' );
+    
+    if ($result->header('Location')) {
+        like(
+            $result->header('Location'),
+            $test->{'sortida'}{'headers'}{'Location'},
+            "resource location header"
+        );
+    }
 }
 
 sub llista_ids {
@@ -101,7 +105,7 @@ sub crea_recurs {
 
     $RESOURCE_ID_GLOBAL = $ids[0];
     
-    
+    return $rp;
 }
 
 sub consulta_recurs { }

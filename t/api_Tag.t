@@ -42,9 +42,15 @@ sub test_smeagol_tag {
 
     my $prefix = "Test[$nr]: $call";
     my $req = do { no strict 'refs'; \&$op };
-    my $r = request(
-        $req->( $uri, Accept => 'application/json', Content => $input )
-    );
+	my $r;
+
+	if($op eq "PUT"){
+		$req = POST $uri, Content => $input, Accept => 'application/json' ;
+		$req->method('PUT');
+		$r = request($req);
+	}else{
+    	$r = request($req->( $uri, Accept => 'application/json', Content => $input ));
+	}
 
     is ( $r->code().' '.$r->message(), $status, "$prefix.status" );
 

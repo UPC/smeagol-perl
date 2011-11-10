@@ -2,7 +2,6 @@ package V2::Server::Controller::Tag;
 
 use Moose;
 use namespace::autoclean;
-use Data::Dumper;
 use V2::Server::Obj::Tag;
 use Exception::Class::TryCatch;
 
@@ -83,7 +82,6 @@ sub get_tag : Private {
 
     if ( !$tag ) {
         @message = { message => "We can't find what you are looking for." };
-
         $c->stash->{content}  = \@message;
         $c->stash->{template} = 'old_not_found.tt';
         $c->response->status(404);
@@ -206,7 +204,9 @@ sub default_PUT {
         eval { new V2::Server::Obj::Tag( id => $id, description => $desc ) };
     catch my $err;
 
+
     my $tag = $c->model('DB::TTag')->find( { id => $id } );
+  
 
     if ($tag) {
         if ($tag_ok) {
@@ -217,9 +217,10 @@ sub default_PUT {
             my $tag = {
                 id          => decode( $enc, $tag->id ),
                 description => decode( $enc, $tag->description )
-            };
+            };    
 
-            $c->stash->{content}  = $tag;
+            #TODO: message: tag creat correctament
+            $c->stash->{content}  = \@message;
             $c->stash->{tag}      = $tag;
             $c->stash->{template} = 'tag/get_tag.tt';
             $c->response->status(200);
@@ -229,6 +230,8 @@ sub default_PUT {
             ($error) = split( 'at', $error );
 
             my @message = { message => $error };
+           
+            
 
             my $new_tag = {
                 id          => $id,
@@ -264,9 +267,6 @@ sub default_DELETE {
     my $req = $c->request;
     my @message;
 
-    $c->log->debug( 'Mètode: ' . $req->method );
-    $c->log->debug("El DELETE funciona");
-
     my $tag_aux = $c->model('DB::TTag')->find( { id => $id } );
     my @resource_tag
         = $c->model('DB::TResourceTag')->search( { tag_id => $id } );
@@ -278,7 +278,7 @@ sub default_DELETE {
             $_->delete;
         }
 
-        @message = { message => "Tag succesfully deleted" };
+        #TODO: message: tag eliminat correctament    
         $c->stash->{content}  = \@message;
         $c->stash->{template} = 'tag/delete_ok.tt';
         $c->response->status(200);
@@ -286,7 +286,6 @@ sub default_DELETE {
     else {
 
         @message = { message => "We can't find what you are looking for." };
-
         $c->stash->{content}  = \@message;
         $c->stash->{template} = 'old_not_found.tt';
         $c->response->status(404);

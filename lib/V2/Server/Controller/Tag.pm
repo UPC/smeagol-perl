@@ -4,7 +4,6 @@ use Moose;
 use namespace::autoclean;
 use V2::Server::Obj::Tag;
 use Exception::Class::TryCatch;
-
 use Encode qw(encode decode);
 my $enc     = 'utf-8';
 my $VERSION = $V2::Server::VERSION;
@@ -81,7 +80,10 @@ sub get_tag : Private {
     my $tag = $c->model('DB::TTag')->find( { id => $id } );
 
     if ( !$tag ) {
-        @message = { message => "We can't find what you are looking for." };
+        #@message = { message => "We can't find what you are looking for." };
+        
+        #TODO: message: tag not found
+        $c->stash->{content}  = \@message;
         $c->stash->{content}  = \@message;
         $c->stash->{template} = 'old_not_found.tt';
         $c->response->status(404);
@@ -105,7 +107,7 @@ sub default_POST {
     my ( $self, $c ) = @_;
     my $req = $c->request;
     my @new_tag;
-
+    my @message;
 =head2
 decode($enc, $str); 
 $text_str = lc $text_str; 
@@ -146,8 +148,10 @@ if($req->parameters->{description} || $req->{headers}->{description}){
                 id          => decode( $enc, $id ),
                 description => decode( $enc, $desc )
             };
-
-            $c->stash->{content}  = $new_tag;
+           
+            
+            #TODO: message: tag creat amb exit.
+            $c->stash->{content}  = \@message;
             $c->stash->{tag}      = $new_tag;
             $c->stash->{template} = 'tag/get_tag.tt';
             $c->response->status(201);
@@ -155,16 +159,9 @@ if($req->parameters->{description} || $req->{headers}->{description}){
         else {
             my ($error) = split( "\n", $err->message );
             ($error) = split( 'at', $error );
-
-            my @message = { message => $error };
-
-            $new_tag = {
-                id          => $id,
-                description => $desc
-            };
-
+            
+           #TODO: message: tag no se ha pogut crear.                     
             $c->stash->{content}  = \@message;
-            $c->stash->{tag}      = $new_tag;
             $c->stash->{template} = 'tag/get_tag.tt';
             $c->response->content_type('text/html');
             $c->stash->{error}
@@ -173,13 +170,17 @@ if($req->parameters->{description} || $req->{headers}->{description}){
         }
 
     }
-    else {    # The tag exists, therefore the server informs of the fact
+    else {    
+        # The tag exists, therefore the server informs of the fact
         @new_tag = {
             id          => $tag_exist->id,
             description => $tag_exist->description
         };
-
-        $c->stash->{content}  = \@new_tag;
+       
+       
+        
+        #TODO: message: tag ja existeix.
+        $c->stash->{content}  = \@message;
         $c->stash->{tag}      = \@new_tag;
         $c->stash->{template} = 'tag/get_tag.tt';
         $c->response->content_type('text/html');
@@ -203,11 +204,10 @@ sub default_PUT {
     my $tag_ok = try
         eval { new V2::Server::Obj::Tag( id => $id, description => $desc ) };
     catch my $err;
-    $c->log->debug( "Valor de err: " .$err );
 
 
     my $tag = $c->model('DB::TTag')->find( { id => $id } );
-    $c->log->debug( "Valor de tag: " .$tag );
+  
 
     if ($tag) {
         if ($tag_ok) {
@@ -231,7 +231,7 @@ sub default_PUT {
             ($error) = split( 'at', $error );
 
             my @message = { message => $error };
-            $c->log->debug( "Message Error: " . Dumper( @message) );
+           
             
 
             my $new_tag = {
@@ -250,8 +250,8 @@ sub default_PUT {
         }
     }
     else {
-        @message = { message => "We can't find what you are looking for." };
-
+       
+        #TODO: message: tag deletead
         $c->stash->{content}  = \@message;
         $c->stash->{template} = 'old_not_found.tt';
         $c->response->status(404);
@@ -268,6 +268,7 @@ sub default_DELETE {
     my $req = $c->request;
     my @message;
 
+  
     my $tag_aux = $c->model('DB::TTag')->find( { id => $id } );
     my @resource_tag
         = $c->model('DB::TResourceTag')->search( { tag_id => $id } );
@@ -278,7 +279,6 @@ sub default_DELETE {
         foreach (@resource_tag) {
             $_->delete;
         }
-
         #TODO: message: tag eliminat correctament    
         $c->stash->{content}  = \@message;
         $c->stash->{template} = 'tag/delete_ok.tt';
@@ -286,7 +286,9 @@ sub default_DELETE {
     }
     else {
 
-        @message = { message => "We can't find what you are looking for." };
+      
+        #TODO: message: tag deleted
+        $c->stash->{content}  = \@message;
         $c->stash->{content}  = \@message;
         $c->stash->{template} = 'old_not_found.tt';
         $c->response->status(404);

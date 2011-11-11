@@ -16,4 +16,4 @@ Número,Descripció,Test,Operació,URI,Entrada,Estat,Capçaleres,Sortida
 15,Crea un tag nou,testCreateTag,POST,/tag,id=tagname3&description=TAG DESCRIPTION,201 Created,,[]
 16,Crea un tag nou,testCreateTag,POST,/tag,id=tagname4&description=TAG DESCRIPTION,201 Created,,[]
 17,Crea un tag nou,testCreateTag,POST,/tag,id=tagname5&description=TAG DESCRIPTION,201 Created,,[]
-18,Llista els tags,testGetTags,GET,/tag
+18,Llista els tags,testGetTags,GET,/tag,,200 OK,,

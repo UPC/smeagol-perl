@@ -1,14 +1,19 @@
 Número,Descripció,Test,Operació,URI,Entrada,Estat,Capçaleres,Sortida
-1,Crea un tag nou,testCreateTag,POST,/tag,id=tagname&description=TAG DESCRIPTION,201 Created,Location: http,"[]"
+1,Crea un tag nou,testCreateTag,POST,/tag,id=tagname&description=TAG DESCRIPTION,201 Created,Location: http,[]
 2,Consulta un tag,testGetTag,GET,/tag/tagname,,200 OK,,"{""id"":""tagname"",""description"":""TAG DESCRIPTION""}"
 3,Llista els tags,testGetTags,GET,/tag,,200 OK,,"[{""id"":""tagname"",""description"":""TAG DESCRIPTION""}]"
-4,Modifica un tag,testUpdateTag,PUT,/tag/tagname,id=tagname&description=TAG DESCRIPTION2,,200 OK,,"[]"
+4,Modifica un tag,testUpdateTag,PUT,/tag/tagname,id=tagname&description=TAG DESCRIPTION2,200 OK,,[]
 5,Consulta un tag modificat,testGetTag,GET,/tag/tagname,,200 OK,,"{""id"":""tagname"",""description"":""TAG DESCRIPTION2""}"
-6,Intenta crear un tag amd ID repetit,testCreateTagAlreadyExists,POST,/tag,id=tagname&description=WHATEVER,409 Conflict,,"[]"
-7,Elimina un tag,testDeleteTag,DELETE,/tag/tagname,,200 OK,,"[]"
-8,Elimina un tag inexsistent,testDeleteTagNotFount,DELETE,/tag/tagname,,404 Not Found,,"[]"
-9,Consulta un tag inexistent,testGetTagNotFound,GET,/tag/tagname,,404 Not Found,,"[]"
-10,Crea un tag amb ID invalid,testCreateTagInvalidId,POST,/tag,id=&description=TAG DESCRIPTION,400 Bad Request,,"[]"
-11,Intenta crear un tag amb signes,testCreateTagSign,POST,/tag,id=!?)$&description=TAG DESCRIPTION3,201 Created,,"[]"
-12,Intenta crear un tag amb menys carac.,testCreateTagChr,POST,/tag,id=a&description=TAG DESCRIPTION4,201 Created,,"[]"
-13,Crear tag amb mayusculas,testCreateTagMayus,POST,/tag,id=TAGNAME&description=TAG DESCRIPTION5,201 Created,,"[]"
+6,Intenta crear un tag amd ID repetit,testCreateTagAlreadyExists,POST,/tag,id=tagname&description=WHATEVER,409 Conflict,,[]
+7,Elimina un tag,testDeleteTag,DELETE,/tag/tagname,,200 OK,,[]
+8,Elimina un tag inexsistent,testDeleteTagNotFount,DELETE,/tag/tagname,,404 Not Found,,[]
+9,Consulta un tag inexistent,testGetTagNotFound,GET,/tag/tagname,,404 Not Found,,[]
+10,Crea un tag amb ID invalid,testCreateTagInvalidId,POST,/tag,id=&description=TAG DESCRIPTION,400 Bad Request,,[]
+11,Intenta crear un tag amb signes,testCreateTagSign,POST,/tag,id=!?)$&description=TAG DESCRIPTION3,201 Created,,[]
+12,Intenta crear un tag amb menys carac.,testCreateTagChr,POST,/tag,id=a&description=TAG DESCRIPTION4,201 Created,,[]
+13,Crear tag amb mayusculas,testCreateTagMayus,POST,/tag,id=TAGNAME&description=TAG DESCRIPTION5,201 Created,,[]
+14,Crea un tag nou,testCreateTag,POST,/tag,id=tagname2&description=TAG DESCRIPTION,201 Created,,[]
+15,Crea un tag nou,testCreateTag,POST,/tag,id=tagname3&description=TAG DESCRIPTION,201 Created,,[]
+16,Crea un tag nou,testCreateTag,POST,/tag,id=tagname4&description=TAG DESCRIPTION,201 Created,,[]
+17,Crea un tag nou,testCreateTag,POST,/tag,id=tagname5&description=TAG DESCRIPTION,201 Created,,[]
+18,Llista els tags,testGetTags,GET,/tag

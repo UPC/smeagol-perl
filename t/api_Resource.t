@@ -16,14 +16,15 @@ BEGIN {
     use_ok 'Catalyst::Test' => 'V2::Server';
 }
 
-# Cada test ve definit per aquesta estructura:
+# Cada test ve definit per aquesta estructura (alguns camps, com el body, 
+# poden ser opcionals per a alguns tests):
 #
 # {
-#   op      => operador (GET, POST, PUT, DELETE),
+#   op      => operador ('GET', 'POST', 'PUT', 'DELETE'),
 #   uri     => la url (p.ex. /resource/NN),
 #   entrada => [ nom_parametre1 => val, nom_param2 => val2, ... ],
 #   sortida => {
-#                 status => HTTP status,
+#                 status => HTTP status code + message (p.ex. '201 Created'),
 #                 headers => { header1 => val1, ... },
 #                 body => json string
 #              },
@@ -40,15 +41,21 @@ my @tests = (
             info        => 'resource info',
         },
         sortida => {
-            status  => HTTP_CREATED,
-            headers => { Location => qr{/resource/$RESOURCE_ID_GLOBAL} },
-            body    => {
-                id          => qr/\d+/,
-                description => 'aula',
-                info        => 'resource info',
-            },
+            status  => HTTP_CREATED . ' ' . status_message(HTTP_CREATED),
+            headers => { Location => qr{/resource/\d+} },
         },
     },
+#    {
+#        op => 'GET',
+#        uri => '/resource',
+#        entrada => {
+#        },
+#        sortida => {
+#            status => HTTP_OK,
+#            headers => {},
+#            body => {}
+#        }
+#    }
 );
 
 my %helpers = (
@@ -71,7 +78,7 @@ sub test_smeagol_resource {
     my $sub    = $helpers{ $test->{'op'} };
     my $result = $sub->( $test->{'entrada'} );
     
-    is( $result->code, $test->{sortida}{status}, 'response status' );
+    is( $result->code . ' ' . $result->message, $test->{sortida}{status}, 'response status' );
     
     if ($result->header('Location')) {
         like(

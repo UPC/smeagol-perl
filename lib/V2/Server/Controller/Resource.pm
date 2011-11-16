@@ -99,7 +99,7 @@ sub default_POST {
     my $info  = $req->parameters->{info};
 
     my $tags_aux = $req->parameters->{tags};
-    my @tags = split( /,/, $tags_aux );
+    my @tags = defined($tags_aux) ? split( /,/, $tags_aux ) : ();
 
     $c->visit( '/check/check_resource', [ $info, $descr ] );
 

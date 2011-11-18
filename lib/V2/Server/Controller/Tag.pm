@@ -155,6 +155,8 @@ if($req->parameters->{description} || $req->{headers}->{description}){
             $c->stash->{tag}      = $new_tag;
             $c->stash->{template} = 'tag/get_tag.tt';
             $c->response->status(201);
+ 	    $c->response->location($req->uri->as_string."/".$id);
+
         }
         else {
             my ($error) = split( "\n", $err->message );

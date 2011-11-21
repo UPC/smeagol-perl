@@ -21,8 +21,8 @@ Número,Descripció,Test,Operació,URI,Entrada,Estat,Capçaleres,Sortida
 20,Modifica un tag,testUpdateTag,PUT,/tag/tag name5,id=tag  name5&description=TAG DESCRIPTION56,200 OK,,[]
 21,Consulta un tag modificat,testGetTag,GET,/tag/tag name5,,200 OK,,"{""id"":""tag name5"",""description"":""TAG DESCRIPTION56""}"
 22,Crea un tag nou,testCreateTag,POST,/tag,id=1234&description=TAG DESCRIPTION,201 Created,Location: http://localhost/tag/1234,[]
-23,Modifica un tag,testUpdateTag,PUT,/tag/tagname,id=123&description=TAG DESCRIPTION56,404 Not Found,,[]
-24,Modifica un tag,testUpdateTag,PUT,,id=1234&description=TAG DESCRIPTION56,200 OK,,[]
+23,Modifica un tag,testUpdateTag,PUT,/tag/123,id=123&description=TAG DESCRIPTION56,404 Not Found,,[]
+24,Modifica un tag,testUpdateTag,PUT,/tag/1234,id=1234&description=TAG DESCRIPTION56,200 OK,,[]
 25,Consulta un tag modificat,testGetTag,GET,/tag/123,,200 OK,,"{""id"":""123"",""description"":""TAG DESCRIPTION56""}"
 26,Crea un tag nou,testCreateTag,POST,/tag,"id=1234kdjfkrituvncmaldoeirutncmcxkslaoeritndjvkalsoejrkfms,ckfqwertyuiopasdfghjkll1234kdjfkrituvncmaldoeirutncmcxkslaoeritndjvkalsoejrkfms,ckfqwertyuiopasdfghjkll1234kdjfkrituvncmaldoeirutncmcxkslaoeritndjvkalsoejrkfms,ckfqwertyuiopasdfghjkllldoektjfhcnghturjfiwekdnvn&description=TAG DESCRIPTION",400 Bad Request,,[]
 27,Llista els tags,testGetTags,GET,/tag,,200 OK,,[]

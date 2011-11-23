@@ -48,6 +48,7 @@ sub default_GET {
 
 sub tag_list : Private {
     my ( $self, $c ) = @_;
+    my $req = $c->request;
     my @tag;
     my @tags;
     my @message;
@@ -58,6 +59,7 @@ sub tag_list : Private {
         @tag = {
             id          => decode( $enc, $_->id ),
             description => decode( $enc, $_->description ),
+            location => decode( $enc, $c->response->location($req->uri->as_string."/".$_->id) ),
         };
 
         push( @tags, @tag );

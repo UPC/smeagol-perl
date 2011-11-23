@@ -24,7 +24,7 @@ closedir $dirh;
 foreach my $f (@thefiles){
     unless ( ($f eq ".") || ($f eq "..") || ($f eq ".svn") || ($f !~ m/Tag.csv$/))
 {
-
+print "Begin test $f \n";
 my $tag_csv = "doc/api/$f";
 
 

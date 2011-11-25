@@ -101,14 +101,12 @@ sub event_list : Local {
 sub default_POST {
     my ( $self, $c ) = @_;
     my $req = $c->request;
-    $c->log->debug( 'Mètode: ' . $req->method );
-    $c->log->debug("El POST funciona");
 
     my $info        = $req->parameters->{info};
     my $description = $req->parameters->{description};
     my $starts      = $req->parameters->{starts};
     my $ends        = $req->parameters->{ends};
-    my @tags        = split( ',', $req->parameters->{tags} );
+#    my @tags        = split( ',', $req->parameters->{tags} );
 
     my $new_event = $c->model('DB::TEvent')->find_or_new();
     my $tag_event;
@@ -126,7 +124,7 @@ sub default_POST {
 
         my $tags;
         my $id_tag;
-
+=pod
         foreach (@tags) {
             $id_tag = $_;
 
@@ -142,14 +140,14 @@ sub default_POST {
                 $c->detach( '/bad_request', [] );
             }
         }
-
+=cut
         my $event = {
             id          => $new_event->id,
             info        => decode( $enc, $new_event->info ),
             description => decode( $enc, $new_event->description ),
             starts      => $new_event->starts->iso8601(),
             ends        => $new_event->ends->iso8601(),
-            tags        => $new_event->tag_list,
+#            tags        => $new_event->tag_list,
             bookings    => $new_event->booking_list
         };
 
@@ -173,9 +171,6 @@ sub default_POST {
 sub default_PUT {
     my ( $self, $c, $res, $id ) = @_;
     my $req = $c->request;
-    $c->log->debug( 'Mètode: ' . $req->method );
-    $c->log->debug( "ID: " . $id );
-    $c->log->debug("El PUT funciona");
 
     my $info        = $req->parameters->{info};
     my $description = $req->parameters->{description};
@@ -215,7 +210,6 @@ sub default_PUT {
             my $id_tag;
             foreach (@tags) {
                 $id_tag = $_;
-                $c->log->debug( "Estem afegint el tag: " . $id_tag );
 
                 $tags = $c->model('DB::TTag')->find( { id => $id_tag } );
 
@@ -268,9 +262,6 @@ sub default_DELETE {
     my ( $self, $c, $res, $id ) = @_;
     my $req = $c->request;
 
-    $c->log->debug( 'Mètode: ' . $req->method );
-    $c->log->debug("El DELETE funciona");
-
     my $event_aux = $c->model('DB::TEvent')->find( { id => $id } );
     my $message;
 
@@ -297,7 +288,6 @@ Outrage!! The author is repeting himself. Throw him to the fire!!
 sub ParseDate : Private {
     my ( $self, $c, $date_str ) = @_;
 
-    $c->log->debug( "Date to parse: " . $date_str );
 
     my ( $day, $hour ) = split( /T/, $date_str );
 

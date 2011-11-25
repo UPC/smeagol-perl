@@ -16,7 +16,7 @@ BEGIN {
     use_ok 'Catalyst::Test' => 'V2::Server';
 }
 
-# Cada test ve definit per aquesta estructura (alguns camps, com el body, 
+# Cada test ve definit per aquesta estructura (alguns camps, com el body,
 # poden ser opcionals per a alguns tests):
 #
 # {
@@ -45,17 +45,18 @@ my @tests = (
             headers => { Location => 'qr{/resource/$GENERATED_RESOURCE_ID}' },
         },
     },
-#    {
-#        op => 'GET',
-#        uri => '/resource',
-#        entrada => {
-#        },
-#        sortida => {
-#            status => HTTP_OK,
-#            headers => {},
-#            body => {}
-#        }
-#    }
+
+    #    {
+    #        op => 'GET',
+    #        uri => '/resource',
+    #        entrada => {
+    #        },
+    #        sortida => {
+    #            status => HTTP_OK,
+    #            headers => {},
+    #            body => {}
+    #        }
+    #    }
 );
 
 my %helpers = (
@@ -77,10 +78,13 @@ sub test_smeagol_resource {
     like( $id, qr/\d+/, "id ben format" );
     my $sub    = $helpers{ $test->{'op'} };
     my $result = $sub->( $test->{'entrada'} );
-    
-    is( $result->code . ' ' . $result->message, $test->{sortida}{status}, 'response status' );
-    
-    if ($result->header('Location')) {
+
+    is( $result->code . ' ' . $result->message,
+        $test->{sortida}{status},
+        'response status'
+    );
+
+    if ( $result->header('Location') ) {
         like(
             $result->header('Location'),
             eval $test->{'sortida'}{'headers'}{'Location'},
@@ -111,7 +115,7 @@ sub crea_recurs {
         if @ids == 0;
 
     $GENERATED_RESOURCE_ID = $ids[0];
-    
+
     return $rp;
 }
 

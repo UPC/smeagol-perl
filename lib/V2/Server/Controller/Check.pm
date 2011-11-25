@@ -37,11 +37,9 @@ sub check_desc : Local {
     $desc =~ s/\n/ /g;    #All new lines substitued by a space
 
     if ( length($desc) < 128 ) {
-        $c->log->debug("Descr OK");
         $c->stash->{desc_ok} = 1;
     }
     else {
-        $c->log->debug("Descr KO");
         $c->stash->{desc_ok} = 0;
     }
 }
@@ -50,11 +48,9 @@ sub check_desc_tag : Local {
     my ( $self, $c, $desc ) = @_;
 
     if ( length($desc) < 256 ) {
-        $c->log->debug("Descr OK");
         $c->stash->{desc_ok} = 1;
     }
     else {
-        $c->log->debug("Descr KO");
         $c->stash->{desc_ok} = 0;
     }
 }

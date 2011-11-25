@@ -30,7 +30,7 @@ BEGIN {
 #              },
 # }
 
-my $RESOURCE_ID_GLOBAL;
+my $GENERATED_RESOURCE_ID;
 
 my @tests = (
     {    # Crear un nou recurs
@@ -42,7 +42,7 @@ my @tests = (
         },
         sortida => {
             status  => HTTP_CREATED . ' ' . status_message(HTTP_CREATED),
-            headers => { Location => qr{/resource/\d+} },
+            headers => { Location => 'qr{/resource/$GENERATED_RESOURCE_ID}' },
         },
     },
 #    {
@@ -83,7 +83,7 @@ sub test_smeagol_resource {
     if ($result->header('Location')) {
         like(
             $result->header('Location'),
-            $test->{'sortida'}{'headers'}{'Location'},
+            eval $test->{'sortida'}{'headers'}{'Location'},
             "resource location header"
         );
     }
@@ -110,7 +110,7 @@ sub crea_recurs {
     fail("obtenir l'identificador del resource acabat de crear")
         if @ids == 0;
 
-    $RESOURCE_ID_GLOBAL = $ids[0];
+    $GENERATED_RESOURCE_ID = $ids[0];
     
     return $rp;
 }

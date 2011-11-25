@@ -49,7 +49,6 @@ sub default_GET {
 
 sub get_event : Local {
     my ( $self, $c, $id ) = @_;
-
     my $event_aux = $c->model('DB::TEvent')->find( { id => $id } );
 
     if ($event_aux) {
@@ -59,8 +58,6 @@ sub get_event : Local {
             description => decode( $enc, $event_aux->description ),
             starts      => $event_aux->starts->iso8601(),
             ends        => $event_aux->ends->iso8601(),
-            tags        => $event_aux->tag_list,
-            bookings    => $event_aux->booking_list
         };
 
         $c->stash->{content} = $event;
@@ -152,10 +149,11 @@ sub default_POST {
             bookings    => $new_event->booking_list
         };
 
-        #TODO: message: tag creat amb exit.
+        #TODO: message: event creat amb exit.
         $c->stash->{content}  = \@message;
         $c->response->status(201);
-        $c->forward( $c->view('JSON') );
+        $c->response->location($req->uri->as_string."/".$new_event->id);
+		$c->forward( $c->view('JSON') );
     }
     else {
         my @message

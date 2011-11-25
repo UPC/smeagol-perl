@@ -16,10 +16,26 @@ BEGIN {
     use_ok 'Catalyst::Test' => 'V2::Server';
 }
 
-# Cada test ve definit per aquesta estructura (alguns camps, com el body,
-# poden ser opcionals per a alguns tests):
+# global variable to store server-generated IDs
+my $GENERATED_RESOURCE_ID;
+
+# returns regex to be used in 'well-formedness' tests
+sub generated_resource_id {
+    my $uri = generated_uri();
+
+    # \Q and \E to avoid meta chars in regex
+    return qr{\Q$uri\E};
+}
+
+sub generated_uri {
+    return qq{/resource/$GENERATED_RESOURCE_ID};
+}
+
+# Every test is defined by the following structure. Note that 
+# several fields ('body', for instance) are optional in some tests.
 #
 # {
+#   titol   => 'SomeTest',   
 #   op      => operador ('GET', 'POST', 'PUT', 'DELETE'),
 #   uri     => la url (p.ex. /resource/NN),
 #   entrada => [ nom_parametre1 => val, nom_param2 => val2, ... ],
@@ -30,39 +46,36 @@ BEGIN {
 #              },
 # }
 
-my $GENERATED_RESOURCE_ID;
-
 my @tests = (
-    {    # Crear un nou recurs
+    {   titol   => 'CreaRecurs',
         op      => 'POST',
-        uri     => '/resource',
+        uri     => sub {'/resource'},
         entrada => {
             description => 'aula',
             info        => 'resource info',
         },
         sortida => {
             status  => HTTP_CREATED . ' ' . status_message(HTTP_CREATED),
-            headers => { Location => 'qr{/resource/$GENERATED_RESOURCE_ID}' },
+            headers => { Location => \&generated_resource_id },
         },
     },
 
-    #    {
-    #        op => 'GET',
-    #        uri => '/resource',
-    #        entrada => {
-    #        },
-    #        sortida => {
-    #            status => HTTP_OK,
-    #            headers => {},
-    #            body => {}
-    #        }
-    #    }
+    {   titol   => 'ConsultaRecurs',
+        op      => 'GET',
+        uri     => \&generated_uri,
+        entrada => {},
+        sortida => {
+            status  => HTTP_OK . ' ' . status_message(HTTP_OK),
+            headers => {},
+            body    => { description => 'aula', info => 'resource info' }
+        }
+    }
 );
 
 my %helpers = (
     GET    => \&consulta_recurs,
     POST   => \&crea_recurs,
-    UPDATE => \&modifica_recurs,
+    PUT    => \&modifica_recurs,
     DELETE => \&esborra_recurs,
 );
 
@@ -74,21 +87,37 @@ done_testing();
 
 sub test_smeagol_resource {
     my ($test) = @_;
-    my ($id)   = crea_recurs();
-    like( $id, qr/\d+/, "id ben format" );
     my $sub    = $helpers{ $test->{'op'} };
-    my $result = $sub->( $test->{'entrada'} );
+    my $args   = {
+        titol   => $test->{'titol'},
+        uri     => $test->{'uri'}->(),
+        entrada => $test->{'entrada'}
+    };
+
+    my $result = $sub->(%$args);
+
+    like( generated_uri(), qr{/resource/\d+},
+        $test->{titol} . ": id ben format" );
 
     is( $result->code . ' ' . $result->message,
         $test->{sortida}{status},
-        'response status'
+        $test->{titol} . ': response status'
     );
 
     if ( $result->header('Location') ) {
         like(
             $result->header('Location'),
-            eval $test->{'sortida'}{'headers'}{'Location'},
-            "resource location header"
+            $test->{sortida}{headers}{Location}->(),
+            $test->{titol} . ': resource location header'
+        );
+    }
+
+    if ( exists $test->{sortida}{body} ) {
+        $test->{sortida}{body}{id} = $GENERATED_RESOURCE_ID;
+        is_deeply(
+            decode_json( $result->content ),
+            $test->{sortida}{body},
+            $test->{titol} . ': response content'
         );
     }
 }
@@ -100,7 +129,9 @@ sub llista_ids {
 }
 
 sub crea_recurs {
-    my ($entrada) = @_;
+    my %arg = @_;
+
+    my ( $titol, $uri, $entrada ) = ( $arg{titol}, $arg{uri}, $arg{entrada} );
 
     my @abans = llista_ids();
 
@@ -111,15 +142,21 @@ sub crea_recurs {
     my $lc = List::Compare->new( \@abans, \@despres );
     my @ids = $lc->get_complement;
 
-    fail("obtenir l'identificador del resource acabat de crear")
-        if @ids == 0;
+    ok( @ids > 0,
+        $titol . ": obtenir l'identificador del resource acabat de crear" );
 
     $GENERATED_RESOURCE_ID = $ids[0];
 
     return $rp;
 }
 
-sub consulta_recurs { }
+sub consulta_recurs {
+    my %args = @_;
+    my $uri  = $args{uri};
+
+    my $rp = request( GET $uri);
+    return $rp;
+}
 
 sub modifica_recurs { }
 

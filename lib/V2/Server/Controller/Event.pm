@@ -101,6 +101,7 @@ sub event_list : Local {
 sub default_POST {
     my ( $self, $c ) = @_;
     my $req = $c->request;
+	my @message;
 
     my $info        = $req->parameters->{info};
     my $description = $req->parameters->{description};
@@ -151,7 +152,8 @@ sub default_POST {
             bookings    => $new_event->booking_list
         };
 
-        $c->stash->{content} = $event;
+        #TODO: message: tag creat amb exit.
+        $c->stash->{content}  = \@message;
         $c->response->status(201);
         $c->forward( $c->view('JSON') );
     }

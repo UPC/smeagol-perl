@@ -64,8 +64,8 @@ sub get_resource : Private {
             id          => $resource->id,
             description => decode( $enc, $resource->description ),
             info        => decode( $enc, $resource->info ),
-            tags        => $resource->tag_list,
-            bookings    => $resource->book_list
+            #tags        => $resource->tag_list,
+            #bookings    => $resource->book_list
         };
 
         $c->stash->{resource} = $res;
@@ -100,7 +100,7 @@ sub default_POST {
 
     my $tags_aux = $req->parameters->{tags};
     my @tags = split( /,/, $tags_aux );
-
+    
     $c->visit( '/check/check_resource', [ $info, $descr ] );
 
 # If all is correct $c->stash->{event_ok} should be 1, otherwise it will be 0.

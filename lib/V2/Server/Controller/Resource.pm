@@ -64,6 +64,7 @@ sub get_resource : Private {
             id          => $resource->id,
             description => decode( $enc, $resource->description ),
             info        => decode( $enc, $resource->info ),
+
             #tags        => $resource->tag_list,
             #bookings    => $resource->book_list
         };
@@ -99,8 +100,8 @@ sub default_POST {
     my $info  = $req->parameters->{info};
 
     my $tags_aux = $req->parameters->{tags};
-    my @tags = split( /,/, $tags_aux );
-    
+    my @tags = split( /,/, $tags_aux ) if defined $tags_aux;
+
     $c->visit( '/check/check_resource', [ $info, $descr ] );
 
 # If all is correct $c->stash->{event_ok} should be 1, otherwise it will be 0.
@@ -157,7 +158,8 @@ sub default_POST {
         $c->stash->{content}  = $resource;
         $c->response->status(201);
         $c->response->content_type('text/html');
-        $c->response->header('Location' => $c->uri_for($c->action, $new_resource->id));
+        $c->response->header(
+            'Location' => $c->uri_for( $c->action, $new_resource->id ) );
         $c->stash->{template} = 'resource/get_resource.tt';
     }
     else {

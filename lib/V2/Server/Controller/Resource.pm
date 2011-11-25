@@ -64,7 +64,6 @@ sub get_resource : Private {
             id          => $resource->id,
             description => decode( $enc, $resource->description ),
             info        => decode( $enc, $resource->info ),
-
             #tags        => $resource->tag_list,
             #bookings    => $resource->book_list
         };

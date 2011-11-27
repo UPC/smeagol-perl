@@ -6,14 +6,27 @@ use utf8::all;
 
 use Test::More;
 use Text::CSV;
-use HTTP::Request::Common qw( GET POST PUT DELETE );
+
+use lib 't/lib';
+use HTTP::Request::Common::Bug65843 qw( GET POST PUT DELETE );
 
 BEGIN {
     require 't/TestingDB.pl';
     use_ok 'Catalyst::Test' => 'V2::Server';
 }
 
-my $tag_csv = 'doc/api/Tag.csv';
+opendir my $dirh, 'doc/api/'
+    or die "Cannot open the directory doc/api/";
+
+my @thefiles= readdir $dirh;
+closedir $dirh;
+
+foreach my $f (@thefiles){
+    unless ( ($f eq ".") || ($f eq "..") || ($f eq ".svn") || ($f !~ m/Tag.csv$/))
+{
+print "Begin test $f \n";
+my $tag_csv = "doc/api/$f";
+
 
 # set binary to accept non-ASCII chars
 my $csv = Text::CSV->new({ binary => 1 })
@@ -32,8 +45,9 @@ while ( my $row = $csv->getline( $fh ) ) {
 $csv->eof or $csv->error_diag();
 close $fh;
 
+}
+}
 done_testing();
-
 
 sub test_smeagol_tag {
     my ($row) = @_;

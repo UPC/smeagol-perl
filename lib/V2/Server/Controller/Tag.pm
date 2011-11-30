@@ -133,7 +133,7 @@ if($req->parameters->{description} || $req->{headers}->{description}){
   
 }else{
     $tag_ok = try
-        eval { new V2::Server::Obj::Tag( id =>decode($enc, $id) ) };
+        eval { new V2::Server::Obj::Tag( id => $id ) };
     catch $err;
 }
 

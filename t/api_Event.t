@@ -6,6 +6,7 @@ use utf8::all;
 use Data::Dumper;
 
 use Test::More;
+use JSON;
 
 use lib 't/lib';
 use HTTP::Request::Common::Bug65843 qw( GET POST PUT DELETE );
@@ -14,6 +15,8 @@ BEGIN {
     require 't/TestingDB.pl';
     use_ok 'Catalyst::Test' => 'V2::Server';
 }
+
+my $EVENT_ID;
 
 my @tests = (
     {    # Crear un nou event
@@ -39,7 +42,7 @@ my @tests = (
 		desc	=> 'Consulta un event',
 		call	=> 'TestGetEvent',
         op      => 'GET',
-        uri     => '/event/1',
+        uri     => \&generated_uri,
         input 	=> '',
         output 	=> {
             status  => '200 OK',
@@ -52,7 +55,7 @@ my @tests = (
 		desc	=> 'Crea un nou event',
 		call	=> 'TestCreateEvent',
         op      => 'POST',
-        uri     => '/event',
+        uri     => '/event' ,
         input => {
             info		=> 'EVENT 2 INFORMATION',
 			description => 'DESCRIPTION',
@@ -77,8 +80,11 @@ done_testing();
 sub test_smeagol_event {
     my ($t) = @_;
 
-    my ( $nr, $desc, $call, $op, $uri, $input, $status, $headers, $output ) =
-		 ($t->{num},$t->{desc},$t->{call},$t->{op},$t->{uri},$t->{input},$t->{output}->{status},$t->{output}->{headers}{Location},$t->{output}{data});
+    my ( $nr, $desc, $call, $op,$input, $status, $headers, $output ) =
+		 ($t->{num},$t->{desc},$t->{call},$t->{op},$t->{input},$t->{output}->{status},$t->{output}->{headers}{Location},$t->{output}{data});
+
+	my $uri;
+	($op eq 'POST')? ($uri = $t->{uri}) : ($uri = $t->{uri}->());
 
     my $prefix = "Test[$nr]: $call";
     my $req = do { no strict 'refs'; \&$op };
@@ -95,9 +101,14 @@ sub test_smeagol_event {
         like( $r->headers->as_string(), qr/$headers/, "$prefix.headers" );
 		my $id = $r->headers->as_string();
 		$id =~ /.*Location:.*\/event\/(\d)+/;
-		$tests[$nr-1]{output}{id} = $1;
+		$EVENT_ID = $1;
+		$tests[$nr-1]{output}{id} = $EVENT_ID;
 
     };
 
-    is  ( $r->decoded_content(), $output, "$prefix.output" );
+	is_deeply (decode_json($r->decoded_content()), decode_json($output), "$prefix.output" );
+}
+
+sub generated_uri {
+    return qq{/event/$EVENT_ID};
 }

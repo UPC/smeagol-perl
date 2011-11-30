@@ -64,6 +64,7 @@ sub get_resource : Private {
             id          => $resource->id,
             description => decode( $enc, $resource->description ),
             info        => decode( $enc, $resource->info ),
+
             #tags        => $resource->tag_list,
             #bookings    => $resource->book_list
         };
@@ -197,7 +198,7 @@ sub default_PUT {
 
     my $tags_aux = $req->parameters->{tags};
     my $info     = $req->parameters->{info};
-    my @tags     = split( /,/, $tags_aux );
+    my @tags     = split( /,/, $tags_aux ) if defined $tags_aux;
 
     my $resource = $c->model('DB::TResource')->find( { id => $id } );
 

@@ -5,7 +5,7 @@ use warnings;
 use utf8::all;
 
 use Test::More;
-use HTTP::Request::Common qw( GET POST PUT DELETE );
+use HTTP::Request::Common::Bug65843 qw( GET POST PUT DELETE );
 use HTTP::Status qw(:constants :is status_message);
 use Data::Dumper::Simple;
 use JSON;
@@ -31,11 +31,11 @@ sub generated_uri {
     return qq{/resource/$GENERATED_RESOURCE_ID};
 }
 
-# Every test is defined by the following structure. Note that 
+# Every test is defined by the following structure. Note that
 # several fields ('body', for instance) are optional in some tests.
 #
 # {
-#   titol   => 'SomeTest',   
+#   titol   => 'SomeTest',
 #   op      => operador ('GET', 'POST', 'PUT', 'DELETE'),
 #   uri     => la url (p.ex. /resource/NN),
 #   entrada => [ nom_parametre1 => val, nom_param2 => val2, ... ],
@@ -68,6 +68,19 @@ my @tests = (
             status  => HTTP_OK . ' ' . status_message(HTTP_OK),
             headers => {},
             body    => { description => 'aula', info => 'resource info' }
+        }
+    },
+
+    {   titol   => 'ModificaRecurs',
+        op      => 'PUT',
+        uri     => \&generated_uri,
+        entrada => {
+            description => 'aula (modif)',
+            info        => 'resource info (modif)',
+        },
+        sortida => {
+            status  => HTTP_OK . ' ' . status_message(HTTP_OK),
+            headers => {},
         }
     }
 );
@@ -104,15 +117,15 @@ sub test_smeagol_resource {
         $test->{titol} . ': response status'
     );
 
-    if ( $result->header('Location') ) {
+    if ( defined $result->header('Location') ) {
         like(
             $result->header('Location'),
             $test->{sortida}{headers}{Location}->(),
-            $test->{titol} . ': resource location header'
+            $test->{titol} . ': "Location" header'
         );
     }
 
-    if ( exists $test->{sortida}{body} ) {
+    if ( exists $test->{sortida}{body} && $test->{sortida}{body} ne '' ) {
         $test->{sortida}{body}{id} = $GENERATED_RESOURCE_ID;
         is_deeply(
             decode_json( $result->content ),
@@ -123,7 +136,7 @@ sub test_smeagol_resource {
 }
 
 sub llista_ids {
-    my $rp = request( GET('/resource') );
+    my $rp = request( GET '/resource' );
 
     return parse_resource_ids( $rp->content );
 }
@@ -158,7 +171,13 @@ sub consulta_recurs {
     return $rp;
 }
 
-sub modifica_recurs { }
+sub modifica_recurs {
+    my %args = @_;
+    my $uri  = $args{uri};
+
+    my $rp = request( PUT $uri );
+    return $rp;
+}
 
 sub esborra_recurs { }
 

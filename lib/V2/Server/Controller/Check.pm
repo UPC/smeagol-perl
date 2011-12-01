@@ -33,15 +33,17 @@ sub check_name : Local {
 sub check_desc : Local {
     my ( $self, $c, $desc ) = @_;
 
-    $desc =~ s/\t//g;     #All tabs substitued by a space
-    $desc =~ s/\n/ /g;    #All new lines substitued by a space
-
+    if (defined $desc) {
+        $desc =~ s/\t//g;     #All tabs substitued by a space
+        $desc =~ s/\n/ /g;    #All new lines substitued by a space
+    }
+    
     if ( length($desc) < 128 ) {
         #$c->log->debug("Descr OK");
         $c->stash->{desc_ok} = 1;
     }
     else {
-        $c->log->debug("Descr KO");
+        #$c->log->debug("Descr KO");
         $c->stash->{desc_ok} = 0;
     }
 }

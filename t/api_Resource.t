@@ -34,15 +34,17 @@ sub generated_uri {
 # Every test is defined by the following structure. Note that
 # several fields ('body', for instance) are optional in some tests.
 #
+# Note that response header values are references to routines returning regexes.
+#
 # {
-#   titol   => 'SomeTest',
-#   op      => operador ('GET', 'POST', 'PUT', 'DELETE'),
-#   uri     => la url (p.ex. /resource/NN),
-#   entrada => [ nom_parametre1 => val, nom_param2 => val2, ... ],
+#   titol   => 'SomeTestTitle',
+#   op      => HTTP method name (ex: 'GET', 'POST', 'PUT', 'DELETE'),
+#   uri     => reference to some routine which builds the request url (ex: \&generated_uri),
+#   entrada => { param1 => val1, param2 => val2, ... },
 #   sortida => {
-#                 status => HTTP status code + message (p.ex. '201 Created'),
-#                 headers => { header1 => val1, ... },
-#                 body => json string
+#                 status => HTTP status code + message (ex: '201 Created'),
+#                 headers => { header1 => sub { qr{regex1} }, ... },
+#                 body => a (possibly empty) valid json string
 #              },
 # }
 
@@ -117,12 +119,17 @@ sub test_smeagol_resource {
         $test->{titol} . ': response status'
     );
 
-    if ( defined $result->header('Location') ) {
-        like(
-            $result->header('Location'),
-            $test->{sortida}{headers}{Location}->(),
-            $test->{titol} . ': "Location" header'
-        );
+    foreach ( keys %{ $test->{sortida}{headers} } ) {
+        if ( $result->header($_) ) {
+            like(
+                $result->header($_),
+                $test->{sortida}{headers}{$_}->(),
+                $test->{titol} . ": '$_' header does not match"
+            );
+        }
+        else {
+            fail( $test->{titol} . ": '$_' header should be returned" );
+        }
     }
 
     if ( exists $test->{sortida}{body} && $test->{sortida}{body} ne '' ) {

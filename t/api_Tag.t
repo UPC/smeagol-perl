@@ -48,6 +48,8 @@ close $fh;
 
 }
 }
+
+
 done_testing();
 
 sub test_smeagol_tag {
@@ -55,13 +57,10 @@ sub test_smeagol_tag {
 
     my ( $nr, $desc, $call, $op, $uri, $input, $status, $headers, $output ) = @$row;
 
-	my $esc_sc = uri_escape(';');
-	$input =~ s/;/$esc_sc/;
-
     my $prefix = "Test[$nr]: $call";
     my $req = do { no strict 'refs'; \&$op };
     my $r = request(
-        $req->( $uri, Accept => 'application/json', Content => $input )
+        $req->( $uri, Accept => 'application/json', Content => escape_values($input))
     );
 
     is ( $r->code().' '.$r->message(), $status, "$prefix.status" );
@@ -74,4 +73,10 @@ sub test_smeagol_tag {
     };
 
     is  ( $r->decoded_content(), $output, "$prefix.output" );
+}
+
+sub escape_values{
+	my ($str) = @_;
+	$str =~ /^id=(.*)&description=(.*)$/;
+	return "id=".uri_escape($1)."&description=".uri_escape($2);
 }

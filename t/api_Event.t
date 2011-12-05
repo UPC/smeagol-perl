@@ -12,7 +12,6 @@ use strict;
 use warnings;
 use utf8::all;
 use Data::Dumper;
-use Storable;
 use Test::More;
 use JSON;
 
@@ -28,7 +27,7 @@ my $EVENT_ID;
 
 my @tests = @{ require 'doc/api/Event.pl' };
 
-#store \@tests, 'doc/api/Event.txt';
+
 
 for my $t (@tests) {
     test_smeagol_event($t);

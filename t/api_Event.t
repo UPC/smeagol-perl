@@ -11,7 +11,6 @@ sub generated_uri {
 use strict;
 use warnings;
 use utf8::all;
-use Data::Dumper;
 use Test::More;
 use JSON;
 

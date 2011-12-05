@@ -53,7 +53,7 @@ sub get_event : Local {
     #$c->log->debug("Valor de event_aux: ".Dumper($event_aux->id));
     if ($event_aux) {
         my $event = {
-            id          => $event_aux->id,
+            #id          => $event_aux->id,
             info        => decode( $enc, $event_aux->info ),
             description => decode( $enc, $event_aux->description ),
             starts      => $event_aux->starts->iso8601(),

@@ -50,7 +50,7 @@ sub default_GET {
 sub get_event : Local {
     my ( $self, $c, $id ) = @_;
     my $event_aux = $c->model('DB::TEvent')->find( { id => $id } );
-
+    $c->log->debug("Valor de event_aux: ".Dumper($event_aux->id));
     if ($event_aux) {
         my $event = {
             id          => $event_aux->id,

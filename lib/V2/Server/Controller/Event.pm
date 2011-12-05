@@ -50,7 +50,7 @@ sub default_GET {
 sub get_event : Local {
     my ( $self, $c, $id ) = @_;
     my $event_aux = $c->model('DB::TEvent')->find( { id => $id } );
-    $c->log->debug("Valor de event_aux: ".Dumper($event_aux->id));
+    #$c->log->debug("Valor de event_aux: ".Dumper($event_aux->id));
     if ($event_aux) {
         my $event = {
             id          => $event_aux->id,
@@ -66,8 +66,8 @@ sub get_event : Local {
         $c->stash->{template} = 'event/get_event.tt';
     }
     else {
-        my @message
-            = { message => "We can't find what you are looking for." };
+        my @message;
+        #    = { message => "We can't find what you are looking for." };
 
         $c->stash->{content}  = \@message;
         $c->stash->{template} = 'old_not_found.tt';
@@ -233,8 +233,8 @@ sub default_PUT {
                 tags        => $event->tag_list,
                 bookings    => $event->booking_list
             };
-
-            $c->stash->{content} = $event;
+            my @message;
+            $c->stash->{content} = \@message;
             $c->response->status(200);
             $c->forward( $c->view('JSON') );
         }
@@ -250,8 +250,8 @@ sub default_PUT {
         }
     }
     else {
-        my @message = { message =>
-                    "404. Not found", };
+        my @message; #= { message =>
+                    #"404. Not found", };
         $c->stash->{content} = \@message;
         $c->stash->{template} = 'not_found.tt';
         $c->response->status(404);
@@ -263,19 +263,20 @@ sub default_DELETE {
     my $req = $c->request;
 
     my $event_aux = $c->model('DB::TEvent')->find( { id => $id } );
-    my $message;
+    my @message;
 
     if ($event_aux) {
         $event_aux->delete;
-        $message = { message => "Event successfully deleted" };
-        $c->stash->{content}  = $message;
+        #$message = { message => "Event successfully deleted" };
+        $c->stash->{content}  = \@message;
         $c->stash->{template} = 'event/delete_ok.tt';
         $c->response->status(200);
     }
     else {
-        $message
-            = { message => "We can't delete an event that we can't find" };
-        $c->stash->{content}  = $message;
+        
+      # @message
+       #     = { message => "We can't delete an event that we can't find" };
+        $c->stash->{content}  = \@message;
         $c->stash->{template} = 'not_found.tt';
         $c->response->status(404);
     }

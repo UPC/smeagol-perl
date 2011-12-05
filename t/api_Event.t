@@ -1,10 +1,17 @@
 #!perl
+sub generated_uri {
+    return qq{/event/$EVENT_ID};
+}
+
+sub generated_uri {
+    return qq{/event/$EVENT_ID};
+}
+
 
 use strict;
 use warnings;
 use utf8::all;
 use Data::Dumper;
-
 use Test::More;
 use JSON;
 
@@ -18,58 +25,9 @@ BEGIN {
 
 my $EVENT_ID;
 
-my @tests = (
-    {    # Crear un nou event
-		num		=> 1,
-		desc	=> 'Crea un nou event',
-		call	=> 'TestCreateEvent',
-        op      => 'POST',
-        uri     => '/event',
-        input 	=> {
-            info		=> 'EVENT 1 INFORMATION',
-			description => 'DESCRIPTION',
-			starts		=> '2011-02-16T04:00:00',
-			ends		=> '2011-02-16T05:00:00',
-        },
-        output	 => {
-            status  => '201 Created',
-            headers => { Location => qr{/event/\d+} },
-            data 	=> '[]',
-        },
-    },
-    {    # Consultar event
-		num		=> 2,
-		desc	=> 'Consulta un event',
-		call	=> 'TestGetEvent',
-        op      => 'GET',
-        uri     => \&generated_uri,
-        input 	=> '',
-        output 	=> {
-            status  => '200 OK',
-            headers => { Location => '' },
-            data 	=>'{"starts":"2011-02-16T04:00:00","info":"EVENT 1 INFORMATION","id":1,"ends":"2011-02-16T05:00:00","description":"DESCRIPTION"}',
-    	},
-	},
-    {    # Crear un nou event
-		num		=> 3,
-		desc	=> 'Crea un nou event',
-		call	=> 'TestCreateEvent',
-        op      => 'POST',
-        uri     => '/event' ,
-        input => {
-            info		=> 'EVENT 2 INFORMATION',
-			description => 'DESCRIPTION',
-			starts		=> '2011-02-16T04:00:00',
-			ends		=> '2011-02-16T05:00:00',
-        },
-        output => {
-            status  => '201 Created',
-            headers => { Location => qr{/event/\d+} },
-            data 	=> '[]',
-        },
-    },
+my @tests = @{ require 'doc/api/Event.pl' };
 
-);
+
 
 for my $t (@tests) {
     test_smeagol_event($t);
@@ -102,7 +60,7 @@ sub test_smeagol_event {
 		my $id = $r->headers->as_string();
 		$id =~ /.*Location:.*\/event\/(\d)+/;
 		$EVENT_ID = $1;
-		$tests[$nr-1]{output}{id} = $EVENT_ID;
+		#$tests[$nr-1]{output}{id} = $EVENT_ID;
 
     };
 
@@ -112,3 +70,8 @@ sub test_smeagol_event {
 sub generated_uri {
     return qq{/event/$EVENT_ID};
 }
+
+
+#sub generated_id {
+#    return qq{$EVENT_ID};
+#}

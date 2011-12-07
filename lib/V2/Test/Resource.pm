@@ -37,29 +37,43 @@ sub GET {
 
     my $uri  = $self->uri;
     $uri    .= "/$id" if @_;
-    my $res  = request HTTP_GET($uri);
 
-    croak "request unsuccessful" unless $res->is_success;
+    my $json;
+    subtest 'get resource' => sub {
+        my $res  = request HTTP_GET($uri);
 
-    my $json = decode_json( $res->decoded_content );
+        ok( $res->is_success, 'request successful' );
+
+        $json = decode_json( $res->decoded_content );
+
+        ok( ref($json) eq 'ARRAY' || ref($json) eq 'HASH', 'content is json' );
+
+        done_testing();
+    };
 
     return @_ ? $json : _list_of_id(@$json);
 }
 
 sub POST {
     my $self = shift;
+    my @args = @_;
 
-    croak "args needed" unless @_;
+    croak "args needed" unless @args;
 
-    my @before = $self->GET();
-    my $res    = request HTTP_POST( $self->uri, @_ );
+    my @new_ids;
+    subtest 'post resource' => sub {
+        my @before = $self->GET();
+        my $res    = request HTTP_POST( $self->uri, @args );
 
-    croak "request unsuccessful" unless $res->is_success;
+        ok( $res->is_success, 'request successful' );
 
-    my @after   = $self->GET();
-    my @new_ids = List::Compare->new( \@before, \@after )->get_complement;
+        my @after = $self->GET();
+        @new_ids  = List::Compare->new( \@before, \@after )->get_complement;
 
-    croak "too many new resources" unless @new_ids == 1;
+        ok( @new_ids == 1, 'one new resource' );
+
+        done_testing();
+    };
 
     return $new_ids[0];
 }
@@ -68,12 +82,17 @@ sub PUT {
     my $self = shift;
     my $id   = shift // croak "id needed";
     my $uri  = $self->uri . "/$id";
+    my @args = @_;
 
-    croak "args needed" unless @_;
+    croak "args needed" unless @args;
 
-    my $res = request HTTP_PUT( $uri, @_ );
+    subtest 'put resource' => sub {
+        my $res = request HTTP_PUT( $uri, @args );
 
-    croak "request unsuccessful" unless $res->is_success;
+        ok( $res->is_success, 'request successful' );
+        
+        done_testing();
+    };
 
     return;
 }
@@ -85,9 +104,13 @@ sub DELETE {
     my $uri  = $self->uri;
     $uri    .= "/$id";
 
-    my $res  = request HTTP_DELETE($uri);
+    subtest 'delete resource' => sub {
+        my $res  = request HTTP_DELETE($uri);
 
-    croak "request unsuccessful" unless $res->is_success;
+        ok( $res->is_success, 'request successful' );
+        
+        done_testing();
+    };
 
     return;
 }

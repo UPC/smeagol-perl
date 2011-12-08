@@ -4,21 +4,29 @@ use Moose;
 use Catalyst::Test 'V2::Server';
 
 use Test::More;
-use Carp          qw( croak       );
-use JSON          qw( decode_json );
-use List::Compare qw(             );
 
-use lib 't/lib';
-use HTTP::Request::Common::Bug65843 ();
+use Carp qw( croak       );
+use JSON qw( decode_json );
 
-{
-    my @op_list = qw( GET POST PUT DELETE );
+use List::Compare         ();
+use HTTP::Request::Common ();
+
+BEGIN {
+    my @op_list = qw( GET POST DELETE );
 
     for my $op (@op_list) {
         no strict 'refs';
 
-        *{ "HTTP_$op" } = \&{ "HTTP::Request::Common::Bug65843::$op" };
+        *{ "HTTP_$op" } = \&{ "HTTP::Request::Common::$op" };
     }
+}
+
+# FIXME (CPAN #65843)
+sub HTTP_PUT {
+    my $req = HTTP_POST(@_);
+    $req->method('PUT');
+
+    return $req;
 }
 
 has 'uri' => (

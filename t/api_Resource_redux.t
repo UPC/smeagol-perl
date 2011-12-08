@@ -11,6 +11,11 @@ use V2::Test;
 use Test::More;
 use utf8::all;
 
+my $t = V2::Test->new( uri => '/tag' );
+
+$t->POST( { id => 'tag1' } );
+$t->POST( { id => 'tag2' } );
+
 my $r = V2::Test->new( uri => '/resource' );
 
 my @resources = $r->GET();
@@ -22,7 +27,15 @@ my %res1 = (
     info        => 'info1',
 );
 
-my $id  = $r->POST([ %res1 ]);
+
+# FIXME (bug #355)
+#
+# Actualment es poden passar tags a la creació però l'objecte
+# retornat no els té perquè es consideren atributs derivats,
+# per tant potser també caldria forçar l'assignació dels tags
+# via API? e.g. POST /resource/1/tag
+#
+my $id  = $r->POST([ %res1, tags => 'tag1,tag2' ]);
 my $out = $r->GET($id);
 
 is_deeply( $out, { %res1, id => $id }, "create res1" );

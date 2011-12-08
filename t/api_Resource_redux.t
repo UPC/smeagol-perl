@@ -32,6 +32,13 @@ is_deeply( $out, { %res1, id => $id }, "create res1" );
 is_deeply( \@resources, [ $id ], 'list of 1 resource' );
 
 $res1{'description'} = 'edited';
+
+# FIXME (bug #355)
+#
+# Es pot considerar un PUT de tipus REST si no es passen
+# tots els atributs de l'objecte?
+#
+# $r->PUT( $id, [ %res1, tags => '' ] );
 $r->PUT( $id, [ %res1 ] );
 
 @resources = $r->GET();

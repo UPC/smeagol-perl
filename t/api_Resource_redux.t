@@ -7,11 +7,11 @@ BEGIN {
     require 't/TestingDB.pl';
 }
 
-use V2::Test::Resource;
+use V2::Test;
 use Test::More;
 use utf8::all;
 
-my $r = V2::Test::Resource->new( uri => '/resource' );
+my $r = V2::Test->new( uri => '/resource' );
 
 my @resources = $r->GET();
 

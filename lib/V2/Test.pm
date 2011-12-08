@@ -1,4 +1,4 @@
-package V2::Test::Resource;
+package V2::Test;
 
 use Moose;
 use Catalyst::Test 'V2::Server';
@@ -39,14 +39,14 @@ sub GET {
     $uri    .= "/$id" if @_;
 
     my $json;
-    subtest 'get resource' => sub {
+    subtest "GET $uri request" => sub {
         my $res  = request HTTP_GET($uri);
 
-        ok( $res->is_success, 'request successful' );
+        ok( $res->is_success, "GET $uri successful" );
 
         $json = decode_json( $res->decoded_content );
 
-        ok( ref($json) eq 'ARRAY' || ref($json) eq 'HASH', 'content is json' );
+        ok( ref($json) eq 'ARRAY' || ref($json) eq 'HASH', "GET $uri content is json" );
 
         done_testing();
     };
@@ -60,17 +60,19 @@ sub POST {
 
     croak "args needed" unless @args;
 
-    my @new_ids;
-    subtest 'post resource' => sub {
-        my @before = $self->GET();
-        my $res    = request HTTP_POST( $self->uri, @args );
+    my $uri = $self->uri;
 
-        ok( $res->is_success, 'request successful' );
+    my @new_ids;
+    subtest "POST $uri request" => sub {
+        my @before = $self->GET();
+        my $res    = request HTTP_POST( $uri, @args );
+
+        ok( $res->is_success, "POST $uri successful" );
 
         my @after = $self->GET();
         @new_ids  = List::Compare->new( \@before, \@after )->get_complement;
 
-        ok( @new_ids == 1, 'one new resource' );
+        ok( @new_ids == 1, "POST $uri created @new_ids" );
 
         done_testing();
     };
@@ -86,10 +88,10 @@ sub PUT {
 
     croak "args needed" unless @args;
 
-    subtest 'put resource' => sub {
+    subtest "PUT $uri request" => sub {
         my $res = request HTTP_PUT( $uri, @args );
 
-        ok( $res->is_success, 'request successful' );
+        ok( $res->is_success, "PUT $uri successful" );
         
         done_testing();
     };
@@ -104,10 +106,10 @@ sub DELETE {
     my $uri  = $self->uri;
     $uri    .= "/$id";
 
-    subtest 'delete resource' => sub {
+    subtest "DELETE $uri request" => sub {
         my $res  = request HTTP_DELETE($uri);
 
-        ok( $res->is_success, 'request successful' );
+        ok( $res->is_success, "DELETE $uri successful" );
         
         done_testing();
     };

@@ -1,12 +1,4 @@
 #!perl
-sub generated_uri {
-    return qq{/event/$EVENT_ID};
-}
-
-sub generated_uri {
-    return qq{/event/$EVENT_ID};
-}
-
 
 use strict;
 use warnings;
@@ -71,6 +63,9 @@ sub generated_uri {
 }
 
 
-#sub generated_id {
-#    return qq{$EVENT_ID};
-#}
+sub generated_id {
+    return qq{$EVENT_ID};
+}
+
+
+

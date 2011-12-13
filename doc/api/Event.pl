@@ -123,4 +123,40 @@
             data     => '[]',
         },
     },
+    {    # Crear un nou event
+        num        => 9,
+        desc    => 'Crea un nou event',
+        call    => 'TestCreateEvent',
+        op      => 'POST',
+        uri     => '/event' ,
+        input => {
+            info        => 'EVENT 3 INFORMATION',
+            description => 'DESCRIPTION_',
+            starts        => '2011-02-16T04:00:00',
+            ends        => '2011-02-16T05:00:00',
+        },
+        output => {
+            status  => '201 Created',
+            headers => { Location => qr{/event/\d+} },
+            data     => '[]',
+        },
+    },   
+    {    # Actualitza event
+        num        => 10,
+        desc    => 'Actualitza un event',
+        call    => 'TestUpdateEvent',
+        op      => 'PUT',
+        uri     => \&generated_uri,
+        input     => {
+            info        => 'EVENT 3 UPDATED',
+            description => 'DESCRIPTION_ UPDATED',
+            starts        => '2012-02-16T04:00:00',
+            ends        => '2012-02-16T05:00:00',
+        },
+        output     => {
+            status  => '404 Not Found',
+            headers => { Location => '' },
+            data     =>'[]',
+        },
+    }, 
 ]

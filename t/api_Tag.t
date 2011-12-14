@@ -3,7 +3,8 @@
 use strict;
 use warnings;
 use utf8::all;
-
+use URI::Escape;
+ 
 use Test::More;
 use Text::CSV;
 
@@ -53,6 +54,9 @@ sub test_smeagol_tag {
     my ($row) = @_;
 
     my ( $nr, $desc, $call, $op, $uri, $input, $status, $headers, $output ) = @$row;
+
+	my $esc_sc = uri_escape(';');
+	$input =~ s/;/$esc_sc/;
 
     my $prefix = "Test[$nr]: $call";
     my $req = do { no strict 'refs'; \&$op };

@@ -52,7 +52,7 @@ sub GET {
 
         ok( $res->is_success, "GET $uri successful" );
 
-        $json = decode_json( $res->decoded_content );
+        $json = decode_json( $res->content );
 
         ok( ref($json) eq 'ARRAY' || ref($json) eq 'HASH', "GET $uri content is json" );
 

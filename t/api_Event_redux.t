@@ -35,8 +35,8 @@ my %ev1 = (
     bookings => [],
 );
 
-my $id  = $e->POST([ %ev1 ]);
-my $out = $e->GET($id);
+my $id  = $e->POST( args => [ %ev1 ] );
+my $out = $e->GET( id => $id );
 
 is_deeply( $out, { %ev1, id => $id }, "create event1" );
 
@@ -45,17 +45,17 @@ is_deeply( $out, { %ev1, id => $id }, "create event1" );
 is_deeply( \@events, [ $id ], 'list of 1 event' );
 
 $ev1{'description'} = 'edited';
-$e->PUT( $id, [ %ev1 ] );
+$e->PUT( id => $id, args => [ %ev1 ] );
 
 @events = $e->GET();
 
 is_deeply( \@events, [ $id ], 'still list of 1 event' );
 
-$out = $e->GET($id);
+$out = $e->GET( id => $id );
 
 is_deeply( $out, { %ev1, id => $id }, "edit event1" );
 
-$e->DELETE($id);
+$e->DELETE( id => $id );
 
 @events = $e->GET();
 

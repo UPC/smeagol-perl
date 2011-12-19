@@ -13,8 +13,8 @@ use utf8::all;
 
 my $t = V2::Test->new( uri => '/tag' );
 
-$t->POST( { id => 'tag1' } );
-$t->POST( { id => 'tag2' } );
+$t->POST( args => { id => 'tag1' } );
+$t->POST( args => { id => 'tag2' } );
 
 my $r = V2::Test->new( uri => '/resource' );
 
@@ -35,8 +35,8 @@ my %res1 = (
 # per tant potser també caldria forçar l'assignació dels tags
 # via API? e.g. POST /resource/1/tag
 #
-my $id  = $r->POST([ %res1, tags => 'tag1,tag2' ]);
-my $out = $r->GET($id);
+my $id  = $r->POST( args => [ %res1, tags => 'tag1,tag2' ] );
+my $out = $r->GET( id => $id );
 
 is_deeply( $out, { %res1, id => $id }, "create res1" );
 
@@ -52,17 +52,17 @@ $res1{'description'} = 'edited';
 # tots els atributs de l'objecte?
 #
 # $r->PUT( $id, [ %res1, tags => '' ] );
-$r->PUT( $id, [ %res1 ] );
+$r->PUT( id => $id, args => [ %res1 ] );
 
 @resources = $r->GET();
 
 is_deeply( \@resources, [ $id ], 'still list of 1 resource' );
 
-$out = $r->GET($id);
+$out = $r->GET( id => $id );
 
 is_deeply( $out, { %res1, id => $id }, "edit res1" );
 
-$r->DELETE($id);
+$r->DELETE( id => $id );
 
 @resources = $r->GET();
 

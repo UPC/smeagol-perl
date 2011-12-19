@@ -1,6 +1,20 @@
 [
-    {    # Crear un nou event
+    {    # Consultar event
         num        => 1,
+        desc    => 'Consulta un event',
+        call    => 'TestGetEvent',
+        op      => 'GET',
+        uri     => \&generated_uri,
+        input     => '',
+        output     => {
+            status  => '200 OK',
+            headers => { Location => '' },
+            data     =>'[]',
+        },
+    },
+    
+    {    # Crear un nou event
+        num        => 2,
         desc    => 'Crea un nou event',
         call    => 'TestCreateEvent',
         op      => 'POST',
@@ -18,7 +32,7 @@
         },
     },
     {    # Consultar event
-        num        => 2,
+        num        => 3,
         desc    => 'Consulta un event',
         call    => 'TestGetEvent',
         op      => 'GET',
@@ -31,7 +45,7 @@
         },
     },
     {    # Actualitza event
-        num        => 3,
+        num        => 4,
         desc    => 'Actualitza un event',
         call    => 'TestUpdateEvent',
         op      => 'PUT',
@@ -49,7 +63,7 @@
         },
     },
     {    # Consultar event
-        num        => 4,
+        num        => 5,
         desc    => 'Consulta un event',
         call    => 'TestGetEvent',
         op      => 'GET',
@@ -62,7 +76,7 @@
         },
     },
     {    # Esborra event
-        num        => 5,
+        num        => 6,
         desc    => 'Esborra un event',
         call    => 'TestDeleteEvent',
         op      => 'DELETE',
@@ -75,7 +89,7 @@
         },
     },
     {    # Consultar event
-        num        => 6,
+        num        => 7,
         desc    => 'Consulta un event',
         call    => 'TestGetEvent',
         op      => 'GET',
@@ -88,7 +102,7 @@
         },
     },
     {    # Actualitza event
-        num        => 7,
+        num        => 8,
         desc    => 'Actualitza un event',
         call    => 'TestUpdateEvent',
         op      => 'PUT',
@@ -106,7 +120,7 @@
         },
     },
     {    # Crear un nou event
-        num        => 8,
+        num        => 9,
         desc    => 'Crea un nou event',
         call    => 'TestCreateEvent',
         op      => 'POST',
@@ -124,7 +138,7 @@
         },
     },
     {    # Crear un nou event
-        num        => 9,
+        num        => 10,
         desc    => 'Crea un nou event',
         call    => 'TestCreateEvent',
         op      => 'POST',
@@ -142,7 +156,7 @@
         },
     },   
     {    # Actualitza event
-        num        => 10,
+        num        => 11,
         desc    => 'Actualitza un event',
         call    => 'TestUpdateEvent',
         op      => 'PUT',
@@ -154,9 +168,84 @@
             ends        => '2012-02-16T05:00:00',
         },
         output     => {
-            status  => '404 Not Found',
+            status  => '200 OK',
+            headers => { Location => '' },
+            data     =>'[]',
+        },
+    },
+    {    # Actualitza event
+        num        => 12,
+        desc    => 'Actualitza un event',
+        call    => 'TestUpdateEvent',
+        op      => 'PUT',
+        uri     => \&generated_uri,
+        input     => {
+            info        => '',
+            description => 'DESCRIPTION_ UPDATED',
+            starts        => '2012-02-16T04:00:00',
+            ends        => '2012-02-16T05:00:00',
+        },
+        output     => {
+            status  => '400 Bad Request',
+            headers => { Location => '' },
+            data     =>'[]',
+        },
+    },   
+    {    # Actualitza event
+        num        => 13,
+        desc    => 'Actualitza un event',
+        call    => 'TestUpdateEvent',
+        op      => 'PUT',
+        uri     => \&generated_uri,
+        input     => {
+            info        => 'EVENT 3 UPDATED',
+            description => '',
+            starts        => '2012-02-16T04:00:00',
+            ends        => '2012-02-16T05:00:00',
+        },
+        output     => {
+            status  => '400 Bad Request',
             headers => { Location => '' },
             data     =>'[]',
         },
     }, 
-]
+    {    # Esborra event
+        num        => 14,
+        desc    => 'Esborra un event',
+        call    => 'TestDeleteEvent',
+        op      => 'DELETE',
+        uri     => \&generated_uri,
+        input     => '',
+        output     => {
+            status  => '200 OK',
+            headers => { Location => '' },
+            data     =>'[]',
+        },
+    },
+    {    # Esborra event
+        num        => 15,
+        desc    => 'Esborra un event',
+        call    => 'TestDeleteEvent',
+        op      => 'DELETE',
+        uri     => \&generated_uri,
+        input     => '',
+        output     => {
+            status  => '404 Not Found',
+            headers => { Location => '' },
+            data     =>'[]',
+        },
+    },
+    {    # Consultar event
+        num        => 16,
+        desc    => 'Consulta un event',
+        call    => 'TestGetEvent',
+        op      => 'GET',
+        uri     => \&generated_uri,
+        input     => '',
+        output     => {
+            status  => '200 OK',
+            headers => { Location => '' },
+            data     =>'[]',
+        },
+    },
+] 

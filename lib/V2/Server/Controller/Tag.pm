@@ -5,7 +5,7 @@ use namespace::autoclean;
 use V2::Server::Obj::Tag;
 use Exception::Class::TryCatch;
 use Encode qw(encode decode);
-my $enc     = 'utf8';
+my $enc     = 'utf-8';
 my $VERSION = $V2::Server::VERSION;
 BEGIN { extends 'Catalyst::Controller::REST' }
 
@@ -115,11 +115,10 @@ decode($enc, $str);
 $text_str = lc $text_str; 
 $text_str = encode($enc, $text_str);
 =cut
-    #TODO: Se ha eliminado el proceso de decodificación y codificación del $id
-    my $id = $req->parameters->{id} ; #en caso de que sea una palabra tag;name el req solamente pilla el Tag
+
+    my $id = decode( $enc, $req->parameters->{id} );
     $id = lc $id;
-    #$id = encode( $enc, $id );
-    
+    $id = encode( $enc, $id );
     my $desc = $req->parameters->{description}
         || $req->{headers}->{description};
 

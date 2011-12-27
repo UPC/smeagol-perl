@@ -2,7 +2,7 @@ package V2::Server::Controller::Event;
 
 use Moose;
 use namespace::autoclean;
-use Data::Dumper;
+
 use DateTime;
 
 use Encode qw(encode decode);
@@ -50,10 +50,10 @@ sub default_GET {
 sub get_event : Local {
     my ( $self, $c, $id ) = @_;
     my $event_aux = $c->model('DB::TEvent')->find( { id => $id } );
-    #$c->log->debug("Valor de event_aux: ".Dumper($event_aux->id));
+    
     if ($event_aux) {
         my $event = {
-            #id          => $event_aux->id,
+            id          => $event_aux->id,
             info        => decode( $enc, $event_aux->info ),
             description => decode( $enc, $event_aux->description ),
             starts      => $event_aux->starts->iso8601(),
@@ -67,7 +67,7 @@ sub get_event : Local {
     }
     else {
         my @message;
-        #    = { message => "We can't find what you are looking for." };
+       
 
         $c->stash->{content}  = \@message;
         $c->stash->{template} = 'old_not_found.tt';
@@ -88,7 +88,7 @@ sub event_list : Local {
 
         push( @events, @event );
     }
-
+    
     $c->stash->{content} = \@events;
     $c->stash->{events}  = \@events;
     $c->response->status(200);
@@ -104,13 +104,16 @@ sub default_POST {
     my $description = $req->parameters->{description};
     my $starts      = $req->parameters->{starts};
     my $ends        = $req->parameters->{ends};
-#    my @tags        = split( ',', $req->parameters->{tags} );
+    my @tags        = split( ',', $req->parameters->{tags} );
 
     my $new_event = $c->model('DB::TEvent')->find_or_new();
     my $tag_event;
 
-    $c->visit( '/check/check_event', [ $info, $description ] );
-
+    #TODO: passing the new parameters $starts and $ends
+    $c->visit( '/check/check_event', [ $info, $description, $starts, $ends ] );
+    
+    
+    
 # If all is correct $c->stash->{event_ok} should be 1, otherwise it will be 0.
 
     if ( $c->stash->{event_ok} == 1 ) {
@@ -156,10 +159,7 @@ sub default_POST {
 		$c->forward( $c->view('JSON') );
     }
     else {
-        my @message
-            = {
-            message => "Error: Check the info and description of the event",
-            };
+        my @message;
         $c->stash->{content} = \@message;
         $c->response->status(400);
         $c->stash->{error}
@@ -174,7 +174,9 @@ sub default_PUT {
 
     my $info        = $req->parameters->{info};
     my $description = $req->parameters->{description};
-
+    my $starts_check = $req->parameters->{starts};
+    my $ends_check = $req->parameters->{ends};
+    
     my $starts_aux = $req->parameters->{starts};
     my $starts = $c->forward( 'ParseDate', [$starts_aux] );
 
@@ -185,9 +187,11 @@ sub default_PUT {
 
     my $event = $c->model('DB::TEvent')->find( { id => $id } );
     my $tag_event;
-
+    
+    #TODO: passing the new parameters $starts and $ends
     if ($event) {
-        $c->visit( '/check/check_event', [ $info, $description ] );
+        $c->visit( '/check/check_event', [ $info, $description, $starts_check, $ends_check ] );
+
 
 # If all is correct $c->stash->{event_ok} should be 1, otherwise it will be 0.
 
@@ -239,8 +243,7 @@ sub default_PUT {
             $c->forward( $c->view('JSON') );
         }
         else {
-            my @message = { message =>
-                    "Error: Check the info and description of the event", };
+            my @message;
             $c->stash->{content} = \@message;
             $c->response->status(400);
             $c->stash->{error}
@@ -250,8 +253,7 @@ sub default_PUT {
         }
     }
     else {
-        my @message; #= { message =>
-                    #"404. Not found", };
+        my @message; 
         $c->stash->{content} = \@message;
         $c->stash->{template} = 'not_found.tt';
         $c->response->status(404);
@@ -273,9 +275,6 @@ sub default_DELETE {
         $c->response->status(200);
     }
     else {
-        
-      # @message
-       #     = { message => "We can't delete an event that we can't find" };
         $c->stash->{content}  = \@message;
         $c->stash->{template} = 'not_found.tt';
         $c->response->status(404);

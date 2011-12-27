@@ -4,7 +4,6 @@ use Moose;
 use feature 'switch';
 
 use namespace::autoclean;
-use Data::Dumper;
 use DateTime;
 use DateTime::Duration;
 use DateTime::Span;
@@ -65,6 +64,29 @@ sub check_info : Local {
         $c->stash->{info_ok} = 0;
     }
 }
+#TODO: new subroutine to check the starts parameter format
+sub check_starts : Local {
+    my ( $self, $c, $starts ) = @_;
+
+    if ( $starts =~ /\G(\d+-\d+-\d+T\d+:\d+:\d+)/ ) {
+        $c->stash->{starts_ok} = 1;
+    }
+    else {
+        $c->stash->{starts_ok} = 0;
+    }
+}
+
+#TODO: new subroutine to check the ends parameter format
+sub check_ends : Local {
+    my ( $self, $c, $ends ) = @_;
+
+    if ( $ends =~ /\G(\d+-\d+-\d+T\d+:\d+:\d+)/ ) {
+        $c->stash->{ends_ok} = 1;
+    }
+    else {
+        $c->stash->{ends_ok} = 0;
+    }
+}
 
 =head2 check_booking
 We verify that the resource exists and that the booking will be associated with an existing event.
@@ -95,13 +117,17 @@ sub check_booking : Local {
 Function used to verify that event parameters are within the proper range 
 =cut
 
+#Todo: New parameters to check (starts_ok) and (ends_ok)
+
 sub check_event : Local {
-    my ( $self, $c, $info, $description ) = @_;
+    my ( $self, $c, $info, $description, $starts, $ends ) = @_;
 
     $c->visit( 'check_info', [$info] );
     $c->visit( 'check_desc', [$description] );
-
-    if ( $c->stash->{info_ok} && $c->stash->{desc_ok} ) {
+    $c->visit( 'check_starts', [$starts] );
+    $c->visit( 'check_ends', [$ends] );
+     
+    if ( $c->stash->{info_ok} && $c->stash->{desc_ok} && $c->stash->{starts_ok} && $c->stash->{ends_ok}) {
         $c->stash->{event_ok} = 1;
     }
     else {

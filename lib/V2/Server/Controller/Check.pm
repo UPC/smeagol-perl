@@ -65,14 +65,14 @@ sub check_info : Local {
     }
 }
 #TODO: new subroutine to check the starts parameter format
-sub check_starts : Local {
-    my ( $self, $c, $starts ) = @_;
+sub check_date : Local {
+    my ( $self, $c, $starts, $atrib ) = @_;
 
     if ( $starts =~ /\G(\d+-\d+-\d+T\d+:\d+:\d+)/ ) {
-        $c->stash->{starts_ok} = 1;
+        $c->stash->{$atrib} = 1;
     }
     else {
-        $c->stash->{starts_ok} = 0;
+        $c->stash->{$atrib} = 0;
     }
 }
 
@@ -124,8 +124,8 @@ sub check_event : Local {
 
     $c->visit( 'check_info', [$info] );
     $c->visit( 'check_desc', [$description] );
-    $c->visit( 'check_starts', [$starts] );
-    $c->visit( 'check_ends', [$ends] );
+    $c->visit( 'check_date', [$starts, 'starts_ok'] );
+    $c->visit( 'check_date', [$ends, 'ends_ok'] );
      
     if ( $c->stash->{info_ok} && $c->stash->{desc_ok} && $c->stash->{starts_ok} && $c->stash->{ends_ok}) {
         $c->stash->{event_ok} = 1;

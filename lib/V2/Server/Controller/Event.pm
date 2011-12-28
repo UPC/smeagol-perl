@@ -2,9 +2,7 @@ package V2::Server::Controller::Event;
 
 use Moose;
 use namespace::autoclean;
-
 use DateTime;
-
 use Encode qw(encode decode);
 my $enc     = 'utf-8';
 my $VERSION = $V2::Server::VERSION;
@@ -59,7 +57,8 @@ sub get_event : Local {
             starts      => $event_aux->starts->iso8601(),
             ends        => $event_aux->ends->iso8601(),
         };
-
+	
+	#TODO: message: Esdeveniment llistat amb èxit. 
         $c->stash->{content} = $event;
         $c->stash->{event}   = $event;
         $c->response->status(200);
@@ -68,7 +67,7 @@ sub get_event : Local {
     else {
         my @message;
        
-
+	#TODO: message: Esdeveniment no trobat.
         $c->stash->{content}  = \@message;
         $c->stash->{template} = 'old_not_found.tt';
         $c->response->status(404);
@@ -89,6 +88,7 @@ sub event_list : Local {
         push( @events, @event );
     }
     
+    #TODO: llistat d'esdeveniments generat amb èxit 
     $c->stash->{content} = \@events;
     $c->stash->{events}  = \@events;
     $c->response->status(200);
@@ -109,7 +109,7 @@ sub default_POST {
     my $new_event = $c->model('DB::TEvent')->find_or_new();
     my $tag_event;
 
-    #TODO: passing the new parameters $starts and $ends
+    #Checking the info, description and dates format.
     $c->visit( '/check/check_event', [ $info, $description, $starts, $ends ] );
     
     
@@ -152,13 +152,15 @@ sub default_POST {
             bookings    => $new_event->booking_list
         };
 
-        #TODO: message: event creat amb exit.
+        #TODO: message: Esdeveniment creat amb exit.
         $c->stash->{content}  = \@message;
         $c->response->status(201);
         $c->response->location($req->uri->as_string."/".$new_event->id);
 		$c->forward( $c->view('JSON') );
     }
     else {
+	
+	#TODO: message: Verifiqui el info, descripció i dates de l'esdeveniment
         my @message;
         $c->stash->{content} = \@message;
         $c->response->status(400);
@@ -188,7 +190,7 @@ sub default_PUT {
     my $event = $c->model('DB::TEvent')->find( { id => $id } );
     my $tag_event;
     
-    #TODO: passing the new parameters $starts and $ends
+    #Checking the info, description and dates format.
     if ($event) {
         $c->visit( '/check/check_event', [ $info, $description, $starts_check, $ends_check ] );
 
@@ -237,12 +239,16 @@ sub default_PUT {
                 tags        => $event->tag_list,
                 bookings    => $event->booking_list
             };
+	    
+	    #TODO: message: Esdeveniment actualitzat amb èxit.
             my @message;
             $c->stash->{content} = \@message;
             $c->response->status(200);
             $c->forward( $c->view('JSON') );
         }
         else {
+	    
+	    #TODO: message: Verifiqui el info, descripció i dates de l'esdeveniment
             my @message;
             $c->stash->{content} = \@message;
             $c->response->status(400);
@@ -253,6 +259,8 @@ sub default_PUT {
         }
     }
     else {
+	
+	#TODO: message: Esdeveniment no trobat.
         my @message; 
         $c->stash->{content} = \@message;
         $c->stash->{template} = 'not_found.tt';
@@ -269,12 +277,15 @@ sub default_DELETE {
 
     if ($event_aux) {
         $event_aux->delete;
-        #$message = { message => "Event successfully deleted" };
+       
+        #TODO: message: Esdeveniment esborrat amb èxit.
         $c->stash->{content}  = \@message;
         $c->stash->{template} = 'event/delete_ok.tt';
         $c->response->status(200);
     }
     else {
+	
+	#TODO: message: Esdeveniment no trobat.
         $c->stash->{content}  = \@message;
         $c->stash->{template} = 'not_found.tt';
         $c->response->status(404);

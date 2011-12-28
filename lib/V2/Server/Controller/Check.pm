@@ -64,27 +64,17 @@ sub check_info : Local {
         $c->stash->{info_ok} = 0;
     }
 }
-#TODO: new subroutine to check the starts parameter format
-sub check_date : Local {
-    my ( $self, $c, $starts, $atrib ) = @_;
 
-    if ( $starts =~ /\G(\d+-\d+-\d+T\d+:\d+:\d+)/ ) {
+#TODO: new subroutine to check the date parameter format
+
+sub check_date : Local {
+    my ( $self, $c, $date, $atrib ) = @_;
+
+    if ( $date =~ /\G(\d+-\d+-\d+T\d+:\d+:\d+)/ && length($date) == 19) {
         $c->stash->{$atrib} = 1;
     }
     else {
         $c->stash->{$atrib} = 0;
-    }
-}
-
-#TODO: new subroutine to check the ends parameter format
-sub check_ends : Local {
-    my ( $self, $c, $ends ) = @_;
-
-    if ( $ends =~ /\G(\d+-\d+-\d+T\d+:\d+:\d+)/ ) {
-        $c->stash->{ends_ok} = 1;
-    }
-    else {
-        $c->stash->{ends_ok} = 0;
     }
 }
 

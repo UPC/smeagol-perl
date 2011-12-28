@@ -301,17 +301,5 @@
             data     => '[]',
         },
     },
-    {    # Consultar eventos
-        num        => 20,
-        desc    => 'Consultar varios events',
-        call    => 'TestGetEvent',
-        op      => 'GET',
-        uri     => \&generated_list ,
-        input     => '',
-        output     => {
-            status  => '200 OK',
-            headers => { Location => '' },
-            data     =>'[]',
-        },
-    },
+
 ] 

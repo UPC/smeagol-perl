@@ -104,7 +104,6 @@ sub default_POST {
     my $description = $req->parameters->{description};
     my $starts      = $req->parameters->{starts};
     my $ends        = $req->parameters->{ends};
-    my @tags        = split( ',', $req->parameters->{tags} );
 
     my $new_event = $c->model('DB::TEvent')->find_or_new();
     my $tag_event;
@@ -185,7 +184,8 @@ sub default_PUT {
     my $ends_aux = $req->parameters->{ends};
     my $ends = $c->forward( 'ParseDate', [$ends_aux] );
 
-    my @tags = split( ',', $req->parameters->{tags} );
+    my @tags;
+	if (defined $req->parameters->{tags}) {@tags = split( ',', $req->parameters->{tags} );}
 
     my $event = $c->model('DB::TEvent')->find( { id => $id } );
     my $tag_event;

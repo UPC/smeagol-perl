@@ -14,7 +14,7 @@ BEGIN {
     use_ok 'Catalyst::Test' => 'V2::Server';
 }
 
-my $EVENT_ID;
+my $EVENT_ID = '';
 
 my @tests = @{ require 'doc/api/Event.pl' };
 

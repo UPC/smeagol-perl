@@ -35,6 +35,10 @@ sub test_smeagol_event {
 	my $uri;
 	($op eq 'POST')? ($uri = $t->{uri}) : ($uri = $t->{uri}->());
 
+	if( ($op eq 'GET') && ($uri =~ /\d+/) ){
+		$output =~ s/}/,"id":"$EVENT_ID"}/;
+	}
+
     my $prefix = "Test[$nr]: $call";
     my $req = do { no strict 'refs'; \&$op };
     my $r = request(
@@ -51,8 +55,6 @@ sub test_smeagol_event {
 		my $id = $r->headers->as_string();
 		$id =~ /.*Location:.*\/event\/(\d)+/;
 		$EVENT_ID = $1;
-		#$tests[$nr-1]{output}{id} = $EVENT_ID;
-
     };
 
 	is_deeply (decode_json($r->decoded_content()), decode_json($output), "$prefix.output" );

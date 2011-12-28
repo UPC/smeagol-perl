@@ -58,7 +58,7 @@
         output     => {
             status  => '200 OK',
             headers => { Location => '' },
-            data     =>'{"id":"1","info":"EVENT 1 INFORMATION","description":"DESCRIPTION","starts":"2011-02-16T04:00:00","ends":"2011-02-16T05:00:00"}',
+            data     =>'{"info":"EVENT 1 INFORMATION","description":"DESCRIPTION","starts":"2011-02-16T04:00:00","ends":"2011-02-16T05:00:00"}',
         },
     },
     {    # Actualitza event
@@ -89,7 +89,7 @@
         output     => {
             status  => '200 OK',
             headers => { Location => '' },
-            data     =>'{"id":"1","info":"EVENT 1 UPDATED","description":"DESCRIPTION UPDATED","starts":"2012-02-16T04:00:00","ends":"2012-02-16T05:00:00"}',
+            data     =>'{"info":"EVENT 1 UPDATED","description":"DESCRIPTION UPDATED","starts":"2012-02-16T04:00:00","ends":"2012-02-16T05:00:00"}',
         },
     },
     {    # Esborra event

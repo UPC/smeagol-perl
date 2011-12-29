@@ -1,0 +1,10 @@
+^Makefile$
+\.svn/?
+^blib
+^\.perltidyrc$
+^smeagol\.db$
+\.tar\.gz$
+\.bak$
+\.old$
+^dtd$
+pm_to_blib

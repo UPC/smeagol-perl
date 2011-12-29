@@ -1,0 +1,465 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+my $VERSION = 0.02;
+
+use Getopt::Euclid qw( :minimal_keys );
+use Data::Dumper;
+use Smeagol::Client;
+
+# are we in verbose mode?
+my $VERBOSE = 0;
+
+if ( $ARGV{verbose} ) {
+    $VERBOSE = 1;
+    verbose("$0 version $VERSION entering verbose mode.");
+}
+
+# Create client
+my $server = $ARGV{server};
+verbose("Trying to create client using $server");
+my $client = Smeagol::Client->new($server);
+defined($client)
+    or die
+    "Could not create client. Is there a Smeagol server running on \"$server\"?\n";
+verbose("Client created");
+
+# List resources
+if ( defined $ARGV{listresources} ) {
+    verbose("request: list resources");
+    my @ids = $client->listResources();
+    foreach my $i (@ids) {
+        print $i . "\n";
+    }
+    verbose( scalar(@ids) . " resource(s) found" );
+    exit(0);
+}
+
+# Create resource
+if ( defined $ARGV{createresource} ) {
+    my $desc = $ARGV{createresource}{description};
+    my $info = $ARGV{createresource}{info};
+
+    $info = ( defined $info ) ? $info : '';
+    verbose(  "request: create resource with"
+            . "\ndescription: $desc"
+            . "\n       info: $info"
+            . "\n" );
+    my $result = $client->createResource( $desc, $info );
+    defined $result or die "couldn't create resource\n";
+    print "resource $result created successfully\n";
+    exit(0);
+}
+
+# Get resource
+if ( defined $ARGV{getresource} ) {
+    my $rid = $ARGV{getresource};
+
+    verbose("request: get resource $rid");
+    my $result = $client->getResource($rid);
+    defined $result or die "couldn't retrieve resource\n";
+    showResource($result);
+    verbose("resource retrieved successfully");
+    exit(0);
+}
+
+# Delete resource
+if ( defined $ARGV{deleteresource} ) {
+    my $rid = $ARGV{deleteresource};
+
+    verbose("request: delete resource $rid");
+    my $result = $client->delResource($rid);
+    defined($result) or die "couldn't delete resource\n";
+    verbose("resource deleted successfully");
+    exit(0);
+}
+
+# Update resource
+if ( defined $ARGV{updateresource} ) {
+    my $rid  = $ARGV{updateresource}{id};
+    my $desc = $ARGV{updateresource}{description};
+    my $info = $ARGV{updateresource}{info};
+
+    $info = ( defined $info ) ? $info : "";
+    verbose(  "request: update resource $rid with"
+            . "\ndescription: $desc"
+            . "\n       info: $info"
+            . "\n" );
+    my $result = $client->updateResource( $rid, $desc, $info );
+    defined($result) or die "couldn't update resource\n";
+    verbose("resource updated successfully");
+    exit(0);
+}
+
+# Create booking
+if ( defined $ARGV{createbooking} ) {
+    my $rid  = $ARGV{createbooking}{resourceid};
+    my $desc = $ARGV{createbooking}{description};
+    my $info = $ARGV{createbooking}{info};
+
+    $info = ( defined $info ) ? $info : "";
+    verbose(  "request: create booking for resource $rid with"
+            . "\ndescription: $desc"
+            . "\n       info: $info"
+            . "\n      start: "
+            . $ARGV{createbooking}{start}
+            . "\n        end: "
+            . $ARGV{createbooking}{end} );
+
+    my $start  = parseDate( $ARGV{createbooking}{start} );
+    my $end    = parseDate( $ARGV{createbooking}{end} );
+    my $result = $client->createBooking( $rid, $desc, $start, $end, $info );
+    defined $result or die "could not create booking\n";
+    verbose("booking created successfully");
+    exit(0);
+}
+
+# List bookings
+if ( defined $ARGV{listbookings} ) {
+    my $rid = $ARGV{listbookings};
+
+    verbose("request: list bookings for resource $rid");
+    my @ids = $client->listBookings($rid);
+    foreach my $i (@ids) {
+        print $i . "\n";
+    }
+    verbose( scalar(@ids) . " booking(s) found for resource $rid" );
+    exit(0);
+}
+
+# Get booking
+if ( defined $ARGV{getbooking} ) {
+    my $rid = $ARGV{getbooking}{resourceid};
+    my $bid = $ARGV{getbooking}{bookingid};
+
+    verbose("request: get booking $bid from resource $rid");
+    my $result = $client->getBooking( $rid, $bid );
+    defined $result or die "could not retrieve booking\n";
+    showBooking($result);
+    verbose("booking retrieved successfully");
+    exit(0);
+}
+
+# Delete booking
+if ( defined $ARGV{deletebooking} ) {
+    my $rid = $ARGV{deletebooking}{resourceid};
+    my $bid = $ARGV{deletebooking}{bookingid};
+
+    verbose("request: delete booking $bid from resource $rid");
+    my $result = $client->delBooking( $rid, $bid );
+    defined $result or die "could not delete booking\n";
+    verbose("booking deleted successfully");
+    exit(0);
+}
+
+# Update booking
+if ( defined $ARGV{updatebooking} ) {
+    my $rid  = $ARGV{updatebooking}{resourceid};
+    my $bid  = $ARGV{updatebooking}{bookingid};
+    my $desc = $ARGV{updatebooking}{description};
+    my $info = $ARGV{updatebooking}{info};
+
+    $info = ( defined $info ) ? $info : "";
+    verbose(  "request: update booking $bid from resource $rid with"
+            . "\ndescription: $desc"
+            . "\n start date: "
+            . $ARGV{updatebooking}{start}
+            . "\n   end date: "
+            . $ARGV{updatebooking}{end}
+            . "\n       info: $info"
+            . "\n" );
+    my $start = parseDate( $ARGV{updatebooking}{start} );
+    my $end   = parseDate( $ARGV{updatebooking}{end} );
+    my $result
+        = $client->updateBooking( $rid, $bid, $desc, $start, $end, $info );
+    defined $result or die "could not update resource\n";
+    verbose("booking updated successfully");
+    exit(0);
+}
+
+if ( defined $ARGV{createtag} ) {
+    my $rid = $ARGV{createtag}{resourceid};
+    my $tag = $ARGV{createtag}{tag};
+
+    verbose("request: create tag $tag from resource $rid");
+    my $result = $client->createTag( $rid, $tag );
+    defined $result or die "could not create tag\n";
+    verbose("tag created successfully");
+    exit(0);
+}
+
+if ( defined $ARGV{listtags} ) {
+    my $rid = $ARGV{listtags};
+
+    verbose("request: list tags for resource $rid");
+    my @tags = $client->listTags($rid);
+    foreach my $t (@tags) {
+        print $t . "\n";
+    }
+    verbose( scalar(@tags) . " tag(s) found for resource $rid" );
+    exit(0);
+}
+
+# Delete tag
+if ( defined $ARGV{deletetag} ) {
+    my $rid = $ARGV{deletetag}{resourceid};
+    my $tag = $ARGV{deletetag}{tag};
+
+    verbose("request: delete tag $tag from resource $rid");
+    my $result = $client->delTag( $rid, $tag );
+    defined $result or die "could not delete tag\n";
+    verbose("tag deleted successfully");
+    exit(0);
+}
+
+# No arguments
+print "No arguments provided. Please use '--help' for additional info.\n";
+
+# Program ends here. Auxiliary functions follow.
+
+# Print string only if we are in verbose mode
+sub verbose {
+    my $lin = shift;
+    print "$lin\n" if ($VERBOSE);
+}
+
+# parseDate: parse a date in YYYYMMDDHHMMSS format
+sub parseDate {
+    my $arg = shift;
+    my @a = $arg =~ /(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/g;
+
+    my $d = eval {
+        DateTime->new(
+            year   => $a[0],
+            month  => $a[1],
+            day    => $a[2],
+            hour   => $a[3],
+            minute => $a[4],
+            second => $a[5],
+        );
+    };
+
+    defined $d
+        or die
+        "Argument $arg is not a valid date or does not follow the YYYYMMDDHHMMSS format: $@\n";
+
+    my $result = {
+        year   => $a[0],
+        month  => $a[1],
+        day    => $a[2],
+        hour   => $a[3],
+        minute => $a[4],
+        second => $a[5],
+    };
+    return $result;
+}
+
+# pretty-print resource
+sub showResource {
+    my $r = shift;
+    print "\ndescription: "
+        . $r->{description}
+        . "\n       info: "
+        . $r->{info} . "\n\n";
+}
+
+# pretty-print booking
+sub showBooking {
+    my $b = shift;
+    print "\ndescription: "
+        . $b->{description}
+        . "\n       from: "
+        . $b->{from}
+        . "\n         to: "
+        . $b->{to}
+        . "\n       info: "
+        . $b->{info} . "\n\n";
+}
+
+__END__
+
+=head1 NAME
+
+smeagol-client - Smeagol command-line interface
+
+=head1 VERSION
+
+This documentation refers to version 0.02
+
+=head1 OPTIONS
+
+=over
+
+=item -s <url> | --server <url>
+
+Smeagol server url. Default is 'http://localhost:8000'.
+
+=for Euclid:
+    url.type:    string
+    url.default: 'http://localhost:8000'
+
+=item -lr | --listresources
+
+List all resource ids in server
+
+=item -gr <id> | --getresource <id>
+
+Show resource with given <id>
+
+=for Euclid:
+    id.type:       +integer
+    id.type.error: <id> must be an integer value
+
+=item -cr <description> [<info>] | --createresource <description> [<info>]
+
+Create a new resource with given <description> and optional <info>
+
+=for Euclid:
+    description.type: string
+    info.type:        string
+
+=item -ur <id> <description> [<info>] | --updateresource <id> <description> [<info>]
+
+Update resource with id=<id>, using given <description> and <info>. If an <info> value is not present, current resource info will be set to empty.
+
+=for Euclid:
+    id.type:           +integer
+    id.type.error:     <id> must be an integer > 0
+    description.type:  string
+    info.type:         string
+
+=item -dr <id> | --deleteresource <id>
+
+Deletes resource with id=<id>, including all related bookings.
+
+=for Euclid:
+    id.type:       +integer
+    id.type.error: <id> must be an integer > 0
+
+=item -cb <resourceid> <description> <start> <end> [<info>] | --createbooking <resourceid> <description> <start> <end> [<info>]
+
+Create booking for resource <resourceid>, spanning from dates <start> to <end>. Dates must follow the format YYYYMMDDHHMMSS.
+
+=for Euclid:
+    resourceid.type:       +integer
+    resourceid.type.error: <resourceid> must be an integer > 0
+    description.type:      string
+    start.type:            /\d+/
+    start.type.error:      <start> must follow the format YYYYMMDDHHMMSS
+    end.type:              /\d+/
+    end.type.error:        <end> must follow the format YYYYMMDDHHMMSS
+    info.type:             string
+
+=item -lb <id> | --listbookings <id>
+
+Show all booking ids for resource <resourceid>.
+
+=for Euclid:
+    id.type: +integer
+    id.type.error: <id> must be an integer > 0
+
+=item -gb <resourceid> <bookingid> | --getbooking <resourceid> <bookingid>
+
+Retrieve booking <bookingid> from resource <resourceid>.
+
+=for Euclid:
+    resourceid.type:       +integer
+    resourceid.type.error: <resourceid> must be an integer > 0
+    bookingid.type:        +integer
+    bookingid.type.error:  <bookingid> must be an integer > 0
+
+=item -db <resourceid> <bookingid> | --deletebooking <resourceid> <bookingid>
+
+Remove booking <bookingid> from resource <resourceid>.
+
+=for Euclid:
+    resourceid.type:       +integer
+    resourceid.type.error: <resourceid> must be an integer > 0
+    bookingid.type:        +integer
+    bookingid.type.error:  <bookingid> must be an integer > 0
+
+=item -ub <resourceid> <bookingid> <description> <start> <end> [<info>] | --updatebooking <resourceid> <bookingid> <description> <start> <end> [<info>]
+
+Update booking <bookingid> from resource <resourceid>, using <description>, <start>, <end> and (optionally) <info>. Dates <start> and <end> must follow the format YYYYMMDDHHMMSS.
+
+=for Euclid:
+    resourceid.type:       +integer
+    resourceid.type.error: <resourceid> must be an integer > 0
+    bookingid.type:        +integer
+    bookingid.type.error:  <bookingid> must be an integer > 0
+    description.type: string
+    start.type:       /\d+/
+    start.type.error: <start> must follow the format YYYYMMDDHHMMSS
+    end.type:         /\d+/
+    end.type.error:   <end> must follow the format YYYYMMDDHHMMSS
+    info.type:        string
+
+=item -ct <resourceid> <tag> | --createtag <resourceid> <tag>
+
+Create tag for resource <resourceid>.
+
+=for Euclid:
+    resourceid.type:       +integer
+    resourceid.type.error: <resourceid> must be an integer > 0
+    tag.type:              string
+
+=item -lt <resourceid> | --listtags <resourceid>
+
+Show all booking ids for resource <resourceid>.
+
+=for Euclid:
+    resourceid.type: +integer
+    resourceid.type.error: <resourceid> must be an integer > 0
+
+=item -dt <resourceid> <tag> | --deletetag <resourceid> <tag>
+
+Remove tag <tag> from resource <resourceid>.
+
+=for Euclid:
+    resourceid.type:       +integer
+    resourceid.type.error: <resourceid> must be an integer > 0
+    tag.type:              string
+
+=item --[no[-]]verbose
+
+[Don't] show verbose messages
+
+=for Euclid:
+    false: --no[-]verbose
+
+=item --help
+
+=item --version
+
+=item --usage
+
+=item --man
+
+=back
+
+=head1 AUTHOR
+
+Alex Muntada (ALEXM)
+
+See the AUTHORS file for a complete list, this section refers to the
+current maintainer only.
+
+=head1 COPYRIGHT 
+
+Copyright (C) 2008,2009  Universitat Politecnica de Catalunya
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+

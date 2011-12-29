@@ -61,8 +61,21 @@
             data     =>'{"info":"EVENT 1 INFORMATION","description":"DESCRIPTION","starts":"2011-02-16T04:00:00","ends":"2011-02-16T05:00:00"}',
         },
     },
-    {    # Actualitza event
+        {    # Consultar event
         num        => 5,
+        desc    => 'Consulta un event',
+        call    => 'TestGetEvent',
+        op      => 'GET',
+        uri     => \&event_uri,
+        input     => '',
+        output     => {
+            status  => '200 OK',
+            headers => { Location => '' },
+            data     =>'[{"info":"EVENT 1 INFORMATION","description":"DESCRIPTION","starts":"2011-02-16T04:00:00","ends":"2011-02-16T05:00:00"}]',
+        },
+    },
+    {    # Actualitza event
+        num        => 6,
         desc    => 'Actualitza un event',
         call    => 'TestUpdateEvent',
         op      => 'PUT',
@@ -80,7 +93,7 @@
         },
     },
     {    # Consultar event
-        num        => 6,
+        num        => 7,
         desc    => 'Consulta un event',
         call    => 'TestGetEvent',
         op      => 'GET',
@@ -93,7 +106,7 @@
         },
     },
     {    # Esborra event
-        num        => 7,
+        num        => 8,
         desc    => 'Esborra un event',
         call    => 'TestDeleteEvent',
         op      => 'DELETE',
@@ -106,7 +119,7 @@
         },
     },
     {    # Consultar event
-        num        => 8,
+        num        => 9,
         desc    => 'Consulta un event',
         call    => 'TestGetEvent',
         op      => 'GET',
@@ -119,7 +132,7 @@
         },
     },
     {    # Actualitza event
-        num        => 9,
+        num        => 10,
         desc    => 'Actualitza un event',
         call    => 'TestUpdateEvent',
         op      => 'PUT',
@@ -137,7 +150,7 @@
         },
     },
     {    # Crear un nou event
-        num        => 10,
+        num        => 11,
         desc    => 'Crea un nou event',
         call    => 'TestCreateEvent',
         op      => 'POST',
@@ -155,7 +168,7 @@
         },
     },
     {    # Crear un nou event
-        num        => 11,
+        num        => 12,
         desc    => 'Crea un nou event',
         call    => 'TestCreateEvent',
         op      => 'POST',
@@ -173,7 +186,7 @@
         },
     },   
     {    # Actualitza event
-        num        => 12,
+        num        => 13,
         desc    => 'Actualitza un event',
         call    => 'TestUpdateEvent',
         op      => 'PUT',
@@ -191,7 +204,7 @@
         },
     },
     {    # Actualitza event
-        num        => 13,
+        num        => 14,
         desc    => 'Actualitza un event',
         call    => 'TestUpdateEvent',
         op      => 'PUT',
@@ -209,7 +222,7 @@
         },
     },   
     {    # Actualitza event
-        num        => 14,
+        num        => 15,
         desc    => 'Actualitza un event',
         call    => 'TestUpdateEvent',
         op      => 'PUT',
@@ -227,7 +240,7 @@
         },
     }, 
     {    # Esborra event
-        num        => 15,
+        num        => 16,
         desc    => 'Esborra un event',
         call    => 'TestDeleteEvent',
         op      => 'DELETE',
@@ -240,7 +253,7 @@
         },
     },
     {    # Esborra event
-        num        => 16,
+        num        => 17,
         desc    => 'Esborra un event',
         call    => 'TestDeleteEvent',
         op      => 'DELETE',
@@ -253,7 +266,7 @@
         },
     },
     {    # Consultar event
-        num        => 17,
+        num        => 18,
         desc    => 'Consulta un event',
         call    => 'TestGetEvent',
         op      => 'GET',
@@ -266,7 +279,7 @@
         },
     },  
     {    # Crear un nou event
-        num        => 18,
+        num        => 19,
         desc    => 'Crea un nou event',
         call    => 'TestCreateEvent',
         op      => 'POST',
@@ -284,7 +297,7 @@
         },
     },
     {    # Crear un nou event
-        num        => 19,
+        num        => 20,
         desc    => 'Crea un nou event',
         call    => 'TestCreateEvent',
         op      => 'POST',

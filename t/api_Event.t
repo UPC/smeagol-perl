@@ -28,7 +28,8 @@ done_testing();
 
 sub test_smeagol_event {
     my ($t) = @_;
-
+    my @id;
+    
     my ( $nr, $desc, $call, $op,$input, $status, $headers, $output ) =
 		 ($t->{num},$t->{desc},$t->{call},$t->{op},$t->{input},$t->{output}->{status},$t->{output}->{headers}{Location},$t->{output}{data});
 
@@ -36,9 +37,22 @@ sub test_smeagol_event {
 	($op eq 'POST')? ($uri = $t->{uri}) : ($uri = $t->{uri}->());
 
 	if( ($op eq 'GET') && ($uri =~ /\d+/) ){
-		$output =~ s/}/,"id":"$EVENT_ID"}/;
+		    $output =~ s/}/,"id":"$EVENT_ID"}/;
+	    
 	}
-
+		if( ($op eq 'GET') && ($uri eq '/event') ){
+		    $output =~ s/}/,"id":"$EVENT_ID"}/;
+	    
+	}
+		if(($op eq 'POST')) {
+		    push(@id, "$EVENT_ID");
+		
+	}
+		if(($op eq 'DELETE')){
+		    pop(@id);
+	    
+	}	   
+    
     my $prefix = "Test[$nr]: $call";
     my $req = do { no strict 'refs'; \&$op };
     my $r = request(
@@ -62,6 +76,10 @@ sub test_smeagol_event {
 
 sub generated_uri {
     return qq{/event/$EVENT_ID};
+}
+
+sub event_uri {
+    return qq{/event};
 }
 
 

@@ -1,9 +1,0 @@
-[% META title = 'Catalyst/TT Error' %]
-<p>
-Hi ha hagut un error. Ho sentim molt, però és una cosa que passa de quan en quan.
-Esperem que per a la propera versió, els desenvolupadors ho "testeging" tot adequadament...  
-</p>
-<p>
-Aquí hi ha el missatge d'error, per si de cas li serveix d'ajuda, o significa alguna cosa per vostè:
-<span class="error">[% error %]</span>
-</p>

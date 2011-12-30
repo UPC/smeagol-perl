@@ -115,8 +115,8 @@ sub hash_event {
         description => $self->description,
         starts      => $self->starts->iso8601(),
         ends        => $self->ends->iso8601(),
-        #tags        => $self->tag_list,
-        #bookings    => $self->booking_list,
+        tags        => $self->tag_list,
+        bookings    => $self->booking_list,
     };
 
     return @event;

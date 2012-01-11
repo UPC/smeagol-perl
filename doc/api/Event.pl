@@ -1,10 +1,10 @@
 [
-    {    # Consultar event
+    {    # Consultar llistat events
         num        => 1,
-        desc    => 'Consulta un event',
-        call    => 'TestGetEvent',
+        desc    => 'Consulta llistat buit',
+        call    => 'TestGetEmptyEventList',
         op      => 'GET',
-        uri     => \&generated_uri,
+        uri     => \&event_uri,
         input     => '',
         output     => {
             status  => '200 OK',
@@ -13,10 +13,10 @@
         },
     },
     
-    {    # Crear un nou event
+    {    # Crear un nou event incorrecte
         num        => 2,
         desc    => 'Crea un nou event',
-        call    => 'TestCreateEvent',
+        call    => 'TestCreateInvalidEvent',
         op      => 'POST',
         uri     => '/event',
         input     => {
@@ -64,7 +64,7 @@
     {    # Consultar llistat de events
         num        => 5,
         desc    => 'Consulta un llistat de events',
-        call    => 'TestGetEvent',
+        call    => 'TestGetNotEmptyEventList',
         op      => 'GET',
         uri     => \&event_uri,
         input     => '',
@@ -118,10 +118,10 @@
             data     =>'[]',
         },
     },
-    {    # Consultar llistat de events
+    {    # Consultar llistat buit
         num        => 9,
-        desc    => 'Consulta un llistat de events',
-        call    => 'TestGetEvent',
+        desc    => 'Consulta un llistat buit',
+        call    => 'TestGetEmptyEventList',
         op      => 'GET',
         uri     => \&event_uri,
         input     => '',
@@ -133,8 +133,8 @@
     },
     {    # Consultar event
         num        => 10,
-        desc    => 'Consulta un event',
-        call    => 'TestGetEvent',
+        desc    => 'Consulta un event esborrat',
+        call    => 'TestGetEventNotFound',
         op      => 'GET',
         uri     => \&generated_uri,
         input     => '',
@@ -146,8 +146,8 @@
     },
     {    # Actualitza event
         num        => 11,
-        desc    => 'Actualitza un event',
-        call    => 'TestUpdateEvent',
+        desc    => 'Actualitza un event esborrat',
+        call    => 'TestUpdateEventNotFound',
         op      => 'PUT',
         uri     => \&generated_uri,
         input     => {
@@ -201,7 +201,7 @@
     {    # Consultar llistat de events
         num        => 14,
         desc    => 'Consulta un llistat de events',
-        call    => 'TestGetEvent',
+        call    => 'TestGetNotEmptyListEvent',
         op      => 'GET',
         uri     => \&event_uri,
         input     => '',
@@ -231,8 +231,8 @@
     },
     {    # Actualitza event
         num        => 16,
-        desc    => 'Actualitza un event',
-        call    => 'TestUpdateEvent',
+        desc    => 'Actualitza incorrectament un event',
+        call    => 'TestUpdateEventInvalid',
         op      => 'PUT',
         uri     => \&generated_uri,
         input     => {
@@ -249,8 +249,8 @@
     },   
     {    # Actualitza event
         num        => 17,
-        desc    => 'Actualitza un event',
-        call    => 'TestUpdateEvent',
+        desc    => 'Actualitza incorrectament un event',
+        call    => 'TestUpdateEventInvalid',
         op      => 'PUT',
         uri     => \&generated_uri,
         input     => {
@@ -266,7 +266,7 @@
         },
     }, 
     {    # Esborra event
-        num        => 17,
+        num        => 18,
         desc    => 'Esborra un event',
         call    => 'TestDeleteEvent',
         op      => 'DELETE',
@@ -279,9 +279,9 @@
         },
     },
     {    # Consultar llistat de events
-        num        => 18,
+        num        => 19,
         desc    => 'Consulta un llistat de events',
-        call    => 'TestGetEvent',
+        call    => 'TestGetNotEmptyListEvent',
         op      => 'GET',
         uri     => \&event_uri,
         input     => '',
@@ -292,9 +292,9 @@
         },
     },
     {    # Esborra event
-        num        => 19,
-        desc    => 'Esborra un event',
-        call    => 'TestDeleteEvent',
+        num        => 20,
+        desc    => 'Esborra un event ja esborrat',
+        call    => 'TestDeleteEventNotFound',
         op      => 'DELETE',
         uri     => \&generated_uri,
         input     => '',
@@ -305,9 +305,9 @@
         },
     },
     {    # Consultar event
-        num        => 20,
-        desc    => 'Consulta un event',
-        call    => 'TestGetEvent',
+        num        => 21,
+        desc    => 'Consulta un event ja esborrat',
+        call    => 'TestGetEventNotFound',
         op      => 'GET',
         uri     => \&generated_uri,
         input     => '',
@@ -318,7 +318,7 @@
         },
     },  
     {    # Crear un nou event
-        num        => 21,
+        num        => 22,
         desc    => 'Crea un nou event',
         call    => 'TestCreateEvent',
         op      => 'POST',
@@ -336,7 +336,7 @@
         },
     },
     {    # Crear un nou event
-        num        => 22,
+        num        => 23,
         desc    => 'Crea un nou event',
         call    => 'TestCreateEvent',
         op      => 'POST',
@@ -353,10 +353,10 @@
             data     => '[]',
         },
     },
-    {    # Consultar llistat de events
-        num        => 23,
+    {    # Consultar llistat events
+        num        => 24,
         desc    => 'Consulta un llistat de events',
-        call    => 'TestGetEvent',
+        call    => 'TestGeNotEmptyEventList',
         op      => 'GET',
         uri     => \&event_uri,
         input     => '',

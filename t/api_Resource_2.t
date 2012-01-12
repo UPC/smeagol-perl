@@ -29,10 +29,23 @@ sub test_smeagol_resource {
 
     my $r = V2::Test->new( uri => '/resource' );
     
-    my $result = $r->{$test->{op}}->( 
-            id => $test->{id}, 
-            args => $test->{args}, 
-            new_ids => $test->{new_ids}, 
-            status => $test->{new_ids} 
-        );
+    my $method = $test->{method};
+    my %args = prepare_args($test);
+    my $result = $r->$method( %args );
+    
+    is_deeply($result, $test->{result}, $test->{title} . ": result does match") if exists $test->{result};
 }
+
+
+sub prepare_args {
+    my ($test) = @_;
+    my %args;
+    
+    $args{id} = $test->{id} if defined $test->{id};
+    $args{args} = $test->{args} if defined $test->{args};
+    $args{new_ids} = $test->{new_ids} if defined $test->{new_ids};
+    $args{status} = $test->{status} if defined $test->{status};
+    
+    return %args;
+}
+

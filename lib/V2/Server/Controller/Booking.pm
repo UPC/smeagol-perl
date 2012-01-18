@@ -28,12 +28,12 @@ Catalyst Controller.
 
 =head1 METHODS
 
-=cut
-
 =head2 begin
+
 Begin is the first function executed when a request directed to /booking is made.
 Some parameters must be saved in the stash, otherwise they are lost once the object
 Catalyst::REST::Request is created (which overwrites the original $c->request).
+
 =cut
 
 sub begin : Private {
@@ -46,8 +46,10 @@ sub begin : Private {
 }
 
 =head2 default
+
 /booking is mapped to this function.
 It redirects to default_GET, default_POST, etc depending on the http method used.
+
 =cut
 
 sub default : Local : ActionClass('REST') {
@@ -55,11 +57,26 @@ sub default : Local : ActionClass('REST') {
 }
 
 =head2 default_GET
+
 There are 3 options:
-  -Complete list of bookings (not very useful): /booking GET which redirects to the Private function
+
+=over 4
+
+=item *
+
+Complete list of bookings (not very useful): /booking GET which redirects to the Private function
 get_list
-  -A booking: /booking/id GET which redirects to the Private function get_booking
-  -A resource's agenda: /booking?resource=id GET which redirects to bookings_resource
+
+=item *
+
+A booking: /booking/id GET which redirects to the Private function get_booking
+
+=item *
+
+A resource's agenda: /booking?resource=id GET which redirects to bookings_resource
+
+=back
+
 =cut
 
 sub default_GET {
@@ -85,10 +102,12 @@ sub default_GET {
 }
 
 =head2 get_booking
+
 This function is not accessible through the url: /booking/get_booking/id but /booking/id hence the
 Private type.
 
 See default_GET for details.
+
 =cut
 
 sub get_booking : Private {
@@ -191,8 +210,10 @@ sub get_booking : Private {
 }
 
 =head2 booking_list
+
 Private function accessible through /booking GET 
 It returns every booking of every resource. 
+
 =cut
 
 sub booking_list : Private {
@@ -221,8 +242,10 @@ sub booking_list : Private {
 }
 
 =head2 bookings_resource
+
 It returns the agenda of a resource.
 $id has been got from $c->stash->{id_resource} as you can see in default_GET
+
 =cut
 
 sub bookings_resource : Private {
@@ -266,7 +289,8 @@ sub bookings_resource : Private {
     $c->stash->{template} = 'booking/get_list.tt';
 }
 
-=head2
+=head2 bookings_event
+
 =cut
 
 sub bookings_event : Private {
@@ -311,6 +335,7 @@ sub bookings_event : Private {
 }
 
 =head2 default_POST
+
 /booking POST
 This function creates a booking for a resource and associate it to an event.
 
@@ -324,6 +349,7 @@ controller Check.
 check_overlap is an special case, some may suggest that it should be placed in the
 Schema/Booking.pm but by doing that the only thing that we achieve is an increase of code
 complexity. $c for the win!
+
 =cut
 
 sub default_POST {
@@ -593,8 +619,10 @@ sub default_POST {
     }
 }
 
-=head2
+=head2 default_PUT
+
 Same functionality than default_POST but updating an existing booking.
+
 =cut
 
 sub default_PUT {
@@ -844,6 +872,10 @@ sub default_PUT {
     }
 }
 
+=head2 default_DELETE
+
+=cut
+
 sub default_DELETE {
     my ( $self, $c, $res, $id ) = @_;
     my $req = $c->request;
@@ -885,9 +917,11 @@ sub ParseDate {
     return $date;
 }
 
-=head2
+=head2 end
+
 The last function executed before responding the request.
 Because we saved format in $c->stash->{format} it allow us to choose between the available views.
+
 =cut
 
 sub end : Private {
@@ -907,6 +941,10 @@ sub end : Private {
         }
     }
 }
+
+=head2 ical
+
+=cut
 
 sub ical : Private {
     my ( $self, $c ) = @_;
@@ -1049,6 +1087,10 @@ sub ical : Private {
     $c->res->output($calendar_ics);
 
 }
+
+=head2 ical_event
+
+=cut
 
 sub ical_event : Private {
     my ( $self, $c ) = @_;

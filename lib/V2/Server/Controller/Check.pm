@@ -90,9 +90,6 @@ sub check_booking : Local {
     my $id_resource = $c->stash->{id_resource};
     my $id_event    = $c->stash->{id_event};
 
-    $c->log->debug( "Check booking. ID resource: " . $id_resource );
-    $c->log->debug( "Check booking. ID event: " . $id_event );
-
     my $resource = $c->model('DB::TResource')->find( { id => $id_resource } );
     my $event = $c->model('DB::TEvent')->find( { id => $id_event } );
 
@@ -162,7 +159,6 @@ sub check_overlap : Local {
     my $new_exception = $c->stash->{new_exception};
     my $new_exc_spanSet;
 
-    $c->log->debug("Provant si hi ha solapament");
     $c->stash->{overlap}  = 0;
     $c->stash->{empty}    = 0;
     $c->stash->{too_long} = 0;
@@ -270,13 +266,9 @@ sub check_overlap : Local {
 
         if ($overlap) {
             $c->stash->{overlap} = 1;
-            $c->log->debug( "Hi ha solpament amb el booking " . $_->id );
             last;
         }
     }
-
-    $c->log->debug("No hi ha solpament") unless $c->stash->{overlap};
-
 }
 
 sub check_exception : Local {

@@ -56,13 +56,19 @@ my %book1 = (
     tags => [],
 );
 
+my %expected;
 my $id  = $b->POST( args => [ %book1 ] );
 my $out = $b->GET( id => $id );
 delete $out->{'duration'};
 delete $out->{'frequency'};
 delete $out->{'until'};
 
-is_deeply( $out, { %book1, id => $id }, "create booking1" );
+%expected = %book1;
+$expected{'id'} = $id;
+$expected{'byminute'} = '0';
+$expected{'byhour'} = '0';
+delete $expected{'freq'};
+is_deeply( $out, \%expected, "create booking1" );
 
 @bookings = $b->GET();
 
@@ -80,7 +86,12 @@ delete $out->{'duration'};
 delete $out->{'frequency'};
 delete $out->{'until'};
 
-is_deeply( $out, { %book1, id => $id }, "edit booking1" );
+%expected = %book1;
+$expected{'id'} = $id;
+$expected{'byminute'} = '0';
+$expected{'byhour'} = '0';
+delete $expected{'freq'};
+is_deeply( $out, \%expected, "edit booking1" );
 
 $b->DELETE( id => $id );
 

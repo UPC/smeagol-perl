@@ -11,12 +11,12 @@ use V2::Test;
 use Test::More;
 use utf8::all;
 
-my $res_id = V2::Test->new( uri => '/resource' )->POST([
+my $res_id = V2::Test->new( uri => '/resource' )->POST( args => [
     description => 'resource_description',
     info        => 'resource_info',
 ]);
 
-my $ev_id = V2::Test->new( uri => '/event' )->POST([
+my $ev_id = V2::Test->new( uri => '/event' )->POST( args => [
     description => 'event_description',
     info        => 'event_info',
     starts      => '2011-12-08T00:00:00',
@@ -56,8 +56,8 @@ my %book1 = (
     tags => [],
 );
 
-my $id  = $b->POST([ %book1 ]);
-my $out = $b->GET($id);
+my $id  = $b->POST( args => [ %book1 ] );
+my $out = $b->GET( id => $id );
 delete $out->{'duration'};
 delete $out->{'frequency'};
 delete $out->{'until'};
@@ -69,20 +69,20 @@ is_deeply( $out, { %book1, id => $id }, "create booking1" );
 is_deeply( \@bookings, [ $id ], 'list of 1 booking' );
 
 $book1{'info'} = 'edited-info';
-$b->PUT( $id, [ %book1 ] );
+$b->PUT( id => $id, args => [ %book1 ] );
 
 @bookings = $b->GET();
 
 is_deeply( \@bookings, [ $id ], 'still list of 1 booking' );
 
-$out = $b->GET($id);
+$out = $b->GET( id => $id );
 delete $out->{'duration'};
 delete $out->{'frequency'};
 delete $out->{'until'};
 
 is_deeply( $out, { %book1, id => $id }, "edit booking1" );
 
-$b->DELETE($id);
+$b->DELETE( id => $id );
 
 @bookings = $b->GET();
 

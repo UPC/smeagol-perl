@@ -2,9 +2,7 @@ package V2::Server::Controller::Event;
 
 use Moose;
 use namespace::autoclean;
-use Data::Dumper;
 use DateTime;
-
 use Encode qw(encode decode);
 my $enc     = 'utf-8';
 my $VERSION = $V2::Server::VERSION;
@@ -49,9 +47,8 @@ sub default_GET {
 
 sub get_event : Local {
     my ( $self, $c, $id ) = @_;
-
     my $event_aux = $c->model('DB::TEvent')->find( { id => $id } );
-
+    
     if ($event_aux) {
         my $event = {
             id          => $event_aux->id,
@@ -59,19 +56,18 @@ sub get_event : Local {
             description => decode( $enc, $event_aux->description ),
             starts      => $event_aux->starts->iso8601(),
             ends        => $event_aux->ends->iso8601(),
-            tags        => $event_aux->tag_list,
-            bookings    => $event_aux->booking_list
         };
-
+	
+	#TODO: message: Esdeveniment llistat amb èxit. 
         $c->stash->{content} = $event;
         $c->stash->{event}   = $event;
         $c->response->status(200);
         $c->stash->{template} = 'event/get_event.tt';
     }
     else {
-        my @message
-            = { message => "We can't find what you are looking for." };
-
+        my @message;
+       
+	#TODO: message: Esdeveniment no trobat.
         $c->stash->{content}  = \@message;
         $c->stash->{template} = 'old_not_found.tt';
         $c->response->status(404);
@@ -91,7 +87,8 @@ sub event_list : Local {
 
         push( @events, @event );
     }
-
+    
+    #TODO: llistat d'esdeveniments generat amb èxit 
     $c->stash->{content} = \@events;
     $c->stash->{events}  = \@events;
     $c->response->status(200);
@@ -101,20 +98,21 @@ sub event_list : Local {
 sub default_POST {
     my ( $self, $c ) = @_;
     my $req = $c->request;
-    $c->log->debug( 'Mètode: ' . $req->method );
-    $c->log->debug("El POST funciona");
+	my @message;
 
     my $info        = $req->parameters->{info};
     my $description = $req->parameters->{description};
     my $starts      = $req->parameters->{starts};
     my $ends        = $req->parameters->{ends};
-    my @tags        = split( ',', $req->parameters->{tags} );
 
     my $new_event = $c->model('DB::TEvent')->find_or_new();
     my $tag_event;
 
-    $c->visit( '/check/check_event', [ $info, $description ] );
-
+    #Checking the info, description and dates format.
+    $c->visit( '/check/check_event', [ $info, $description, $starts, $ends ] );
+    
+    
+    
 # If all is correct $c->stash->{event_ok} should be 1, otherwise it will be 0.
 
     if ( $c->stash->{event_ok} == 1 ) {
@@ -126,7 +124,7 @@ sub default_POST {
 
         my $tags;
         my $id_tag;
-
+=pod
         foreach (@tags) {
             $id_tag = $_;
 
@@ -142,26 +140,27 @@ sub default_POST {
                 $c->detach( '/bad_request', [] );
             }
         }
-
+=cut
         my $event = {
             id          => $new_event->id,
             info        => decode( $enc, $new_event->info ),
             description => decode( $enc, $new_event->description ),
             starts      => $new_event->starts->iso8601(),
             ends        => $new_event->ends->iso8601(),
-            tags        => $new_event->tag_list,
+#            tags        => $new_event->tag_list,
             bookings    => $new_event->booking_list
         };
 
-        $c->stash->{content} = $event;
+        #TODO: message: Esdeveniment creat amb exit.
+        $c->stash->{content}  = \@message;
         $c->response->status(201);
-        $c->forward( $c->view('JSON') );
+        $c->response->location($req->uri->as_string."/".$new_event->id);
+		$c->forward( $c->view('JSON') );
     }
     else {
-        my @message
-            = {
-            message => "Error: Check the info and description of the event",
-            };
+	
+	#TODO: message: Verifiqui el info, descripció i dates de l'esdeveniment
+        my @message;
         $c->stash->{content} = \@message;
         $c->response->status(400);
         $c->stash->{error}
@@ -173,26 +172,28 @@ sub default_POST {
 sub default_PUT {
     my ( $self, $c, $res, $id ) = @_;
     my $req = $c->request;
-    $c->log->debug( 'Mètode: ' . $req->method );
-    $c->log->debug( "ID: " . $id );
-    $c->log->debug("El PUT funciona");
 
     my $info        = $req->parameters->{info};
     my $description = $req->parameters->{description};
-
+    my $starts_check = $req->parameters->{starts};
+    my $ends_check = $req->parameters->{ends};
+    
     my $starts_aux = $req->parameters->{starts};
     my $starts = $c->forward( 'ParseDate', [$starts_aux] );
 
     my $ends_aux = $req->parameters->{ends};
     my $ends = $c->forward( 'ParseDate', [$ends_aux] );
 
-    my @tags = split( ',', $req->parameters->{tags} );
+    my @tags;
+	if (defined $req->parameters->{tags}) {@tags = split( ',', $req->parameters->{tags} );}
 
     my $event = $c->model('DB::TEvent')->find( { id => $id } );
     my $tag_event;
-
+    
+    #Checking the info, description and dates format.
     if ($event) {
-        $c->visit( '/check/check_event', [ $info, $description ] );
+        $c->visit( '/check/check_event', [ $info, $description, $starts_check, $ends_check ] );
+
 
 # If all is correct $c->stash->{event_ok} should be 1, otherwise it will be 0.
 
@@ -215,7 +216,6 @@ sub default_PUT {
             my $id_tag;
             foreach (@tags) {
                 $id_tag = $_;
-                $c->log->debug( "Estem afegint el tag: " . $id_tag );
 
                 $tags = $c->model('DB::TTag')->find( { id => $id_tag } );
 
@@ -239,14 +239,17 @@ sub default_PUT {
                 tags        => $event->tag_list,
                 bookings    => $event->booking_list
             };
-
-            $c->stash->{content} = $event;
+	    
+	    #TODO: message: Esdeveniment actualitzat amb èxit.
+            my @message;
+            $c->stash->{content} = \@message;
             $c->response->status(200);
             $c->forward( $c->view('JSON') );
         }
         else {
-            my @message = { message =>
-                    "Error: Check the info and description of the event", };
+	    
+	    #TODO: message: Verifiqui el info, descripció i dates de l'esdeveniment
+            my @message;
             $c->stash->{content} = \@message;
             $c->response->status(400);
             $c->stash->{error}
@@ -256,8 +259,9 @@ sub default_PUT {
         }
     }
     else {
-        my @message = { message =>
-                    "404. Not found", };
+	
+	#TODO: message: Esdeveniment no trobat.
+        my @message; 
         $c->stash->{content} = \@message;
         $c->stash->{template} = 'not_found.tt';
         $c->response->status(404);
@@ -268,23 +272,21 @@ sub default_DELETE {
     my ( $self, $c, $res, $id ) = @_;
     my $req = $c->request;
 
-    $c->log->debug( 'Mètode: ' . $req->method );
-    $c->log->debug("El DELETE funciona");
-
     my $event_aux = $c->model('DB::TEvent')->find( { id => $id } );
-    my $message;
+    my @message;
 
     if ($event_aux) {
         $event_aux->delete;
-        $message = { message => "Event successfully deleted" };
-        $c->stash->{content}  = $message;
+       
+        #TODO: message: Esdeveniment esborrat amb èxit.
+        $c->stash->{content}  = \@message;
         $c->stash->{template} = 'event/delete_ok.tt';
         $c->response->status(200);
     }
     else {
-        $message
-            = { message => "We can't delete an event that we can't find" };
-        $c->stash->{content}  = $message;
+	
+	#TODO: message: Esdeveniment no trobat.
+        $c->stash->{content}  = \@message;
         $c->stash->{template} = 'not_found.tt';
         $c->response->status(404);
     }
@@ -297,7 +299,6 @@ Outrage!! The author is repeting himself. Throw him to the fire!!
 sub ParseDate : Private {
     my ( $self, $c, $date_str ) = @_;
 
-    $c->log->debug( "Date to parse: " . $date_str );
 
     my ( $day, $hour ) = split( /T/, $date_str );
 

@@ -4,7 +4,6 @@ use Moose;
 use feature 'switch';
 
 use namespace::autoclean;
-use Data::Dumper;
 use DateTime;
 use DateTime::Duration;
 use DateTime::Span;
@@ -39,11 +38,9 @@ sub check_desc : Local {
     }
     
     if ( length($desc) < 128 ) {
-        #$c->log->debug("Descr OK");
         $c->stash->{desc_ok} = 1;
     }
     else {
-        #$c->log->debug("Descr KO");
         $c->stash->{desc_ok} = 0;
     }
 }
@@ -52,11 +49,9 @@ sub check_desc_tag : Local {
     my ( $self, $c, $desc ) = @_;
 
     if ( length($desc) < 256 ) {
-        $c->log->debug("Descr OK");
         $c->stash->{desc_ok} = 1;
     }
     else {
-        $c->log->debug("Descr KO");
         $c->stash->{desc_ok} = 0;
     }
 }
@@ -69,6 +64,19 @@ sub check_info : Local {
     }
     else {
         $c->stash->{info_ok} = 0;
+    }
+}
+
+#TODO: new subroutine to check the date parameter format
+
+sub check_date : Local {
+    my ( $self, $c, $date, $atrib ) = @_;
+
+    if ( $date =~ /\G(\d+-\d+-\d+T\d+:\d+:\d+)/ && length($date) == 19) {
+        $c->stash->{$atrib} = 1;
+    }
+    else {
+        $c->stash->{$atrib} = 0;
     }
 }
 
@@ -101,13 +109,17 @@ sub check_booking : Local {
 Function used to verify that event parameters are within the proper range 
 =cut
 
+#Todo: New parameters to check (starts_ok) and (ends_ok)
+
 sub check_event : Local {
-    my ( $self, $c, $info, $description ) = @_;
+    my ( $self, $c, $info, $description, $starts, $ends ) = @_;
 
     $c->visit( 'check_info', [$info] );
     $c->visit( 'check_desc', [$description] );
-
-    if ( $c->stash->{info_ok} && $c->stash->{desc_ok} ) {
+    $c->visit( 'check_date', [$starts, 'starts_ok'] );
+    $c->visit( 'check_date', [$ends, 'ends_ok'] );
+     
+    if ( $c->stash->{info_ok} && $c->stash->{desc_ok} && $c->stash->{starts_ok} && $c->stash->{ends_ok}) {
         $c->stash->{event_ok} = 1;
     }
     else {

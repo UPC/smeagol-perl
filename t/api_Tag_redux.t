@@ -22,8 +22,8 @@ my %tag1 = (
     description => 'tag-description',
 );
 
-my $id  = $t->POST( \%tag1 );
-my $out = $t->GET($id);
+my $id  = $t->POST( args => \%tag1 );
+my $out = $t->GET( id => $id );
 
 is_deeply( $out, \%tag1, "create tag1" );
 
@@ -33,17 +33,17 @@ is_deeply( \@tags, [ $id ], 'list of 1 tag' );
 
 $tag1{'description'} = 'edited';
 
-$t->PUT( $id, \%tag1 );
+$t->PUT( id => $id, args => \%tag1 );
 
 @tags = $t->GET();
 
 is_deeply( \@tags, [ $id ], 'still list of 1 tag' );
 
-$out = $t->GET($id);
+$out = $t->GET( id => $id );
 
 is_deeply( $out, \%tag1, "edit tag1" );
 
-$t->DELETE($id);
+$t->DELETE( id => $id );
 
 @tags = $t->GET();
 

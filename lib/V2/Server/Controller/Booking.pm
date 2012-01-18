@@ -379,7 +379,8 @@ sub default_POST {
         );
     }
     
-    my @tags        = split( ',', $req->parameters->{tags} );
+    my @tags = split( ',', $req->parameters->{tags} )
+        if defined $req->parameters->{tags};
 
 #dtstart and dtend are parsed in case that some needed parameters to build the recurrence of the
 #booking aren't provided
@@ -663,7 +664,8 @@ sub default_PUT {
     $c->stash->{id_event}    = $id_event;
     $c->stash->{id_resource} = $id_resource;
 
-    my @tags        = split( ',', $req->parameters->{tags} );
+    my @tags = split( ',', $req->parameters->{tags} )
+        if defined $req->parameters->{tags};
     
     #Do the resource and the event exist?
     $c->visit( '/check/check_booking', [] );

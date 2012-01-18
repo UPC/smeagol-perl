@@ -361,7 +361,7 @@ sub default_POST {
     $dtend    = ParseDate($dtend);
     $duration = $dtend - $dtstart;
 
-    my $freq     = $req->parameters->{freq};
+    my $freq     = $req->parameters->{frequency};
     my $interval = $req->parameters->{interval} || 1;
     my $until    = $req->parameters->{until} || $req->parameters->{dtend};
 
@@ -615,9 +615,9 @@ sub default_PUT {
     $dtend    = ParseDate($dtend);
     $duration = $dtend - $dtstart;
 
-    my $freq     = $req->parameters->{freq}     || "daily";
-    my $interval = $req->parameters->{interval} || 1;
-    my $until    = $req->parameters->{until}    || $req->parameters->{dtend};
+    my $freq     = $req->parameters->{frequency} || "daily";
+    my $interval = $req->parameters->{interval}  || 1;
+    my $until    = $req->parameters->{until}     || $req->parameters->{dtend};
 
     my $by_minute = $req->parameters->{by_minute} || $dtstart->minute;
     my $by_hour   = $req->parameters->{by_hour}   || $dtstart->hour;

@@ -37,7 +37,7 @@ my %book1 = (
     dtend        => '2011-12-08T23:59:00',
     id_resource  => $res_id,
     id_event     => $ev_id,
-    freq         => 'daily',
+    frequency    => 'daily',
     interval     => 1,
 #    by_minute    => '',
 #    until        => '',
@@ -60,14 +60,12 @@ my %expected;
 my $id  = $b->POST( args => [ %book1 ] );
 my $out = $b->GET( id => $id );
 delete $out->{'duration'};
-delete $out->{'frequency'};
 delete $out->{'until'};
 
 %expected = %book1;
 $expected{'id'} = $id;
 $expected{'byminute'} = '0';
 $expected{'byhour'} = '0';
-delete $expected{'freq'};
 is_deeply( $out, \%expected, "create booking1" );
 
 @bookings = $b->GET();
@@ -83,14 +81,12 @@ is_deeply( \@bookings, [ $id ], 'still list of 1 booking' );
 
 $out = $b->GET( id => $id );
 delete $out->{'duration'};
-delete $out->{'frequency'};
 delete $out->{'until'};
 
 %expected = %book1;
 $expected{'id'} = $id;
 $expected{'byminute'} = '0';
 $expected{'byhour'} = '0';
-delete $expected{'freq'};
 is_deeply( $out, \%expected, "edit booking1" );
 
 $b->DELETE( id => $id );

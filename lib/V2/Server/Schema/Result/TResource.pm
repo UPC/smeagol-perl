@@ -88,8 +88,6 @@ sub get_resources {
             id          => $_->id,
             description => $_->description,
             info        => $_->info,
-            tags        => $_->tag_list,
-            bookings    => $_->book_list
         };
         push( @resources, @resource );
     }

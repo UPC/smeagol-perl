@@ -32,14 +32,13 @@
     },
     {   title  => 'ConsultaRecurs',
         method => 'GET',
-        id     => 1,
+        id     => \&get_generated_id,
         status => sub { shift->code == HTTP_OK },
-        result => {
-            id          => 1,
+        result => [{
+            id          => \&get_generated_id,
             description => 'aula',
             info        => 'resource info',
-            }
-
+            }]
     },
 
     #    {   title  => 'ModificaRecurs',

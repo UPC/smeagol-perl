@@ -279,4 +279,18 @@
             data     => '[]',
         },
     },
+    {    # Consultar llistat recursos
+        num        => 20,
+        desc    => 'Consulta un llistat de recursos',
+        call    => 'TestGeNotEmptyResourceList',
+        op      => 'GET',
+        uri     => \&uri_resource,
+        input     => '',
+        output     => {
+            status  => '200 OK',
+            headers => { Location => '' },
+            data     =>'[{"info":"RESOURCE 2 INFORMATION","description":"DESCRIPTION"}, {"info":"RESOURCE 4 INFORMATION","description":"DESCRIPTION_"}]',
+        },
+    },
+
 ] 

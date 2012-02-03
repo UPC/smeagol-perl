@@ -1,6 +1,5 @@
 #!perl
 
-use Data::Dumper;
 use strict;
 use warnings;
 use utf8::all;
@@ -16,18 +15,16 @@ BEGIN {
 }
 
 my $ID = '';
-
-my @tests = @{ require 'doc/api/Resource.pl' };
-
-
+my @tests = @{ require 'doc/api/Event.pl' };
+push @tests , @{ require 'doc/api/Resource.pl' };
 
 for my $t (@tests) {
-    test_smeagol_resource($t);
+    test_smeagol($t);
 }
 
 done_testing();
 
-sub test_smeagol_resource {
+sub test_smeagol {
     my ($t) = @_;
 
     my ( $nr, $desc, $call, $op,$input, $status, $headers, $output ) =
@@ -54,15 +51,24 @@ sub test_smeagol_resource {
 
         like( $r->headers->as_string(), qr/$headers/, "$prefix.headers" );
 		my $id = $r->headers->as_string();
-		$id =~ /.*Location:.*\/resource\/(\d)+/;
+		$id =~ /.*Location:.*\/.*\/(\d)+/;
 		$ID = $1;
     };
 	is_deeply (decode_json($r->decoded_content()), decode_json($output), "$prefix.output" );
 }
 
+sub generated_uri_event {
+    return qq{/event/$ID};
+}
+
 sub generated_uri_resource {
     return qq{/resource/$ID};
 }
+
+sub uri_event {
+    return qq{/event};
+}
+
 sub uri_resource {
     return qq{/resource};
 }

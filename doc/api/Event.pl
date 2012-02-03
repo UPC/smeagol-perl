@@ -4,7 +4,7 @@
         desc    => 'Consulta un event',
         call    => 'TestGetEvent',
         op      => 'GET',
-        uri     => \&generated_uri,
+        uri     => \&uri_event,
         input     => '',
         output     => {
             status  => '200 OK',
@@ -53,7 +53,7 @@
         desc    => 'Consulta un event',
         call    => 'TestGetEvent',
         op      => 'GET',
-        uri     => \&generated_uri,
+        uri     => \&generated_uri_event,
         input     => '',
         output     => {
             status  => '200 OK',
@@ -66,7 +66,7 @@
         desc    => 'Actualitza un event',
         call    => 'TestUpdateEvent',
         op      => 'PUT',
-        uri     => \&generated_uri,
+        uri     => \&generated_uri_event,
         input     => {
             info        => 'EVENT 1 UPDATED',
             description => 'DESCRIPTION UPDATED',
@@ -84,7 +84,7 @@
         desc    => 'Consulta un event',
         call    => 'TestGetEvent',
         op      => 'GET',
-        uri     => \&generated_uri,
+        uri     => \&generated_uri_event,
         input     => '',
         output     => {
             status  => '200 OK',
@@ -97,7 +97,7 @@
         desc    => 'Esborra un event',
         call    => 'TestDeleteEvent',
         op      => 'DELETE',
-        uri     => \&generated_uri,
+        uri     => \&generated_uri_event,
         input     => '',
         output     => {
             status  => '200 OK',
@@ -110,7 +110,7 @@
         desc    => 'Consulta un event',
         call    => 'TestGetEvent',
         op      => 'GET',
-        uri     => \&generated_uri,
+        uri     => \&generated_uri_event,
         input     => '',
         output     => {
             status  => '404 Not Found',
@@ -123,7 +123,7 @@
         desc    => 'Actualitza un event',
         call    => 'TestUpdateEvent',
         op      => 'PUT',
-        uri     => \&generated_uri,
+        uri     => \&generated_uri_event,
         input     => {
             info        => 'EVENT 1 UPDATED',
             description => 'DESCRIPTION UPDATED',
@@ -177,7 +177,7 @@
         desc    => 'Actualitza un event',
         call    => 'TestUpdateEvent',
         op      => 'PUT',
-        uri     => \&generated_uri,
+        uri     => \&generated_uri_event,
         input     => {
             info        => 'EVENT 3 UPDATED',
             description => 'DESCRIPTION_ UPDATED',
@@ -195,7 +195,7 @@
         desc    => 'Actualitza un event',
         call    => 'TestUpdateEvent',
         op      => 'PUT',
-        uri     => \&generated_uri,
+        uri     => \&generated_uri_event,
         input     => {
             info        => 'hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh',
             description => 'DESCRIPTION_ UPDATED',
@@ -213,7 +213,7 @@
         desc    => 'Actualitza un event',
         call    => 'TestUpdateEvent',
         op      => 'PUT',
-        uri     => \&generated_uri,
+        uri     => \&generated_uri_event,
         input     => {
             info        => 'EVENT 3 UPDATED',
             description => 'mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm',
@@ -231,7 +231,7 @@
         desc    => 'Esborra un event',
         call    => 'TestDeleteEvent',
         op      => 'DELETE',
-        uri     => \&generated_uri,
+        uri     => \&generated_uri_event,
         input     => '',
         output     => {
             status  => '200 OK',
@@ -244,7 +244,7 @@
         desc    => 'Esborra un event',
         call    => 'TestDeleteEvent',
         op      => 'DELETE',
-        uri     => \&generated_uri,
+        uri     => \&generated_uri_event,
         input     => '',
         output     => {
             status  => '404 Not Found',
@@ -257,7 +257,7 @@
         desc    => 'Consulta un event',
         call    => 'TestGetEvent',
         op      => 'GET',
-        uri     => \&generated_uri,
+        uri     => \&generated_uri_event,
         input     => '',
         output     => {
             status  => '404 Not Found',

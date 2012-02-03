@@ -60,8 +60,12 @@ sub test_smeagol_event {
 	is_deeply (decode_json($r->decoded_content()), decode_json($output), "$prefix.output" );
 }
 
-sub generated_uri {
+sub generated_uri_event {
     return qq{/event/$EVENT_ID};
+}
+
+sub uri_event {
+    return qq{/event};
 }
 
 

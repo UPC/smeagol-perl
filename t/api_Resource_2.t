@@ -56,7 +56,7 @@ sub prepare_args {
     if (exists $test->{result}) {
         $args{result} = $test->{result};
         if (ref $args{result} eq 'ARRAY') {
-            foreach my $val ($args{result}) {
+            foreach my $val (@{ $args{result} }) {
 #                if (exists $val->{id}) {
 #                    if (ref $val{id} eq 'CODE') {
 #                        $val{id} = $val{id}->();

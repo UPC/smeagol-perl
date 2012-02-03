@@ -289,7 +289,7 @@
         output     => {
             status  => '200 OK',
             headers => { Location => '' },
-            data     =>'[{"info":"EVENT 2 INFORMATION","description":"DESCRIPTION"}, {"info":"EVENT 4 INFORMATION","description":"DESCRIPTION_"}]',
+            data     =>'[{"info":"RESOURCE 2 INFORMATION","description":"DESCRIPTION"}, {"info":"RESOURCE 4 INFORMATION","description":"DESCRIPTION_"}]',
         },
     },
 

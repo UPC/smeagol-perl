@@ -1,10 +1,10 @@
 [
-    {    # Consultar event
+    {    # Consultar llistat events
         num        => 1,
-        desc    => 'Consulta un event',
-        call    => 'TestGetEvent',
+        desc    => 'Consulta llistat buit',
+        call    => 'TestGetEmptyEventList',
         op      => 'GET',
-        uri     => \&generated_uri,
+        uri     => \&event_uri,
         input     => '',
         output     => {
             status  => '200 OK',
@@ -13,10 +13,10 @@
         },
     },
     
-    {    # Crear un nou event
+    {    # Crear un nou event incorrecte
         num        => 2,
         desc    => 'Crea un nou event',
-        call    => 'TestCreateEvent',
+        call    => 'TestCreateInvalidEvent',
         op      => 'POST',
         uri     => '/event',
         input     => {
@@ -48,7 +48,7 @@
             data     => '[]',
         },
     },
-    {    # Consultar event
+    {    # Consultar un event 
         num        => 4,
         desc    => 'Consulta un event',
         call    => 'TestGetEvent',
@@ -61,8 +61,21 @@
             data     =>'{"info":"EVENT 1 INFORMATION","description":"DESCRIPTION","starts":"2011-02-16T04:00:00","ends":"2011-02-16T05:00:00"}',
         },
     },
-    {    # Actualitza event
+    {    # Consultar llistat de events
         num        => 5,
+        desc    => 'Consulta un llistat de events',
+        call    => 'TestGetNotEmptyEventList',
+        op      => 'GET',
+        uri     => \&event_uri,
+        input     => '',
+        output     => {
+            status  => '200 OK',
+            headers => { Location => '' },
+            data     =>'[{"info":"EVENT 1 INFORMATION","description":"DESCRIPTION","starts":"2011-02-16T04:00:00","ends":"2011-02-16T05:00:00"}]',
+        },
+    },
+    {    # Actualitza event
+        num        => 6,
         desc    => 'Actualitza un event',
         call    => 'TestUpdateEvent',
         op      => 'PUT',
@@ -80,7 +93,7 @@
         },
     },
     {    # Consultar event
-        num        => 6,
+        num        => 7,
         desc    => 'Consulta un event',
         call    => 'TestGetEvent',
         op      => 'GET',
@@ -93,7 +106,7 @@
         },
     },
     {    # Esborra event
-        num        => 7,
+        num        => 8,
         desc    => 'Esborra un event',
         call    => 'TestDeleteEvent',
         op      => 'DELETE',
@@ -105,10 +118,23 @@
             data     =>'[]',
         },
     },
+    {    # Consultar llistat buit
+        num        => 9,
+        desc    => 'Consulta un llistat buit',
+        call    => 'TestGetEmptyEventList',
+        op      => 'GET',
+        uri     => \&event_uri,
+        input     => '',
+        output     => {
+            status  => '200 OK',
+            headers => { Location => '' },
+            data     =>'[]',
+        },
+    },
     {    # Consultar event
-        num        => 8,
-        desc    => 'Consulta un event',
-        call    => 'TestGetEvent',
+        num        => 10,
+        desc    => 'Consulta un event esborrat',
+        call    => 'TestGetEventNotFound',
         op      => 'GET',
         uri     => \&generated_uri,
         input     => '',
@@ -119,9 +145,9 @@
         },
     },
     {    # Actualitza event
-        num        => 9,
-        desc    => 'Actualitza un event',
-        call    => 'TestUpdateEvent',
+        num        => 11,
+        desc    => 'Actualitza un event esborrat',
+        call    => 'TestUpdateEventNotFound',
         op      => 'PUT',
         uri     => \&generated_uri,
         input     => {
@@ -137,7 +163,7 @@
         },
     },
     {    # Crear un nou event
-        num        => 10,
+        num        => 12,
         desc    => 'Crea un nou event',
         call    => 'TestCreateEvent',
         op      => 'POST',
@@ -155,7 +181,7 @@
         },
     },
     {    # Crear un nou event
-        num        => 11,
+        num        => 13,
         desc    => 'Crea un nou event',
         call    => 'TestCreateEvent',
         op      => 'POST',
@@ -171,9 +197,22 @@
             headers => { Location => qr{/event/\d+} },
             data     => '[]',
         },
-    },   
+    },
+    {    # Consultar llistat de events
+        num        => 14,
+        desc    => 'Consulta un llistat de events',
+        call    => 'TestGetNotEmptyListEvent',
+        op      => 'GET',
+        uri     => \&event_uri,
+        input     => '',
+        output     => {
+            status  => '200 OK',
+            headers => { Location => '' },
+            data     =>'[{"info":"EVENT 2 INFORMATION","description":"DESCRIPTION","starts":"2011-02-16T04:00:00","ends":"2011-02-16T05:00:00"}, {"info":"EVENT 3 INFORMATION","description":"DESCRIPTION_","starts":"2011-02-16T04:00:00","ends":"2011-02-16T05:00:00"}]',
+        },
+    },
     {    # Actualitza event
-        num        => 12,
+        num        => 15,
         desc    => 'Actualitza un event',
         call    => 'TestUpdateEvent',
         op      => 'PUT',
@@ -191,9 +230,9 @@
         },
     },
     {    # Actualitza event
-        num        => 13,
-        desc    => 'Actualitza un event',
-        call    => 'TestUpdateEvent',
+        num        => 16,
+        desc    => 'Actualitza incorrectament un event',
+        call    => 'TestUpdateEventInvalid',
         op      => 'PUT',
         uri     => \&generated_uri,
         input     => {
@@ -209,9 +248,9 @@
         },
     },   
     {    # Actualitza event
-        num        => 14,
-        desc    => 'Actualitza un event',
-        call    => 'TestUpdateEvent',
+        num        => 17,
+        desc    => 'Actualitza incorrectament un event',
+        call    => 'TestUpdateEventInvalid',
         op      => 'PUT',
         uri     => \&generated_uri,
         input     => {
@@ -227,7 +266,7 @@
         },
     }, 
     {    # Esborra event
-        num        => 15,
+        num        => 18,
         desc    => 'Esborra un event',
         call    => 'TestDeleteEvent',
         op      => 'DELETE',
@@ -239,10 +278,23 @@
             data     =>'[]',
         },
     },
+    {    # Consultar llistat de events
+        num        => 19,
+        desc    => 'Consulta un llistat de events',
+        call    => 'TestGetNotEmptyListEvent',
+        op      => 'GET',
+        uri     => \&event_uri,
+        input     => '',
+        output     => {
+            status  => '200 OK',
+            headers => { Location => '' },
+            data     =>'[{"info":"EVENT 2 INFORMATION","description":"DESCRIPTION","starts":"2011-02-16T04:00:00","ends":"2011-02-16T05:00:00"}]',
+        },
+    },
     {    # Esborra event
-        num        => 16,
-        desc    => 'Esborra un event',
-        call    => 'TestDeleteEvent',
+        num        => 20,
+        desc    => 'Esborra un event ja esborrat',
+        call    => 'TestDeleteEventNotFound',
         op      => 'DELETE',
         uri     => \&generated_uri,
         input     => '',
@@ -253,9 +305,9 @@
         },
     },
     {    # Consultar event
-        num        => 17,
-        desc    => 'Consulta un event',
-        call    => 'TestGetEvent',
+        num        => 21,
+        desc    => 'Consulta un event ja esborrat',
+        call    => 'TestGetEventNotFound',
         op      => 'GET',
         uri     => \&generated_uri,
         input     => '',
@@ -266,7 +318,7 @@
         },
     },  
     {    # Crear un nou event
-        num        => 18,
+        num        => 22,
         desc    => 'Crea un nou event',
         call    => 'TestCreateEvent',
         op      => 'POST',
@@ -284,7 +336,7 @@
         },
     },
     {    # Crear un nou event
-        num        => 19,
+        num        => 23,
         desc    => 'Crea un nou event',
         call    => 'TestCreateEvent',
         op      => 'POST',
@@ -301,5 +353,18 @@
             data     => '[]',
         },
     },
-
+    {    # Consultar llistat events
+        num        => 24,
+        desc    => 'Consulta un llistat de events',
+        call    => 'TestGeNotEmptyEventList',
+        op      => 'GET',
+        uri     => \&event_uri,
+        input     => '',
+        output     => {
+            status  => '200 OK',
+            headers => { Location => '' },
+            data     =>'[{"info":"EVENT 2 INFORMATION","description":"DESCRIPTION","starts":"2011-02-16T04:00:00","ends":"2011-02-16T05:00:00"}, {"info":"EVENT 4 INFORMATION","description":"DESCRIPTION_","starts":"2011-02-16T04:00:00","ends":"2011-02-16T05:00:00"}, {"info":"EVENT 5 INFORMATION","description":"DESCRIPTION_","starts":"2011-02-16T04:00:00","ends":"2011-02-16T05:00:00"}]',
+        },
+    },
 ] 
+

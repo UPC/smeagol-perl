@@ -16,7 +16,7 @@ use Data::Dumper;
 # global variable to store server-generated IDs
 my $GENERATED_RESOURCE_ID;
 
-my @tests = @{ require 'doc/api/Resource.pl' };
+my @tests = @{ require 'doc/api/Resource_v2.pl' };
 
 for my $t (@tests) {
     test_smeagol_resource($t);

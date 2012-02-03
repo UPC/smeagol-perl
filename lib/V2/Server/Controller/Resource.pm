@@ -50,12 +50,12 @@ sub default_GET {
 sub get_resource : Private {
     my ( $self, $c, $id ) = @_;
     my $resource = $c->model('DB::TResource')->find( { id => $id } );
+	my @message;
 
     if ( !$resource ) {
-
-        my @message
-            = { message => "We can't find what you are looking for." };
+		#TODO: message: Resource no trobat.
         $c->stash->{content}  = \@message;
+        
         $c->stash->{template} = 'old_not_found.tt';
         $c->response->status(404);
     }
@@ -64,9 +64,6 @@ sub get_resource : Private {
             id          => $resource->id,
             description => decode( $enc, $resource->description ),
             info        => decode( $enc, $resource->info ),
-
-            #tags        => $resource->tag_list,
-            #bookings    => $resource->book_list
         };
 
         $c->stash->{resource} = $res;
@@ -95,12 +92,10 @@ sub resource_list : Private {
 sub default_POST {
     my ( $self, $c, $id ) = @_;
     my $req = $c->request;
+    my @message;
 
     my $descr = $req->parameters->{description};
     my $info  = $req->parameters->{info};
-
-    my $tags_aux = $req->parameters->{tags};
-    my @tags = split( /,/, $tags_aux ) if defined $tags_aux;
 
     $c->visit( '/check/check_resource', [ $info, $descr ] );
 
@@ -122,41 +117,17 @@ sub default_POST {
         $new_resource->info($info);
         $new_resource->insert;
 
-#Buscarem si els tags ja existeixen, en cas de no existir els crearem
-#Cal omplir DB::ResourceTag per a establir la relació entre els tags i els recursos
-
-        my $TagID;
-
-        foreach (@tags) {
-            $TagID = $c->model('DB::TTag')->find( { id => $_ } );
-
-            if ($TagID) {
-
-         #Si el tag existeix, fem constar a ResourceTag la relació recurs-tag
-                my $ResTag = $c->model('DB::TResourceTag')->find_or_new();
-                $ResTag->resource_id( $new_resource->id );
-                $ResTag->tag_id( $TagID->id );
-                $ResTag->insert;
-
-            }
-            else {
-
-                #Si el tag no existeix, el creem i repetim com a dalt
-                $c->detach( '/bad_request', [] );
-            }
-        }
-
 #Un cop tenim el tema dels tags aclarit, muntem el json amb les dades del recurs
         my $resource = {
             id          => $new_resource->id,
             description => decode( $enc, $new_resource->description ),
             info        => decode( $enc, $new_resource->info ),
-            tags        => $new_resource->tag_list,
         };
 
+		#TODO: message: Resource creat amb exit.
         $c->stash->{resource} = $resource;
-        $c->stash->{content}  = $resource;
-        $c->response->status(201);
+        $c->stash->{content}  = \@message;
+		$c->response->status(201);
         $c->response->content_type('text/html');
         $c->response->header(
             'Location' => $c->uri_for( $c->action, $new_resource->id ) );
@@ -164,11 +135,8 @@ sub default_POST {
     }
     else {
         if ( $c->stash->{conflict} ) {
-            my @message
-                = { message =>
-                    "Error: A resource with the same description already exist",
-                };
-            $c->stash->{content} = \@message;
+            #TODO: message: Descripcio ja en us
+			$c->stash->{content} = \@message;
             $c->response->status(409);
             $c->stash->{error}
                 = "Error: A resource with the same description already exist";
@@ -176,10 +144,6 @@ sub default_POST {
             $c->stash->{template} = 'resource/get_list.tt';
         }
         else {
-            my @message
-                = { message =>
-                    "Error: Check the info and description of the resource",
-                };
             $c->stash->{content} = \@message;
             $c->response->status(400);
             $c->stash->{error}
@@ -193,12 +157,10 @@ sub default_POST {
 sub default_PUT {
     my ( $self, $c, $id ) = @_;
     my $req = $c->request;
+    my @message;
 
     my $descr = $req->parameters->{description};
-
-    my $tags_aux = $req->parameters->{tags};
     my $info     = $req->parameters->{info};
-    my @tags     = split( /,/, $tags_aux ) if defined $tags_aux;
 
     my $resource = $c->model('DB::TResource')->find( { id => $id } );
 
@@ -218,50 +180,20 @@ sub default_PUT {
             $resource->info($info);
             $resource->update;
 
-            my $TagID;
-
-            my @old_tags = $c->model('DB::TResourceTag')
-                ->search( { resource_id => $id } );
-
-            foreach (@old_tags) {
-                $_->delete;
-            }
-
-            foreach (@tags) {
-                $TagID = $c->model('DB::TTag')->find( { id => $_ } );
-
-                if ($TagID) {
-
-         #Si el tag existeix, fem constar a ResourceTag la relació recurs-tag
-                    my $ResTag = $c->model('DB::TResourceTag')->find_or_new();
-                    $ResTag->resource_id( $resource->id );
-                    $ResTag->tag_id( $TagID->id );
-                    $ResTag->insert;
-
-                }
-                else {
-                    $c->detach( '/bad_request', [] );
-                }
-
-            }
-
             my @resource = {
                 id          => $resource->id,
                 description => decode( $enc, $resource->description ),
                 info        => decode( $enc, $resource->info ),
-                tags        => $resource->tag_list,
             };
 
+			#TODO: message: Resource actualitzat amb èxit.
             $c->stash->{resource} = \@resource;
-            $c->stash->{content}  = \@resource;
+            $c->stash->{content}  = \@message;
             $c->response->status(200);
         }
         else {
             if ( $c->stash->{conflict} ) {
-                my @message
-                    = { message =>
-                        "Error: A resource with the same description already exist",
-                    };
+                #TODO: message: Descripcio ja en us
                 $c->stash->{content} = \@message;
                 $c->response->status(409);
                 $c->stash->{error}
@@ -270,10 +202,7 @@ sub default_PUT {
                 $c->stash->{template} = 'resource/get_list.tt';
             }
             else {
-                my @message
-                    = { message =>
-                        "Error: Check the info and description of the resource",
-                    };
+				#TODO: message: Descripcio o info incorrectes
                 $c->stash->{content} = \@message;
                 $c->response->status(400);
                 $c->stash->{error}
@@ -284,9 +213,8 @@ sub default_PUT {
         }
     }
     else {
-        my @message
-            = { message => "We can't find what you are looking for." };
-        $c->stash->{content}  = \@message;
+       	#TODO: message: Resource no trobat.
+        $c->stash->{content} = \@message;
         $c->stash->{template} = 'old_not_found.tt';
         $c->response->content_type('text/html');
         $c->response->status(404);
@@ -299,24 +227,20 @@ sub default_DELETE {
     my $req = $c->request;
 
     my $resource_aux = $c->model('DB::TResource')->find( { id => $id } );
+	my @message;
 
     if ($resource_aux) {
 
-# 	 my @res_tag = $c->model('DB::TResourceTag')->search( {resource_id => $id} );
-#
-# 	 foreach (@res_tag) {
-# 	      $_->delete;
-# 	 }
-
         $resource_aux->delete;
 
-        $c->forward( 'resource_list', [] );
+		#TODO: message: Resource esborrat amb èxit.
+        $c->stash->{content}  = \@message;
     }
     else {
 
-        my @message
-            = { message => "We can't find what you are looking for." };
+		#TODO: message: Resource no trobat.
         $c->stash->{content}  = \@message;
+
         $c->stash->{template} = 'old_not_found.tt';
         $c->response->status(404);
     }

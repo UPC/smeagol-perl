@@ -5,7 +5,7 @@ use warnings;
 use utf8::all;
 
 use Test::More;
-use HTTP::Request::Common::Bug65843 qw( GET POST PUT DELETE );
+use HTTP::Request::Common qw( GET POST PUT DELETE );
 use HTTP::Status qw(:constants :is status_message);
 use Data::Dumper::Simple;
 use JSON;
@@ -28,34 +28,49 @@ sub generated_resource_id {
 }
 
 sub generated_uri {
-    return
-        defined $GENERATED_RESOURCE_ID
-        ? qq{/resource/$GENERATED_RESOURCE_ID}
-        : qq{/resource/};
+    return qq{/resource/$GENERATED_RESOURCE_ID};
 }
 
-#
-# TESTS FORMAT DESCRIPTION
-#
-# Every test is defined by the following structure. Note that
+# Every test is defined by the following structure. Note that 
 # several fields ('body', for instance) are optional in some tests.
 #
-# Note that response header values are references to routines returning regexes.
-#
 # {
-#   titol   => 'SomeTestTitle',
-#   op      => HTTP method name (ex: 'GET', 'POST', 'PUT', 'DELETE'),
-#   uri     => reference to some routine which builds the request url (ex: \&generated_uri),
-#   entrada => { param1 => val1, param2 => val2, ... },
+#   titol   => 'SomeTest',   
+#   op      => operador ('GET', 'POST', 'PUT', 'DELETE'),
+#   uri     => la url (p.ex. /resource/NN),
+#   entrada => [ nom_parametre1 => val, nom_param2 => val2, ... ],
 #   sortida => {
-#                 status => HTTP status code + message (ex: '201 Created'),
-#                 headers => { header1 => sub { qr{regex1} }, ... },
-#                 body => a (possibly empty) valid json string
+#                 status => HTTP status code + message (p.ex. '201 Created'),
+#                 headers => { header1 => val1, ... },
+#                 body => json string
 #              },
 # }
 
-# slurp resource test collection
-my @tests = @{ require 'doc/api/test_Resource.pl' };
+my @tests = (
+    {   titol   => 'CreaRecurs',
+        op      => 'POST',
+        uri     => sub {'/resource'},
+        entrada => {
+            description => 'aula',
+            info        => 'resource info',
+        },
+        sortida => {
+            status  => HTTP_CREATED . ' ' . status_message(HTTP_CREATED),
+            headers => { Location => \&generated_resource_id },
+        },
+    },
+
+    {   titol   => 'ConsultaRecurs',
+        op      => 'GET',
+        uri     => \&generated_uri,
+        entrada => {},
+        sortida => {
+            status  => HTTP_OK . ' ' . status_message(HTTP_OK),
+            headers => {},
+            body    => { description => 'aula', info => 'resource info' }
+        }
+    }
+);
 
 my %helpers = (
     GET    => \&consulta_recurs,
@@ -82,45 +97,33 @@ sub test_smeagol_resource {
     my $result = $sub->(%$args);
 
     like( generated_uri(), qr{/resource/\d+},
-        $test->{titol} . ": id ben format" )
-        if defined $GENERATED_RESOURCE_ID;
+        $test->{titol} . ": id ben format" );
 
     is( $result->code . ' ' . $result->message,
         $test->{sortida}{status},
         $test->{titol} . ': response status'
     );
 
-    foreach ( keys %{ $test->{sortida}{headers} } ) {
-        if ( $result->header($_) ) {
-            like(
-                $result->header($_),
-                $test->{sortida}{headers}{$_}->(),
-                $test->{titol} . ": '$_' header does not match"
-            );
-        }
-        else {
-            fail( $test->{titol} . ": '$_' header should be returned" );
-        }
+    if ( $result->header('Location') ) {
+        like(
+            $result->header('Location'),
+            $test->{sortida}{headers}{Location}->(),
+            $test->{titol} . ': resource location header'
+        );
     }
 
-    if (   exists $test->{sortida}{body}
-        && defined $test->{sortida}{body}
-        && $test->{sortida}{body} ne '' )
-    {
-        $test->{sortida}{body}{id} = $GENERATED_RESOURCE_ID
-            if defined $GENERATED_RESOURCE_ID;
-        my $got = decode_json( $result->content );
-        is_deeply( $got, $test->{sortida}{body},
-                  $test->{titol}
-                . ': response content '
-                . Dumper($got)
-                . ' expected: '
-                . Dumper( $test->{sortida}{body} ) );
+    if ( exists $test->{sortida}{body} ) {
+        $test->{sortida}{body}{id} = $GENERATED_RESOURCE_ID;
+        is_deeply(
+            decode_json( $result->content ),
+            $test->{sortida}{body},
+            $test->{titol} . ': response content'
+        );
     }
 }
 
 sub llista_ids {
-    my $rp = request( GET '/resource' );
+    my $rp = request( GET('/resource') );
 
     return parse_resource_ids( $rp->content );
 }
@@ -139,7 +142,10 @@ sub crea_recurs {
     my $lc = List::Compare->new( \@abans, \@despres );
     my @ids = $lc->get_complement;
 
-    $GENERATED_RESOURCE_ID = $ids[0] if @ids;
+    ok( @ids > 0,
+        $titol . ": obtenir l'identificador del resource acabat de crear" );
+
+    $GENERATED_RESOURCE_ID = $ids[0];
 
     return $rp;
 }
@@ -152,13 +158,7 @@ sub consulta_recurs {
     return $rp;
 }
 
-sub modifica_recurs {
-    my %args = @_;
-    my $uri  = $args{uri};
-
-    my $rp = request( PUT $uri );
-    return $rp;
-}
+sub modifica_recurs { }
 
 sub esborra_recurs { }
 

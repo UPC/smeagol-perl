@@ -32,18 +32,18 @@ requires 'Catalyst::Action::RenderView'     => 0;
 requires 'DateTime::Format::SQLite'         => 0;
 requires 'DateTime::Event::ICal'            => 0;
 requires 'DBD::SQLite'                      => 0;
-requires 'Exception::Class::TryCatch'       => 0;
+requires 'Exception::Class::TryCatch' => 0;
 
-test_requires 'Path::Class'          => 0;
-test_requires 'File::Copy'           => 0;
-test_requires 'Test::More'           => 0;
-test_requires 'Data::Compare'        => 0;
-test_requires 'Test::Pod'            => 0;
-test_requires 'Test::Pod::Coverage'  => 0;
+test_requires 'Path::Class'         => 0;
+test_requires 'File::Copy'          => 0;
+test_requires 'Test::More'          => 0;
+test_requires 'Data::Compare'       => 0;
+test_requires 'Test::Pod'           => 0;
+test_requires 'Test::Pod::Coverage' => 0;
 test_requires 'Data::Dumper::Simple' => 0;
-test_requires 'JSON'                 => 0;
-test_requires 'List::Compare'        => 0;
-test_requires 'utf8::all'            => 0;
+test_requires 'JSON'                => 0;
+test_requires 'List::Compare'       => 0;
+test_requires 'utf8::all'           => 0;
 
 catalyst;
 

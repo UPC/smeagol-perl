@@ -115,8 +115,8 @@ sub hash_event {
         description => $self->description,
         starts      => $self->starts->iso8601(),
         ends        => $self->ends->iso8601(),
-        tags        => $self->tag_list,
-        bookings    => $self->booking_list,
+        #tags        => $self->tag_list,
+        #bookings    => $self->booking_list,
     };
 
     return @event;
@@ -152,3 +152,4 @@ sub booking_list {
 
 # You can replace this text with custom content, and it will be preserved on regeneration
 1;
+

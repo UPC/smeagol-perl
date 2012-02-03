@@ -53,7 +53,18 @@ sub prepare_args {
     $args{args}    = $test->{args}    if defined $test->{args};
     $args{new_ids} = $test->{new_ids} if defined $test->{new_ids};
     $args{status}  = $test->{status}  if defined $test->{status};
-    #$args{result}{id} = (ref $test->{result}->[0]->{id} eq 'CODE') ? $test->{result}->[0]->{id}->() : $test->{result}->[0]->{id};
+    if (exists $test->{result}) {
+        $args{result} = $test->{result};
+        if (ref $args{result} eq 'ARRAY') {
+            foreach my $val ($args{result}) {
+#                if (exists $val->{id}) {
+#                    if (ref $val{id} eq 'CODE') {
+#                        $val{id} = $val{id}->();
+#                    }
+#                }
+            }
+        }
+    }
 
     return %args;
 }

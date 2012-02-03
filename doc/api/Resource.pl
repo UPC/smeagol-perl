@@ -20,6 +20,7 @@
         method => 'GET',
         id     => 123456789,                    # non-existent resource ID
         status => sub { shift->code == HTTP_NOT_FOUND },
+	result => [],
     },
     {   title  => 'CreaRecurs',
         method => 'POST',
@@ -29,6 +30,7 @@
         },
         status  => sub { shift->code == HTTP_CREATED },
         new_ids => 1,
+	result  => [],
     },
     {   title  => 'ConsultaRecurs',
         method => 'GET',

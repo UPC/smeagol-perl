@@ -35,12 +35,13 @@ sub test_smeagol_resource {
 
     my $method = $test->{method};
     my %args   = prepare_args($test);
+    my $expected = delete $args{result};
+
     my $got    = $r->$method(%args);
 
     $GENERATED_RESOURCE_ID = $got if defined $args{new_ids} && $args{new_ids} != 0;
 
-    is_deeply( $got, $test->{result}, $test->{title} . ": result does match" )
-        if defined $test->{result};
+    is_deeply( $got, (ref $got eq 'ARRAY') ? $test->{result} : $test->{result}[0], $test->{title} . ": result does match" );
 }
 
 sub prepare_args {
@@ -57,11 +58,11 @@ sub prepare_args {
         $args{result} = $test->{result};
         if (ref $args{result} eq 'ARRAY') {
             foreach my $val (@{ $args{result} }) {
-#                if (exists $val->{id}) {
-#                    if (ref $val{id} eq 'CODE') {
-#                        $val{id} = $val{id}->();
-#                    }
-#                }
+                if (exists $val->{id}) {
+                    if (ref $val->{id} eq 'CODE') {
+                        $val->{id} = $val->{id}->();
+                    }
+                }
             }
         }
     }

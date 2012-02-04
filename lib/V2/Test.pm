@@ -75,15 +75,15 @@ sub POST {
 	\@_,
         status  => { isa => 'CodeRef', default => \&_default_status },
         args    => { isa => 'ArrayRef | HashRef' },
-	new_ids => { isa => 'Num', default => 1 },
+	    new_ids => { isa => 'Num', default => 1 },
     );
 
     my $uri = $self->uri;
 
     my @new_ids;
     subtest "POST $uri request" => sub {
-        my @before = $self->GET();
-        my $res    = request HTTP_POST( $uri, $params{'args'} );
+        my @before      = $self->GET();
+        my ($res, $ctx) = ctx_request HTTP_POST( $uri, $params{'args'} );
 
         ok( $params{'status'}->($res), "POST $uri successful" );
 
@@ -91,6 +91,25 @@ sub POST {
         @new_ids  = List::Compare->new( \@before, \@after )->get_complement;
 
         ok( @new_ids == $params{'new_ids'}, "POST $uri created @new_ids" );
+
+        SKIP: {
+            skip "Location not expected", 1
+                if $params{'new_ids'} == 0;
+
+            # uri received by server
+            my $server_uri = $ctx->req->uri;
+
+            # make sure that uri ends with slash
+            $server_uri .= '/' unless $server_uri =~ m{/$};
+
+            my $location = $res->header('Location');
+
+            like(
+                $location,
+                qr{^\Q$server_uri\E/*$new_ids[0]$},
+                "Location <$location>",
+            );
+        };
 
         done_testing();
     };

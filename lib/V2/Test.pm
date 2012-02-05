@@ -93,7 +93,7 @@ sub POST {
         ok( @new_ids == $params{'new_ids'}, "POST $uri created @new_ids" );
 
         SKIP: {
-            skip "Location not expected", 1
+            skip "Location header not expected", 2
                 if $params{'new_ids'} == 0;
 
             # uri received by server
@@ -104,10 +104,15 @@ sub POST {
 
             my $location = $res->header('Location');
 
+            ok( defined $location, "Location header present" );
+
+            skip "Location header is undefined", 1
+                unless defined $location;
+
             like(
                 $location,
                 qr{^\Q$server_uri\E/*$new_ids[0]$},
-                "Location <$location>",
+                "Location header value <$location>",
             );
         };
 

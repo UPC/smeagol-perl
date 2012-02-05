@@ -62,7 +62,12 @@ sub GET {
 
         $json = decode_json( $res->content );
 
-        ok( ref($json) eq 'ARRAY' || ref($json) eq 'HASH', "GET $uri content is json" );
+        ok(
+            exists $params{'id'}  ?
+            ref($json) eq 'HASH' :
+            ref($json) eq 'ARRAY',
+            "GET $uri content is API compliant",
+        );
 
         done_testing();
     };
@@ -86,6 +91,9 @@ sub POST {
         my ($res, $ctx) = ctx_request HTTP_POST( $uri, $params{'args'} );
 
         ok( $params{'status'}->($res), "POST $uri successful" );
+
+        my $json = decode_json( $res->content );
+        ok( ref($json) eq 'ARRAY', "POST $uri content is API compliant" );
 
         my @after = $self->GET();
         @new_ids  = List::Compare->new( \@before, \@after )->get_complement;
@@ -136,6 +144,9 @@ sub PUT {
 
         ok( $params{'status'}->($res), "PUT $uri successful" );
         
+        my $json = decode_json( $res->content );
+        ok( ref($json) eq 'ARRAY', "PUT $uri content is API compliant" );
+
         done_testing();
     };
 
@@ -157,6 +168,9 @@ sub DELETE {
 
         ok( $params{'status'}->($res), "DELETE $uri successful" );
         
+        my $json = decode_json( $res->content );
+        ok( ref($json) eq 'ARRAY', "DELETE $uri content is API compliant" );
+
         done_testing();
     };
 

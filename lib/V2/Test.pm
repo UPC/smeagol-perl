@@ -49,6 +49,7 @@ sub GET {
 	\@_,
         id     => { isa => 'Str', optional => 1 },
         status => { isa => 'CodeRef', default => \&_default_status },
+        result => { isa => 'ArrayRef | HashRef', optional => 1 },
     );
 
     my $uri  = $self->uri;
@@ -63,11 +64,18 @@ sub GET {
         $json = decode_json( $res->content );
 
         ok(
-            exists $params{'id'}  ?
+            exists $params{'id'} ?
             ref($json) eq 'HASH' :
             ref($json) eq 'ARRAY',
             "GET $uri content is API compliant",
         );
+
+        SKIP: {
+            skip "Expected result not provided", 1
+                unless exists $params{'result'};
+
+            is_deeply( $json, $params{'result'}, "Same result as expected" );
+        };
 
         done_testing();
     };
@@ -80,7 +88,8 @@ sub POST {
 	\@_,
         status  => { isa => 'CodeRef', default => \&_default_status },
         args    => { isa => 'ArrayRef | HashRef' },
-	    new_ids => { isa => 'Num', default => 1 },
+        new_ids => { isa => 'Num', default => 1 },
+        result  => { isa => 'ArrayRef', default => [] },
     );
 
     my $uri = $self->uri;
@@ -94,6 +103,7 @@ sub POST {
 
         my $json = decode_json( $res->content );
         ok( ref($json) eq 'ARRAY', "POST $uri content is API compliant" );
+        is_deeply( $json, $params{'result'}, "Same result as expected" );
 
         my @after = $self->GET();
         @new_ids  = List::Compare->new( \@before, \@after )->get_complement;
@@ -136,6 +146,7 @@ sub PUT {
         id      => { isa => 'Str' },
         status  => { isa => 'CodeRef', default => \&_default_status },
         args    => { isa => 'ArrayRef | HashRef' },
+        result  => { isa => 'ArrayRef', default => [] },
     );
     my $uri  = $self->uri . "/$params{'id'}";
 
@@ -146,6 +157,7 @@ sub PUT {
         
         my $json = decode_json( $res->content );
         ok( ref($json) eq 'ARRAY', "PUT $uri content is API compliant" );
+        is_deeply( $json, $params{'result'}, "Same result as expected" );
 
         done_testing();
     };
@@ -158,6 +170,7 @@ sub DELETE {
 	\@_,
         id      => { isa => 'Str' },
         status  => { isa => 'CodeRef', default => \&_default_status },
+        result  => { isa => 'ArrayRef', default => [] },
     );
 
     my $uri  = $self->uri;
@@ -170,6 +183,7 @@ sub DELETE {
         
         my $json = decode_json( $res->content );
         ok( ref($json) eq 'ARRAY', "DELETE $uri content is API compliant" );
+        is_deeply( $json, $params{'result'}, "Same result as expected" );
 
         done_testing();
     };

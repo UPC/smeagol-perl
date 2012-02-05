@@ -1,5 +1,41 @@
 package V2::Test;
 
+=head1 NAME
+
+V2::Test - V2::Server tests made easy
+
+=head1 SYNOPSIS
+
+Test server API thoroughly and make easy to test its funcionality:
+
+    my $tag = V2::Test->new( uri => '/tag' );
+    
+    my $new_tag_id = $tag->POST( args => {
+        id => 'tag-name',
+        description => 'tag-description',
+    } );
+    
+    my $new_tag = $tag->GET( id => $new_tag_id );
+    print $new_tag->{'tag-name'};
+    print $new_tag->{'tag-description'};
+    
+    my @tags = $tag->GET();
+    print @tags;
+
+=head1 DESCRIPTION
+
+The purpose of this module is that unit tests for server can
+forget about API and focus on checking the expected results.
+This module will make sure that the requests to server are
+sent properly and results received match the public API.
+
+Thus, unit tests don't need to check whether the format of
+results is correct according to the public API. They only
+have to check whether they have the expected values after
+server performed the requested operation.
+
+=cut
+
 use Moose;
 use MooseX::Params::Validate qw( validated_hash );
 use Catalyst::Test 'V2::Server';
@@ -44,6 +80,35 @@ sub _default_status {
     return shift->is_success;
 }
 
+=head1 METHODS
+
+=head2 GET
+
+GET method is a read-only method and thus idempotent. It returns
+a list of objects unless B<id> is provided, in which case it will
+return the object matching that.
+
+=head3 Parameters
+
+=over 4
+
+=item * id (Str)
+
+String ID to locate an object.
+
+=item * status (CodeRef)
+
+Code reference that gets a L<HTTP::Status> object and defaults to success.
+
+=item * result (ArrayRef | HashRef)
+
+Array reference (when B<id> is not provided) or hash reference
+(for the provided B<id>) describing the expected result.
+
+=back
+
+=cut
+
 sub GET {
     my ( $self, %params ) = validated_hash(
 	\@_,
@@ -82,6 +147,34 @@ sub GET {
 
     return @_ ? $json : _list_of_id(@$json);
 }
+
+=head2 POST
+
+=head3 Parameters
+
+=over 4
+
+=item * args (ArrayRef | HashRef)
+
+Array or hash reference of name/value pairs to pass into
+L<HTTP::Request> object as the form input.
+
+=item * new_ids (Num)
+
+Number of new objects created: 0 if error was being tested and
+1 by default. Higher values are supported but unexpected.
+
+=item * status (CodeRef)
+
+Code reference that gets a L<HTTP::Status> object and defaults to success.
+
+=item * result (ArrayRef)
+
+Array reference describing the expected result.
+
+=back
+
+=cut
 
 sub POST {
     my ( $self, %params ) = validated_hash(
@@ -140,6 +233,33 @@ sub POST {
     return @new_ids[ 0 .. $params{'new_ids'} - 1 ];
 }
 
+=head2 PUT
+
+=head3 Parameters
+
+=over 4
+
+=item * id (Str)
+
+String ID to locate an object.
+
+=item * args (ArrayRef | HashRef)
+
+Array or hash reference of name/value pairs to pass into
+L<HTTP::Request> object as the form input.
+
+=item * status
+
+Code reference that gets a L<HTTP::Status> object and defaults to success.
+
+=item * result
+
+Array reference describing the expected result.
+
+=back
+
+=cut
+
 sub PUT {
     my ( $self, %params ) = validated_hash(
 	\@_,
@@ -164,6 +284,26 @@ sub PUT {
 
     return;
 }
+
+=head2 DELETE
+
+=head3 Parameters
+
+=over 4
+
+=item * id (Str)
+
+=item * status (CodeRef)
+
+Code reference that gets a L<HTTP::Status> object and defaults to success.
+
+=item * result (ArrayRef)
+
+Array reference describing the expected result.
+
+=back
+
+=cut
 
 sub DELETE {
     my ( $self, %params ) = validated_hash(

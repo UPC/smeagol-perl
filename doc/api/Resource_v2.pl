@@ -36,23 +36,29 @@
         method => 'GET',
         id     => \&get_generated_id,
         status => sub { shift->code == HTTP_OK },
-        result => [{
+        result => {
             id          => \&get_generated_id,
             description => 'aula',
             info        => 'resource info',
-            }]
+        }
     },
-
-    #    {   title  => 'ModificaRecurs',
-    #        method => 'PUT',
-    #        id     => get_generated_resource_id(),
-    #        args   => {
-    #            description => 'aula (modif)',
-    #            info        => 'resource info (modif)',
-    #        },
-    #        sortida => {
-    #            status  => HTTP_OK . ' ' . status_message(HTTP_OK),
-    #            headers => {},
-    #        }
-    #    }
+    {   title  => 'ModificaRecurs',
+        method => 'PUT',
+        id     => \&get_generated_id,
+        args   => {
+            description => 'aula (modif)',
+            info        => 'resource info (modif)',
+        },
+        status => sub { shift->code == HTTP_OK },
+    },
+    {   title  => 'ConsultaRecursModificat',
+        method => 'GET',
+        id     => \&get_generated_id,
+        status => sub { shift->code == HTTP_OK },
+        result => {
+            id          => \&get_generated_id,
+            description => 'aula (modif)',
+            info        => 'resource info (modif)',
+        }
+    },
 ]

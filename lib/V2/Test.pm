@@ -1,5 +1,41 @@
 package V2::Test;
 
+=head1 NAME
+
+V2::Test - V2::Server tests made easy
+
+=head1 SYNOPSIS
+
+Test server API thoroughly and make easy to test its funcionality:
+
+    my $tag = V2::Test->new( uri => '/tag' );
+    
+    my $new_tag_id = $tag->POST( args => {
+        id => 'tag-name',
+        description => 'tag-description',
+    } );
+    
+    my $new_tag = $tag->GET( id => $new_tag_id );
+    print $new_tag->{'tag-name'};
+    print $new_tag->{'tag-description'};
+    
+    my @tags = $tag->GET();
+    print @tags;
+
+=head1 DESCRIPTION
+
+The purpose of this module is that unit tests for server can
+forget about API and focus on checking the expected results.
+This module will make sure that the requests to server are
+sent properly and results received match the public API.
+
+Thus, unit tests don't need to check whether the format of
+results is correct according to the public API. They only
+have to check whether they have the expected values after
+server performed the requested operation.
+
+=cut
+
 use Moose;
 use MooseX::Params::Validate qw( validated_hash );
 use Catalyst::Test 'V2::Server';
@@ -44,11 +80,41 @@ sub _default_status {
     return shift->is_success;
 }
 
+=head1 METHODS
+
+=head2 GET
+
+GET method is a read-only method and thus idempotent. It returns
+a list of objects unless B<id> is provided, in which case it will
+return the object matching that.
+
+=head3 Parameters
+
+=over 4
+
+=item * id (Str)
+
+String ID to locate an object.
+
+=item * status (CodeRef)
+
+Code reference that gets a L<HTTP::Status> object and defaults to success.
+
+=item * result (ArrayRef | HashRef)
+
+Array reference (when B<id> is not provided) or hash reference
+(for the provided B<id>) describing the expected result.
+
+=back
+
+=cut
+
 sub GET {
     my ( $self, %params ) = validated_hash(
 	\@_,
         id     => { isa => 'Str', optional => 1 },
         status => { isa => 'CodeRef', default => \&_default_status },
+        result => { isa => 'ArrayRef | HashRef', optional => 1 },
     );
 
     my $uri  = $self->uri;
@@ -62,7 +128,19 @@ sub GET {
 
         $json = decode_json( $res->content );
 
-        ok( ref($json) eq 'ARRAY' || ref($json) eq 'HASH', "GET $uri content is json" );
+        ok(
+            exists $params{'id'} ?
+            ref($json) eq 'HASH' :
+            ref($json) eq 'ARRAY',
+            "GET $uri content is API compliant",
+        );
+
+        SKIP: {
+            skip "Expected result not provided", 1
+                unless exists $params{'result'};
+
+            is_deeply( $json, $params{'result'}, "Same result as expected" );
+        };
 
         done_testing();
     };
@@ -70,27 +148,84 @@ sub GET {
     return @_ ? $json : _list_of_id(@$json);
 }
 
+=head2 POST
+
+=head3 Parameters
+
+=over 4
+
+=item * args (ArrayRef | HashRef)
+
+Array or hash reference of name/value pairs to pass into
+L<HTTP::Request> object as the form input.
+
+=item * new_ids (Num)
+
+Number of new objects created: 0 if error was being tested and
+1 by default. Higher values are supported but unexpected.
+
+=item * status (CodeRef)
+
+Code reference that gets a L<HTTP::Status> object and defaults to success.
+
+=item * result (ArrayRef)
+
+Array reference describing the expected result.
+
+=back
+
+=cut
+
 sub POST {
     my ( $self, %params ) = validated_hash(
 	\@_,
         status  => { isa => 'CodeRef', default => \&_default_status },
         args    => { isa => 'ArrayRef | HashRef' },
-	new_ids => { isa => 'Num', default => 1 },
+        new_ids => { isa => 'Num', default => 1 },
+        result  => { isa => 'ArrayRef', default => [] },
     );
 
     my $uri = $self->uri;
 
     my @new_ids;
     subtest "POST $uri request" => sub {
-        my @before = $self->GET();
-        my $res    = request HTTP_POST( $uri, $params{'args'} );
+        my @before      = $self->GET();
+        my ($res, $ctx) = ctx_request HTTP_POST( $uri, $params{'args'} );
 
         ok( $params{'status'}->($res), "POST $uri successful" );
+
+        my $json = decode_json( $res->content );
+        ok( ref($json) eq 'ARRAY', "POST $uri content is API compliant" );
+        is_deeply( $json, $params{'result'}, "Same result as expected" );
 
         my @after = $self->GET();
         @new_ids  = List::Compare->new( \@before, \@after )->get_complement;
 
         ok( @new_ids == $params{'new_ids'}, "POST $uri created @new_ids" );
+
+        SKIP: {
+            skip "Location header not expected", 2
+                if $params{'new_ids'} == 0;
+
+            # uri received by server
+            my $server_uri = $ctx->req->uri;
+
+            # make sure that uri ends with slash
+            $server_uri .= '/' unless $server_uri =~ m{/$};
+
+            my $location = $res->header('Location');
+
+            ok( defined $location, "Location header present" );
+
+            skip "Location header is undefined", 1
+                unless defined $location;
+
+            like(
+                $location,
+                qr{^\Q$server_uri\E/*$new_ids[0]$},
+                "Location header value <$location>",
+            );
+        };
 
         done_testing();
     };
@@ -98,12 +233,40 @@ sub POST {
     return @new_ids[ 0 .. $params{'new_ids'} - 1 ];
 }
 
+=head2 PUT
+
+=head3 Parameters
+
+=over 4
+
+=item * id (Str)
+
+String ID to locate an object.
+
+=item * args (ArrayRef | HashRef)
+
+Array or hash reference of name/value pairs to pass into
+L<HTTP::Request> object as the form input.
+
+=item * status
+
+Code reference that gets a L<HTTP::Status> object and defaults to success.
+
+=item * result
+
+Array reference describing the expected result.
+
+=back
+
+=cut
+
 sub PUT {
     my ( $self, %params ) = validated_hash(
 	\@_,
         id      => { isa => 'Str' },
         status  => { isa => 'CodeRef', default => \&_default_status },
         args    => { isa => 'ArrayRef | HashRef' },
+        result  => { isa => 'ArrayRef', default => [] },
     );
     my $uri  = $self->uri . "/$params{'id'}";
 
@@ -112,17 +275,42 @@ sub PUT {
 
         ok( $params{'status'}->($res), "PUT $uri successful" );
         
+        my $json = decode_json( $res->content );
+        ok( ref($json) eq 'ARRAY', "PUT $uri content is API compliant" );
+        is_deeply( $json, $params{'result'}, "Same result as expected" );
+
         done_testing();
     };
 
     return;
 }
 
+=head2 DELETE
+
+=head3 Parameters
+
+=over 4
+
+=item * id (Str)
+
+=item * status (CodeRef)
+
+Code reference that gets a L<HTTP::Status> object and defaults to success.
+
+=item * result (ArrayRef)
+
+Array reference describing the expected result.
+
+=back
+
+=cut
+
 sub DELETE {
     my ( $self, %params ) = validated_hash(
 	\@_,
         id      => { isa => 'Str' },
         status  => { isa => 'CodeRef', default => \&_default_status },
+        result  => { isa => 'ArrayRef', default => [] },
     );
 
     my $uri  = $self->uri;
@@ -133,6 +321,10 @@ sub DELETE {
 
         ok( $params{'status'}->($res), "DELETE $uri successful" );
         
+        my $json = decode_json( $res->content );
+        ok( ref($json) eq 'ARRAY', "DELETE $uri content is API compliant" );
+        is_deeply( $json, $params{'result'}, "Same result as expected" );
+
         done_testing();
     };
 

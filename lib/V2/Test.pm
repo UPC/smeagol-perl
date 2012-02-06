@@ -121,15 +121,17 @@ sub GET {
     $uri    .= "/$params{'id'}" if exists $params{'id'};
 
     my $json;
+    my $get_id_success;
     subtest "GET $uri request" => sub {
         my $res  = request HTTP_GET($uri);
 
-        ok( $params{'status'}->($res), "GET $uri successful" );
+        ok( $params{'status'}->($res), "GET $uri status" );
 
-        $json = decode_json( $res->content );
+        $json           = decode_json( $res->content );
+        $get_id_success = exists $params{'id'} && $res->is_success;
 
         ok(
-            exists $params{'id'} ?
+            $get_id_success ?
             ref($json) eq 'HASH' :
             ref($json) eq 'ARRAY',
             "GET $uri content is API compliant",
@@ -145,7 +147,7 @@ sub GET {
         done_testing();
     };
 
-    return @_ ? $json : _list_of_id(@$json);
+    return $get_id_success ? $json : _list_of_id(@$json);
 }
 
 =head2 POST
@@ -192,18 +194,22 @@ sub POST {
         my @before      = $self->GET();
         my ($res, $ctx) = ctx_request HTTP_POST( $uri, $params{'args'} );
 
-        ok( $params{'status'}->($res), "POST $uri successful" );
+        my $status = $params{'status'}->($res);
+        ok( $status, "POST $uri status" );
 
         my $json = decode_json( $res->content );
         ok( ref($json) eq 'ARRAY', "POST $uri content is API compliant" );
         is_deeply( $json, $params{'result'}, "Same result as expected" );
 
-        my @after = $self->GET();
-        @new_ids  = List::Compare->new( \@before, \@after )->get_complement;
-
-        ok( @new_ids == $params{'new_ids'}, "POST $uri created @new_ids" );
-
         SKIP: {
+            skip "Unsuccessful request", 3
+                unless $res->is_success;
+
+            my @after = $self->GET();
+            @new_ids  = List::Compare->new( \@before, \@after )->get_complement;
+
+            ok( @new_ids == $params{'new_ids'}, "POST $uri created @new_ids" );
+
             skip "Location header not expected", 2
                 if $params{'new_ids'} == 0;
 
@@ -273,7 +279,7 @@ sub PUT {
     subtest "PUT $uri request" => sub {
         my $res = request HTTP_PUT( $uri, $params{'args'} );
 
-        ok( $params{'status'}->($res), "PUT $uri successful" );
+        ok( $params{'status'}->($res), "PUT $uri status" );
         
         my $json = decode_json( $res->content );
         ok( ref($json) eq 'ARRAY', "PUT $uri content is API compliant" );
@@ -319,7 +325,7 @@ sub DELETE {
     subtest "DELETE $uri request" => sub {
         my $res  = request HTTP_DELETE($uri);
 
-        ok( $params{'status'}->($res), "DELETE $uri successful" );
+        ok( $params{'status'}->($res), "DELETE $uri status" );
         
         my $json = decode_json( $res->content );
         ok( ref($json) eq 'ARRAY', "DELETE $uri content is API compliant" );

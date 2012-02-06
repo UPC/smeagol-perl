@@ -43,10 +43,26 @@ $out = $t->GET( id => $id );
 
 is_deeply( $out, \%tag1, "edit tag1" );
 
+$out = $t->POST(
+    args => \%tag1,
+    status => sub { shift->code == 409 },
+    result => [],
+);
+
+is( $out, undef, 'tag1 conflict' );
+
 $t->DELETE( id => $id );
 
 @tags = $t->GET();
 
 is_deeply( \@tags, [], 'delete gets empty list back' );
+
+@tags = $t->GET(
+    id => $id,
+    status => sub { shift->code == 404 },
+    result => [],
+);
+
+is_deeply( \@tags, [], 'tag1 not found' );
 
 done_testing();

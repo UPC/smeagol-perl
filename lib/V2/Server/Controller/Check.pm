@@ -56,6 +56,17 @@ sub check_desc_tag : Local {
     }
 }
 
+sub check_desc_resource : Local {
+    my ( $self, $c, $desc ) = @_;
+
+    if ( length($desc) > 0 && length($desc) < 256 ) {
+        $c->stash->{desc_ok} = 1;
+    }
+    else {
+        $c->stash->{desc_ok} = 0;
+    }    
+}
+
 sub check_info : Local {
     my ( $self, $c, $info ) = @_;
 
@@ -135,7 +146,7 @@ sub check_resource : Local {
     my ( $self, $c, $info, $description ) = @_;
 
     $c->visit( 'check_info', [$info] );
-    $c->visit( 'check_desc', [$description] );
+    $c->visit( 'check_desc_resource', [$description] );
 
     if ( $c->stash->{info_ok} && $c->stash->{desc_ok} ) {
         $c->stash->{resource_ok} = 1;

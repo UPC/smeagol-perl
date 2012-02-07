@@ -59,7 +59,7 @@ sub check_desc_tag : Local {
 sub check_desc_resource : Local {
     my ( $self, $c, $desc ) = @_;
 
-    if ( length($desc) > 0 && length($desc) < 256 ) {
+    if ( length($desc) >= 1 && length($desc) <= 128 ) {
         $c->stash->{desc_ok} = 1;
     }
     else {

@@ -70,7 +70,7 @@ sub check_desc_resource : Local {
 sub check_info : Local {
     my ( $self, $c, $info ) = @_;
 
-    if ( length($info) < 256 ) {
+    if ( length($info) <= 256 ) {
         $c->stash->{info_ok} = 1;
     }
     else {

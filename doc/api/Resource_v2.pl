@@ -63,7 +63,7 @@
     {   title  => 'CreaRecursDescripcioMassaLlarga',
         method => 'POST',
         args   => {
-            description => 'a' x 129,
+            description => 'a' x 129, # max description length is 128 chars
             info => 'una altra info',
         },
         status => sub { shift->code == HTTP_BAD_REQUEST },
@@ -93,7 +93,16 @@
         method => 'POST',
         args   => {
             description => 'un recurs',
-            info => 'a' x 257, # max len is 256
+            info => 'a' x 257, # max info length is 256 chars
+        },
+        status => sub { shift->code == HTTP_BAD_REQUEST },
+        result => [],
+    },
+    {   title  => 'CreaRecursDescripcioEnBlanc',
+        method => 'POST',
+        args   => {
+            description => '     ', # should not accept blank descriptions
+            info => 'una info',
         },
         status => sub { shift->code == HTTP_BAD_REQUEST },
         result => [],
@@ -117,4 +126,5 @@
             info        => 'resource info (modif)',
         }
     },
+    
 ]

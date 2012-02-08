@@ -32,6 +32,16 @@
         new_ids => 1,
         result  => [],
     },
+    {   title  => 'LlistaDeRecursosNoBuida',
+        method => 'GET',
+        status => sub { shift->code == HTTP_OK },
+        result => [
+            {   "id"          => \&get_generated_id,
+                "description" => "aula",
+                "info"        => "resource info"
+            }
+        ],
+    },
     {   title  => 'ConsultaRecurs',
         method => 'GET',
         id     => \&get_generated_id,
@@ -63,7 +73,7 @@
     {   title  => 'CreaRecursDescripcioMassaLlarga',
         method => 'POST',
         args   => {
-            description => 'a' x 129, # max description length is 128 chars
+            description => 'a' x 129,    # max description length is 128 chars
             info => 'una altra info',
         },
         status => sub { shift->code == HTTP_BAD_REQUEST },
@@ -93,7 +103,7 @@
         method => 'POST',
         args   => {
             description => 'un recurs',
-            info => 'a' x 257, # max info length is 256 chars
+            info        => 'a' x 257,     # max info length is 256 chars
         },
         status => sub { shift->code == HTTP_BAD_REQUEST },
         result => [],
@@ -101,10 +111,20 @@
     {   title  => 'CreaRecursDescripcioEnBlanc',
         method => 'POST',
         args   => {
-            description => '     ', # should not accept blank descriptions
-            info => 'una info',
+            description => '   ',       # should not accept blank descriptions
+            info        => 'una info',
         },
         status => sub { shift->code == HTTP_BAD_REQUEST },
+        result => [],
+    },
+    {   title  => 'ModificaRecursInexistent',
+        method => 'PUT',
+        id     => 12345,
+        args   => {
+            description => 'aula (modif)',
+            info        => 'resource info (modif)',
+        },
+        status => sub { shift->code == HTTP_NOT_FOUND },
         result => [],
     },
     {   title  => 'ModificaRecurs',
@@ -136,6 +156,58 @@
         method => 'DELETE',
         id     => \&get_generated_id,
         status => sub { shift->code == HTTP_OK },
+        result => [],
+    },
+    {   title  => 'ConsultaRecursEsborrat',
+        method => 'GET',
+        id     => \&get_generated_id,
+        status => sub { shift->code == HTTP_NOT_FOUND },
+        result => [],
+    },
+
+ #
+ # The 3 following tests work together to check server does not allow updating
+ # a resource description if there is already another resource with the same
+ # description
+ #
+    {   title  => 'CreaRecursPerConflicteActualitzacio_1',
+        method => 'POST',
+        args   => {
+            description => 'r1',
+            info        => 'r1 info',
+        },
+        status  => sub { shift->code == HTTP_CREATED },
+        new_ids => 1,
+        result  => [],
+    },
+    {   title  => 'CreaRecursPerConflicteActualitzacio_2',
+        method => 'POST',
+        args   => {
+            description => 'r2',
+            info        => 'r2 info',
+        },
+        status  => sub { shift->code == HTTP_CREATED },
+        new_ids => 1,
+        result  => [],
+    },
+    {   title  => 'ModificaRecursConflicteActualitzacio',
+        method => 'PUT',
+        id     => \&get_generated_id,
+        args   => {
+            description => 'r1',    # trying to update r2 with r1's desc
+            info => 'r2 info (updated)',
+        },
+        status => sub { shift->code == HTTP_CONFLICT },
+        result => [],
+    },
+    {   title  => 'ModificaRecursAmbDescripcioNoValida',
+        method => 'PUT',
+        id     => \&get_generated_id,
+        args   => {
+            description => '   ',
+            info        => 'r2 info (updated)',
+        },
+        status => sub { shift->code == HTTP_BAD_REQUEST },
         result => [],
     },
 ]

@@ -126,5 +126,16 @@
             info        => 'resource info (modif)',
         }
     },
-    
+    {   title  => 'EsborraRecursInexistent',
+        method => 'DELETE',
+        id     => 12345,
+        status => sub { shift->code == HTTP_NOT_FOUND },
+        result => [],
+    },
+    {   title  => 'EsborraRecurs',
+        method => 'DELETE',
+        id     => \&get_generated_id,
+        status => sub { shift->code == HTTP_OK },
+        result => [],
+    },
 ]

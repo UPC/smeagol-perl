@@ -49,7 +49,7 @@ sub test_smeagol_resource {
 		    my $i = 0;
 		    
 		    my @output_ = split /,\s+/,$output;
-		  
+		    
 		    foreach (@id){
 		        $output_[$i] =~ s/}/,"id":"$id[$i]"}/;
 		        $i++;  
@@ -58,6 +58,7 @@ sub test_smeagol_resource {
 		    $output = join(", ",@output_);
 	}
 
+   
     my $prefix = "Test[$nr]: $call";
     my $req = do { no strict 'refs'; \&$op };
     my $r = request(
@@ -72,9 +73,9 @@ sub test_smeagol_resource {
 
         like( $r->headers->as_string(), qr/$headers/, "$prefix.headers" );
 		my $id = $r->headers->as_string();
-		$id =~ /.*Location:.*\/resource\/(\d)+/;
+		$id =~ /.*Location:.*\/resource\/(\d+)+/;
 		$ID = $1;
-
+		
 		if(($op eq 'POST') && ($status eq '201 Created') ){    
 		    push(@id, $ID);
 	    }

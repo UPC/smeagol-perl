@@ -95,7 +95,7 @@ sub test_smeagol_event {
 
         like( $r->headers->as_string(), qr/$headers/, "$prefix.headers" );
 		my $id = $r->headers->as_string();
-		$id =~ /.*Location:.*\/event\/(\d)+/;
+		$id =~ /.*Location:.*\/event\/(\d+)+/;
 		$EVENT_ID = $1;
 		
 		if(($op eq 'POST') && ($status eq '201 Created') ){    

@@ -263,7 +263,7 @@
             data     => '[]',
         },
     },
-    {    # Crear un nou resource
+    {    # Actualitzar resource amb descripcio ja usada
         num     => 19,
         desc    => 'Crea un nou resource',
         call    => 'TestCreateResourceDescriptionAlreadyExists',
@@ -292,5 +292,222 @@
             data     =>'[{"info":"RESOURCE 2 INFORMATION","description":"DESCRIPTION"}, {"info":"RESOURCE 4 INFORMATION","description":"DESCRIPTION_"}]',
         },
     },
-
+    {    # Crear un nou resource
+        num        => 21,
+        desc    => 'Crea un nou resource',
+        call    => 'TestCreateResource',
+        op      => 'POST',
+        uri     => '/resource' ,
+        input => {
+            info        => '',
+            description => 'DESCRIPTION21',
+        },
+        output => {
+            status  => '201 Created',
+            headers => { Location => qr{/resource/\d+} },
+            data     => '[]',
+        },
+    },
+    {    # Crear un nou resource
+        num        => 22,
+        desc    => 'Crea un nou resource',
+        call    => 'TestCreateResource',
+        op      => 'POST',
+        uri     => '/resource' ,
+        input => {
+            info        => '',
+            description => 'DESCRIPTION22',
+        },
+        output => {
+            status  => '201 Created',
+            headers => { Location => qr{/resource/\d+} },
+            data     => '[]',
+        },
+    },
+    {    # Crear un nou resource
+        num        => 23,
+        desc    => 'Crea un nou resource',
+        call    => 'TestCreateResource',
+        op      => 'POST',
+        uri     => '/resource' ,
+        input => {
+            info        => 'info resource 23',
+            description => '',
+        },
+        output => {
+            status  => '201 Created',
+            headers => { Location => qr{/resource/\d+} },
+            data     => '[]',
+        },
+    },
+        {    # Esborra resource
+        num        => 24,
+        desc    => 'Esborra un resource',
+        call    => 'TestDeleteResource',
+        op      => 'DELETE',
+        uri     => \&generated_uri_resource,
+        input     => '',
+        output     => {
+            status  => '200 OK',
+            headers => { Location => '' },
+            data     =>'[]',
+        },
+    },
+    {    # Crear un nou resource
+        num        => 25,
+        desc    => 'Crea un nou resource',
+        call    => 'TestCreateResource',
+        op      => 'POST',
+        uri     => '/resource' ,
+        input => {
+            info        => 'info resource 24',
+            description => '',
+        },
+        output => {
+            status  => '201 Created',
+            headers => { Location => qr{/resource/\d+} },
+            data     => '[]',
+        },
+    },
+    {    # Crear un nou resource
+        num        => 26,
+        desc    => 'Crea un nou resource',
+        call    => 'TestCreateResource',
+        op      => 'POST',
+        uri     => '/resource' ,
+        input => {
+            info        => '',
+            description => '',
+        },
+        output => {
+            status  => '409 Conflict',
+            headers => { Location => '' },
+            data     =>'[]',
+        },
+    },
+    {    # Crear un nou resource
+        num        => 27,
+        desc    => 'Crea un nou resource',
+        call    => 'TestCreateResource',
+        op      => 'POST',
+        uri     => '/resource' ,
+        input => {
+            info        => '',
+            description => '',
+        },
+        output => {
+            status  => '409 Conflict',
+            headers => { Location => '' },
+            data     =>'[]',
+        },
+    },
+    {    # Crear un nou resource
+        num        => 28,
+        desc    => 'Crea un nou resource',
+        call    => 'TestCreateResource',
+        op      => 'POST',
+        uri     => '/resource' ,
+        input => {
+            info        => 'info 27',
+            description => 'description 27',
+        },
+        output => {
+            status  => '201 Created',
+            headers => { Location => qr{/resource/\d+} },
+            data     => '[]',
+        },
+    },
+    {    # Crear un nou resource
+        num        => 29,
+        desc    => 'Crea un nou resource',
+        call    => 'TestCreateResource',
+        op      => 'POST',
+        uri     => '/resource' ,
+        input => {
+            info        => 'info 27',
+            description => 'description 28',
+        },
+        output => {
+            status  => '201 Created',
+            headers => { Location => qr{/resource/\d+} },
+            data     => '[]',
+        },
+    },
+    {    # Crear un nou resource
+        num        => 30,
+        desc    => 'Crea un nou resource',
+        call    => 'TestCreateResource',
+        op      => 'POST',
+        uri     => '/resource' ,
+        input => {
+            info        => '',
+            description => 'description 29',
+        },
+        output => {
+            status  => '201 Created',
+            headers => { Location => qr{/resource/\d+} },
+            data     => '[]',
+        },
+    },
+    {    # Actualitzar resource amb descripcio ja usada
+        num        => 31,
+        desc    => 'Crea un nou resource',
+        call    => 'TestCreateResource',
+        op      => 'POST',
+        uri     => '/resource' ,
+        input => {
+            info        => '',
+            description => 'description 29',
+        },
+        output => {
+            status  => '409 Conflict',
+            headers => { Location => '' },
+            data     =>'[]',
+        },
+    },
+    {    # Crear un nou resource
+        num        => 32,
+        desc    => 'Crea un nou resource',
+        call    => 'TestCreateResource',
+        op      => 'POST',
+        uri     => '/resource' ,
+        input => {
+            info        => 'info 31',
+            description => 'description 31',
+        },
+        output => {
+            status  => '201 Created',
+            headers => { Location => qr{/resource/\d+} },
+            data     => '[]',
+        },
+    },
+        {    # Actualitzar resource amb descripcio ja usada
+        num        => 33,
+        desc    => 'Crea un nou resource',
+        call    => 'TestCreateResource',
+        op      => 'POST',
+        uri     => '/resource' ,
+        input => {
+            info        => '',
+            description => 'description 31',
+        },
+        output => {
+            status  => '409 Conflict',
+            headers => { Location => '' },
+            data     =>'[]',
+        },
+    },
+    {    # Consultar llistat recursos
+        num        => 34,
+        desc    => 'Consulta un llistat de recursos',
+        call    => 'TestGeNotEmptyResourceList',
+        op      => 'GET',
+        uri     => \&uri_resource,
+        input     => '',
+        output     => {
+            status  => '200 OK',
+            headers => { Location => '' },
+            data     =>'[{"info":"RESOURCE 2 INFORMATION","description":"DESCRIPTION"}, {"info":"RESOURCE 4 INFORMATION","description":"DESCRIPTION_"}, {"info":"","description":"DESCRIPTION21"}, {"info":"","description":"DESCRIPTION22"}, {"info":"info resource 24","description":""}, {"info":"info 27","description":"description 27"}, {"info":"info 27","description":"description 28"}, {"info":"","description":"description 29"}, {"info":"info 31","description":"description 31"}]',
+        },
+    },
 ] 

@@ -40,9 +40,14 @@ sub default_GET {
 
     if ($id) {
         $c->detach( 'get_tag', [$id] );
-    }
-    else {
-        $c->detach( 'tag_list', [] );
+    }elsif ( $c->stash->{id_resource} ) {
+        $c->detach( 'get_tags_for_resource', [] );
+    }elsif ( $c->stash->{id_event} ) {
+        $c->detach( 'get_tags_for_event', [] );
+    }elsif ( $c->stash->{id_booking} ) {
+        $c->detach( 'get_tags_for_booking', [] );
+    }else {
+		$c->detach( 'tag_list', [] );
     }
 }
 
@@ -106,6 +111,19 @@ sub get_tag : Private {
 }
 
 sub default_POST {
+    my ( $self, $c, $res, $id ) = @_;
+
+  	if ( $c->stash->{id_resource} ) {
+       	$c->detach( 'post_tags_for_resource', [] );
+   	}elsif ( $c->stash->{id_event} ) {
+       	$c->detach( 'post_tags_for_event', [] );
+   	}elsif ( $c->stash->{id_booking} ) {
+   	    $c->detach( 'post_tags_for_booking', [] );
+   	}else {
+	$c->detach( 'create_tag', [] );
+}
+
+sub create_tag {
     my ( $self, $c ) = @_;
     my $req = $c->request;
     my @new_tag;
@@ -312,6 +330,112 @@ sub end : Private {
     }
 }
 
+sub get_tags_for_resource : Private {
+    my ( $self, $c ) = @_;
+
+    my $id   = $c->stash->{id_resource};
+
+    my @resource_aux
+        = $c->model('DB::TResourceTag')->search( { id_resource => $id } );
+
+    my @resource;
+    my @resources;
+
+    foreach (@resource_aux) {
+        @resource = $_->hash_resource;
+        push( @resources, @resource );
+    }
+
+    $c->stash->{content} = \@resources;
+    $c->response->status(200);
+}
+
+sub get_tags_for_event : Private {
+    my ( $self, $c ) = @_;
+	my @events;
+    my $id   = $c->stash->{id_event};
+
+    $c->stash->{content} = \@events;
+    $c->response->status(200);
+}
+
+sub get_tags_for_booking : Private {
+    my ( $self, $c ) = @_;
+	my @bookings;
+    my $id   = $c->stash->{id_booking};
+
+    $c->stash->{content} = \@bookings;
+    $c->response->status(200);
+}
+
+
+sub post_tags_for_resource : Private {
+    my ( $self, $c ) = @_;
+    my $req = $c->request;
+	my @message;
+
+    my $id   = $c->stash->{id_resource};
+
+    my $tags_aux = $req->parameters->{tags};
+    my @tags = split( /,/, $tags_aux );
+
+    my @resource_exist
+        = $c->model('DB::TResource')->search( { id_resource => $id } );
+
+    if ( @resource_exist > 0 ) {
+
+#Buscarem si els tags ja existeixen, en cas de no existir els crearem
+#Cal omplir DB::ResourceTag per a establir la relació entre els tags i els recursos
+
+        my $TagID;
+
+        foreach (@tags) {
+            $TagID = $c->model('DB::TTag')->find( { id => $_ } );
+
+            if ($TagID) {
+
+         #Si el tag existeix, fem constar a ResourceTag la relació recurs-tag
+                my $ResTag = $c->model('DB::TResourceTag')->find_or_new();
+                $ResTag->resource_id( $new_resource->id );
+                $ResTag->tag_id( $TagID->id );
+                $ResTag->insert;
+
+            }
+            else {
+                #Si el tag no existeix, el creem i repetim com a dalt
+                $c->detach( '/bad_request', [] );
+            }
+        }
+
+		#FIXME: message: ...
+    	$c->stash->{content} = \@messages;
+    	$c->response->status(200);
+	}else{
+		#FIXME: message: recurs no existeix
+ 		$c->stash->{content} = \@messages;
+    	$c->response->status(400);
+	}
+}
+
+sub post_tags_for_event : Private {
+    my ( $self, $c ) = @_;
+    my $req = $c->request;
+	my @message;
+
+    my $id   = $c->stash->{id_event};
+	$c->stash->{content} = \@messages;
+    $c->response->status(200);
+}
+
+sub post_tags_for_booking : Private {
+    my ( $self, $c ) = @_;
+    my $req = $c->request;
+	my @message;
+
+    my $id   = $c->stash->{id_booking};
+	$c->stash->{content} = \@messages;
+    $c->response->status(200);
+}
 =head1 AUTHOR
 
 Jordi Amorós Andreu,,,

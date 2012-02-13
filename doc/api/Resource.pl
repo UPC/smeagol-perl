@@ -360,7 +360,7 @@
         op      => 'POST',
         uri     => '/resource' ,
         input => {
-            info        => 'info resource 24',
+            info        => 'info resource 25',
             description => '',
         },
         output => {
@@ -424,8 +424,8 @@
         op      => 'POST',
         uri     => '/resource' ,
         input => {
-            info        => 'info 27',
-            description => 'description 28',
+            info        => 'info 29',
+            description => 'description 29',
         },
         output => {
             status  => '201 Created',
@@ -441,7 +441,7 @@
         uri     => '/resource' ,
         input => {
             info        => '',
-            description => 'description 29',
+            description => 'description 30',
         },
         output => {
             status  => '201 Created',
@@ -449,7 +449,7 @@
             data     => '[]',
         },
     },
-    {    # Actualitzar resource amb descripcio ja usada
+    {    # Crea resource amb descripcio ja usada
         num        => 31,
         desc    => 'Crea un nou resource',
         call    => 'TestCreateResource',
@@ -472,8 +472,8 @@
         op      => 'POST',
         uri     => '/resource' ,
         input => {
-            info        => 'info 31',
-            description => 'description 31',
+            info        => 'info 32',
+            description => 'description 32',
         },
         output => {
             status  => '201 Created',

@@ -262,6 +262,42 @@ sub default_PUT {
     }
 }
 
+sub put_tag_object : Private {
+    my ( $self, $c, $id , $module ,  $id_tag) = @_;
+    my $tag = $c->model('DB::TTag')->find( { id => $id_tag } );
+    my @message;
+
+    if ( !$tag ) {
+		#TODO: message: Tag no trobat.
+        $c->stash->{content}  = \@message;
+        
+        $c->stash->{template} = 'old_not_found.tt';
+        $c->response->status(404);
+    }
+    else {
+        my $RelationTag;
+		if ($module eq 'resource'){
+			$RelationTag = $c->model('DB::TResourceTag')->find_or_new();
+			$RelationTag->resource_id( $id );
+	    	$RelationTag->tag_id( $id_tag );
+	    	$RelationTag->insert;
+		}elsif($module eq 'event'){
+			$RelationTag = $c->model('DB::TEventTag')->find_or_new();
+			$RelationTag->id_event( $id );
+	    	$RelationTag->id_tag( $id_tag );
+	    	$RelationTag->insert;
+		}elsif($module eq 'booking'){
+			$RelationTag = $c->model('DB::TBookingTag')->find_or_new();
+			$RelationTag->id_booking( $id );
+	    	$RelationTag->id_tag( $id_tag );
+	    	$RelationTag->insert;
+		}
+	    #TODO: message: Relacio creada.
+	    $c->stash->{content}  = \@message;
+	    $c->response->status(200);
+    }
+}
+
 sub default_DELETE {
     my ( $self, $c, $res, $id ) = @_;
 

@@ -282,12 +282,12 @@ sub put_tag_object : Private {
 	    	$RelationTag->tag_id( $id_tag );
 	    	$RelationTag->insert;
 		}elsif($module eq 'event'){
-			$RelationTag = $c->model('DB::TEventTag')->find_or_new();
+			$RelationTag = $c->model('DB::TTagEvent')->find_or_new();
 			$RelationTag->id_event( $id );
 	    	$RelationTag->id_tag( $id_tag );
 	    	$RelationTag->insert;
 		}elsif($module eq 'booking'){
-			$RelationTag = $c->model('DB::TBookingTag')->find_or_new();
+			$RelationTag = $c->model('DB::TTagBooking')->find_or_new();
 			$RelationTag->id_booking( $id );
 	    	$RelationTag->id_tag( $id_tag );
 	    	$RelationTag->insert;

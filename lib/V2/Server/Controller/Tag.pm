@@ -105,6 +105,35 @@ sub get_tag : Private {
 
 }
 
+
+sub get_tag_from_object : Private {
+    my ( $self, $c, $id , $module ,  $id_module) = @_;
+    my $tag = $c->model('DB::TTag')->find( { id => $id_module } );
+    my @message;
+
+    if ( !$tag ) {
+		#TODO: message: Resource no trobat.
+        $c->stash->{content}  = \@message;
+        
+        $c->stash->{template} = 'old_not_found.tt';
+        $c->response->status(404);
+    }
+    else {
+        my $object = $c->model('DB::TResourceTag')->find( { tag_id => $id_module, resource_id => $id } ) if ($module eq 'resource');
+	$object = $c->model('DB::TTagEvent')->find( { id_tag => $id_module, id_event => $id } ) if ($module eq 'event');
+	$object = $c->model('DB::TTagBooking')->find( { id_tag => $id_module, id_booking => $id } ) if ($module eq 'booking');
+	if ( !$object ) {
+	    	#TODO: message: Relacio no trobada.
+	    $c->stash->{content}  = \@message;
+	    $c->response->status(404);
+	}else{
+	    #TODO: message: Relacio trobada.
+	    $c->stash->{content}  = \@message;
+	    $c->response->status(200);
+	}
+    }
+}
+
 sub default_POST {
     my ( $self, $c ) = @_;
     my $req = $c->request;

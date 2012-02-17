@@ -3,11 +3,9 @@ package V2::Server::Controller::Booking;
 use Moose;
 use feature 'switch';
 use namespace::autoclean;
-use Data::Dumper;
 use DateTime;
 use DateTime::Duration;
 use DateTime::Span;
-
 #Voodoo modules
 use Date::ICal;
 use Data::ICal;
@@ -80,10 +78,16 @@ A resource's agenda: /booking?resource=id GET which redirects to bookings_resour
 =cut
 
 sub default_GET {
-    my ( $self, $c, $res, $id ) = @_;
+    my ( $self, $c, $res, $id, $module, $id_module ) = @_;
+
 
     if ($id) {
-        $c->detach( 'get_booking', [$id] );
+	if(($module eq 'tag') && ($id_module)){
+	    $c->detach( 'get_relation_tag_booking', [$id, $id_module]);
+	}
+	else {
+	    $c->detach( 'get_booking', [$id] );
+	}
     }
     else {
         if ( $c->stash->{id_resource} ) {
@@ -101,6 +105,23 @@ sub default_GET {
     }
 }
 
+sub get_relation_tag_booking : Private {
+    my ( $self, $c, $id , $id_module) = @_;
+    my $booking = $c->model('DB::TBooking')->find( { id => $id } );
+    my @message;
+
+    if ( !$booking ) {
+		#TODO: message: Resource no trobat.
+        $c->stash->{content}  = \@message;
+        
+        $c->stash->{template} = 'old_not_found.tt';
+        $c->response->status(404);
+    }
+    else {
+
+        $c->detach( '/tag/get_tag_from_object', [ $id, $self, $id_module ] );
+    }
+}
 =head2 get_booking
 
 This function is not accessible through the url: /booking/get_booking/id but /booking/id hence the

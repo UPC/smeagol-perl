@@ -16,34 +16,34 @@ use Data::Dumper;
 my @tests = @{ require 'doc/api/Resource_Tag.pl' };
 
 # global variable to store server-generated IDs
-my $GENERATED_ID;
+my $OBJECT_ID;
 
 # get generated ID (for deferred evaluation)
 sub get_generated_id {
-    return $GENERATED_ID;
+    return $OBJECT_ID;
 }
 
-#
+
 # Builds the url for a test, given a hash with the following values:
 #  {
 #    type => (required) "resource", "event" or "booking"
 #    id   => (required) the id of the resource/event/booking (required),
 #              or reference to a function which returns the id
-#    tag  => (optional) the tag name or reference to a function
-#             which returns the tag name
+#    tag  => (optional) the tag name
 #  }
 # For instance, get_generated_url('resource',23,'aula') returns "/resource/23/tag/aula"
 #
 sub test_url {
-    my ( $params ) = @_;
+    my ($params) = @_;
     my $url = '/' . $params->{'type'};
-    if (defined $params->{'id'}) {
-    $url .= ( ref $params->{'id'} eq 'CODE' ) ? $params->{'id'}->() : $params->{'id'};
-    $url .= '/tag';
+    if ( defined $params->{'id'} ) {
+        $url .=
+            '/' . ( ref $params->{'id'} eq 'CODE' 
+            ? $params->{'id'}->()
+            : $params->{'id'});
+        $url .= '/tag';
     }
-    if ( defined $params->{'tag'} ) {
-        $url .= '/' . ( ref $params->{'tag'} eq 'CODE' ) ? $params->{'tag'}->() : $params->{'tag'};
-    }
+    $url .= ('/' . $params->{'tag'}) if ( defined $params->{'tag'} );
     return $url;
 }
 
@@ -59,8 +59,8 @@ sub run_test {
 
     my %args = prepare_args($test);
 
-    my $r = V2::Test->new( uri => test_url($test->{'url'}) );
-    
+    my $r = V2::Test->new( uri => test_url( $test->{'url'} ) );
+
     # V2::Test doesn't expect a 'url' key in tests
     delete $args{'url'} if exists $args{'url'};
 
@@ -68,12 +68,11 @@ sub run_test {
 
     my $got = $r->$method(%args);
 
-    $GENERATED_ID = $got
-        if exists $args{'new_ids'} && $args{'new_ids'} != 0;
+    $OBJECT_ID = $got if ( exists $args{'new_ids'} && $args{'new_ids'} != 0 );
 }
 
 # Parse test hash and prepare arguments for test call, performing
-# deferred evaluation for {'id'}, {'url'} and {'result'}{'id'} fields,
+# deferred evaluation in fields with function references.
 # when needed.
 sub prepare_args {
     my ($test) = @_;

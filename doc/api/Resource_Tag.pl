@@ -1,4 +1,13 @@
 [
+    {
+        title => 'CreaTag',
+        url   => { type => 'tag' },
+        method => 'POST',
+        args => { id=> 't1', description => 'tag 1' },
+        status => sub { shift->code == HTTP_CREATED },
+        new_ids => 1,
+        result => [],
+    },
     {   title  => 'CreaRecurs',
         url    => { type => 'resource' },
         method => 'POST',
@@ -10,11 +19,18 @@
         new_ids => 1,
         result  => [],
     },
-#    {
-#        title => 'GetResourceTags'
-#        url   => { type => 'resource', id => \&get_generated_id },
-#        method => 'GET',
-#        status => sub { shift ->code == HTTP_OK },
-#        result => [],
-#    }
+    {
+        title => 'GetResourceTags',
+        url   => { type => 'resource', id => \&get_generated_id },
+        method => 'GET',
+        status => sub { shift->code == HTTP_OK },
+        result => [],
+    },
+    {
+        title => 'AssignTagToResource',
+        url   => { type => 'resource', id => \&get_generated_id, tag => 't1'},
+        method => 'POST',
+        status => sub { shift->code == HTTP_CREATED },
+        result => [],
+    },
 ]

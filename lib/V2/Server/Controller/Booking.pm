@@ -620,13 +620,25 @@ sub default_POST {
     }
 }
 
+sub default_PUT {
+    my ( $self, $c, $res, $id, $module, $id_module ) = @_;
+    if ($id) {
+		if(($module eq 'tag') && ($id_module)){
+		    $c->forward( 'put_relation_tag_booking', [$id, $id_module]);
+		}else{
+		    $c->forward( 'put_booking', [$id] );
+		}
+    }
+}
+
+
 =head2 default_PUT
 
 Same functionality than default_POST but updating an existing booking.
 
 =cut
 
-sub default_PUT {
+sub put_booking : Private {
     my ( $self, $c, $res, $id ) = @_;
     my $req = $c->request;
 
@@ -871,6 +883,22 @@ sub default_PUT {
             = "Error: Check if the event or the resource exist";
         $c->stash->{template} = 'booking/get_list.tt';
 
+    }
+}
+sub put_relation_tag_booking : Private {
+    my ( $self, $c, $id_booking , $id_module) = @_;
+    my $booking = $c->model('DB::TBooking')->find( { id => $id_booking } );
+    my @message;
+
+    if ( !$booking ) {
+		#TODO: message: Booking no trobat.
+        $c->stash->{content}  = \@message;
+        
+        $c->stash->{template} = 'old_not_found.tt';
+        $c->response->status(404);
+    }
+    else {
+        $c->detach( '/tag/put_tag_object', [ $id_booking, 'booking', $id_module ] );
     }
 }
 

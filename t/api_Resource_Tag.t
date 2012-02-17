@@ -23,7 +23,6 @@ sub get_generated_id {
     return $OBJECT_ID;
 }
 
-
 # Builds the url for a test, given a hash with the following values:
 #  {
 #    type => (required) "resource", "event" or "booking"
@@ -37,13 +36,15 @@ sub test_url {
     my ($params) = @_;
     my $url = '/' . $params->{'type'};
     if ( defined $params->{'id'} ) {
-        $url .=
-            '/' . ( ref $params->{'id'} eq 'CODE' 
+        $url .= '/'
+            . (
+            ref $params->{'id'} eq 'CODE'
             ? $params->{'id'}->()
-            : $params->{'id'});
+            : $params->{'id'}
+            );
         $url .= '/tag';
     }
-    $url .= ('/' . $params->{'tag'}) if ( defined $params->{'tag'} );
+    $url .= ( '/' . $params->{'tag'} ) if ( defined $params->{'tag'} );
     return $url;
 }
 

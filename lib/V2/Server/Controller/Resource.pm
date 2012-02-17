@@ -2,7 +2,7 @@ package V2::Server::Controller::Resource;
 
 use Moose;
 use namespace::autoclean;
-use Data::Dumper;
+
 
 use Encode qw(encode decode);
 my $enc     = 'utf-8';
@@ -41,13 +41,14 @@ sub default_GET {
 
     if ($id) {
 	if(($module eq 'tag') && ($id_module)){
-	    $c->forward( 'get_relation_tag_resource', [$id, $id_module]);
-	}else{
-	    $c->forward( 'get_resource', [$id] );
+	    $c->detach( 'get_relation_tag_resource', [$id, $id_module]);
+	}
+	else {
+	    $c->detach( 'get_resource', [$id] );
 	}
     }
     else {
-        $c->forward( 'resource_list', [] );
+	$c->detach( 'resource_list', [] );
     }
 }
 

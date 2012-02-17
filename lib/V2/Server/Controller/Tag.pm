@@ -276,23 +276,14 @@ sub put_tag_object : Private {
     }
     else {
         my $RelationTag;
-		if ($module eq 'resource'){
-			$RelationTag = $c->model('DB::TResourceTag')->find_or_new();
-			$RelationTag->resource_id( $id );
-	    	$RelationTag->tag_id( $id_tag );
-	    	$RelationTag->insert;
-		}elsif($module eq 'event'){
-			$RelationTag = $c->model('DB::TTagEvent')->find_or_new();
-			$RelationTag->id_event( $id );
-	    	$RelationTag->id_tag( $id_tag );
-	    	$RelationTag->insert;
-		}elsif($module eq 'booking'){
-			$RelationTag = $c->model('DB::TTagBooking')->find_or_new();
-			$RelationTag->id_booking( $id );
-	    	$RelationTag->id_tag( $id_tag );
-	    	$RelationTag->insert;
-		}
-	    #TODO: message: Relacio creada.
+
+		$RelationTag = $c->model('DB::TResourceTag')->find_or_new({ resource_id => $id, tag_id => $id_tag }) if ($module eq 'resource');
+		$RelationTag = $c->model('DB::TTagEvent')->find_or_new(id_event => $id, id_tag => $id_tag) if($module eq 'event');
+		$RelationTag = $c->model('DB::TTagBooking')->find_or_new(id_booking => $id, id_tag => $id_tag) if($module eq 'booking');
+	    
+		unless ($RelationTag->in_storage) {$RelationTag->insert;}
+	    
+		#TODO: message: Relacio creada.
 	    $c->stash->{content}  = \@message;
 	    $c->response->status(200);
     }

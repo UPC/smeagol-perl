@@ -105,6 +105,19 @@ sub get_tag : Private {
 
 }
 
+sub get_list_tag_from_object : Private {
+	my ( $self, $c, $id ) = @_;
+	my $req = $c->request;
+	my @message;
+
+	$c->response->location($c->uri_for('/tag')."/?resource_id=".$id);
+
+	$c->stash->{content}  = \@message;
+    $c->response->status(301);
+
+
+}
+
 sub default_POST {
     my ( $self, $c ) = @_;
     my $req = $c->request;

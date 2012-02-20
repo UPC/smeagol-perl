@@ -3,7 +3,6 @@ package V2::Server::Controller::Booking;
 use Moose;
 use feature 'switch';
 use namespace::autoclean;
-use Data::Dumper;
 use DateTime;
 use DateTime::Duration;
 use DateTime::Span;
@@ -879,24 +878,46 @@ sub default_PUT {
 =cut
 
 sub default_DELETE {
-    my ( $self, $c, $res, $id ) = @_;
+    my ( $self, $c, $res, $id, $module, $id_module) = @_;
+    
     my $req = $c->request;
-
-    my $booking_aux = $c->model('DB::TBooking')->find( { id => $id } );
-
-    if ($booking_aux) {
-        $booking_aux->delete;
-        my @message = { message => "Booking succesfully deleted" };
-        $c->stash->{content}  = \@message;
-        $c->stash->{template} = 'booking/delete_ok.tt';
-        $c->response->status(200);
+    
+if ($id) {
+    if(($module eq 'tag') && ($id_module)){
+        $c->detach( 'delete_relation_tag_booking', [$id, $id_module]);
     }
     else {
-        my @message = { message =>
-                "We have not found the booking. Maybe it's already deleted" };
+        my $booking_aux = $c->model('DB::TBooking')->find( { id => $id } );
+        my @message;
+        if ($booking_aux) {
+	    $booking_aux->delete;
+	    #TODO: message: Resource esborrat amb èxit.
+	    $c->stash->{content}  = \@message;
+        }
+        else {  
+	    #TODO: message: Resource no trobat.
+	    $c->stash->{content}  = \@message;
+	    $c->stash->{template} = 'old_not_found.tt';
+	    $c->response->status(404);
+        }
+    }
+}
+}
+
+sub delete_relation_tag_booking : Private {
+    my ( $self, $c, $id , $id_module) = @_;
+    my $booking = $c->model('DB::TBooking')->find( { id => $id } );
+    my @message;
+
+    if ( !$booking ) {
+		#TODO: message: Resource no trobat.
         $c->stash->{content}  = \@message;
-        $c->stash->{template} = 'not_found.tt';
+        
+        $c->stash->{template} = 'old_not_found.tt';
         $c->response->status(404);
+    }
+    else {
+        $c->detach( '/tag/delete_tag_from_object', [ $id, $c->namespace, $id_module ] );
     }
 }
 

@@ -8,6 +8,7 @@ my $enc     = 'utf-8';
 my $VERSION = $V2::Server::VERSION;
 BEGIN { extends 'Catalyst::Controller::REST' }
 
+
 =head1 NAME
 
 V2::Server::Controller::Event - Catalyst Controller
@@ -35,16 +36,38 @@ sub default : Local : ActionClass('REST') {
 }
 
 sub default_GET {
-    my ( $self, $c, $res, $id ) = @_;
+    my ( $self, $c, $res, $id, $module, $id_module ) = @_;
 
     if ($id) {
-        $c->forward( 'get_event', [$id] );
+	if(($module eq 'tag') && ($id_module)){
+	    $c->detach( 'get_relation_tag_event', [$id, $id_module]);
+	}
+	else{
+	    $c->detach( 'get_event', [$id] );
+	}
     }
     else {
-        $c->forward( 'event_list', [] );
+        $c->detach( 'event_list', [] );
     }
 }
 
+sub get_relation_tag_event : Private {
+    my ( $self, $c, $id , $id_module) = @_;
+    my $event = $c->model('DB::TEvent')->find( { id => $id } );
+    my @message;
+
+    if ( !$event ) {
+		#TODO: message: Resource no trobat.
+        $c->stash->{content}  = \@message;
+        
+        $c->stash->{template} = 'old_not_found.tt';
+        $c->response->status(404);
+    }
+    else {
+
+        $c->detach( '/tag/get_tag_from_object', [ $id, $c->namespace, $id_module ] );
+    }
+}
 sub get_event : Local {
     my ( $self, $c, $id ) = @_;
     my $event_aux = $c->model('DB::TEvent')->find( { id => $id } );

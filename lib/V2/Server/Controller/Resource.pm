@@ -2,7 +2,7 @@ package V2::Server::Controller::Resource;
 
 use Moose;
 use namespace::autoclean;
-use Data::Dumper;
+
 
 use Encode qw(encode decode);
 my $enc     = 'utf-8';
@@ -37,13 +37,35 @@ sub default : Path : ActionClass('REST') {
 }
 
 sub default_GET {
-    my ( $self, $c, $id ) = @_;
+    my ( $self, $c, $id, $module, $id_module ) = @_;
 
     if ($id) {
-        $c->forward( 'get_resource', [$id] );
+	if(($module eq 'tag') && ($id_module)){
+	    $c->detach( 'get_relation_tag_resource', [$id, $id_module]);
+	}
+	else {
+	    $c->detach( 'get_resource', [$id] );
+	}
     }
     else {
-        $c->forward( 'resource_list', [] );
+	$c->detach( 'resource_list', [] );
+    }
+}
+
+sub get_relation_tag_resource : Private {
+    my ( $self, $c, $id , $id_module) = @_;
+    my $resource = $c->model('DB::TResource')->find( { id => $id } );
+    my @message;
+
+    if ( !$resource ) {
+		#TODO: message: Resource no trobat.
+        $c->stash->{content}  = \@message;
+        
+        $c->stash->{template} = 'old_not_found.tt';
+        $c->response->status(404);
+    }
+    else {
+        $c->detach( '/tag/get_tag_from_object', [ $id, $c->namespace, $id_module ] );
     }
 }
 

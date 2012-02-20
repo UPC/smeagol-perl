@@ -1,5 +1,5 @@
 package V2::Server::Controller::Event;
-use Data::Dumper;
+
 use Moose;
 use namespace::autoclean;
 use DateTime;
@@ -99,7 +99,7 @@ sub default_POST {
     my ( $self, $c, $res, $id, $module, $id_module ) = @_;
     my $req = $c->request;
     my @message;
-$c->log->debug("Debug: ".$module);  
+ 
     if(($module eq 'tag') && ($id_module)){
 	$c->detach( 'post_relation_tag_event');
 }

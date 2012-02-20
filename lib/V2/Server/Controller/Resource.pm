@@ -177,6 +177,18 @@ sub default_POST {
 }
 
 sub default_PUT {
+    my ( $self, $c, $id, $module, $id_module ) = @_;
+
+    if ($id) {
+		if(($module eq 'tag') && ($id_module)){
+		    $c->forward( 'put_relation_tag_resource', [$id, $id_module]);
+		}else{
+		    $c->forward( 'put_resource', [$id] );
+		}
+    }
+}
+
+sub put_resource : Private {
     my ( $self, $c, $id ) = @_;
     my $req = $c->request;
     my @message;
@@ -242,6 +254,23 @@ sub default_PUT {
         $c->response->status(404);
     }
 
+}
+
+sub put_relation_tag_resource : Private {
+    my ( $self, $c, $id_resource , $id_module) = @_;
+    my $resource = $c->model('DB::TResource')->find( { id => $id_resource } );
+    my @message;
+
+    if ( !$resource ) {
+		#TODO: message: Resource no trobat.
+        $c->stash->{content}  = \@message;
+        
+        $c->stash->{template} = 'old_not_found.tt';
+        $c->response->status(404);
+    }
+    else {
+        $c->detach( '/tag/put_tag_object', [ $id_resource, $c->namespace, $id_module ] );
+    }
 }
 
 sub default_DELETE {

@@ -193,6 +193,17 @@ sub default_POST {
 }
 
 sub default_PUT {
+    my ( $self, $c, $res, $id, $module, $id_module ) = @_;
+    if ($id) {
+		if(($module eq 'tag') && ($id_module)){
+		    $c->forward( 'put_relation_tag_event', [$id, $id_module]);
+		}else{
+		    $c->forward( 'put_event', [$id] );
+		}
+    }
+}
+
+sub put_event : Private {
     my ( $self, $c, $res, $id ) = @_;
     my $req = $c->request;
 
@@ -288,6 +299,21 @@ sub default_PUT {
         $c->stash->{content} = \@message;
         $c->stash->{template} = 'not_found.tt';
         $c->response->status(404);
+    }
+}
+
+sub put_relation_tag_event : Private {
+    my ( $self, $c, $id_event , $id_module) = @_;
+    my $event = $c->model('DB::TEvent')->find( { id => $id_event } );
+    my @message;
+
+    if ( !$event ) {
+		#TODO: message: Event no trobat.
+        $c->stash->{content}  = \@message;
+        $c->response->status(404);
+    }
+    else {
+        $c->detach( '/tag/put_tag_object', [ $id_event, $c->namespace, $id_module ] );
     }
 }
 

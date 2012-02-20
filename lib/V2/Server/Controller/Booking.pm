@@ -353,8 +353,12 @@ complexity. $c for the win!
 =cut
 
 sub default_POST {
-    my ( $self, $c ) = @_;
+    my ( $self, $c, $res, $id, $module, $id_module ) = @_;
     my $req = $c->request;
+
+if(($module eq 'tag') && ($id_module)){
+	$c->detach( 'post_relation_tag_booking');
+}
 
     my $info        = $req->parameters->{info};
     my $id_resource = $req->parameters->{id_resource};
@@ -401,6 +405,8 @@ sub default_POST {
     my $by_day_month = $req->parameters->{by_day_month};
 
     my $new_booking = $c->model('DB::TBooking')->find_or_new();
+    
+    
     $c->stash->{id_event}    = $id_event;
     $c->stash->{id_resource} = $id_resource;
 
@@ -620,6 +626,14 @@ sub default_POST {
     }
 }
 
+sub post_relation_tag_booking : Private {
+    my ( $self, $c) = @_;
+     my @message;
+     
+	$c->stash->{content} = \@message; 
+        $c->response->status(405);
+   
+}
 =head2 default_PUT
 
 Same functionality than default_POST but updating an existing booking.
@@ -873,6 +887,7 @@ sub default_PUT {
 
     }
 }
+
 
 =head2 default_DELETE
 

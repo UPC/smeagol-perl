@@ -75,5 +75,17 @@ __PACKAGE__->belongs_to(
     { join_type => "LEFT", on_delete => "CASCADE", on_update => "CASCADE" },
 );
 
+sub hash {
+    my ($self) = @_;
+
+    my $obj = {
+        resource_id => $self->resource_id,
+        tag_id 		=> $self->tag_id,
+    };
+
+    return $obj;
+}
+
+
 # You can replace this text with custom content, and it will be preserved on regeneration
 1;

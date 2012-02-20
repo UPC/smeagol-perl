@@ -28,6 +28,8 @@ Catalyst Controller.
 sub begin : Private {
     my ( $self, $c ) = @_;
 
+    $c->stash->{id_resource} = $c->request->query_parameters->{resource};
+    $c->stash->{id_event}    = $c->request->query_parameters->{event};
     $c->stash->{format} = $c->request->headers->{"accept"}
         || 'application/json';
 }
@@ -37,12 +39,17 @@ sub default : Local : ActionClass('REST') {
 
 sub default_GET {
     my ( $self, $c, $res, $id ) = @_;
-
     if ($id) {
         $c->detach( 'get_tag', [$id] );
     }
     else {
-        $c->detach( 'tag_list', [] );
+#$c->log_request_parameters();
+        if ( $c->stash->{id_resource} ) {
+			$c->detach('list_tags_object', [$c->namespace] );
+		}
+		else{
+			$c->detach( 'tag_list', [] );
+		}
     }
 }
 
@@ -103,6 +110,23 @@ sub get_tag : Private {
         $c->stash->{template} = 'tag/get_tag.tt';
     }
 
+}
+
+sub list_tags_object : Private {
+    my ( $self, $c ) = @_;
+	my $id   = $c->stash->{id_resource};
+	my @tag;
+	my @tags;
+
+    my @relations = $c->model('DB::TResourceTag')->search( { resource_id => $id } );
+    foreach (@relations) {
+        my $rel = $_->hash;
+        my $tag = $c->model('DB::TTag')->find( { id => $rel->{tag_id} } );
+		push( @tags, $tag->hash );
+    }
+
+	$c->stash->{content}  = \@tags;
+    $c->response->status(200);
 }
 
 sub get_list_tag_from_object : Private {

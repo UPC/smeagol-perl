@@ -3,7 +3,7 @@ package V2::Server::Controller::Booking;
 use Moose;
 use feature 'switch';
 use namespace::autoclean;
-use Data::Dumper;
+
 use DateTime;
 use DateTime::Duration;
 use DateTime::Span;

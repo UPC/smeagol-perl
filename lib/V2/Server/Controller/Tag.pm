@@ -300,6 +300,36 @@ sub default_DELETE {
 
 }
 
+sub delete_tag_from_object : Private {
+    my ( $self, $c, $id , $module ,  $id_tag) = @_;
+    my $tag = $c->model('DB::TTag')->find( { id => $id_tag } );
+    my @message;
+
+    if ( !$tag ) {
+		#TODO: message: Tag no trobat.
+        $c->stash->{content}  = \@message;
+        
+        $c->stash->{template} = 'old_not_found.tt';
+        $c->response->status(404);
+    }
+    else {
+        my $RelationTag;
+
+    	$RelationTag = $c->model('DB::TResourceTag')->find_or_new({ resource_id => $id, tag_id => $id_tag }) if ($module eq 'resource');
+	$RelationTag = $c->model('DB::TTagEvent')->find_or_new(id_event => $id, id_tag => $id_tag) if($module eq 'event');
+	$RelationTag = $c->model('DB::TTagBooking')->find_or_new(id_booking => $id, id_tag => $id_tag) if($module eq 'booking');
+	    
+    	if ( !$RelationTag ) {
+	    #TODO: message: Relacio no trobada.
+	    $c->stash->{content}  = \@message;
+	    $c->response->status(404);
+	}else{
+	    #TODO: message: Relacio trobada.
+	    $c->stash->{content}  = \@message;
+	    $c->response->status(200);
+	}
+    }
+}
 sub end : Private {
     my ( $self, $c ) = @_;
 

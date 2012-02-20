@@ -247,7 +247,7 @@ sub put_relation_tag_resource : Private {
         $c->response->status(404);
     }
     else {
-        $c->detach( '/tag/put_tag_object', [ $id_resource, 'resource', $id_module ] );
+        $c->detach( '/tag/put_tag_object', [ $id_resource, $c->namespace, $id_module ] );
     }
 }
 

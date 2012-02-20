@@ -290,7 +290,7 @@ sub put_relation_tag_event : Private {
         $c->response->status(404);
     }
     else {
-        $c->detach( '/tag/put_tag_object', [ $id_event, 'event', $id_module ] );
+        $c->detach( '/tag/put_tag_object', [ $id_event, $c->namespace, $id_module ] );
     }
 }
 

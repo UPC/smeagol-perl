@@ -2,8 +2,6 @@ package V2::Server::Controller::Resource;
 
 use Moose;
 use namespace::autoclean;
-use Data::Dumper;
-
 use Encode qw(encode decode);
 my $enc     = 'utf-8';
 my $VERSION = $V2::Server::VERSION;
@@ -223,28 +221,47 @@ sub default_PUT {
 }
 
 sub default_DELETE {
-    my ( $self, $c, $id ) = @_;
+    my ( $self, $c, $id, $module, $id_module) = @_;
+ 
     my $req = $c->request;
-
-    my $resource_aux = $c->model('DB::TResource')->find( { id => $id } );
-	my @message;
-
-    if ($resource_aux) {
-
-        $resource_aux->delete;
-
-		#TODO: message: Resource esborrat amb èxit.
-        $c->stash->{content}  = \@message;
+    
+if ($id) {
+    if(($module eq 'tag') && ($id_module)){
+        $c->detach( 'delete_relation_tag_resource', [$id, $id_module]);
     }
     else {
+        my $resource_aux = $c->model('DB::TResource')->find( { id => $id } );
+        my @message;
+        if ($resource_aux) {
+	    $resource_aux->delete;
+	    #TODO: message: Resource esborrat amb èxit.
+	    $c->stash->{content}  = \@message;
+        }
+        else {  
+	    #TODO: message: Resource no trobat.
+	    $c->stash->{content}  = \@message;
+	    $c->stash->{template} = 'old_not_found.tt';
+	    $c->response->status(404);
+        }
+    }
+}
+}
 
+sub delete_relation_tag_resource : Private {
+    my ( $self, $c, $id , $id_module) = @_;
+    my $resource = $c->model('DB::TResource')->find( { id => $id } );
+    my @message;
+
+    if ( !$resource ) {
 		#TODO: message: Resource no trobat.
         $c->stash->{content}  = \@message;
-
+        
         $c->stash->{template} = 'old_not_found.tt';
         $c->response->status(404);
     }
-
+    else {
+        $c->detach( '/tag/delete_tag_from_object', [ $id, $c->namespace, $id_module ] );
+    }
 }
 
 sub end : Private {

@@ -30,6 +30,7 @@ sub begin : Private {
 
     $c->stash->{id_resource} = $c->request->query_parameters->{resource};
     $c->stash->{id_event}    = $c->request->query_parameters->{event};
+    $c->stash->{id_booking}    = $c->request->query_parameters->{booking};
     $c->stash->{format} = $c->request->headers->{"accept"}
         || 'application/json';
 }
@@ -43,11 +44,13 @@ sub default_GET {
         $c->detach( 'get_tag', [$id] );
     }
     else {
-#$c->log_request_parameters();
         if ( $c->stash->{id_resource} ) {
-			$c->detach('list_tags_object', [$c->namespace] );
-		}
-		else{
+			$c->detach('list_tags_object', ['resource'] );
+		}elsif ( $c->stash->{id_event} ) {
+			$c->detach('list_tags_object', ['event'] );
+		}elsif ( $c->stash->{id_booking} ) {
+			$c->detach('list_tags_object', ['booking'] );
+		}else{
 			$c->detach( 'tag_list', [] );
 		}
     }
@@ -113,15 +116,19 @@ sub get_tag : Private {
 }
 
 sub list_tags_object : Private {
-    my ( $self, $c ) = @_;
-	my $id   = $c->stash->{id_resource};
-	my @tag;
+    my ( $self, $c , $module) = @_;
+	my $id = $c->stash->{id_resource} if ($module eq 'resource');
+	$id = $c->stash->{id_event} if ($module eq 'event');
+	$id = $c->stash->{id_booking} if ($module eq 'booking');
+	
 	my @tags;
 
-    my @relations = $c->model('DB::TResourceTag')->search( { resource_id => $id } );
+    my @relations = $c->model('DB::TResourceTag')->search( { resource_id => $id } ) if ($module eq 'resource');
+    @relations = $c->model('DB::TTagEvent')->search( { id_event => $id } ) if ($module eq 'event');
+    @relations = $c->model('DB::TTagBooking')->search( { id_booking => $id } ) if ($module eq 'booking');
     foreach (@relations) {
         my $rel = $_->hash;
-        my $tag = $c->model('DB::TTag')->find( { id => $rel->{tag_id} } );
+        my $tag = $c->model('DB::TTag')->find( { id => $rel->{id_tag} } );
 		push( @tags, $tag->hash );
     }
 

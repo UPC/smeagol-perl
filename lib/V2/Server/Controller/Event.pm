@@ -1,5 +1,5 @@
 package V2::Server::Controller::Event;
-
+use Data::Dumper;
 use Moose;
 use namespace::autoclean;
 use DateTime;
@@ -96,9 +96,13 @@ sub event_list : Local {
 }
 
 sub default_POST {
-    my ( $self, $c ) = @_;
+    my ( $self, $c, $res, $id, $module, $id_module ) = @_;
     my $req = $c->request;
-	my @message;
+    my @message;
+$c->log->debug("Debug: ".$module);  
+    if(($module eq 'tag') && ($id_module)){
+	$c->detach( 'post_relation_tag_event');
+}
 
     my $info        = $req->parameters->{info};
     my $description = $req->parameters->{description};
@@ -167,6 +171,15 @@ sub default_POST {
             = "Error: Check the info and description of the event";
         $c->stash->{template} = 'event/get_list.tt';
     }
+}
+
+sub post_relation_tag_event : Private {
+    my ( $self, $c) = @_;
+     my @message;
+     
+	$c->stash->{content} = \@message; 
+        $c->response->status(405);
+   
 }
 
 sub default_PUT {

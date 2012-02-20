@@ -119,9 +119,9 @@ sub get_tag_from_object : Private {
         $c->response->status(404);
     }
     else {
-        my $object = $c->model('DB::TResourceTag')->find( { tag_id => $id_module, resource_id => $id } ) if ($module =~ m/Resource/);
-	$object = $c->model('DB::TTagEvent')->find( { id_tag => $id_module, id_event => $id } ) if ($module =~ m/Event/);
-	$object = $c->model('DB::TTagBooking')->find( { id_tag => $id_module, id_booking => $id } ) if ($module =~ m/Booking/);
+        my $object = $c->model('DB::TResourceTag')->find( { tag_id => $id_module, resource_id => $id } ) if ($module eq 'resource');
+	$object = $c->model('DB::TTagEvent')->find( { id_tag => $id_module, id_event => $id } ) if ($module eq 'event');
+	$object = $c->model('DB::TTagBooking')->find( { id_tag => $id_module, id_booking => $id } ) if ($module eq 'booking');
 	if ( !$object ) {
 	    	#TODO: message: Relacio no trobada.
 	    $c->stash->{content}  = \@message;

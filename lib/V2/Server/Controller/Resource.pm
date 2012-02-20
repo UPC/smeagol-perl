@@ -65,7 +65,7 @@ sub get_relation_tag_resource : Private {
         $c->response->status(404);
     }
     else {
-        $c->detach( '/tag/get_tag_from_object', [ $id, $self, $id_module ] );
+        $c->detach( '/tag/get_tag_from_object', [ $id, $c->namespace, $id_module ] );
     }
 }
 

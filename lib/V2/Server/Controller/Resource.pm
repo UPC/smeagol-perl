@@ -2,7 +2,7 @@ package V2::Server::Controller::Resource;
 
 use Moose;
 use namespace::autoclean;
-use Data::Dumper;
+
 
 use Encode qw(encode decode);
 my $enc     = 'utf-8';

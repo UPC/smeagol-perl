@@ -1,5 +1,4 @@
 package V2::Server::Controller::Tag;
-
 use Moose;
 use namespace::autoclean;
 use V2::Server::Obj::Tag;
@@ -315,9 +314,9 @@ sub delete_tag_from_object : Private {
     else {
         my $RelationTag;
 
-    	$RelationTag = $c->model('DB::TResourceTag')->find_or_new({ resource_id => $id, tag_id => $id_tag }) if ($module eq 'resource');
-	$RelationTag = $c->model('DB::TTagEvent')->find_or_new(id_event => $id, id_tag => $id_tag) if($module eq 'event');
-	$RelationTag = $c->model('DB::TTagBooking')->find_or_new(id_booking => $id, id_tag => $id_tag) if($module eq 'booking');
+    	$RelationTag = $c->model('DB::TResourceTag')->search({ resource_id => $id, tag_id => $id_tag }) if ($module eq 'resource');
+	$RelationTag = $c->model('DB::TTagEvent')->search(id_event => $id, id_tag => $id_tag) if($module eq 'event');
+	$RelationTag = $c->model('DB::TTagBooking')->search(id_booking => $id, id_tag => $id_tag) if($module eq 'booking');
 	    
     	if ( !$RelationTag ) {
 	    #TODO: message: Relacio no trobada.
@@ -325,6 +324,7 @@ sub delete_tag_from_object : Private {
 	    $c->response->status(404);
 	}else{
 	    #TODO: message: Relacio trobada.
+	    $tag->delete;
 	    $c->stash->{content}  = \@message;
 	    $c->response->status(200);
 	}

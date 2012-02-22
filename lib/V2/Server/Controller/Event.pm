@@ -101,8 +101,8 @@ sub default_POST {
     my @message;
  
     if(($module eq 'tag') && ($id_module)){
-	$c->detach( 'post_relation_tag_event');
-}
+		$c->detach( 'post_relation_tag_event');
+	}
 
     my $info        = $req->parameters->{info};
     my $description = $req->parameters->{description};
@@ -175,11 +175,11 @@ sub default_POST {
 
 sub post_relation_tag_event : Private {
     my ( $self, $c) = @_;
-     my @message;
-     
+    my @message;
+    
+	#TODO: message: operacio no permesa 
 	$c->stash->{content} = \@message; 
-        $c->response->status(405);
-   
+    $c->response->status(405);
 }
 
 sub default_PUT {

@@ -356,9 +356,9 @@ sub default_POST {
     my ( $self, $c, $res, $id, $module, $id_module ) = @_;
     my $req = $c->request;
 
-if(($module eq 'tag') && ($id_module)){
-	$c->detach( 'post_relation_tag_booking');
-}
+	if(($module eq 'tag') && ($id_module)){
+		$c->detach( 'post_relation_tag_booking');
+	}
 
     my $info        = $req->parameters->{info};
     my $id_resource = $req->parameters->{id_resource};
@@ -628,11 +628,11 @@ if(($module eq 'tag') && ($id_module)){
 
 sub post_relation_tag_booking : Private {
     my ( $self, $c) = @_;
-     my @message;
+    my @message;
      
+	#TODO: operacio no permesa.
 	$c->stash->{content} = \@message; 
-        $c->response->status(405);
-   
+    $c->response->status(405);
 }
 =head2 default_PUT
 

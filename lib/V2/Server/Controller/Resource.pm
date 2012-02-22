@@ -99,7 +99,7 @@ sub default_POST {
     
     if(($module eq 'tag') && ($id_module)){
 		$c->detach( 'post_relation_tag_resource');
-	    }
+	}
       
     $c->visit( '/check/check_resource', [ $info, $descr ] );
 
@@ -159,11 +159,11 @@ sub default_POST {
 }
 sub post_relation_tag_resource : Private {
     my ( $self, $c) = @_;
-     my @message;
-     
-	$c->stash->{content} = \@message; 
-        $c->response->status(405);
+    my @message;
    
+	#TODO: message: operacio no permesa  
+	$c->stash->{content} = \@message; 
+    $c->response->status(405);
 }
 
 sub default_PUT {

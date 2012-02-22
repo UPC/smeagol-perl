@@ -318,28 +318,49 @@ sub put_relation_tag_event : Private {
 }
 
 sub default_DELETE {
-    my ( $self, $c, $res, $id ) = @_;
+    my ( $self, $c, $res, $id, $module, $id_module) = @_;
+    
     my $req = $c->request;
-
-    my $event_aux = $c->model('DB::TEvent')->find( { id => $id } );
-    my @message;
-
-    if ($event_aux) {
-        $event_aux->delete;
-       
-        #TODO: message: Esdeveniment esborrat amb èxit.
-        $c->stash->{content}  = \@message;
-        $c->stash->{template} = 'event/delete_ok.tt';
-        $c->response->status(200);
+    
+if ($id) {
+    if(($module eq 'tag') && ($id_module)){
+        $c->detach( 'delete_relation_tag_event', [$id, $id_module]);
     }
     else {
-	
-	#TODO: message: Esdeveniment no trobat.
-        $c->stash->{content}  = \@message;
-        $c->stash->{template} = 'not_found.tt';
-        $c->response->status(404);
+        my $event_aux = $c->model('DB::TEvent')->find( { id => $id } );
+        my @message;
+        if ($event_aux) {
+	    $event_aux->delete;
+	    #TODO: message: Resource esborrat amb èxit.
+	    $c->stash->{content}  = \@message;
+        }
+        else {  
+	    #TODO: message: Resource no trobat.
+	    $c->stash->{content}  = \@message;
+	    $c->stash->{template} = 'old_not_found.tt';
+	    $c->response->status(404);
+        }
     }
 }
+}
+
+sub delete_relation_tag_event : Private {
+    my ( $self, $c, $id , $id_module) = @_;
+    my $event = $c->model('DB::TEvent')->find( { id => $id } );
+    my @message;
+
+    if ( !$event ) {
+		#TODO: message: Resource no trobat.
+        $c->stash->{content}  = \@message;
+        
+        $c->stash->{template} = 'old_not_found.tt';
+        $c->response->status(404);
+    }
+    else {
+        $c->detach( '/tag/delete_tag_from_object', [ $id, $c->namespace, $id_module ] );
+    }
+}
+
 
 =head2 ParseDate
 Outrage!! The author is repeting himself. Throw him to the fire!!

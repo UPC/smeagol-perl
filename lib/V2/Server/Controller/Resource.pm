@@ -3,6 +3,7 @@ package V2::Server::Controller::Resource;
 use Moose;
 use namespace::autoclean;
 
+
 use Encode qw(encode decode);
 my $enc     = 'utf-8';
 my $VERSION = $V2::Server::VERSION;
@@ -111,13 +112,17 @@ sub resource_list : Private {
 }
 
 sub default_POST {
-    my ( $self, $c, $id ) = @_;
+    my ( $self, $c, $id, $module, $id_module ) = @_;
     my $req = $c->request;
     my @message;
 
     my $descr = $req->parameters->{description};
     my $info  = $req->parameters->{info};
-
+    
+    if(($module eq 'tag') && ($id_module)){
+		$c->detach( 'post_relation_tag_resource');
+	}
+      
     $c->visit( '/check/check_resource', [ $info, $descr ] );
 
 # If all is correct $c->stash->{event_ok} should be 1, otherwise it will be 0.
@@ -131,7 +136,7 @@ sub default_POST {
     }
 
     if ( $c->stash->{resource_ok} ) {
-
+	  
         my $new_resource = $c->model('DB::TResource')->find_or_new();
 
         $new_resource->description($descr);
@@ -173,6 +178,14 @@ sub default_POST {
             $c->stash->{template} = 'resource/get_list.tt';
         }
     }
+}
+sub post_relation_tag_resource : Private {
+    my ( $self, $c) = @_;
+    my @message;
+   
+	#TODO: message: operacio no permesa  
+	$c->stash->{content} = \@message; 
+    $c->response->status(405);
 }
 
 sub default_PUT {

@@ -27,6 +27,9 @@ Catalyst Controller.
 sub begin : Private {
     my ( $self, $c ) = @_;
 
+    $c->stash->{id_resource} = $c->request->query_parameters->{resource};
+    $c->stash->{id_event}    = $c->request->query_parameters->{event};
+    $c->stash->{id_booking}        = $c->request->query_parameters->{booking};
     $c->stash->{format} = $c->request->headers->{"accept"}
         || 'application/json';
 }
@@ -36,12 +39,19 @@ sub default : Local : ActionClass('REST') {
 
 sub default_GET {
     my ( $self, $c, $res, $id ) = @_;
-
     if ($id) {
         $c->detach( 'get_tag', [$id] );
     }
     else {
-        $c->detach( 'tag_list', [] );
+		if($c->stash->{id_resource}){
+			$c->detach('filter_tags_by_object',['resource']);
+		}elsif($c->stash->{id_event}){
+			$c->detach('filter_tags_by_object',['event']);
+		}elsif($c->stash->{id_booking}){
+			$c->detach('filter_tags_by_object',['booking']);
+		}else{
+        	$c->detach( 'tag_list', [] );
+		}
     }
 }
 
@@ -104,6 +114,25 @@ sub get_tag : Private {
 
 }
 
+sub filter_tags_by_object : Private {
+    my ( $self, $c, $module ) = @_;
+	my @message;
+
+	my $obj = $c->model('DB::TResource')->find( { id => $c->stash->{id_resource} } )  if ($module eq 'resource');
+	$obj = $c->model('DB::TEvent')->find( { id => $c->stash->{id_event} } )  if ($module eq 'event');
+	$obj = $c->model('DB::TBooking')->find( { id => $c->stash->{id_booking} } )  if ($module eq 'booking');
+
+	if ( !$obj ) {
+        #TODO: message: objecte no trobat
+        $c->stash->{content}  = \@message;
+        $c->response->status(404);
+    }else{
+		my @tags = $obj->tag_list;
+
+   		$c->stash->{content}  = \@tags;
+    	$c->response->status(200);
+	}
+}
 
 sub get_tag_from_object : Private {
     my ( $self, $c, $id , $module ,  $id_module) = @_;

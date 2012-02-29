@@ -38,14 +38,19 @@ sub default : Path : ActionClass('REST') {
 
 sub default_GET {
     my ( $self, $c, $id, $module, $id_module ) = @_;
+	my @message;
 
     if ($id) {
-	if(($module eq 'tag') && ($id_module)){
-	    $c->detach( 'get_relation_tag_resource', [$id, $id_module]);
-	}
-	else {
-	    $c->detach( 'get_resource', [$id] );
-	}
+		if(($module eq 'tag') && ($id_module)){
+		    $c->detach( 'get_relation_tag_resource', [$id, $id_module]);
+		}elsif(($module eq 'tag') && !($id_module)){
+			$c->response->location($c->uri_for('/tag')."/?resource=".$id);
+			#TODO: message: redireccio a la llista
+			$c->stash->{content}  = \@message;
+			$c->response->status(301); 
+		}else {
+	    	$c->detach( 'get_resource', [$id] );
+		}
     }
     else {
 	$c->detach( 'resource_list', [] );

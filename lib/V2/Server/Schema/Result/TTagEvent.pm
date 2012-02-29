@@ -84,17 +84,6 @@ __PACKAGE__->belongs_to(
     { join_type => "LEFT", on_delete => "CASCADE", on_update => "CASCADE" },
 );
 
-sub hash {
-    my ($self) = @_;
-
-    my $obj = {
-        id_event => $self->id_event,
-        id_tag 	=> $self->id_tag,
-    };
-
-    return $obj;
-}
-
 # Created by DBIx::Class::Schema::Loader v0.07000 @ 2011-02-10 13:00:38
 # DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:G5HMRWD2YnnbOEIpmy2wVQ
 

@@ -57,17 +57,6 @@ __PACKAGE__->has_many(
     { cascade_copy     => 0, cascade_delete => 0 },
 );
 
-sub hash {
-    my ($self) = @_;
-
-    my $obj = {
-        id 			=> $self->id,
-        description	=> $self->description,
-    };
-
-    return $obj;
-}
-
 # Created by DBIx::Class::Schema::Loader v0.07000 @ 2011-02-10 13:00:38
 # DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:QZV1/yQTHg1xNhBI5dJh9A
 

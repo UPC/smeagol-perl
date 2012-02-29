@@ -55,7 +55,7 @@ __PACKAGE__->set_primary_key( "resource_id", "tag_id" );
 # Created by DBIx::Class::Schema::Loader v0.07000 @ 2011-02-10 13:00:38
 # DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:s6KrEh8/rf6MzDrlKL9yPA
 __PACKAGE__->belongs_to(
-    "tag", "V2::Server::Schema::Result::Tag",
+    "tag", "gollum::Schema::Result::Tag",
     { id        => "tag_id" },
     { join_type => "LEFT", on_delete => "CASCADE", on_update => "CASCADE" },
 );
@@ -64,28 +64,16 @@ __PACKAGE__->belongs_to(
 
 Type: belongs_to
 
-Related object: L<V2::Server::Schema::Result::Resource>
+Related object: L<gollum::Schema::Result::Resource>
 
 =cut
 
 __PACKAGE__->belongs_to(
     "resource",
-    "V2::Server::Schema::Result::Resource",
+    "gollum::Schema::Result::Resource",
     { id        => "resource_id" },
     { join_type => "LEFT", on_delete => "CASCADE", on_update => "CASCADE" },
 );
-
-sub hash {
-    my ($self) = @_;
-
-    my $obj = {
-        id_resource => $self->resource_id,
-        id_tag 		=> $self->tag_id,
-    };
-
-    return $obj;
-}
-
 
 # You can replace this text with custom content, and it will be preserved on regeneration
 1;

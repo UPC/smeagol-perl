@@ -3,11 +3,9 @@ package V2::Server::Controller::Booking;
 use Moose;
 use feature 'switch';
 use namespace::autoclean;
-use Data::Dumper;
 use DateTime;
 use DateTime::Duration;
 use DateTime::Span;
-
 #Voodoo modules
 use Date::ICal;
 use Data::ICal;
@@ -80,10 +78,16 @@ A resource's agenda: /booking?resource=id GET which redirects to bookings_resour
 =cut
 
 sub default_GET {
-    my ( $self, $c, $res, $id ) = @_;
+    my ( $self, $c, $res, $id, $module, $id_module ) = @_;
+
 
     if ($id) {
-        $c->detach( 'get_booking', [$id] );
+	if(($module eq 'tag') && ($id_module)){
+	    $c->detach( 'get_relation_tag_booking', [$id, $id_module]);
+	}
+	else {
+	    $c->detach( 'get_booking', [$id] );
+	}
     }
     else {
         if ( $c->stash->{id_resource} ) {
@@ -101,6 +105,23 @@ sub default_GET {
     }
 }
 
+sub get_relation_tag_booking : Private {
+    my ( $self, $c, $id , $id_module) = @_;
+    my $booking = $c->model('DB::TBooking')->find( { id => $id } );
+    my @message;
+
+    if ( !$booking ) {
+		#TODO: message: Resource no trobat.
+        $c->stash->{content}  = \@message;
+        
+        $c->stash->{template} = 'old_not_found.tt';
+        $c->response->status(404);
+    }
+    else {
+
+        $c->detach( '/tag/get_tag_from_object', [ $id, $c->namespace, $id_module ] );
+    }
+}
 =head2 get_booking
 
 This function is not accessible through the url: /booking/get_booking/id but /booking/id hence the
@@ -353,8 +374,12 @@ complexity. $c for the win!
 =cut
 
 sub default_POST {
-    my ( $self, $c ) = @_;
+    my ( $self, $c, $res, $id, $module, $id_module ) = @_;
     my $req = $c->request;
+
+	if(($module eq 'tag') && ($id_module)){
+		$c->detach( 'post_relation_tag_booking');
+	}
 
     my $info        = $req->parameters->{info};
     my $id_resource = $req->parameters->{id_resource};
@@ -401,6 +426,8 @@ sub default_POST {
     my $by_day_month = $req->parameters->{by_day_month};
 
     my $new_booking = $c->model('DB::TBooking')->find_or_new();
+    
+    
     $c->stash->{id_event}    = $id_event;
     $c->stash->{id_resource} = $id_resource;
 
@@ -620,6 +647,15 @@ sub default_POST {
     }
 }
 
+sub post_relation_tag_booking : Private {
+    my ( $self, $c) = @_;
+    my @message;
+     
+	#TODO: operacio no permesa.
+	$c->stash->{content} = \@message; 
+    $c->response->status(405);
+}
+
 =head2 default_PUT
 
 Same functionality than default_POST but updating an existing booking.
@@ -627,6 +663,17 @@ Same functionality than default_POST but updating an existing booking.
 =cut
 
 sub default_PUT {
+    my ( $self, $c, $res, $id, $module, $id_module ) = @_;
+    if ($id) {
+		if(($module eq 'tag') && ($id_module)){
+		    $c->forward( 'put_relation_tag_booking', [$id, $id_module]);
+		}else{
+		    $c->forward( 'put_booking', [$id] );
+		}
+    }
+}
+
+sub put_booking : Private {
     my ( $self, $c, $res, $id ) = @_;
     my $req = $c->request;
 
@@ -874,29 +921,68 @@ sub default_PUT {
     }
 }
 
+sub put_relation_tag_booking : Private {
+    my ( $self, $c, $id_booking , $id_module) = @_;
+    my $booking = $c->model('DB::TBooking')->find( { id => $id_booking } );
+    my @message;
+
+    if ( !$booking ) {
+		#TODO: message: Booking no trobat.
+        $c->stash->{content}  = \@message;
+        
+        $c->stash->{template} = 'old_not_found.tt';
+        $c->response->status(404);
+    }
+    else {
+        $c->detach( '/tag/put_tag_object', [ $id_booking, $c->namespace, $id_module ] );
+    }
+}
+
 =head2 default_DELETE
 
 =cut
 
 sub default_DELETE {
-    my ( $self, $c, $res, $id ) = @_;
+    my ( $self, $c, $res, $id, $module, $id_module) = @_;
+    
     my $req = $c->request;
-
-    my $booking_aux = $c->model('DB::TBooking')->find( { id => $id } );
-
-    if ($booking_aux) {
-        $booking_aux->delete;
-        my @message = { message => "Booking succesfully deleted" };
-        $c->stash->{content}  = \@message;
-        $c->stash->{template} = 'booking/delete_ok.tt';
-        $c->response->status(200);
+    
+if ($id) {
+    if(($module eq 'tag') && ($id_module)){
+        $c->detach( 'delete_relation_tag_booking', [$id, $id_module]);
     }
     else {
-        my @message = { message =>
-                "We have not found the booking. Maybe it's already deleted" };
+        my $booking_aux = $c->model('DB::TBooking')->find( { id => $id } );
+        my @message;
+        if ($booking_aux) {
+	    $booking_aux->delete;
+	    #TODO: message: Resource esborrat amb èxit.
+	    $c->stash->{content}  = \@message;
+        }
+        else {  
+	    #TODO: message: Resource no trobat.
+	    $c->stash->{content}  = \@message;
+	    $c->stash->{template} = 'old_not_found.tt';
+	    $c->response->status(404);
+        }
+    }
+}
+}
+
+sub delete_relation_tag_booking : Private {
+    my ( $self, $c, $id , $id_module) = @_;
+    my $booking = $c->model('DB::TBooking')->find( { id => $id } );
+    my @message;
+
+    if ( !$booking ) {
+		#TODO: message: Resource no trobat.
         $c->stash->{content}  = \@message;
-        $c->stash->{template} = 'not_found.tt';
+        
+        $c->stash->{template} = 'old_not_found.tt';
         $c->response->status(404);
+    }
+    else {
+        $c->detach( '/tag/delete_tag_from_object', [ $id, $c->namespace, $id_module ] );
     }
 }
 

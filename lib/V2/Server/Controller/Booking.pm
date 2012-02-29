@@ -79,15 +79,20 @@ A resource's agenda: /booking?resource=id GET which redirects to bookings_resour
 
 sub default_GET {
     my ( $self, $c, $res, $id, $module, $id_module ) = @_;
+	my @message;
 
 
     if ($id) {
-	if(($module eq 'tag') && ($id_module)){
-	    $c->detach( 'get_relation_tag_booking', [$id, $id_module]);
-	}
-	else {
-	    $c->detach( 'get_booking', [$id] );
-	}
+		if(($module eq 'tag') && ($id_module)){
+		    $c->detach( 'get_relation_tag_booking', [$id, $id_module]);
+		}elsif(($module eq 'tag') && !($id_module)){
+			$c->response->location($c->uri_for('/tag')."/?booking=".$id);
+			#TODO: message: redireccio a la llista
+			$c->stash->{content}  = \@message;
+			$c->response->status(301); 
+		}else {
+			$c->detach( 'get_booking', [$id] );
+		}
     }
     else {
         if ( $c->stash->{id_resource} ) {

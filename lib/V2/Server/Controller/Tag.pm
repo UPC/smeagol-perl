@@ -127,8 +127,18 @@ sub filter_tags_by_object : Private {
         $c->stash->{content}  = \@message;
         $c->response->status(404);
     }else{
-		my @tags = $obj->tag_list;
+		my @idTags = $obj->tag_list;
+		my @tags;
+		foreach (@{$idTags[0]}){
+			my $tagaux = $c->model('DB::TTag')->find( { id => $_->{id} } );
+			#FIXME: aixo ho hauria de fer el modul Schema::Tag
+			my $tag = {
+        	    id          => $tagaux->id ,
+        	    description => $tagaux->description ,
+        	};
 
+			push @tags, $tag;
+		}
    		$c->stash->{content}  = \@tags;
     	$c->response->status(200);
 	}

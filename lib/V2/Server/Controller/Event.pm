@@ -40,13 +40,15 @@ sub default_GET {
 	my @message;
 
     if ($id) {
-		if(($module eq 'tag') && ($id_module)){
-		    $c->detach( 'get_relation_tag_event', [$id, $id_module]);
-		}elsif(($module eq 'tag') && !($id_module)){
-			$c->response->location($c->uri_for('/tag')."/?event=".$id);
-			#TODO: message: redireccio a la llista
-			$c->stash->{content}  = \@message;
-			$c->response->status(301); 
+		if((defined $module)&&($module eq 'tag')) {
+			if($id_module){
+		    	$c->detach( 'get_relation_tag_event', [$id, $id_module]);
+			}else{
+				$c->response->location($c->uri_for('/tag')."/?event=".$id);
+				#TODO: message: redireccio a la llista
+				$c->stash->{content}  = \@message;
+				$c->response->status(301);
+			}
 		}else{
 		    $c->detach( 'get_event', [$id] );
 		}
@@ -128,7 +130,7 @@ sub default_POST {
     my $req = $c->request;
     my @message;
  
-    if(($module eq 'tag') && ($id_module)){
+    if((defined $module) &&($module eq 'tag') && ($id_module)){
 		$c->detach( 'post_relation_tag_event');
 	}
 
@@ -212,8 +214,9 @@ sub post_relation_tag_event : Private {
 
 sub default_PUT {
     my ( $self, $c, $res, $id, $module, $id_module ) = @_;
+
     if ($id) {
-		if(($module eq 'tag') && ($id_module)){
+		if((defined $module) && ($module eq 'tag') && ($id_module)){
 		    $c->forward( 'put_relation_tag_event', [$id, $id_module]);
 		}else{
 		    $c->forward( 'put_event', [$id] );
@@ -222,7 +225,7 @@ sub default_PUT {
 }
 
 sub put_event : Private {
-    my ( $self, $c, $res, $id ) = @_;
+    my ( $self, $c, $id ) = @_;
     my $req = $c->request;
 
     my $info        = $req->parameters->{info};
@@ -341,7 +344,7 @@ sub default_DELETE {
     my $req = $c->request;
     
 if ($id) {
-    if(($module eq 'tag') && ($id_module)){
+    if((defined $module) && ($module eq 'tag') && ($id_module)){
         $c->detach( 'delete_relation_tag_event', [$id, $id_module]);
     }
     else {

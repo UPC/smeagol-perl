@@ -8,6 +8,7 @@ my $enc     = 'utf-8';
 my $VERSION = $V2::Server::VERSION;
 BEGIN { extends 'Catalyst::Controller::REST' }
 
+
 =head1 NAME
 
 V2::Server::Controller::Event - Catalyst Controller
@@ -35,16 +36,45 @@ sub default : Local : ActionClass('REST') {
 }
 
 sub default_GET {
-    my ( $self, $c, $res, $id ) = @_;
+    my ( $self, $c, $res, $id, $module, $id_module ) = @_;
+	my @message;
 
     if ($id) {
-        $c->forward( 'get_event', [$id] );
+		if((defined $module)&&($module eq 'tag')) {
+			if($id_module){
+		    	$c->detach( 'get_relation_tag_event', [$id, $id_module]);
+			}else{
+				$c->response->location($c->uri_for('/tag')."/?event=".$id);
+				#TODO: message: redireccio a la llista
+				$c->stash->{content}  = \@message;
+				$c->response->status(301);
+			}
+		}else{
+		    $c->detach( 'get_event', [$id] );
+		}
     }
     else {
-        $c->forward( 'event_list', [] );
+        $c->detach( 'event_list', [] );
     }
 }
 
+sub get_relation_tag_event : Private {
+    my ( $self, $c, $id , $id_module) = @_;
+    my $event = $c->model('DB::TEvent')->find( { id => $id } );
+    my @message;
+
+    if ( !$event ) {
+		#TODO: message: Resource no trobat.
+        $c->stash->{content}  = \@message;
+        
+        $c->stash->{template} = 'old_not_found.tt';
+        $c->response->status(404);
+    }
+    else {
+
+        $c->detach( '/tag/get_tag_from_object', [ $id, $c->namespace, $id_module ] );
+    }
+}
 sub get_event : Local {
     my ( $self, $c, $id ) = @_;
     my $event_aux = $c->model('DB::TEvent')->find( { id => $id } );
@@ -96,9 +126,13 @@ sub event_list : Local {
 }
 
 sub default_POST {
-    my ( $self, $c ) = @_;
+    my ( $self, $c, $res, $id, $module, $id_module ) = @_;
     my $req = $c->request;
-	my @message;
+    my @message;
+ 
+    if((defined $module) &&($module eq 'tag') && ($id_module)){
+		$c->detach( 'post_relation_tag_event');
+	}
 
     my $info        = $req->parameters->{info};
     my $description = $req->parameters->{description};
@@ -169,8 +203,29 @@ sub default_POST {
     }
 }
 
+sub post_relation_tag_event : Private {
+    my ( $self, $c) = @_;
+    my @message;
+    
+	#TODO: message: operacio no permesa 
+	$c->stash->{content} = \@message; 
+    $c->response->status(405);
+}
+
 sub default_PUT {
-    my ( $self, $c, $res, $id ) = @_;
+    my ( $self, $c, $res, $id, $module, $id_module ) = @_;
+
+    if ($id) {
+		if((defined $module) && ($module eq 'tag') && ($id_module)){
+		    $c->forward( 'put_relation_tag_event', [$id, $id_module]);
+		}else{
+		    $c->forward( 'put_event', [$id] );
+		}
+    }
+}
+
+sub put_event : Private {
+    my ( $self, $c, $id ) = @_;
     my $req = $c->request;
 
     my $info        = $req->parameters->{info};
@@ -268,29 +323,65 @@ sub default_PUT {
     }
 }
 
-sub default_DELETE {
-    my ( $self, $c, $res, $id ) = @_;
-    my $req = $c->request;
-
-    my $event_aux = $c->model('DB::TEvent')->find( { id => $id } );
+sub put_relation_tag_event : Private {
+    my ( $self, $c, $id_event , $id_module) = @_;
+    my $event = $c->model('DB::TEvent')->find( { id => $id_event } );
     my @message;
 
-    if ($event_aux) {
-        $event_aux->delete;
-       
-        #TODO: message: Esdeveniment esborrat amb èxit.
+    if ( !$event ) {
+		#TODO: message: Event no trobat.
         $c->stash->{content}  = \@message;
-        $c->stash->{template} = 'event/delete_ok.tt';
-        $c->response->status(200);
-    }
-    else {
-	
-	#TODO: message: Esdeveniment no trobat.
-        $c->stash->{content}  = \@message;
-        $c->stash->{template} = 'not_found.tt';
         $c->response->status(404);
     }
+    else {
+        $c->detach( '/tag/put_tag_object', [ $id_event, $c->namespace, $id_module ] );
+    }
 }
+
+sub default_DELETE {
+    my ( $self, $c, $res, $id, $module, $id_module) = @_;
+    
+    my $req = $c->request;
+    
+if ($id) {
+    if((defined $module) && ($module eq 'tag') && ($id_module)){
+        $c->detach( 'delete_relation_tag_event', [$id, $id_module]);
+    }
+    else {
+        my $event_aux = $c->model('DB::TEvent')->find( { id => $id } );
+        my @message;
+        if ($event_aux) {
+	    $event_aux->delete;
+	    #TODO: message: Resource esborrat amb èxit.
+	    $c->stash->{content}  = \@message;
+        }
+        else {  
+	    #TODO: message: Resource no trobat.
+	    $c->stash->{content}  = \@message;
+	    $c->stash->{template} = 'old_not_found.tt';
+	    $c->response->status(404);
+        }
+    }
+}
+}
+
+sub delete_relation_tag_event : Private {
+    my ( $self, $c, $id , $id_module) = @_;
+    my $event = $c->model('DB::TEvent')->find( { id => $id } );
+    my @message;
+
+    if ( !$event ) {
+		#TODO: message: Resource no trobat.
+        $c->stash->{content}  = \@message;
+        
+        $c->stash->{template} = 'old_not_found.tt';
+        $c->response->status(404);
+    }
+    else {
+        $c->detach( '/tag/delete_tag_from_object', [ $id, $c->namespace, $id_module ] );
+    }
+}
+
 
 =head2 ParseDate
 Outrage!! The author is repeting himself. Throw him to the fire!!

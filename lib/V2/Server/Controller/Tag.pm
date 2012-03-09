@@ -1,5 +1,4 @@
 package V2::Server::Controller::Tag;
-
 use Moose;
 use namespace::autoclean;
 use V2::Server::Obj::Tag;
@@ -28,6 +27,9 @@ Catalyst Controller.
 sub begin : Private {
     my ( $self, $c ) = @_;
 
+    $c->stash->{id_resource} = $c->request->query_parameters->{resource};
+    $c->stash->{id_event}    = $c->request->query_parameters->{event};
+    $c->stash->{id_booking}        = $c->request->query_parameters->{booking};
     $c->stash->{format} = $c->request->headers->{"accept"}
         || 'application/json';
 }
@@ -37,12 +39,19 @@ sub default : Local : ActionClass('REST') {
 
 sub default_GET {
     my ( $self, $c, $res, $id ) = @_;
-
     if ($id) {
         $c->detach( 'get_tag', [$id] );
     }
     else {
-        $c->detach( 'tag_list', [] );
+		if($c->stash->{id_resource}){
+			$c->detach('filter_tags_by_object',['resource']);
+		}elsif($c->stash->{id_event}){
+			$c->detach('filter_tags_by_object',['event']);
+		}elsif($c->stash->{id_booking}){
+			$c->detach('filter_tags_by_object',['booking']);
+		}else{
+        	$c->detach( 'tag_list', [] );
+		}
     }
 }
 
@@ -103,6 +112,64 @@ sub get_tag : Private {
         $c->stash->{template} = 'tag/get_tag.tt';
     }
 
+}
+
+sub filter_tags_by_object : Private {
+    my ( $self, $c, $module ) = @_;
+	my @message;
+
+	my $obj = $c->model('DB::TResource')->find( { id => $c->stash->{id_resource} } )  if ($module eq 'resource');
+	$obj = $c->model('DB::TEvent')->find( { id => $c->stash->{id_event} } )  if ($module eq 'event');
+	$obj = $c->model('DB::TBooking')->find( { id => $c->stash->{id_booking} } )  if ($module eq 'booking');
+
+	if ( !$obj ) {
+        #TODO: message: objecte no trobat
+        $c->stash->{content}  = \@message;
+        $c->response->status(404);
+    }else{
+		my @idTags = $obj->tag_list;
+		my @tags;
+		foreach (@{$idTags[0]}){
+			my $tagaux = $c->model('DB::TTag')->find( { id => $_->{id} } );
+			#FIXME: aixo ho hauria de fer el modul Schema::Tag
+			my $tag = {
+        	    id          => $tagaux->id ,
+        	    description => $tagaux->description ,
+        	};
+
+			push @tags, $tag;
+		}
+   		$c->stash->{content}  = \@tags;
+    	$c->response->status(200);
+	}
+}
+
+sub get_tag_from_object : Private {
+    my ( $self, $c, $id , $module ,  $id_module) = @_;
+    my $tag = $c->model('DB::TTag')->find( { id => $id_module } );
+    my @message;
+
+    if ( !$tag ) {
+		#TODO: message: Resource no trobat.
+        $c->stash->{content}  = \@message;
+        
+        $c->stash->{template} = 'old_not_found.tt';
+        $c->response->status(404);
+    }
+    else {
+        my $object = $c->model('DB::TResourceTag')->find( { tag_id => $id_module, resource_id => $id } ) if ($module eq 'resource');
+	$object = $c->model('DB::TTagEvent')->find( { id_tag => $id_module, id_event => $id } ) if ($module eq 'event');
+	$object = $c->model('DB::TTagBooking')->find( { id_tag => $id_module, id_booking => $id } ) if ($module eq 'booking');
+	if ( !$object ) {
+	    	#TODO: message: Relacio no trobada.
+	    $c->stash->{content}  = \@message;
+	    $c->response->status(404);
+	}else{
+	    #TODO: message: Relacio trobada.
+	    $c->stash->{content}  = \@message;
+	    $c->response->status(200);
+	}
+    }
 }
 
 sub default_POST {
@@ -262,6 +329,33 @@ sub default_PUT {
     }
 }
 
+sub put_tag_object : Private {
+    my ( $self, $c, $id , $module ,  $id_tag) = @_;
+    my $tag = $c->model('DB::TTag')->find( { id => $id_tag } );
+    my @message;
+
+    if ( !$tag ) {
+		#TODO: message: Tag no trobat.
+        $c->stash->{content}  = \@message;
+        
+        $c->stash->{template} = 'old_not_found.tt';
+        $c->response->status(404);
+    }
+    else {
+        my $RelationTag;
+
+		$RelationTag = $c->model('DB::TResourceTag')->find_or_new({ resource_id => $id, tag_id => $id_tag }) if ($module eq 'resource');
+		$RelationTag = $c->model('DB::TTagEvent')->find_or_new(id_event => $id, id_tag => $id_tag) if($module eq 'event');
+		$RelationTag = $c->model('DB::TTagBooking')->find_or_new(id_booking => $id, id_tag => $id_tag) if($module eq 'booking');
+	    
+		unless ($RelationTag->in_storage) {$RelationTag->insert;}
+	    
+		#TODO: message: Relacio creada.
+	    $c->stash->{content}  = \@message;
+	    $c->response->status(200);
+    }
+}
+
 sub default_DELETE {
     my ( $self, $c, $res, $id ) = @_;
 
@@ -300,6 +394,37 @@ sub default_DELETE {
 
 }
 
+sub delete_tag_from_object : Private {
+    my ( $self, $c, $id , $module ,  $id_tag) = @_;
+    my $tag = $c->model('DB::TTag')->find( { id => $id_tag } );
+    my @message;
+
+    if ( !$tag ) {
+		#TODO: message: Tag no trobat.
+        $c->stash->{content}  = \@message;
+        
+        $c->stash->{template} = 'old_not_found.tt';
+        $c->response->status(404);
+    }
+    else {
+        my @RelationTag;
+
+    	@RelationTag = $c->model('DB::TResourceTag')->search({ resource_id => $id, tag_id => $id_tag }) if ($module eq 'resource');
+		@RelationTag = $c->model('DB::TTagEvent')->search({id_event => $id, id_tag => $id_tag}) if($module eq 'event');
+		@RelationTag = $c->model('DB::TTagBooking')->search({id_booking => $id, id_tag => $id_tag}) if($module eq 'booking');
+	    
+    	if ( !@RelationTag ) {
+		    #TODO: message: Relacio no trobada.
+		    $c->stash->{content}  = \@message;
+		    $c->response->status(404);
+		}else{
+		    #TODO: message: Relacio trobada.
+			$RelationTag[0]->delete;
+		    $c->stash->{content}  = \@message;
+		    $c->response->status(200);
+		}
+    }
+}
 sub end : Private {
     my ( $self, $c ) = @_;
 

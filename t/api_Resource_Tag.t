@@ -60,6 +60,8 @@ sub run_test {
 
     my %args = prepare_args($test);
 
+    diag ( $test->{'method'} . ' ' . test_url($test->{'url'}) );
+
     my $r = V2::Test->new( uri => test_url( $test->{'url'} ) );
 
     # V2::Test doesn't expect a 'url' key in tests

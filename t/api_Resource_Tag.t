@@ -48,6 +48,20 @@ sub test_url {
     return $url;
 }
 
+# Builds a URL, given an array reference composed by strings or function references.
+#
+# For instance, evaluate_and_concat([ 'tag?resource=', \&get_generated_id ])
+# returns "/tag?resource=ID"
+#
+sub evaluate_and_concat {
+    my ($params) = @_;
+    my $url = '/';
+    for my $elem ( @{$params} ) {
+        $url .= ( ref $elem eq 'CODE' ) ? $elem->() : $elem;
+    }
+    return $url;
+}
+
 # main loop
 for my $t (@tests) {
     run_test($t);
@@ -60,9 +74,14 @@ sub run_test {
 
     my %args = prepare_args($test);
 
-    diag ( $test->{'method'} . ' ' . test_url($test->{'url'}) );
+    my $url
+        = ( ref $test->{'url'} eq 'HASH' )
+        ? test_url( $test->{'url'} )
+        : evaluate_and_concat( $test->{'url'} );
 
-    my $r = V2::Test->new( uri => test_url( $test->{'url'} ) );
+    diag( $test->{'method'} . ' ' . $url );
+
+    my $r = V2::Test->new( uri => $url );
 
     # V2::Test doesn't expect a 'url' key in tests
     delete $args{'url'} if exists $args{'url'};

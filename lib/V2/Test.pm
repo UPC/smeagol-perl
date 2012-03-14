@@ -269,9 +269,9 @@ Array reference describing the expected result.
 sub PUT {
     my ( $self, %params ) = validated_hash(
 	\@_,
-        id      => { isa => 'Str' },
+        id      => { isa => 'Str', default => '' },
         status  => { isa => 'CodeRef', default => \&_default_status },
-        args    => { isa => 'ArrayRef | HashRef' },
+        args    => { isa => 'ArrayRef | HashRef', default => {} },
         result  => { isa => 'ArrayRef', default => [] },
     );
     my $uri  = $self->uri . "/$params{'id'}";

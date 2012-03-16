@@ -83,13 +83,15 @@ sub default_GET {
 
 
     if ($id) {
-		if(($module eq 'tag') && ($id_module)){
-		    $c->detach( 'get_relation_tag_booking', [$id, $id_module]);
-		}elsif(($module eq 'tag') && !($id_module)){
-			$c->response->location($c->uri_for('/tag')."/?booking=".$id);
-			#TODO: message: redireccio a la llista
-			$c->stash->{content}  = \@message;
-			$c->response->status(301); 
+		if((defined $module) && ($module eq 'tag') ){
+			if ($id_module){
+		    	$c->detach( 'get_relation_tag_booking', [$id, $id_module]);
+			}else{
+				$c->response->location($c->uri_for('/tag')."/?booking=".$id);
+				#TODO: message: redireccio a la llista
+				$c->stash->{content}  = \@message;
+				$c->response->status(301); 
+			}
 		}else {
 			$c->detach( 'get_booking', [$id] );
 		}
@@ -155,9 +157,8 @@ sub get_booking : Private {
                         until       => $booking_aux->until->iso8601(),
                         frequency   => $booking_aux->frequency,
                         interval    => $booking_aux->interval,
-                        byminute    => $booking_aux->by_minute,
-                        byhour      => $booking_aux->by_hour,
-                        tags        => $booking_aux->tag_list,
+                        by_minute    => $booking_aux->by_minute,
+                        by_hour      => $booking_aux->by_hour,
                 };
 
             }
@@ -174,10 +175,9 @@ sub get_booking : Private {
                         until       => $booking_aux->until->iso8601(),
                         frequency   => $booking_aux->frequency,
                         interval    => $booking_aux->interval,
-                        byminute    => $booking_aux->by_minute,
-                        byhour      => $booking_aux->by_hour,
-                        byday       => $booking_aux->by_day,
-                        tags        => $booking_aux->tag_list,                        
+                        by_minute    => $booking_aux->by_minute,
+                        by_hour      => $booking_aux->by_hour,
+                        by_day       => $booking_aux->by_day,
                 };
 
             }
@@ -194,11 +194,10 @@ sub get_booking : Private {
                         until       => $booking_aux->until->iso8601(),
                         frequency   => $booking_aux->frequency,
                         interval    => $booking_aux->interval,
-                        byminute    => $booking_aux->by_minute,
-                        byhour      => $booking_aux->by_hour,
-                        bymonth     => $booking_aux->by_month,
-                        bymonthday  => $booking_aux->by_day_month,
-                        tags        => $booking_aux->tag_list,
+                        by_minute    => $booking_aux->by_minute,
+                        by_hour      => $booking_aux->by_hour,
+                        by_month     => $booking_aux->by_month,
+                        by_monthday  => $booking_aux->by_day_month,
 		};
             }
 
@@ -214,11 +213,10 @@ sub get_booking : Private {
                         until       => $booking_aux->until->iso8601(),
                         frequency   => $booking_aux->frequency,
                         interval    => $booking_aux->interval,
-                        byminute    => $booking_aux->by_minute,
-                        byhour      => $booking_aux->by_hour,
-                        bymonth     => $booking_aux->by_month,
-                        bymonthday  => $booking_aux->by_day_month,
-                        tags        => $booking_aux->tag_list,
+                        by_minute    => $booking_aux->by_minute,
+                        by_hour      => $booking_aux->by_hour,
+                        by_month     => $booking_aux->by_month,
+                        by_monthday  => $booking_aux->by_day_month,
                 };
             }
         };
@@ -606,12 +604,12 @@ sub default_POST {
         else {
 	    $new_booking->insert;
 	    
-            $c->stash->{content} = $booking;
+            $c->stash->{content} = \@message;
             $c->stash->{booking} = $booking;
             $c->response->status(201);
 
             #$c->stash->{template} = 'booking/get_booking.tt';
-            $c->forward( 'get_booking', [ $new_booking->id ] );
+            #$c->forward( 'get_booking', [ $new_booking->id ] );
 
         }
     }

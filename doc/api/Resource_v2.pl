@@ -3,39 +3,39 @@
 # Each test has the following key/value pairs:
 #
 #   title  => a descriptive test description
-#   method => the HTTP method to use (GET, POST, PUT, DELETE)
+#   op => the HTTP method to use (GET, POST, PUT, DELETE)
 #   id     => the resource id   (required only when using GET, PUT or DELETE)
-#   args   => a hash describing a resource (required in POST)
+#   input   => a hash describing a resource (required in POST)
 #   status => a code reference which to the routine used to verify
 #             HTTP status response
 #   new_ids => number of IDs the test should generate (1 for POST, 0 elsewhere)
-#   result => a hash describing the object(s) returned by the server
+#   output => a (possibly empty) list of hashes describing the object(s) returned by the server
 #
 [   {   title  => 'LlistaDeRecursosBuida',
-        method => 'GET',
+        op     => 'GET',
         status => sub { shift->code == HTTP_OK },
-        result => [],
+        output => [],
     },
-    {   title  => 'ConsultaRecursInexistent',
-        method => 'GET',
-        id     => 123456789,                    # non-existent resource ID
+    {   title => 'ConsultaRecursInexistent',
+        op    => 'GET',
+        id    => 123456789,                    # non-existent resource ID
         status => sub { shift->code == HTTP_NOT_FOUND },
-        result => [],
+        output => [],
     },
-    {   title  => 'CreaRecurs',
-        method => 'POST',
-        args   => {
+    {   title => 'CreaRecurs',
+        op    => 'POST',
+        input => {
             description => 'aula',
             info        => 'resource info',
         },
         status  => sub { shift->code == HTTP_CREATED },
         new_ids => 1,
-        result  => [],
+        output  => [],
     },
     {   title  => 'LlistaDeRecursosNoBuida',
-        method => 'GET',
+        op     => 'GET',
         status => sub { shift->code == HTTP_OK },
-        result => [
+        output => [
             {   "id"          => \&get_generated_id,
                 "description" => "aula",
                 "info"        => "resource info"
@@ -43,126 +43,126 @@
         ],
     },
     {   title  => 'ConsultaRecurs',
-        method => 'GET',
+        op     => 'GET',
         id     => \&get_generated_id,
         status => sub { shift->code == HTTP_OK },
-        result => {
+        output => {
             id          => \&get_generated_id,
             description => 'aula',
             info        => 'resource info',
         }
     },
-    {   title  => 'CreaRecursDuplicat',
-        method => 'POST',
-        args   => {
+    {   title => 'CreaRecursDuplicat',
+        op    => 'POST',
+        input => {
             description => 'aula',
             info        => 'una altra info',
         },
         status => sub { shift->code == HTTP_CONFLICT },
-        result => [],
+        output => [],
     },
-    {   title  => 'CreaRecursDescripcioMassaCurta',
-        method => 'POST',
-        args   => {
+    {   title => 'CreaRecursDescripcioMassaCurta',
+        op    => 'POST',
+        input => {
             description => '',
             info        => 'una altra info',
         },
         status => sub { shift->code == HTTP_BAD_REQUEST },
-        result => [],
+        output => [],
     },
-    {   title  => 'CreaRecursDescripcioMassaLlarga',
-        method => 'POST',
-        args   => {
+    {   title => 'CreaRecursDescripcioMassaLlarga',
+        op    => 'POST',
+        input => {
             description => 'a' x 129,    # max description length is 128 chars
             info => 'una altra info',
         },
         status => sub { shift->code == HTTP_BAD_REQUEST },
-        result => [],
+        output => [],
     },
-    {   title  => 'CreaRecursInfoBuida',
-        method => 'POST',
-        args   => {
+    {   title => 'CreaRecursInfoBuida',
+        op    => 'POST',
+        input => {
             description => 'aula amb info buida',
             info        => '',
         },
         status  => sub { shift->code == HTTP_CREATED },
         new_ids => 1,
-        result  => [],
+        output  => [],
     },
     {   title  => 'ConsultaRecursInfoBuida',
-        method => 'GET',
+        op     => 'GET',
         id     => \&get_generated_id,
         status => sub { shift->code == HTTP_OK },
-        result => {
+        output => {
             id          => \&get_generated_id,
             description => 'aula amb info buida',
             info        => '',
         }
     },
-    {   title  => 'CreaRecursInfoMassaLlarga',
-        method => 'POST',
-        args   => {
+    {   title => 'CreaRecursInfoMassaLlarga',
+        op    => 'POST',
+        input => {
             description => 'un recurs',
             info        => 'a' x 257,     # max info length is 256 chars
         },
         status => sub { shift->code == HTTP_BAD_REQUEST },
-        result => [],
+        output => [],
     },
-    {   title  => 'CreaRecursDescripcioEnBlanc',
-        method => 'POST',
-        args   => {
+    {   title => 'CreaRecursDescripcioEnBlanc',
+        op    => 'POST',
+        input => {
             description => '   ',       # should not accept blank descriptions
             info        => 'una info',
         },
         status => sub { shift->code == HTTP_BAD_REQUEST },
-        result => [],
+        output => [],
     },
-    {   title  => 'ModificaRecursInexistent',
-        method => 'PUT',
-        id     => 12345,
-        args   => {
+    {   title => 'ModificaRecursInexistent',
+        op    => 'PUT',
+        id    => 12345,
+        input => {
             description => 'aula (modif)',
             info        => 'resource info (modif)',
         },
         status => sub { shift->code == HTTP_NOT_FOUND },
-        result => [],
+        output => [],
     },
-    {   title  => 'ModificaRecurs',
-        method => 'PUT',
-        id     => \&get_generated_id,
-        args   => {
+    {   title => 'ModificaRecurs',
+        op    => 'PUT',
+        id    => \&get_generated_id,
+        input => {
             description => 'aula (modif)',
             info        => 'resource info (modif)',
         },
         status => sub { shift->code == HTTP_OK },
     },
     {   title  => 'ConsultaRecursModificat',
-        method => 'GET',
+        op     => 'GET',
         id     => \&get_generated_id,
         status => sub { shift->code == HTTP_OK },
-        result => {
+        output => {
             id          => \&get_generated_id,
             description => 'aula (modif)',
             info        => 'resource info (modif)',
         }
     },
     {   title  => 'EsborraRecursInexistent',
-        method => 'DELETE',
+        op     => 'DELETE',
         id     => 12345,
         status => sub { shift->code == HTTP_NOT_FOUND },
-        result => [],
+        output => [],
     },
     {   title  => 'EsborraRecurs',
-        method => 'DELETE',
+        op     => 'DELETE',
         id     => \&get_generated_id,
         status => sub { shift->code == HTTP_OK },
-        result => [],
+        output => [],
     },
     {   title  => 'ConsultaRecursEsborrat',
-        method => 'GET',
+        op     => 'GET',
         id     => \&get_generated_id,
         status => sub { shift->code == HTTP_NOT_FOUND },
-        result => [],
+        output => [],
     },
 
  #
@@ -170,44 +170,44 @@
  # a resource description if there is already another resource with the same
  # description
  #
-    {   title  => 'CreaRecursPerConflicteActualitzacio_1',
-        method => 'POST',
-        args   => {
+    {   title => 'CreaRecursPerConflicteActualitzacio_1',
+        op    => 'POST',
+        input => {
             description => 'r1',
             info        => 'r1 info',
         },
         status  => sub { shift->code == HTTP_CREATED },
         new_ids => 1,
-        result  => [],
+        output  => [],
     },
-    {   title  => 'CreaRecursPerConflicteActualitzacio_2',
-        method => 'POST',
-        args   => {
+    {   title => 'CreaRecursPerConflicteActualitzacio_2',
+        op    => 'POST',
+        input => {
             description => 'r2',
             info        => 'r2 info',
         },
         status  => sub { shift->code == HTTP_CREATED },
         new_ids => 1,
-        result  => [],
+        output  => [],
     },
-    {   title  => 'ModificaRecursConflicteActualitzacio',
-        method => 'PUT',
-        id     => \&get_generated_id,
-        args   => {
+    {   title => 'ModificaRecursConflicteActualitzacio',
+        op    => 'PUT',
+        id    => \&get_generated_id,
+        input => {
             description => 'r1',    # trying to update r2 with r1's desc
             info => 'r2 info (updated)',
         },
         status => sub { shift->code == HTTP_CONFLICT },
-        result => [],
+        output => [],
     },
-    {   title  => 'ModificaRecursAmbDescripcioNoValida',
-        method => 'PUT',
-        id     => \&get_generated_id,
-        args   => {
+    {   title => 'ModificaRecursAmbDescripcioNoValida',
+        op    => 'PUT',
+        id    => \&get_generated_id,
+        input => {
             description => '   ',
             info        => 'r2 info (updated)',
         },
         status => sub { shift->code == HTTP_BAD_REQUEST },
-        result => [],
+        output => [],
     },
 ]

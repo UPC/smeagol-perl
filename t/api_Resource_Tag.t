@@ -23,7 +23,7 @@ sub get_generated_id {
     return $OBJECT_ID;
 }
 
-# Builds the url for a test, given a hash with the following values:
+# Builds the uri for a test, given a hash with the following values:
 #  {
 #    type => (required) "resource", "event" or "booking"
 #    id   => (required) the id of the resource/event/booking (required),
@@ -32,20 +32,20 @@ sub get_generated_id {
 #  }
 # For instance, get_generated_url('resource',23,'aula') returns "/resource/23/tag/aula"
 #
-sub test_url {
+sub test_uri {
     my ($params) = @_;
-    my $url = '/' . $params->{'type'};
+    my $uri = '/' . $params->{'type'};
     if ( defined $params->{'id'} ) {
-        $url .= '/'
+        $uri .= '/'
             . (
             ref $params->{'id'} eq 'CODE'
             ? $params->{'id'}->()
             : $params->{'id'}
             );
-        $url .= '/tag';
+        $uri .= '/tag';
     }
-    $url .= ( '/' . $params->{'tag'} ) if ( defined $params->{'tag'} );
-    return $url;
+    $uri .= ( '/' . $params->{'tag'} ) if ( defined $params->{'tag'} );
+    return $uri;
 }
 
 # Builds a URL, given an array reference composed by strings or function references.
@@ -74,21 +74,21 @@ sub run_test {
 
     my %args = prepare_args($test);
 
-    my $url
-        = ( ref $test->{'url'} eq 'HASH' )
-        ? test_url( $test->{'url'} )
-        : evaluate_and_concat( $test->{'url'} );
+    my $uri
+        = ( ref $test->{'uri'} eq 'HASH' )
+        ? test_uri( $test->{'uri'} )
+        : evaluate_and_concat( $test->{'uri'} );
 
-    diag( $test->{'method'} . ' ' . $url );
+    #diag( $test->{'op'} . ' ' . $uri );
 
-    my $r = V2::Test->new( uri => $url );
+    my $r = V2::Test->new( uri => $uri );
 
-    # V2::Test doesn't expect a 'url' key in tests
-    delete $args{'url'} if exists $args{'url'};
+    # V2::Test doesn't expect a 'uri' key in tests
+    delete $args{'uri'} if exists $args{'uri'};
 
-    my $method = $test->{'method'};
+    my $op = $test->{'op'};
 
-    my $got = $r->$method(%args);
+    my $got = $r->$op(%args);
 
     $OBJECT_ID = $got if ( exists $args{'new_ids'} && $args{'new_ids'} != 0 );
 }
@@ -106,13 +106,13 @@ sub prepare_args {
             ? $test->{'id'}->()
             : $test->{'id'};
     }
-    $args{'args'}    = $test->{'args'}    if defined $test->{'args'};
+    $args{'args'}    = $test->{'input'}   if defined $test->{'input'};
     $args{'new_ids'} = $test->{'new_ids'} if defined $test->{'new_ids'};
     $args{'status'}  = $test->{'status'}  if defined $test->{'status'};
 
     # FIXME: is it possible to simplify the following code?
-    if ( exists $test->{'result'} ) {
-        $args{'result'} = $test->{'result'};
+    if ( exists $test->{'output'} ) {
+        $args{'result'} = $test->{'output'};
         if ( ref $args{'result'} eq 'ARRAY' ) {
             foreach my $val ( @{ $args{'result'} } ) {
                 if ( exists $val->{'id'} && ref $val->{'id'} eq 'CODE' ) {

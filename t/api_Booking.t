@@ -57,17 +57,143 @@ my @objs = 	(
 								id_resource	=> 1,
 								id_event	=> 1,
 								dtstart		=> '2012-03-12T09:00:00',
-								dtent		=> '2012-03-12T14:00:00',
+								dtend		=> '2012-03-12T14:00:00',
 #								duration	=> ,
 								frequency	=> 'daily',
 #								interval	=> ,
 								until		=> '2012-03-16T14:00:00',
-#								by_minute	=> '',
-#								by_hour		=> '',
+								by_minute	=> '1',
+								by_hour		=> '1',
 #								by_day		=> '',
 #								by_month	=> '',
 #			    		        by_day_month=> '',
 #	    				        exception	=> '',
+				   			},
+					status => 201
+				},
+				{
+					uri => '/resource',
+					op => 'POST',
+					input => {
+								info=>'RESOURCE 2 INFORMATION',
+								description => 'DESCRIPTION2',
+							},
+					status => 201
+				},
+				{
+					uri => '/event',
+					op => 'POST',
+					input => {
+								info		=> 'EVENT 2 INFORMATION',
+			    		        description	=> 'DESCRIPTION2',
+			    		        starts		=> '2011-02-15T04:00:00',
+	    				        ends		=> '2011-02-15T05:00:00',
+				   			},
+					status => 201
+				},
+				{
+					uri => '/booking',
+					op => 'POST',
+					input => {
+								info		=> 'BOOKING 1 INFORMATION',
+								id_resource	=> 2,
+								id_event	=> 2,
+								dtstart		=> '2012-03-13T09:00:00',
+								dtend		=> '2012-03-13T14:00:00',
+								#duration	=> 60,
+								frequency	=> 'weekly',
+								interval	=> 1,
+								until		=> '2012-03-15T14:00:00',
+								by_minute	=> '2',
+								by_hour		=> '2',
+								by_day		=> 'we',
+								#by_month	=> '-2',
+								#by_day_month	=> '-2',
+#	    				        exception	=> '',
+				   			},
+					status => 201
+				},
+				{
+					uri => '/resource',
+					op => 'POST',
+					input => {
+								info=>'RESOURCE 3 INFORMATION',
+								description => 'DESCRIPTION3',
+							},
+					status => 201
+				},
+				{
+					uri => '/event',
+					op => 'POST',
+					input => {
+								info		=> 'EVENT 3 INFORMATION',
+			    		        description	=> 'DESCRIPTION3',
+			    		        starts		=> '2011-02-18T04:00:00',
+	    				        ends		=> '2011-02-18T05:00:00',
+				   			},
+					status => 201
+				},
+				{
+					uri => '/booking',
+					op => 'POST',
+					input => {
+								info		=> 'BOOKING 3 INFORMATION',
+								id_resource	=> 3,
+								id_event	=> 3,
+								dtstart		=> '2012-03-18T09:00:00',
+								dtend		=> '2012-04-18T14:00:00',
+								#duration	=> ,
+								frequency	=> 'monthly',
+								interval	=> 1,
+								until		=> '2012-04-18T14:00:00',
+								by_minute	=> '1',
+								by_hour		=> '14',
+								#by_day		=> '1FR',
+								#by_month	=> '-3',
+	        			    		        by_day_month	=> '1',
+			    				        #exception	=> '',
+				   			},
+					status => 201
+				},
+				{
+					uri => '/resource',
+					op => 'POST',
+					input => {
+								info=>'RESOURCE 4 INFORMATION',
+								description => 'DESCRIPTION4',
+							},
+					status => 201
+				},
+				{
+					uri => '/event',
+					op => 'POST',
+					input => {
+								info		=> 'EVENT 4 INFORMATION',
+			    		        description	=> 'DESCRIPTION4',
+			    		        starts		=> '2011-02-17T04:00:00',
+	    				        ends		=> '2011-02-17T05:00:00',
+				   			},
+					status => 201
+				},
+				{
+					uri => '/booking',
+					op => 'POST',
+					input => {
+								info		=> 'BOOKING 3 INFORMATION',
+								id_resource	=> 4,
+								id_event	=> 4,
+								dtstart		=> '2012-03-19T09:00:00',
+								dtend		=> '2015-04-19T14:00:00',
+								#duration	=> 60,
+								frequency	=> 'yearly',
+								interval	=> 1,
+								until		=> '2015-04-19T14:00:00',
+								by_minute	=> '1',
+								by_hour		=> '1',
+								#by_day		=> '1mo',
+								by_month	=> '-3',
+	        			    		        by_day_month	=> '15',
+			    				        #exception	=> '',
 				   			},
 					status => 201
 				},
@@ -81,9 +207,10 @@ foreach my $obj (@objs){
 	my $r = request(
 	        $req->( $uri, Accept => 'application/json', Content => $input )
 	    );
-	#my $id = $r->headers->as_string();
-	#$id =~ /.*Location:.*\/resource\/(\d)+/;
-	
+	my $id = $r->headers->as_string();
+	$id =~ /.*Location:.*\/event\/(\d)+/ if ($uri =~ 'event');
+	$id =~ /.*Location:.*\/resource\/(\d)+/ if ($uri =~ 'resource');
+	$id = $1;
 	is($r->code(),$status, "objecte creat a $uri" );
 }
 

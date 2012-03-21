@@ -1,0 +1,7 @@
+[% META title='Event List'%]
+
+[% FOREACH event IN events %]
+<ul class='list-of-events'>
+<li><a href='/event/[% event.id %]'>[% event.id %]</a></li>
+</ul>
+[% END %]

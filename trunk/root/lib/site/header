@@ -1,0 +1,6 @@
+<!-- BEGIN site/header -->
+<div id="logo"><a href='[% c.uri_for("/") %]'><img src='/static/images/logo.png' alt='logo'/></a>
+<span class="title">[% template.title or site.title %]</span>
+</div>
+
+<!-- END site/header -->

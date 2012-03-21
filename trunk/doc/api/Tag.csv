@@ -1,0 +1,31 @@
+Número,Descripció,Test,Operació,URI,Entrada,Estat,Capçaleres,Sortida
+1,Crea un tag nou,testCreateTag,POST,/tag,id=tagname&description=TAG DESCRIPTION,201 Created,Location: http://localhost/tag/tagname,[]
+2,Consulta un tag,testGetTag,GET,/tag/tagname,,200 OK,,"{""id"":""tagname"",""description"":""TAG DESCRIPTION""}"
+3,Llista els tags,testGetTags,GET,/tag,,200 OK,,"[{""location"":""http://localhost/tag/tagname"",""id"":""tagname"",""description"":""TAG DESCRIPTION""}]"
+4,Modifica un tag,testUpdateTag,PUT,/tag/tagname,id=tagname&description=TAG DESCRIPTION2,200 OK,,[]
+5,Consulta un tag modificat,testGetTag,GET,/tag/tagname,,200 OK,,"{""id"":""tagname"",""description"":""TAG DESCRIPTION2""}"
+6,Intenta crear un tag amd ID repetit,testCreateTagAlreadyExists,POST,/tag,id=tagname&description=WHATEVER,409 Conflict,,[]
+7,Elimina un tag,testDeleteTag,DELETE,/tag/tagname,,200 OK,,[]
+8,Elimina un tag inexsistent,testDeleteTagNotFount,DELETE,/tag/tagname,,404 Not Found,,[]
+9,Consulta un tag inexistent,testGetTagNotFound,GET,/tag/tagname,,404 Not Found,,[]
+10,Crea un tag amb ID invalid,testCreateTagInvalidId,POST,/tag,id=&description=TAG DESCRIPTION,400 Bad Request,,[]
+11,Intenta crear un tag amb signes,testCreateTagSign,POST,/tag,id=!?)$&description=TAG DESCRIPTION3,400 Bad Request,,[]
+12,Intenta crear un tag amb menys carac.,testCreateTagChr,POST,/tag,id=a&description=TAG DESCRIPTION4,201 Created,Location: http://localhost/tag/a,[]
+13,Crear tag amb mayusculas,testCreateTagMayus,POST,/tag,id=TAGNAME&description=TAG DESCRIPTION5,201 Created,Location: http://localhost/tag/tagname,[]
+14,Crea un tag nou,testCreateTag,POST,/tag,id=tagname2&description=TAG DESCRIPTION,201 Created,Location: http://localhost/tag/tagname2,[]
+15,Crea un tag nou,testCreateTag,POST,/tag,id=tagname3&description=TAG DESCRIPTION,201 Created,Location: http://localhost/tag/tagname3,[]
+16,Crea un tag nou,testCreateTag,POST,/tag,id=tagname4&description=TAG DESCRIPTION,201 Created,Location: http://localhost/tag/tagname4,[]
+17,Crea un tag nou,testCreateTag,POST,/tag,id=tagname5&description=TAG DESCRIPTION,201 Created,Location: http://localhost/tag/tagname5,[]
+18,Llista els tags,testGetTags,GET,/tag,,200 OK,,"[{""location"":""http://localhost/tag/a"",""id"":""a"",""description"":""TAG DESCRIPTION4""},{""location"":""http://localhost/tag/tagname"",""id"":""tagname"",""description"":""TAG DESCRIPTION5""},{""location"":""http://localhost/tag/tagname2"",""id"":""tagname2"",""description"":""TAG DESCRIPTION""},{""location"":""http://localhost/tag/tagname3"",""id"":""tagname3"",""description"":""TAG DESCRIPTION""},{""location"":""http://localhost/tag/tagname4"",""id"":""tagname4"",""description"":""TAG DESCRIPTION""},{""location"":""http://localhost/tag/tagname5"",""id"":""tagname5"",""description"":""TAG DESCRIPTION""}]"
+19,Crea un tag nou,testCreateTag,POST,/tag,id=tag name5&description=TAG DESCRIPTION,400 Bad Request,,[]
+20,Modifica un tag,testUpdateTag,PUT,/tag/tag name5,id=tag  name5&description=TAG DESCRIPTION56,404 Not Found,,[]
+21,Consulta un tag modificat,testGetTag,GET,/tag/tag name5,,404 Not Found,,[]
+22,Crea un tag nou,testCreateTag,POST,/tag,id=1234&description=TAG DESCRIPTION,201 Created,Location: http://localhost/tag/1234,[]
+23,Modifica un tag,testUpdateTag,PUT,/tag/123,id=123&description=TAG DESCRIPTION56,404 Not Found,,[]
+24,Modifica un tag,testUpdateTag,PUT,/tag/1234,id=1234&description=TAG DESCRIPTION56,200 OK,,[]
+25,Consulta un tag modificat,testGetTag,GET,/tag/123,,404 Not Found,,[]
+26,Crea un tag nou,testCreateTag,POST,/tag,"id=1234kdjfkrituvncmaldoeirutncmcxkslaoeritndjvkalsoejrkfms,ckfqwertyuiopasdfghjkll1234kdjfkrituvncmaldoeirutncmcxkslaoeritndjvkalsoejrkfms,ckfqwertyuiopasdfghjkll1234kdjfkrituvncmaldoeirutncmcxkslaoeritndjvkalsoejrkfms,ckfqwertyuiopasdfghjkllldoektjfhcnghturjfiwekdnvn&description=TAG DESCRIPTION",400 Bad Request,,[]
+27,Llista els tags,testGetTags,GET,/tag,,200 OK,,"[{""location"":""http://localhost/tag/a"",""id"":""a"",""description"":""TAG DESCRIPTION4""},{""location"":""http://localhost/tag/tagname"",""id"":""tagname"",""description"":""TAG DESCRIPTION5""},{""location"":""http://localhost/tag/tagname2"",""id"":""tagname2"",""description"":""TAG DESCRIPTION""},{""location"":""http://localhost/tag/tagname3"",""id"":""tagname3"",""description"":""TAG DESCRIPTION""},{""location"":""http://localhost/tag/tagname4"",""id"":""tagname4"",""description"":""TAG DESCRIPTION""},{""location"":""http://localhost/tag/tagname5"",""id"":""tagname5"",""description"":""TAG DESCRIPTION""},{""location"":""http://localhost/tag/1234"",""id"":""1234"",""description"":""TAG DESCRIPTION56""}]"
+28,Crea un tag nou,testCreateTag,POST,/tag,id=·$%&/(()=?¿&$·!__:;::;·$%&description=TAG DESCRIPTION,400 Bad Request,,[]
+29,Modifica un tag,testUpdateTag,PUT,/tag/tagname,id=·$%&/(()=?¿&$__:;::;·$%123&description=TAG DESCRIPTION56,200 OK,,[]
+30,Consulta un tag modificat,testGetTag,GET,/tag/·$%&/(()=?¿&$__:;::;·$%123,,404 Not Found,,[]

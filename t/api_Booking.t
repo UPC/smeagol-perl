@@ -197,6 +197,50 @@ my @objs = 	(
 				   			},
 					status => 201
 				},
+				{
+					uri => '/booking',
+					op => 'POST',
+					input => {
+								info		=> 'BOOKING 3 INFORMATION',
+								id_resource	=> 5,
+								id_event	=> 5,
+								dtstart		=> '2012-03-19T09:00:00',
+								dtend		=> '2015-04-19T14:00:00',
+								#duration	=> 60,
+								frequency	=> 'yearly',
+								interval	=> 1,
+								until		=> '2015-04-19T14:00:00',
+								by_minute	=> '1',
+								by_hour		=> '1',
+								#by_day		=> '1mo',
+								by_month	=> '-3',
+	        			    		        by_day_month	=> '15',
+			    				        #exception	=> '',
+				   			},
+					status => 400
+				},
+				{
+					uri => '/booking',
+					op => 'POST',
+					input => {
+								info		=> 'BOOKING 3 INFORMATION',
+								id_resource	=> 4,
+								id_event	=> 4,
+								dtstart		=> '2012-03-19T09:00:00',
+								dtend		=> '2015-04-19T14:00:00',
+								#duration	=> 60,
+								frequency	=> 'yearly',
+								interval	=> 1,
+								until		=> '2015-04-19T14:00:00',
+								by_minute	=> '1',
+								by_hour		=> '1',
+								#by_day		=> '1mo',
+								by_month	=> '-3',
+	        			    		        by_day_month	=> '15',
+			    				        #exception	=> '',
+				   			},
+					status => 409
+				},
 
 			);
 

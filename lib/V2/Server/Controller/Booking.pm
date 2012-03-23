@@ -586,14 +586,11 @@ sub default_POST {
             or $c->stash->{too_long} == 1 )
         {
             if ( $c->stash->{empty} == 1 ) {
-                @message = { message => "Bad Request", };
+                #TODO: Parametros estan malament
                 $c->response->status(400);
             }
             else {
-                @message
-                    = { message =>
-                        "Error: The booking you tried to create overlaps with another booking or with itself",
-                    };
+                #TODO: Booking con recurso o evento ocupadomak
                 $c->response->status(409);
             }
 
@@ -618,9 +615,7 @@ sub default_POST {
         }
     }
     else {
-        my @message
-            = { message => "Error: Check if the event or the resource exist",
-            };
+	#TODO: Parametros estan malament   
         $c->stash->{content} = \@message;
         $c->response->status(400);
         $c->stash->{error}

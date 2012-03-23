@@ -106,6 +106,7 @@ sub check_booking : Local {
     my $id_resource = $c->stash->{id_resource};
     my $id_event    = $c->stash->{id_event};
 
+
     my $resource = $c->model('DB::TResource')->find( { id => $id_resource } );
     my $event = $c->model('DB::TEvent')->find( { id => $id_event } );
 
@@ -285,7 +286,6 @@ sub check_overlap : Local {
             last;
         }
     }
-
 
 }
 

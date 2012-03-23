@@ -83,15 +83,13 @@ sub default_GET {
 
 
     if ($id) {
-		if((defined $module) && ($module eq 'tag') ){
-			if ($id_module){
-		    	$c->detach( 'get_relation_tag_booking', [$id, $id_module]);
-			}else{
-				$c->response->location($c->uri_for('/tag')."/?booking=".$id);
-				#TODO: message: redireccio a la llista
-				$c->stash->{content}  = \@message;
-				$c->response->status(301); 
-			}
+		if(($module eq 'tag') && ($id_module)){
+		    $c->detach( 'get_relation_tag_booking', [$id, $id_module]);
+		}elsif(($module eq 'tag') && !($id_module)){
+			$c->response->location($c->uri_for('/tag')."/?booking=".$id);
+			#TODO: message: redireccio a la llista
+			$c->stash->{content}  = \@message;
+			$c->response->status(301); 
 		}else {
 			$c->detach( 'get_booking', [$id] );
 		}
@@ -157,8 +155,9 @@ sub get_booking : Private {
                         until       => $booking_aux->until->iso8601(),
                         frequency   => $booking_aux->frequency,
                         interval    => $booking_aux->interval,
-                        by_minute    => $booking_aux->by_minute,
-                        by_hour      => $booking_aux->by_hour,
+                        byminute    => $booking_aux->by_minute,
+                        byhour      => $booking_aux->by_hour,
+                        tags        => $booking_aux->tag_list,
                 };
 
             }
@@ -175,9 +174,10 @@ sub get_booking : Private {
                         until       => $booking_aux->until->iso8601(),
                         frequency   => $booking_aux->frequency,
                         interval    => $booking_aux->interval,
-                        by_minute    => $booking_aux->by_minute,
-                        by_hour      => $booking_aux->by_hour,
-                        by_day       => $booking_aux->by_day,
+                        byminute    => $booking_aux->by_minute,
+                        byhour      => $booking_aux->by_hour,
+                        byday       => $booking_aux->by_day,
+                        tags        => $booking_aux->tag_list,                        
                 };
 
             }
@@ -194,10 +194,11 @@ sub get_booking : Private {
                         until       => $booking_aux->until->iso8601(),
                         frequency   => $booking_aux->frequency,
                         interval    => $booking_aux->interval,
-                        by_minute    => $booking_aux->by_minute,
-                        by_hour      => $booking_aux->by_hour,
-                        by_month     => $booking_aux->by_month,
-                        by_monthday  => $booking_aux->by_day_month,
+                        byminute    => $booking_aux->by_minute,
+                        byhour      => $booking_aux->by_hour,
+                        bymonth     => $booking_aux->by_month,
+                        bymonthday  => $booking_aux->by_day_month,
+                        tags        => $booking_aux->tag_list,
 		};
             }
 
@@ -213,10 +214,11 @@ sub get_booking : Private {
                         until       => $booking_aux->until->iso8601(),
                         frequency   => $booking_aux->frequency,
                         interval    => $booking_aux->interval,
-                        by_minute    => $booking_aux->by_minute,
-                        by_hour      => $booking_aux->by_hour,
-                        by_month     => $booking_aux->by_month,
-                        by_monthday  => $booking_aux->by_day_month,
+                        byminute    => $booking_aux->by_minute,
+                        byhour      => $booking_aux->by_hour,
+                        bymonth     => $booking_aux->by_month,
+                        bymonthday  => $booking_aux->by_day_month,
+                        tags        => $booking_aux->tag_list,
                 };
             }
         };
@@ -573,11 +575,9 @@ sub default_POST {
         $c->stash->{new_exception} = $exception;
     }
 
-    $c->visit( '/check/check_overlap', [] );
+    $c->forward( '/check/check_overlap', [] );
     my @message;
-    
-    
-    
+       
     if ( $c->stash->{booking_ok} == 1 ) {
 	 
         if (   $c->stash->{overlap} == 1
@@ -585,14 +585,11 @@ sub default_POST {
             or $c->stash->{too_long} == 1 )
         {
             if ( $c->stash->{empty} == 1 ) {
-                @message = { message => "Bad Request", };
+                #TODO: message: parametres estan malament
                 $c->response->status(400);
             }
             else {
-                @message
-                    = { message =>
-                        "Error: The booking you tried to create overlaps with another booking or with itself",
-                    };
+                #TODO: message: Booking amb resource ocupat
                 $c->response->status(409);
             }
 
@@ -602,21 +599,22 @@ sub default_POST {
             $c->stash->{template} = 'booking/get_list.tt';
         }
         else {
-	    $new_booking->insert;
-	    
+
+	     $new_booking->insert;
+	   
+	    #TODO: booking creat correctament
             $c->stash->{content} = \@message;
             $c->stash->{booking} = $booking;
             $c->response->status(201);
 
             #$c->stash->{template} = 'booking/get_booking.tt';
             #$c->forward( 'get_booking', [ $new_booking->id ] );
+	    
 
         }
     }
     else {
-        my @message
-            = { message => "Error: Check if the event or the resource exist",
-            };
+		#TODO: message: parametres estan malament   
         $c->stash->{content} = \@message;
         $c->response->status(400);
         $c->stash->{error}
@@ -690,7 +688,6 @@ sub put_booking : Private {
     $c->stash->{id_event}    = $id_event;
     $c->stash->{id_resource} = $id_resource;
 
-      
     #Do the resource and the event exist?
     $c->visit( '/check/check_booking', [] );
 
@@ -904,7 +901,7 @@ sub default_DELETE {
     my $req = $c->request;
     
 if ($id) {
-    if(($module eq 'tag') && ($id_module)){
+    if((defined $module) && ($module eq 'tag') && ($id_module)){
         $c->detach( 'delete_relation_tag_booking', [$id, $id_module]);
     }
     else {
@@ -914,6 +911,7 @@ if ($id) {
 	    $booking_aux->delete;
 	    #TODO: message: Resource esborrat amb èxit.
 	    $c->stash->{content}  = \@message;
+		$c->response->status(200);
         }
         else {  
 	    #TODO: message: Resource no trobat.
@@ -1276,3 +1274,4 @@ it under the same terms as Perl itself.
 =cut
 
 1;
+

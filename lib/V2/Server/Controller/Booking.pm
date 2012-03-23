@@ -575,11 +575,9 @@ sub default_POST {
         $c->stash->{new_exception} = $exception;
     }
 
-    $c->visit( '/check/check_overlap', [] );
+    $c->forward( '/check/check_overlap', [] );
     my @message;
-    
-    
-    
+       
     if ( $c->stash->{booking_ok} == 1 ) {
 	 
         if (   $c->stash->{overlap} == 1
@@ -587,14 +585,11 @@ sub default_POST {
             or $c->stash->{too_long} == 1 )
         {
             if ( $c->stash->{empty} == 1 ) {
-                @message = { message => "Bad Request", };
+                #TODO: message: parametres estan malament
                 $c->response->status(400);
             }
             else {
-                @message
-                    = { message =>
-                        "Error: The booking you tried to create overlaps with another booking or with itself",
-                    };
+                #TODO: message: Booking amb resource ocupat
                 $c->response->status(409);
             }
 
@@ -604,21 +599,22 @@ sub default_POST {
             $c->stash->{template} = 'booking/get_list.tt';
         }
         else {
-	    $new_booking->insert;
-	    
-            $c->stash->{content} = $booking;
+
+	     $new_booking->insert;
+	   
+	    #TODO: booking creat correctament
+            $c->stash->{content} = \@message;
             $c->stash->{booking} = $booking;
             $c->response->status(201);
 
             #$c->stash->{template} = 'booking/get_booking.tt';
-            $c->forward( 'get_booking', [ $new_booking->id ] );
+            #$c->forward( 'get_booking', [ $new_booking->id ] );
+	    
 
         }
     }
     else {
-        my @message
-            = { message => "Error: Check if the event or the resource exist",
-            };
+		#TODO: message: parametres estan malament   
         $c->stash->{content} = \@message;
         $c->response->status(400);
         $c->stash->{error}
@@ -692,7 +688,6 @@ sub put_booking : Private {
     $c->stash->{id_event}    = $id_event;
     $c->stash->{id_resource} = $id_resource;
 
-      
     #Do the resource and the event exist?
     $c->visit( '/check/check_booking', [] );
 

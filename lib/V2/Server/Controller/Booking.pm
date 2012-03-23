@@ -586,11 +586,11 @@ sub default_POST {
             or $c->stash->{too_long} == 1 )
         {
             if ( $c->stash->{empty} == 1 ) {
-                #TODO: Parametros estan malament
+                #TODO: message: parametres estan malament
                 $c->response->status(400);
             }
             else {
-                #TODO: Booking con recurso o evento ocupadomak
+                #TODO: message: Booking amb resource ocupat
                 $c->response->status(409);
             }
 
@@ -615,7 +615,7 @@ sub default_POST {
         }
     }
     else {
-	#TODO: Parametros estan malament   
+		#TODO: message: parametres estan malament   
         $c->stash->{content} = \@message;
         $c->response->status(400);
         $c->stash->{error}

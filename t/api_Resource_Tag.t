@@ -32,19 +32,26 @@ sub get_generated_id {
 #  }
 # For instance, get_generated_url('resource',23,'aula') returns "/resource/23/tag/aula"
 #
-sub test_uri {
-    my ($params) = @_;
-    my $uri = '/' . $params->{'type'};
-    if ( defined $params->{'id'} ) {
-        $uri .= '/'
-            . (
-            ref $params->{'id'} eq 'CODE'
-            ? $params->{'id'}->()
-            : $params->{'id'}
-            );
-        $uri .= '/tag';
+sub build_uri {
+    my (%params) = @_;
+
+    my $uri = $params{'uri'};
+
+    if ( exists $params{'postfix'} && defined $params{'postfix'} ) {
+        $uri .= '/' . evaluate_and_concat( $params{'postfix'} );
     }
-    $uri .= ( '/' . $params->{'tag'} ) if ( defined $params->{'tag'} );
+
+    #    my $uri = '/' . $params->{'type'};
+    #    if ( defined $params->{'id'} ) {
+    #        $uri .= '/'
+    #            . (
+    #            ref $params->{'id'} eq 'CODE'
+    #            ? $params->{'id'}->()
+    #            : $params->{'id'}
+    #            );
+    #        $uri .= '/tag';
+    #    }
+    #    $uri .= ( '/' . $params->{'tag'} ) if ( defined $params->{'tag'} );
     return $uri;
 }
 
@@ -55,7 +62,7 @@ sub test_uri {
 #
 sub evaluate_and_concat {
     my ($params) = @_;
-    my $url = '/';
+    my $url = '';
     for my $elem ( @{$params} ) {
         $url .= ( ref $elem eq 'CODE' ) ? $elem->() : $elem;
     }
@@ -75,11 +82,14 @@ sub run_test {
     my %args = prepare_args($test);
 
     my $uri
-        = ( ref $test->{'uri'} eq 'HASH' )
-        ? test_uri( $test->{'uri'} )
-        : evaluate_and_concat( $test->{'uri'} );
+        = build_uri( uri => $test->{'uri'}, postfix => $test->{'postfix'} );
 
-    #diag( $test->{'op'} . ' ' . $uri );
+    #    my $uri =
+    #        = ( ref $test->{'uri'} eq 'HASH' )
+    #        ? build_uri( $test->{'uri'} )
+    #        : evaluate_and_concat( $test->{'uri'} );
+
+    diag( $test->{'op'} . ' ' . $uri );
 
     my $r = V2::Test->new( uri => $uri );
 

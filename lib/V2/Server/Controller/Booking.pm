@@ -901,7 +901,7 @@ sub default_DELETE {
     my $req = $c->request;
     
 if ($id) {
-    if(($module eq 'tag') && ($id_module)){
+    if((defined $module) && ($module eq 'tag') && ($id_module)){
         $c->detach( 'delete_relation_tag_booking', [$id, $id_module]);
     }
     else {
@@ -911,6 +911,7 @@ if ($id) {
 	    $booking_aux->delete;
 	    #TODO: message: Resource esborrat amb èxit.
 	    $c->stash->{content}  = \@message;
+		$c->response->status(200);
         }
         else {  
 	    #TODO: message: Resource no trobat.
@@ -1273,3 +1274,4 @@ it under the same terms as Perl itself.
 =cut
 
 1;
+

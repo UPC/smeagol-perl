@@ -926,7 +926,7 @@ sub default_DELETE {
     my $req = $c->request;
     
 if ($id) {
-    if(($module eq 'tag') && ($id_module)){
+    if((defined $module) && ($module eq 'tag') && ($id_module)){
         $c->detach( 'delete_relation_tag_booking', [$id, $id_module]);
     }
     else {

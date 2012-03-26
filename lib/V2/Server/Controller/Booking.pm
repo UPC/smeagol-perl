@@ -575,11 +575,9 @@ sub default_POST {
         $c->stash->{new_exception} = $exception;
     }
 
-    $c->visit( '/check/check_overlap', [] );
+    $c->forward( '/check/check_overlap', [] );
     my @message;
-    
-    
-    
+       
     if ( $c->stash->{booking_ok} == 1 ) {
 	 
         if (   $c->stash->{overlap} == 1
@@ -587,14 +585,11 @@ sub default_POST {
             or $c->stash->{too_long} == 1 )
         {
             if ( $c->stash->{empty} == 1 ) {
-                @message = { message => "Bad Request", };
+                #TODO: message: parametres estan malament
                 $c->response->status(400);
             }
             else {
-                @message
-                    = { message =>
-                        "Error: The booking you tried to create overlaps with another booking or with itself",
-                    };
+                #TODO: message: Booking amb resource ocupat
                 $c->response->status(409);
             }
 
@@ -604,21 +599,22 @@ sub default_POST {
             $c->stash->{template} = 'booking/get_list.tt';
         }
         else {
-	    $new_booking->insert;
-	    
-            $c->stash->{content} = $booking;
+
+	     $new_booking->insert;
+	   
+	    #TODO: booking creat correctament
+            $c->stash->{content} = \@message;
             $c->stash->{booking} = $booking;
             $c->response->status(201);
 
             #$c->stash->{template} = 'booking/get_booking.tt';
-            $c->forward( 'get_booking', [ $new_booking->id ] );
+            #$c->forward( 'get_booking', [ $new_booking->id ] );
+	    
 
         }
     }
     else {
-        my @message
-            = { message => "Error: Check if the event or the resource exist",
-            };
+		#TODO: message: parametres estan malament   
         $c->stash->{content} = \@message;
         $c->response->status(400);
         $c->stash->{error}
@@ -646,7 +642,7 @@ Same functionality than default_POST but updating an existing booking.
 sub default_PUT {
     my ( $self, $c, $res, $id, $module, $id_module ) = @_;
     if ($id) {
-		if(($module eq 'tag') && ($id_module)){
+		if((defined $module) && ($module eq 'tag') && ($id_module)){
 		    $c->forward( 'put_relation_tag_booking', [$id, $id_module]);
 		}else{
 		    $c->forward( 'put_booking', [$id] );
@@ -655,9 +651,11 @@ sub default_PUT {
 }
 
 sub put_booking : Private {
-    my ( $self, $c, $res, $id ) = @_;
+    my ( $self, $c, $id) = @_;
     my $req = $c->request;
-
+    my $booking = $c->model('DB::TBooking')->find( { id => $id } );
+    if (defined($booking)){
+    
     my $info        = $req->parameters->{info};
     my $id_resource = $req->parameters->{id_resource};
     my $id_event    = $req->parameters->{id_event};
@@ -688,17 +686,16 @@ sub put_booking : Private {
     my $by_month     = $req->parameters->{by_month}     || $dtstart->month;
     my $by_day_month = $req->parameters->{by_day_month} || "";
 
-    my $booking = $c->model('DB::TBooking')->find( { id => $id } );
+    
     $c->stash->{id_event}    = $id_event;
     $c->stash->{id_resource} = $id_resource;
 
-      
     #Do the resource and the event exist?
     $c->visit( '/check/check_booking', [] );
 
     my $jbooking;
-
-    given ($freq) {
+    
+	given ($freq) {
 
 #Duration is saved in minuntes in the DB in order to make it easier to deal with it when the server
 #builds the JSON objects
@@ -840,7 +837,7 @@ sub put_booking : Private {
     $c->stash->{new_booking} = $booking;
     $c->stash->{PUT}         = 1;
     $c->visit( '/check/check_overlap', [] );
-
+    my @message; 
 
     
     if ( $c->stash->{booking_ok} == 1 ) {
@@ -849,33 +846,44 @@ sub put_booking : Private {
             or $c->stash->{empty} == 1
             or $c->stash->{too_long} == 1 )
         {
-            my @message
-                = { message => "Error: Bad request. Check parameters", };
-            $c->stash->{content} = \@message;
-            $c->response->status(409);
-            $c->stash->{error}    = "Error: Bad request. Check parameters";
-            $c->stash->{template} = 'booking/get_list.tt';
+	    if ( $c->stash->{empty} == 1 ) {
+		$c->stash->{content} = \@message;
+		$c->response->status(400);
+		$c->stash->{error}    = "Error: Bad request. Check parameters";
+		$c->stash->{template} = 'booking/get_list.tt';
+	    }
+	    else {
+		#TODO: Recurs o event ocupat
+		$c->stash->{content} = \@message;
+                $c->response->status(409);
+	    }
         }
         else {
             $booking->update;
 	    
-            $c->stash->{content} = $jbooking;
+            $c->stash->{content} = \@message;
             $c->stash->{booking} = $jbooking;
-            $c->response->status(201);
+            $c->response->status(200);
             $c->stash->{template} = 'booking/get_booking.tt';
 
         }
     }
     else {
-        my @message
-            = { message => "Error: Check if the event or the resource exist",
-            };
+       
         $c->stash->{content} = \@message;
-        $c->response->status(400);
+        $c->response->status(404);
         $c->stash->{error}
             = "Error: Check if the event or the resource exist";
         $c->stash->{template} = 'booking/get_list.tt';
 
+    }
+    }
+    else{
+	my @message;
+	
+	$c->stash->{content} = \@message;
+	$c->stash->{template} = 'old_not_found.tt';
+        $c->response->status(404);
     }
 }
 
@@ -906,7 +914,7 @@ sub default_DELETE {
     my $req = $c->request;
     
 if ($id) {
-    if(($module eq 'tag') && ($id_module)){
+    if((defined $module) && ($module eq 'tag') && ($id_module)){
         $c->detach( 'delete_relation_tag_booking', [$id, $id_module]);
     }
     else {
@@ -916,6 +924,7 @@ if ($id) {
 	    $booking_aux->delete;
 	    #TODO: message: Resource esborrat amb èxit.
 	    $c->stash->{content}  = \@message;
+		$c->response->status(200);
         }
         else {  
 	    #TODO: message: Resource no trobat.
@@ -1278,3 +1287,4 @@ it under the same terms as Perl itself.
 =cut
 
 1;
+

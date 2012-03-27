@@ -143,6 +143,7 @@ sub get_booking : Private {
 
     my $booking_aux = $c->model('DB::TBooking')->find( { id => $id } );
     my $booking;
+    my @message;
     if ($booking_aux) {
         given ( $booking_aux->frequency ) {
             when ('daily') {
@@ -197,7 +198,7 @@ sub get_booking : Private {
                         by_minute    => $booking_aux->by_minute,
                         by_hour      => $booking_aux->by_hour,
                         by_month     => $booking_aux->by_month,
-                        by_monthday  => $booking_aux->by_day_month,
+                        by_day_month  => $booking_aux->by_day_month,
 		};
             }
 
@@ -216,7 +217,7 @@ sub get_booking : Private {
 #                        by_minute    => $booking_aux->by_minute,
 #                        by_hour      => $booking_aux->by_hour,
                         by_month     => $booking_aux->by_month,
-                        by_monthday  => $booking_aux->by_day_month,
+                        by_day_month  => $booking_aux->by_day_month,
                 };
             }
         };
@@ -228,6 +229,9 @@ sub get_booking : Private {
 
     }
     else {
+	
+	#TODO: Booking no Trobat.
+	$c->stash->{content} = \@message;
         $c->stash->{template} = 'old_not_found.tt';
         $c->response->status(404);
     }

@@ -18,7 +18,13 @@ BEGIN {
 
 my %ops = ( 'GET' => 'consulta', 'POST' => 'crea', 'PUT' => 'actualitza', 'DELETE' => 'esborra' );
 
-my @objs = 	(
+my @objs = 	(		{
+					uri => '/booking/1',
+					op => 'GET',
+					input => '',
+					output => '[]',
+					status => 404
+				},
 				{
 					uri => '/resource',
 					op => 'POST',
@@ -70,13 +76,13 @@ my @objs = 	(
 				   			}',
 					status => 200
 				},
-#				{
-#					uri => '/booking/2',
-#					op => 'GET',
-#					input => '',
-#					output => '[]',
-#					status => 404
-#				},
+				{
+					uri => '/booking/2',
+					op => 'GET',
+					input => '',
+					output => '[]',
+					status => 404
+				},
 				{
 					uri => '/booking',
 					op => 'POST',
@@ -105,6 +111,13 @@ my @objs = 	(
 								"frequency":"daily"
 				   			}',
 					status => 200
+				},
+				{
+					uri => '/booking/3',
+					op => 'GET',
+					input => '',
+					output => '[]',
+					status => 404
 				},
 				{
 					uri => '/resource',
@@ -167,9 +180,16 @@ my @objs = 	(
 					status => 200
 				},
 				{
+					uri => '/booking/4',
+					op => 'GET',
+					input => '',
+					output => '[]',
+					status => 404
+				},
+				{
 					uri => '/booking',
-                    op => 'POST',
-                    input => {
+					op => 'POST',
+					input => {
 								info            => 'BOOKING 4 INFORMATION',
 								id_resource     => 2,
 								id_event        => 2,
@@ -181,6 +201,30 @@ my @objs = 	(
 							},
 					output => '[]',
 					status => 201
+				},
+				{
+					uri => '/booking/4',
+					op => 'GET',
+					input => '',
+					output => '{
+								"id":"4",
+								"info":"BOOKING 4 INFORMATION",
+								"id_resource":"2",
+								"id_event":"2",
+								"dtstart":"2012-03-13T09:00:00",
+								"dtend":"2012-03-13T14:00:00",
+								"frequency":"weekly",
+								"until":"2012-03-16T14:00:00",
+								"by_day":"tu,th"
+							}',
+					status => 200
+				},
+				{
+					uri => '/booking/5',
+					op => 'GET',
+					input => '',
+					output => '[]',
+					status => 404
 				},
 				{
 					uri => '/booking',
@@ -199,6 +243,30 @@ my @objs = 	(
 					status => 201
 				},
 				{
+					uri => '/booking/5',
+					op => 'GET',
+					input => '',
+					output => '{
+								"id":"5",
+								"info":"BOOKING 5 INFORMATION",
+								"id_resource":"2",
+								"id_event":"2",
+								"dtstart":"2012-03-13T14:00:00",
+								"dtend":"2012-03-13T19:00:00",
+								"frequency":"weekly",
+								"until":"2012-03-16T19:00:00",
+								"by_day":"we,fr"
+							}',
+					status => 200
+				},
+				{
+					uri => '/booking/6',
+					op => 'GET',
+					input => '',
+					output => '[]',
+					status => 404
+				},
+				{
 					uri => '/booking',
 					op => 'POST',
 					input => {
@@ -213,6 +281,23 @@ my @objs = 	(
 							},
 					output => '[]',
                     status => 201
+				},
+				{
+					uri => '/booking/6',
+					op => 'GET',
+					input => '',
+					output => '{
+								"id":"6",
+								"info":"BOOKING 6 INFORMATION",
+								"id_resource":"2",
+								"id_event":"2",
+								"dtstart":"2012-03-13T14:00:00",
+								"dtend":"2012-03-13T19:00:00",
+								"frequency":"weekly",
+								"until":"2012-03-16T19:00:00",
+								"by_day":"tu,th"
+							}',
+					status => 200
 				},
 				{
 					uri => '/resource',
@@ -237,6 +322,13 @@ my @objs = 	(
 					status => 201
 				},
 				{
+					uri => '/booking/7',
+					op => 'GET',
+					input => '',
+					output => '[]',
+					status => 404
+				},
+				{
 					uri => '/booking',
 					op => 'POST',
 					input => {
@@ -250,10 +342,31 @@ my @objs = 	(
 								until		=> '2012-04-18T14:00:00',
 								by_minute	=> '1',
 								by_hour		=> '14',
-	        			    	by_day_month	=> '1',
+								by_month	=> '1',
+								by_day_month	=> '1',
 				   			},
 					output => '[]',
 					status => 201
+				},
+				{
+					uri => '/booking/7',
+					op => 'GET',
+					input => '',
+					output => '{
+								"id":"7",
+								"info":"BOOKING 7 INFORMATION",
+								"id_resource":"3",
+								"id_event":"3",
+								"dtstart":"2012-03-18T09:00:00",
+								"dtend":"2012-04-18T14:00:00",
+								"frequency":"monthly",
+								"until":"2012-04-18T14:00:00",
+								"by_minute":"1",
+								"by_hour":"14",
+								"by_month":"1",
+								"by_day_month":"1"
+				   			}',
+					status => 200
 				},
 				{
 					uri => '/resource',
@@ -278,6 +391,13 @@ my @objs = 	(
 					status => 201
 				},
 				{
+					uri => '/booking/8',
+					op => 'GET',
+					input => '',
+					output => '[]',
+					status => 404
+				},
+				{
 					uri => '/booking',
 					op => 'POST',
 					input => {
@@ -290,7 +410,7 @@ my @objs = 	(
 								interval	=> 1,
 								until		=> '2015-04-19T14:00:00',
 								by_month	=> '-3',
-	        			    	by_day_month	=> '15',
+								by_day_month	=> '-15',
 				   			},
 					output => '[]',
 					status => 201
@@ -309,7 +429,8 @@ my @objs = 	(
 								"frequency":"yearly",
 								"until":"2015-04-19T14:00:00",
 								"by_month":"-3",
-	        			    	"by_day_month":"15"
+								"by_day_month":"-15"
+								
 				   			}',
 					status => 200
 				},

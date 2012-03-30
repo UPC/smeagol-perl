@@ -23,14 +23,12 @@ sub get_generated_id {
     return $OBJECT_ID;
 }
 
-# Builds the uri for a test, given a hash with the following values:
+# Builds the uri for a test, given a hash with the following key-values:
 #  {
-#    type => (required) "resource", "event" or "booking"
-#    id   => (required) the id of the resource/event/booking (required),
-#              or reference to a function which returns the id
-#    tag  => (optional) the tag name
+#    uri     => (required) The URI prefix ("/resource", "/event", etc).
+#    postfix => (optional) an array of url segments to be appended to the prefix.
+#               The segments can be strings or code references.
 #  }
-# For instance, get_generated_url('resource',23,'aula') returns "/resource/23/tag/aula"
 #
 sub build_uri {
     my (%params) = @_;
@@ -38,24 +36,13 @@ sub build_uri {
     my $uri = $params{'uri'};
 
     if ( exists $params{'postfix'} && defined $params{'postfix'} ) {
-        $uri .= '/' . evaluate_and_concat( $params{'postfix'} );
+        $uri .= evaluate_and_concat( $params{'postfix'} );
     }
 
-    #    my $uri = '/' . $params->{'type'};
-    #    if ( defined $params->{'id'} ) {
-    #        $uri .= '/'
-    #            . (
-    #            ref $params->{'id'} eq 'CODE'
-    #            ? $params->{'id'}->()
-    #            : $params->{'id'}
-    #            );
-    #        $uri .= '/tag';
-    #    }
-    #    $uri .= ( '/' . $params->{'tag'} ) if ( defined $params->{'tag'} );
     return $uri;
 }
 
-# Builds a URL, given an array reference composed by strings or function references.
+# Builds a string, given an array reference composed by strings or function references.
 #
 # For instance, evaluate_and_concat([ 'tag?resource=', \&get_generated_id ])
 # returns "/tag?resource=ID"
@@ -64,7 +51,7 @@ sub evaluate_and_concat {
     my ($params) = @_;
     my $url = '';
     for my $elem ( @{$params} ) {
-        $url .= ( ref $elem eq 'CODE' ) ? $elem->() : $elem;
+        $url .= '/' . ( ref $elem eq 'CODE' ? $elem->() : $elem );
     }
     return $url;
 }
@@ -83,11 +70,6 @@ sub run_test {
 
     my $uri
         = build_uri( uri => $test->{'uri'}, postfix => $test->{'postfix'} );
-
-    #    my $uri =
-    #        = ( ref $test->{'uri'} eq 'HASH' )
-    #        ? build_uri( $test->{'uri'} )
-    #        : evaluate_and_concat( $test->{'uri'} );
 
     diag( $test->{'op'} . ' ' . $uri );
 

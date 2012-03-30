@@ -26,6 +26,7 @@ sub get_generated_id {
 # Builds the uri for a test, given a hash with the following key-values:
 #  {
 #    uri     => (required) The URI prefix ("/resource", "/event", etc).
+#    id      => 
 #    postfix => (optional) an array of url segments to be appended to the prefix.
 #               The segments can be strings or code references.
 #  }

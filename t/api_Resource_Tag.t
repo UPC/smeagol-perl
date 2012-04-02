@@ -26,35 +26,34 @@ sub get_generated_id {
 # Builds the uri for a test, given a hash with the following key-values:
 #  {
 #    uri     => (required) The URI prefix ("/resource", "/event", etc).
-#    id      => 
-#    postfix => (optional) an array of url segments to be appended to the prefix.
-#               The segments can be strings or code references.
+#    id      => (optional) the ID of the resource, when needed
 #  }
 #
 sub build_uri {
     my (%params) = @_;
 
-    my $uri = $params{'uri'};
+    my $uri
+        = ref $params{'uri'} eq 'ARRAY'
+        ? evaluate_and_concat( $params{'uri'} )
+        : $params{'uri'};
 
-    if ( exists $params{'postfix'} && defined $params{'postfix'} ) {
-        $uri .= evaluate_and_concat( $params{'postfix'} );
-    }
-
+    $uri .= '/' . $params{'id'} if defined $params{'id'};
     return $uri;
 }
 
-# Builds a string, given an array reference composed by strings or function references.
+# Builds a string as a concatenation of the elements contained in a given
+# array reference containing strings or function references.
 #
-# For instance, evaluate_and_concat([ 'tag?resource=', \&get_generated_id ])
-# returns "/tag?resource=ID"
+# For instance, evaluate_and_concat([ '/tag?resource=', \&function_name ])
+# returns "/tag?resource=FOO"  (where FOO is the result of function_name())
 #
 sub evaluate_and_concat {
     my ($params) = @_;
-    my $url = '';
+    my $result = '';
     for my $elem ( @{$params} ) {
-        $url .= '/' . ( ref $elem eq 'CODE' ? $elem->() : $elem );
+        $result .= ref $elem eq 'CODE' ? $elem->() : $elem;
     }
-    return $url;
+    return $result;
 }
 
 # main loop
@@ -69,8 +68,7 @@ sub run_test {
 
     my %args = prepare_args($test);
 
-    my $uri
-        = build_uri( uri => $test->{'uri'}, postfix => $test->{'postfix'} );
+    my $uri = build_uri( uri => $test->{'uri'}, id => $test->{'id'} );
 
     diag( $test->{'op'} . ' ' . $uri );
 
@@ -86,9 +84,8 @@ sub run_test {
     $OBJECT_ID = $got if ( exists $args{'new_ids'} && $args{'new_ids'} != 0 );
 }
 
-# Parse test hash and prepare arguments for test call, performing
-# deferred evaluation in fields with function references.
-# when needed.
+# Parse test hash and prepare arguments for the test call, performing
+# deferred evaluation in fields which are function references.
 sub prepare_args {
     my ($test) = @_;
     my %args;

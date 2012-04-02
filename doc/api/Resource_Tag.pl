@@ -31,11 +31,11 @@
         status => sub { shift->code == HTTP_MOVED_PERMANENTLY },
         output => [],
     },
-    {
-        title => 'Obté tags del recurs aula quan no té encara cap tag (sense redirect)',
-        uri   => [ '/tag/?resource=', \&get_generated_id ],
-        op    => 'GET',
-        status => sub { shift->code == HTTP_OK },
+    {   title =>
+            'Obté tags del recurs aula quan no té encara cap tag (sense redirect)',
+        uri    => [ '/tag/?resource=', \&get_generated_id ],
+        op     => 'GET',
+        status => sub                  { shift->code == HTTP_OK },
         output => [],
     },
     {   title => 'Assigna el tag t1 al recurs aula',
@@ -82,20 +82,19 @@
             { id => 't2', description => 'tag 2' }
         ],
     },
-    {
-        title => 'Obté tags del recurs aula quan té assignats t1 i t2 (sense redirect)',
-        uri   => [ '/tag/?resource=', \&get_generated_id ],
-        op    => 'GET',
-        status => sub { shift->code == HTTP_OK },
+    {   title =>
+            'Obté tags del recurs aula quan té assignats t1 i t2 (sense redirect)',
+        uri    => [ '/tag/?resource=', \&get_generated_id ],
+        op     => 'GET',
+        status => sub                  { shift->code == HTTP_OK },
         output => [
             { id => 't1', description => 'tag 1' },
-            { id => 't2', description => 'tag 2' }            
+            { id => 't2', description => 'tag 2' }
         ],
     },
-    {
-        title => 'Obté tags d\'un recurs inexistent',
-        uri   => '/tag/?resource=123345678',
-        op    => 'GET',
+    {   title  => 'Obté tags d\'un recurs inexistent',
+        uri    => '/tag/?resource=123345678',
+        op     => 'GET',
         status => sub { shift->code == HTTP_NOT_FOUND },
         output => [],
     },
@@ -105,9 +104,10 @@
         status => sub { shift->code == HTTP_OK },
         output => [],
     },
-    {   title => 'Comprova que el recurs aula NO té assignat un tag inexistent',
-        uri   => [ '/resource/', \&get_generated_id, '/tag/dummy' ],
-        op    => 'GET',
+    {   title =>
+            'Comprova que el recurs aula NO té assignat un tag inexistent',
+        uri => [ '/resource/', \&get_generated_id, '/tag/dummy' ],
+        op  => 'GET',
         status => sub { shift->code == HTTP_NOT_FOUND },
         output => [],
     },

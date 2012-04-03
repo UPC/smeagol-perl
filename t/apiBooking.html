@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta charset="utf-8">
+  </head>
+  <body >
+ 
+  <fieldset>
+  <legend>Nueva Reserva</legend>
+
+<div id="info">
+<label for="info">Info:</label>
+<input id="info" name="info" type="text" maxlength="256" value="">
+</div>
+<div id="id_resource">
+<label for="id_resource">ID Resource</label>
+<input id="id_resource" name="id_resource" type="text" maxlength="256" value="">
+</div>
+<div id="id_event">
+<label for="id_event">ID Event</label>
+<input id="id_event" name="id_event" type="text" maxlength="256" value="">
+</div>
+<div id="dtstart">
+<label for="dtstart">Date Start</label>
+<input id="dtstart" name="dtstart" type="text" maxlength="256" value="">
+</div>
+<div id="dtend">
+<label for="dtend">Date End</label>
+<input id="dtend" name="dtend" type="text" maxlength="256" value="">
+</div>
+<fieldset id="rep_info">
+<legend></legend>
+      <div id="frenquency">
+        <label>Frequency:</label>
+        <div class="group">
+      <label><input class="radio" name="frenquency" type="radio" value="" checked="checked">None</label>
+      <label><input class="radio" name="frenquency" type="radio" value="daily">Daily</label>
+      <label><input class="radio" name="frenquency" type="radio" value="weekly">Weekly</label>
+      <label><input class="radio" name="frenquency" type="radio" value="monthly">Monthly</label>
+      <label><input class="radio" name="frenquency" type="radio" value="yearly">Yearly</label>
+        </div>
+      </div>
+<div id="interval">
+<label for="interval">Interval</label>
+<input id="interval" name="interval" type="text" maxlength="10" value="1">
+</div>
+<div id="by_minute">
+        <label>By Minute:</label>
+<span id="by_minute_minuteselector">
+<select name="by_minute">
+<option selected="selected">1</option>
+<option>2</option>
+<option>3</option>
+<option>4</option>
+<option>5</option>
+<option>6</option>
+<option>7</option>
+<option>8</option>
+<option>9</option>
+<option>10</option>
+<option>11</option>
+<option>12</option>
+<option>13</option>
+<option>14</option>
+<option>15</option>
+<option>16</option>
+<option>17</option>
+<option>18</option>
+<option>19</option>
+<option>20</option>
+<option>21</option>
+<option>22</option>
+<option>23</option>
+<option>24</option>
+<option>25</option>
+<option>26</option>
+<option>27</option>
+<option>28</option>
+<option>29</option>
+<option>30</option>
+<option>31</option>
+<option>32</option>
+<option>33</option>
+<option>34</option>
+<option>35</option>
+<option>36</option>
+<option>37</option>
+<option>38</option>
+<option>39</option>
+<option>40</option>
+<option>41</option>
+<option>42</option>
+<option>43</option>
+<option>44</option>
+<option>45</option>
+<option>46</option>
+<option>47</option>
+<option>48</option>
+<option>49</option>
+<option>50</option>
+<option>51</option>
+<option>52</option>
+<option>53</option>
+<option>54</option>
+<option>55</option>
+<option>56</option>
+<option>57</option>
+<option>58</option>
+<option>59</option>
+<option>60</option>
+</select>
+</div>
+<div id="by_houer">
+        <label>By Minute:</label>
+<span id="by_hour_hourselector">
+<select name="by_hour">
+<option selected="selected">1</option>
+<option>2</option>
+<option>3</option>
+<option>4</option>
+<option>5</option>
+<option>6</option>
+<option>7</option>
+<option>8</option>
+<option>9</option>
+<option>10</option>
+<option>11</option>
+<option>12</option>
+<option>13</option>
+<option>14</option>
+<option>15</option>
+<option>16</option>
+<option>17</option>
+<option>18</option>
+<option>19</option>
+<option>20</option>
+<option>21</option>
+<option>22</option>
+<option>23</option>
+<option>24</option>
+</select>
+</div>
+
+<div id="by_day">
+        <label>By Day: </label>
+        <div class="group">
+      <label><input class="checkbox" name="by_day[]" value="mo" type="checkbox">monday</label>
+      <label><input class="checkbox" name="by_day[]" value="tu" type="checkbox">tuesday</label>
+      <label><input class="checkbox" name="by_day[]" value="we" type="checkbox">wednesday</label>
+      <label><input class="checkbox" name="by_day[]" value="th" type="checkbox">thursday</label>
+      <label><input class="checkbox" name="by_day[]" value="fr" type="checkbox">friday</label>
+      <label><input class="checkbox" name="by_day[]" value="sa" type="checkbox">saturday</label>
+      <label><input class="checkbox" name="by_day[]" value="su" type="checkbox">sunday</label>
+        </div>
+</div>
+
+<div id="by_month">
+        <label>By month: </label>
+        <div class="group">
+      <label><input class="checkbox" name="by_month[]" value="1" type="checkbox">jan</label>
+      <label><input class="checkbox" name="by_month[]" value="2" type="checkbox">feb</label>
+      <label><input class="checkbox" name="by_month[]" value="3" type="checkbox">mar</label>
+      <label><input class="checkbox" name="by_month[]" value="4" type="checkbox">apr</label>
+      <label><input class="checkbox" name="by_month[]" value="5" type="checkbox">may</label>
+      <label><input class="checkbox" name="by_month[]" value="6" type="checkbox">jun</label>
+      <label><input class="checkbox" name="by_month[]" value="7" type="checkbox">jul</label>
+      <label><input class="checkbox" name="by_month[]" value="8" type="checkbox">aug</label>
+      <label><input class="checkbox" name="by_month[]" value="9" type="checkbox">sep</label>
+      <label><input class="checkbox" name="by_month[]" value="10" type="checkbox">oct</label>
+      <label><input class="checkbox" name="by_month[]" value="11" type="checkbox">nov</label>
+      <label><input class="checkbox" name="by_month[]" value="12" type="checkbox">dec</label>
+        </div>
+</div>
+<div id="by_day_month">
+        <label>By Day Month: </label>
+        <div class="group">
+      <label><input class="checkbox" name="by_month[]" value="1" type="checkbox">1</label>
+      <label><input class="checkbox" name="by_month[]" value="2" type="checkbox">2</label>
+      <label><input class="checkbox" name="by_month[]" value="3" type="checkbox">3</label>
+      <label><input class="checkbox" name="by_month[]" value="4" type="checkbox">4</label>
+      <label><input class="checkbox" name="by_month[]" value="5" type="checkbox">5</label>
+      <label><input class="checkbox" name="by_month[]" value="6" type="checkbox">6</label>
+      <label><input class="checkbox" name="by_month[]" value="7" type="checkbox">7</label>
+      <label><input class="checkbox" name="by_month[]" value="8" type="checkbox">8</label>
+      <label><input class="checkbox" name="by_month[]" value="9" type="checkbox">9</label>
+      <label><input class="checkbox" name="by_month[]" value="10" type="checkbox">10</label>
+      <label><input class="checkbox" name="by_month[]" value="11" type="checkbox">11</label>
+      <label><input class="checkbox" name="by_month[]" value="12" type="checkbox">12</label>
+      <label><input class="checkbox" name="by_month[]" value="13" type="checkbox">13</label>
+      <label><input class="checkbox" name="by_month[]" value="14" type="checkbox">14</label>
+      <label><input class="checkbox" name="by_month[]" value="15" type="checkbox">15</label>
+      <br>
+      <label><input class="checkbox" name="by_month[]" value="16" type="checkbox">16</label>
+      <label><input class="checkbox" name="by_month[]" value="17" type="checkbox">17</label>
+      <label><input class="checkbox" name="by_month[]" value="18" type="checkbox">18</label>
+      <label><input class="checkbox" name="by_month[]" value="19" type="checkbox">19</label>
+      <label><input class="checkbox" name="by_month[]" value="20" type="checkbox">20</label>
+      <label><input class="checkbox" name="by_month[]" value="21" type="checkbox">21</label>
+      <label><input class="checkbox" name="by_month[]" value="22" type="checkbox">22</label>
+      <label><input class="checkbox" name="by_month[]" value="23" type="checkbox">23</label>
+      <label><input class="checkbox" name="by_month[]" value="24" type="checkbox">24</label>
+      <label><input class="checkbox" name="by_month[]" value="25" type="checkbox">25</label>
+      <label><input class="checkbox" name="by_month[]" value="26" type="checkbox">26</label>
+      <label><input class="checkbox" name="by_month[]" value="27" type="checkbox">27</label>
+      <label><input class="checkbox" name="by_month[]" value="28" type="checkbox">28</label>
+      <label><input class="checkbox" name="by_month[]" value="29" type="checkbox">29</label>
+      <label><input class="checkbox" name="by_month[]" value="30" type="checkbox">30</label>
+      <label><input class="checkbox" name="by_month[]" value="31" type="checkbox">31</label>
+        </div>
+</div>
+
+
+<br>
+<div id="submit">
+<input class="submit" type="submit" value="submit">
+</div>
+
+
+  </body>
+</html>

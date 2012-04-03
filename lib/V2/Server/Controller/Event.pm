@@ -130,7 +130,7 @@ sub default_POST {
     my $req = $c->request;
     my @message;
  
-    if((defined $module) &&($module eq 'tag') && ($id_module)){
+    if((defined $module) &&($module eq 'tag')){
 		$c->detach( 'post_relation_tag_event');
 	}
 

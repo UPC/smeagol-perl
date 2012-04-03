@@ -126,7 +126,7 @@ sub default_POST {
     my $descr = $req->parameters->{description};
     my $info  = $req->parameters->{info};
     
-    if((defined $module) && ($module eq 'tag') && ($id_module)){
+    if((defined $module) && ($module eq 'tag')){
 		$c->detach( 'post_relation_tag_resource');
 	}
       

@@ -23,29 +23,37 @@ sub get_generated_id {
     return $OBJECT_ID;
 }
 
-# Builds the url for a test, given a hash with the following values:
+# Builds the uri for a test, given a hash with the following key-values:
 #  {
-#    type => (required) "resource", "event" or "booking"
-#    id   => (required) the id of the resource/event/booking (required),
-#              or reference to a function which returns the id
-#    tag  => (optional) the tag name
+#    uri     => (required) The URI prefix ("/resource", "/event", etc).
+#    id      => (optional) the ID of the resource, when needed
 #  }
-# For instance, get_generated_url('resource',23,'aula') returns "/resource/23/tag/aula"
 #
-sub test_url {
+sub build_uri {
+    my (%params) = @_;
+
+    my $uri
+        = ref $params{'uri'} eq 'ARRAY'
+        ? evaluate_and_concat( $params{'uri'} )
+        : $params{'uri'};
+
+    $uri .= '/' . $params{'id'} if defined $params{'id'};
+    return $uri;
+}
+
+# Builds a string as a concatenation of the elements contained in a given
+# array reference containing strings or function references.
+#
+# For instance, evaluate_and_concat([ '/tag?resource=', \&function_name ])
+# returns "/tag?resource=FOO"  (where FOO is the result of function_name())
+#
+sub evaluate_and_concat {
     my ($params) = @_;
-    my $url = '/' . $params->{'type'};
-    if ( defined $params->{'id'} ) {
-        $url .= '/'
-            . (
-            ref $params->{'id'} eq 'CODE'
-            ? $params->{'id'}->()
-            : $params->{'id'}
-            );
-        $url .= '/tag';
+    my $result = '';
+    for my $elem ( @{$params} ) {
+        $result .= ref $elem eq 'CODE' ? $elem->() : $elem;
     }
-    $url .= ( '/' . $params->{'tag'} ) if ( defined $params->{'tag'} );
-    return $url;
+    return $result;
 }
 
 # main loop
@@ -60,21 +68,24 @@ sub run_test {
 
     my %args = prepare_args($test);
 
-    my $r = V2::Test->new( uri => test_url( $test->{'url'} ) );
+    my $uri = build_uri( uri => $test->{'uri'}, id => $test->{'id'} );
 
-    # V2::Test doesn't expect a 'url' key in tests
-    delete $args{'url'} if exists $args{'url'};
+    diag( $test->{'op'} . ' ' . $uri );
 
-    my $method = $test->{'method'};
+    my $r = V2::Test->new( uri => $uri );
 
-    my $got = $r->$method(%args);
+    # V2::Test doesn't expect a 'uri' key in tests
+    delete $args{'uri'} if exists $args{'uri'};
+
+    my $op = $test->{'op'};
+
+    my $got = $r->$op(%args);
 
     $OBJECT_ID = $got if ( exists $args{'new_ids'} && $args{'new_ids'} != 0 );
 }
 
-# Parse test hash and prepare arguments for test call, performing
-# deferred evaluation in fields with function references.
-# when needed.
+# Parse test hash and prepare arguments for the test call, performing
+# deferred evaluation in fields which are function references.
 sub prepare_args {
     my ($test) = @_;
     my %args;
@@ -85,13 +96,13 @@ sub prepare_args {
             ? $test->{'id'}->()
             : $test->{'id'};
     }
-    $args{'args'}    = $test->{'args'}    if defined $test->{'args'};
+    $args{'args'}    = $test->{'input'}   if defined $test->{'input'};
     $args{'new_ids'} = $test->{'new_ids'} if defined $test->{'new_ids'};
     $args{'status'}  = $test->{'status'}  if defined $test->{'status'};
 
     # FIXME: is it possible to simplify the following code?
-    if ( exists $test->{'result'} ) {
-        $args{'result'} = $test->{'result'};
+    if ( exists $test->{'output'} ) {
+        $args{'result'} = $test->{'output'};
         if ( ref $args{'result'} eq 'ARRAY' ) {
             foreach my $val ( @{ $args{'result'} } ) {
                 if ( exists $val->{'id'} && ref $val->{'id'} eq 'CODE' ) {

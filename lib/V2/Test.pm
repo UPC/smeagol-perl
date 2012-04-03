@@ -77,7 +77,7 @@ sub _list_of_id {
 }
 
 sub _default_status {
-    return shift->is_success;
+    return !shift->is_error;
 }
 
 =head1 METHODS
@@ -125,6 +125,7 @@ sub GET {
     subtest "GET $uri request" => sub {
         my $res  = request HTTP_GET($uri);
 
+        #$DB::single=($uri eq '/resource/1/tag');
         ok( $params{'status'}->($res), "GET $uri status" );
 
         $json           = decode_json( $res->content );

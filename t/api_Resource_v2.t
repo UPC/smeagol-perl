@@ -33,17 +33,17 @@ sub test_smeagol_resource {
 
     my $r = V2::Test->new( uri => '/resource' );
 
-    my $method = $test->{'method'};
-    my %args   = prepare_args($test);
+    my $op   = $test->{'op'};
+    my %args = prepare_args($test);
 
-    my $got = $r->$method(%args);
+    my $got = $r->$op(%args);
 
     $GENERATED_RESOURCE_ID = $got
         if exists $args{'new_ids'} && $args{'new_ids'} != 0;
 }
 
 # Parse test hash and prepare arguments for test call, performing
-# deferred argument evaluation for {'id'} and {'result'}{'id'} fields,
+# deferred argument evaluation for {'id'} and {'output'}{'id'} fields,
 # when needed.
 sub prepare_args {
     my ($test) = @_;
@@ -55,13 +55,13 @@ sub prepare_args {
             ? $test->{'id'}->()
             : $test->{'id'};
     }
-    $args{'args'}    = $test->{'args'}    if defined $test->{'args'};
+    $args{'args'}    = $test->{'input'}   if defined $test->{'input'};
     $args{'new_ids'} = $test->{'new_ids'} if defined $test->{'new_ids'};
     $args{'status'}  = $test->{'status'}  if defined $test->{'status'};
 
     # FIXME: is it possible to simplify the following code?
-    if ( exists $test->{'result'} ) {
-        $args{'result'} = $test->{'result'};
+    if ( exists $test->{'output'} ) {
+        $args{'result'} = $test->{'output'};
         if ( ref $args{'result'} eq 'ARRAY' ) {
             foreach my $val ( @{ $args{'result'} } ) {
                 if ( exists $val->{'id'} && ref $val->{'id'} eq 'CODE' ) {

@@ -382,7 +382,7 @@ sub default_POST {
     my ( $self, $c, $res, $id, $module, $id_module ) = @_;
     my $req = $c->request;
 
-	if((defined $module) && ($module eq 'tag') && ($id_module)){
+	if((defined $module) && ($module eq 'tag')){
 		$c->detach( 'post_relation_tag_booking');
 	}
 

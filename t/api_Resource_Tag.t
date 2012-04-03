@@ -70,7 +70,7 @@ sub run_test {
 
     my $uri = build_uri( uri => $test->{'uri'}, id => $test->{'id'} );
 
-    diag( $test->{'op'} . ' ' . $uri );
+    #diag( $test->{'op'} . ' ' . $uri );
 
     my $r = V2::Test->new( uri => $uri );
 

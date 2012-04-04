@@ -114,32 +114,14 @@ sub prepare_args {
     my ($test) = @_;
     my %args;
 
-    if ( exists $test->{'id'} ) {
-        $args{'id'}
-            = ( ref $test->{'id'} eq 'CODE' )
-            ? $test->{'id'}->()
-            : $test->{'id'};
-    }
-    $args{'args'}    = $test->{'input'}   if defined $test->{'input'};
-    $args{'new_ids'} = $test->{'new_ids'} if defined $test->{'new_ids'};
-    $args{'status'}  = $test->{'status'}  if defined $test->{'status'};
-
-    # FIXME: is it possible to simplify the following code?
-    if ( exists $test->{'output'} ) {
-        $args{'result'} = $test->{'output'};
-        if ( ref $args{'result'} eq 'ARRAY' ) {
-            foreach my $val ( @{ $args{'result'} } ) {
-                if ( exists $val->{'id'} && ref $val->{'id'} eq 'CODE' ) {
-                    $val->{'id'} = $val->{'id'}->();
-                }
-            }
-        }
-        elsif ( exists $args{'result'}{'id'}
-            && ref $args{'result'}{'id'} eq 'CODE' )
-        {
-            $args{'result'}{'id'} = $args{'result'}{'id'}->();
-        }
-    }
+    $args{'id'} = V2::Test->deferred_eval( $test->{'id'} )
+        if exists $test->{'id'};
+    $args{'args'} = V2::Test->deferred_eval( $test->{'input'} )
+        if exists $test->{'input'};
+    $args{'new_ids'} = $test->{'new_ids'} if exists $test->{'new_ids'};
+    $args{'status'}  = $test->{'status'}  if exists $test->{'status'};
+    $args{'result'} = V2::Test->deferred_eval( $test->{'output'} )
+        if exists $test->{'output'};
 
     return %args;
 }

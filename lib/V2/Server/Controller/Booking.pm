@@ -148,26 +148,51 @@ sub get_booking : Private {
         given ( $booking_aux->frequency ) {
             when ('daily') {
                 $booking = {
-                    id              => $booking_aux->id,
-                        info        => $booking_aux->info,
-                        id_resource => $booking_aux->id_resource->id,
-                        id_event    => $booking_aux->id_event->id,
-                        dtstart     => $booking_aux->dtstart->iso8601(),
-                        dtend       => $booking_aux->dtend->iso8601(),
-                        duration    => $booking_aux->duration,
-                        until       => $booking_aux->until->iso8601(),
-                        frequency   => $booking_aux->frequency,
-                        interval    => $booking_aux->interval,
+			id           => $booking_aux->id,
+                        info         => $booking_aux->info,
+                        id_resource  => $booking_aux->id_resource->id,
+                        id_event     => $booking_aux->id_event->id,
+                        dtstart      => $booking_aux->dtstart->iso8601(),
+                        dtend        => $booking_aux->dtend->iso8601(),
+                        duration     => $booking_aux->duration,
+                        until        => $booking_aux->until->iso8601(),
+                        frequency    => $booking_aux->frequency,
+                        interval     => $booking_aux->interval,
                         by_minute    => $booking_aux->by_minute,
                         by_hour      => $booking_aux->by_hour,
-			by_day 	    => $booking_aux->by_day,
+			by_day 	     => $booking_aux->by_day,
+			by_month     => $booking_aux->by_month,
+			by_day_month => $booking_aux->by_day_month,
+			
                 };
 
             }
 
             when ('weekly') {
                 $booking = {
-                    id              => $booking_aux->id,
+			id              => $booking_aux->id,
+                        info        	=> $booking_aux->info,
+                        id_resource 	=> $booking_aux->id_resource->id,
+                        id_event    	=> $booking_aux->id_event->id,
+                        dtstart     	=> $booking_aux->dtstart->iso8601(),
+                        dtend       	=> $booking_aux->dtend->iso8601(),
+                        duration    	=> $booking_aux->duration,
+                        until       	=> $booking_aux->until->iso8601(),
+                        frequency   	=> $booking_aux->frequency,
+                        interval    	=> $booking_aux->interval,
+                        by_minute    	=> $booking_aux->by_minute,
+                        by_hour      	=> $booking_aux->by_hour,
+                        by_day       	=> $booking_aux->by_day,
+			by_month     => $booking_aux->by_month,
+			by_day_month => $booking_aux->by_day_month,
+			
+                };
+
+            }
+
+            when ('monthly') {
+                $booking = {
+			id              => $booking_aux->id,
                         info        => $booking_aux->info,
                         id_resource => $booking_aux->id_resource->id,
                         id_event    => $booking_aux->id_event->id,
@@ -179,25 +204,7 @@ sub get_booking : Private {
                         interval    => $booking_aux->interval,
                         by_minute    => $booking_aux->by_minute,
                         by_hour      => $booking_aux->by_hour,
-                        by_day       => $booking_aux->by_day,
-                };
-
-            }
-
-            when ('monthly') {
-                $booking = {
-                    id              => $booking_aux->id,
-                        info        => $booking_aux->info,
-                        id_resource => $booking_aux->id_resource->id,
-                        id_event    => $booking_aux->id_event->id,
-                        dtstart     => $booking_aux->dtstart->iso8601(),
-                        dtend       => $booking_aux->dtend->iso8601(),
-#                        duration    => $booking_aux->duration,
-                        until       => $booking_aux->until->iso8601(),
-                        frequency   => $booking_aux->frequency,
-#                        interval    => $booking_aux->interval,
-                        by_minute    => $booking_aux->by_minute,
-                        by_hour      => $booking_aux->by_hour,
+			by_day 	     => $booking_aux->by_day,
                         by_month     => $booking_aux->by_month,
                         by_day_month  => $booking_aux->by_day_month,
 		};
@@ -205,18 +212,19 @@ sub get_booking : Private {
 
             default {
                 $booking = {
-                    id              => $booking_aux->id,
+			id          => $booking_aux->id,
                         info        => $booking_aux->info,
                         id_resource => $booking_aux->id_resource->id,
                         id_event    => $booking_aux->id_event->id,
                         dtstart     => $booking_aux->dtstart->iso8601(),
                         dtend       => $booking_aux->dtend->iso8601(),
-#                        duration    => $booking_aux->duration,
+                        duration    => $booking_aux->duration,
                         until       => $booking_aux->until->iso8601(),
                         frequency   => $booking_aux->frequency,
-#                        interval    => $booking_aux->interval,
-#                        by_minute    => $booking_aux->by_minute,
-#                        by_hour      => $booking_aux->by_hour,
+                        interval    => $booking_aux->interval,
+                        by_minute    => $booking_aux->by_minute,
+                        by_hour      => $booking_aux->by_hour,
+			by_day 	     => $booking_aux->by_day,
                         by_month     => $booking_aux->by_month,
                         by_day_month  => $booking_aux->by_day_month,
                 };

@@ -218,7 +218,7 @@ my @objs = 	(
                                 by_hour         => undef,
                                 by_day          => 'th',
                                 by_month       	=> undef,
-                                by_day_month   	=> ,
+                                by_day_month   	=> undef,
 #                               exception       => '',
 							},
 					status => 409

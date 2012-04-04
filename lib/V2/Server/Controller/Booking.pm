@@ -712,7 +712,10 @@ sub put_booking : Private {
             $booking->until($until);
             $booking->by_minute($by_minute);
             $booking->by_hour($by_hour);
-
+	    $booking->by_day($by_day);
+	    $booking->by_month($by_month);
+	    $booking->by_day_month($by_day_month);
+	    
             $jbooking = {
                 id          => $booking->id,
                 info        => $booking->info,
@@ -726,6 +729,9 @@ sub put_booking : Private {
                 duration    => $booking->duration,
                 by_minute   => $booking->by_minute,
                 by_hour     => $booking->by_hour,
+		by_day	    => $booking->by_day,
+		by_month    => $booking->by_month,
+		by_day_month =>$booking->by_day_month,
             };
         }
 
@@ -742,6 +748,8 @@ sub put_booking : Private {
             $booking->by_minute($by_minute);
             $booking->by_hour($by_hour);
             $booking->by_day($by_day);
+	    $booking->by_month($by_month);
+	    $booking->by_day_month($by_day_month);
 
             $jbooking = {
                 id          => $booking->id,
@@ -757,6 +765,8 @@ sub put_booking : Private {
                 by_minute   => $booking->by_minute,
                 by_hour     => $booking->by_hour,
                 by_day      => $booking->by_day,
+		by_month    => $booking->by_month,
+		by_day_month =>$booking->by_day_month,
             };
 
         }
@@ -773,6 +783,7 @@ sub put_booking : Private {
             $booking->until($until);
             $booking->by_minute($by_minute);
             $booking->by_hour($by_hour);
+	    $booking->by_day($by_day);
             $booking->by_month($by_month);
             $booking->by_day_month($by_day_month);
 
@@ -789,6 +800,7 @@ sub put_booking : Private {
                 duration     => $booking->duration,
                 by_minute    => $booking->by_minute,
                 by_hour      => $booking->by_hour,
+		 by_day       => $booking->by_day,
                 by_month     => $booking->by_month,
                 by_day_month => $booking->by_day_month,
             };

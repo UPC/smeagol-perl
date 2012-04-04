@@ -154,12 +154,13 @@ sub get_booking : Private {
                         id_event    => $booking_aux->id_event->id,
                         dtstart     => $booking_aux->dtstart->iso8601(),
                         dtend       => $booking_aux->dtend->iso8601(),
-#                        duration    => $booking_aux->duration,
-#                        until       => $booking_aux->until->iso8601(),
+                        duration    => $booking_aux->duration,
+                        until       => $booking_aux->until->iso8601(),
                         frequency   => $booking_aux->frequency,
-#                        interval    => $booking_aux->interval,
-#                        by_minute    => $booking_aux->by_minute,
-#                        by_hour      => $booking_aux->by_hour,
+                        interval    => $booking_aux->interval,
+                        by_minute    => $booking_aux->by_minute,
+                        by_hour      => $booking_aux->by_hour,
+			by_day 	    => $booking_aux->by_day,
                 };
 
             }
@@ -172,12 +173,12 @@ sub get_booking : Private {
                         id_event    => $booking_aux->id_event->id,
                         dtstart     => $booking_aux->dtstart->iso8601(),
                         dtend       => $booking_aux->dtend->iso8601(),
-#                        duration    => $booking_aux->duration,
+                        duration    => $booking_aux->duration,
                         until       => $booking_aux->until->iso8601(),
                         frequency   => $booking_aux->frequency,
-#                        interval    => $booking_aux->interval,
-#                        by_minute    => $booking_aux->by_minute,
-#                        by_hour      => $booking_aux->by_hour,
+                        interval    => $booking_aux->interval,
+                        by_minute    => $booking_aux->by_minute,
+                        by_hour      => $booking_aux->by_hour,
                         by_day       => $booking_aux->by_day,
                 };
 

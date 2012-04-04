@@ -65,8 +65,6 @@ my @objs = 	(		{
 								by_day		=> undef,
 								by_month	=> undef,
 								by_day_month	=> undef,
-	    				        		exception	=> undef,
-								
 				   			},
 					output => '[]',
 					status => 201
@@ -87,8 +85,10 @@ my @objs = 	(		{
 								"frequency":"daily",
 								"interval":"1",
 								"by_minute":"0",
-								"by_hour":"9"
-								 
+								"by_hour":"9",
+								"by_day": null,
+								"by_month": null,
+								"by_day_month": null
 				   			}',
 					status => 200
 				},
@@ -108,7 +108,6 @@ my @objs = 	(		{
 								id_event	=> 1,
 								dtstart		=> '2012-03-12T14:00:00',
 								dtend		=> '2012-03-12T16:00:00',
-								frequency	=> 'daily',
 								duration	=>undef,
 								frequency	=>'daily',
 								interval	=>undef,
@@ -118,7 +117,7 @@ my @objs = 	(		{
 								by_day		=> undef,
 								by_month	=> undef,
 								by_day_month	=> undef,
-	    				        		exception	=> undef,
+	    				        		
 				   			},
 					output => '[]',
 					status => 201
@@ -139,7 +138,10 @@ my @objs = 	(		{
 								"frequency":"daily",
 								"interval":"1",
 								"by_minute":"0",
-								"by_hour":"14"
+								"by_hour":"14",
+								"by_day": null,
+								"by_month": null,
+								"by_day_month": null
 				   			}',
 					status => 200
 				},
@@ -212,7 +214,9 @@ my @objs = 	(		{
 								"until":"2012-03-16T14:00:00",
 								"by_minute":"0",
 								"by_hour":"9",
-								"by_day":"we,fr"
+								"by_day":"we,fr",
+								"by_month": null,
+								"by_day_month": null
 							}',
 					status => 200
 				},
@@ -263,7 +267,9 @@ my @objs = 	(		{
 								"until":"2012-03-16T14:00:00",
 								"by_minute":"0",
 								"by_hour":"9",
-								"by_day":"tu,th"
+								"by_day":"tu,th",
+								"by_month": null,
+								"by_day_month": null
 							}',
 					status => 200
 				},
@@ -285,11 +291,13 @@ my @objs = 	(		{
 								dtend		=> '2012-03-13T19:00:00',
 								duration 	=> undef,
 								frequency	=> 'weekly',
+								interval	=>undef,
 								until		=> '2012-03-16T19:00:00',
+								by_minute	=> undef,
+								by_hour		=> undef,
 								by_day		=> 'we,fr',
 								by_month	=> undef,
 								by_day_month	=> undef,
-			    				        exception	=> undef,
 				   			},
 					output => '[]',
 					status => 201
@@ -308,8 +316,13 @@ my @objs = 	(		{
 								"duration":"300",
 								"until":"2012-03-16T19:00:00",
 								"frequency":"weekly",
+								"interval":"1",
+								"by_minute":"0",
+								"by_hour":"14",
 								"until":"2012-03-16T19:00:00",
-								"by_day":"we,fr"
+								"by_day":"we,fr",
+								"by_month": null,
+								"by_day_month": null
 							}',
 					status => 200
 				},
@@ -331,11 +344,13 @@ my @objs = 	(		{
 								dtend           => '2012-03-13T19:00:00',
 								duration 	=>undef,
 								frequency       => 'weekly',
+								interval	=>undef,
 								until           => '2012-03-16T19:00:00',
+								by_minute	=> undef,
+								by_hour		=> undef,
 								by_day          => 'tu,th',
 								by_month	=> undef,
 								by_day_month	=> undef,
-			    				        exception	=> undef,
 							},
 					output => '[]',
                     status => 201
@@ -351,9 +366,15 @@ my @objs = 	(		{
 								"id_event":"2",
 								"dtstart":"2012-03-13T14:00:00",
 								"dtend":"2012-03-13T19:00:00",
-								"frequency":"weekly",
 								"until":"2012-03-16T19:00:00",
-								"by_day":"tu,th"
+								"duration":"300",
+								"frequency":"weekly",
+								"interval":"1",
+								"by_minute":"0",
+								"by_hour":"14",
+								"by_day":"tu,th",
+								"by_month": null,
+								"by_day_month": null
 							}',
 					status => 200
 				},
@@ -404,7 +425,6 @@ my @objs = 	(		{
 								by_month	=> undef,
 								by_month	=> '1',
 								by_day_month	=> '1',
-								exception	=> undef,
 				   			},
 					output => '[]',
 					status => 201
@@ -420,10 +440,13 @@ my @objs = 	(		{
 								"id_event":"3",
 								"dtstart":"2012-03-18T09:00:00",
 								"dtend":"2012-04-18T14:00:00",
-								"frequency":"monthly",
+								"duration":"300",
 								"until":"2012-04-18T14:00:00",
+								"frequency":"monthly",
+								"interval":"1",
 								"by_minute":"1",
 								"by_hour":"14",
+								"by_day": null,
 								"by_month":"1",
 								"by_day_month":"1"
 				   			}',
@@ -473,10 +496,9 @@ my @objs = 	(		{
 								until		=> '2015-04-19T14:00:00',
 								by_minute	=> undef,
 								by_hour		=> undef,
+								by_day		=> undef,
 								by_month	=> '-3',
 								by_day_month	=> '-15',
-								exception	=> undef,
-								
 				   			},
 					output => '[]',
 					status => 201
@@ -492,8 +514,13 @@ my @objs = 	(		{
 								"id_event":"4",
 								"dtstart":"2012-03-19T09:00:00",
 								"dtend":"2015-04-19T14:00:00",
-								"frequency":"yearly",
+								"duration":"300",
 								"until":"2015-04-19T14:00:00",
+								"frequency":"yearly",
+								"interval":"1",
+								"by_minute":"0",
+								"by_hour":"9",
+								"by_day": null,
 								"by_month":"-3",
 								"by_day_month":"-15"
 								

@@ -36,6 +36,8 @@ Catalyst::REST::Request is created (which overwrites the original $c->request).
 
 sub begin : Private {
     my ( $self, $c ) = @_;
+
+
     $c->stash->{id_resource} = $c->request->query_parameters->{resource};
     $c->stash->{id_event}    = $c->request->query_parameters->{event};
     $c->stash->{ical}        = $c->request->query_parameters->{ical};

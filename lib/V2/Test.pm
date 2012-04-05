@@ -21,6 +21,13 @@ Test server API thoroughly and make easy to test its funcionality:
     
     my @tags = $tag->GET();
     print @tags;
+    
+    my $struct = V2::Test->deferred_eval(
+                    { id   => sub { very_complex_calculation() }, 
+                      desc => 'hello!',
+                      x    => [ 'a', \&my_sub ],
+                    }
+                 );
 
 =head1 DESCRIPTION
 
@@ -337,5 +344,54 @@ sub DELETE {
 
     return;
 }
+
+
+=head2 deferred_eval
+
+Deeply evaluates any kind of data structure. Useful for evaluating references
+in test 'input' or 'output' parameters.
+
+=head3 Parameters
+
+=over 4
+
+=item * CodeRef | ArrayRef | HashRef | Scalar
+
+=back
+
+=head3 Result
+
+An equivalent structure reference, containing que deferred evaluation of the
+structure.
+
+=cut
+
+sub deferred_eval {
+    my $class = shift;
+    $class eq __PACKAGE__ or croak 'deferred_eval() is a class method';
+    
+    my ($arg) = @_;
+    
+    if (ref $arg eq 'HASH') {
+        my %result;
+        
+        @result{ keys %{$arg} } = map { (ref $_ eq 'CODE') ? $_->() : __PACKAGE__->deferred_eval($_) } values %{$arg};
+        return \%result;
+    }
+    
+    if (ref $arg eq 'ARRAY') {
+        my @result;
+    
+        @result = map { (ref $_ eq 'CODE') ? $_->() : __PACKAGE__->deferred_eval($_) } @{$arg} ;    
+        return \@result;
+    }
+    
+    if (ref $arg eq 'CODE') {
+        return $arg->();
+    }
+    
+    return $arg;
+}
+
 
 1;

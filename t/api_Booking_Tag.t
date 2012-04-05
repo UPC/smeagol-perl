@@ -12,15 +12,36 @@ use Test::More;
 use utf8::all;
 use HTTP::Status qw(:constants :is status_message);
 use Data::Dumper;
+use DateTime;
 
-my @tests = @{ require 'doc/api/Resource_Tag.pl' };
+my @tests = @{ require 'doc/api/Booking_Tag.pl' };
 
-# global variable to store server-generated IDs
-my $OBJECT_ID;
+# global variable to store server-generated ids
+my %OBJECT_IDS = (
+    resource => undef,
+    event    => undef,
+    booking  => undef,
+);
 
-# get generated ID (for deferred evaluation)
+# returns last generated id for resource type
+# arguments:
+#   $type : the resource type ('resource', 'event', or 'booking')
 sub get_generated_id {
-    return $OBJECT_ID;
+    my $type = shift;
+
+    return $OBJECT_IDS{$type};
+}
+
+# sets last generated id for resource type
+# arguments:
+#     $type : the resource type ('resource', 'event' or 'booking')
+#     $id   : the last generated id
+sub set_generated_id {
+    my ( $type, $id ) = @_;
+
+    #diag("Guardo $id per a $type");
+
+    $OBJECT_IDS{$type} = $id;
 }
 
 # Builds the uri for a test, given a hash with the following key-values:
@@ -81,7 +102,11 @@ sub run_test {
 
     my $got = $r->$op(%args);
 
-    $OBJECT_ID = $got if ( exists $args{'new_ids'} && $args{'new_ids'} != 0 );
+    if ( exists $args{'new_ids'} && $args{'new_ids'} != 0 ) {
+        if ( $uri =~ m{/(\w+)$} ) {
+            set_generated_id( $1, $got );
+        }
+    }
 }
 
 # Parse test hash and prepare arguments for the test call, performing

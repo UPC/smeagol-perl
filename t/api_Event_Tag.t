@@ -13,7 +13,7 @@ use utf8::all;
 use HTTP::Status qw(:constants :is status_message);
 use Data::Dumper;
 
-my @tests = @{ require 'doc/api/Resource_Tag.pl' };
+my @tests = @{ require 'doc/api/Event_Tag.pl' };
 
 # global variable to store server-generated IDs
 my $OBJECT_ID;

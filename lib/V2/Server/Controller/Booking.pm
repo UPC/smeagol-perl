@@ -606,7 +606,7 @@ sub default_POST {
             $c->stash->{content} = \@message;
             $c->stash->{booking} = $booking;
             $c->response->status(201);
-
+            $c->response->location($req->uri->as_string."/". $new_booking->id);
             #$c->stash->{template} = 'booking/get_booking.tt';
             #$c->forward( 'get_booking', [ $new_booking->id ] );
 	    

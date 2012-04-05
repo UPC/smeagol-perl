@@ -12,6 +12,7 @@ use Test::More;
 use utf8::all;
 use HTTP::Status qw(:constants :is status_message);
 use Data::Dumper;
+use DateTime;
 
 my @tests = @{ require 'doc/api/Booking_Tag.pl' };
 
@@ -22,12 +23,12 @@ my %OBJECT_IDS = (
     booking  => undef,
 );
 
-# returns last generated id for resource type 
+# returns last generated id for resource type
 # arguments:
 #   $type : the resource type ('resource', 'event', or 'booking')
 sub get_generated_id {
     my $type = shift;
-    
+
     return $OBJECT_IDS{$type};
 }
 
@@ -36,8 +37,8 @@ sub get_generated_id {
 #     $type : the resource type ('resource', 'event' or 'booking')
 #     $id   : the last generated id
 sub set_generated_id {
-    my ($type, $id) = @_;
-    
+    my ( $type, $id ) = @_;
+
     #diag("Guardo $id per a $type");
 
     $OBJECT_IDS{$type} = $id;
@@ -90,7 +91,7 @@ sub run_test {
 
     my $uri = build_uri( uri => $test->{'uri'}, id => $test->{'id'} );
 
-    diag( $test->{'op'} . ' ' . $uri );
+    #diag( $test->{'op'} . ' ' . $uri );
 
     my $r = V2::Test->new( uri => $uri );
 
@@ -103,7 +104,7 @@ sub run_test {
 
     if ( exists $args{'new_ids'} && $args{'new_ids'} != 0 ) {
         if ( $uri =~ m{/(\w+)$} ) {
-            set_generated_id($1, $got);
+            set_generated_id( $1, $got );
         }
     }
 }

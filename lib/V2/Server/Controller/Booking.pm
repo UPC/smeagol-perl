@@ -36,11 +36,14 @@ Catalyst::REST::Request is created (which overwrites the original $c->request).
 
 sub begin : Private {
     my ( $self, $c ) = @_;
+
+
     $c->stash->{id_resource} = $c->request->query_parameters->{resource};
     $c->stash->{id_event}    = $c->request->query_parameters->{event};
     $c->stash->{ical}        = $c->request->query_parameters->{ical};
     $c->stash->{format}      = $c->request->headers->{"accept"}
         || 'application/json';
+
 }
 
 =head2 default
@@ -83,13 +86,15 @@ sub default_GET {
 
 
     if ($id) {
-		if(($module eq 'tag') && ($id_module)){
-		    $c->detach( 'get_relation_tag_booking', [$id, $id_module]);
-		}elsif(($module eq 'tag') && !($id_module)){
-			$c->response->location($c->uri_for('/tag')."/?booking=".$id);
-			#TODO: message: redireccio a la llista
-			$c->stash->{content}  = \@message;
-			$c->response->status(301); 
+		if((defined $module) && ($module eq 'tag')){
+			if($id_module){
+		    	$c->detach( 'get_relation_tag_booking', [$id, $id_module]);
+			}else{
+				$c->response->location($c->uri_for('/tag')."/?booking=".$id);
+				#TODO: message: redireccio a la llista
+				$c->stash->{content}  = \@message;
+				$c->response->status(301); 
+			}
 		}else {
 			$c->detach( 'get_booking', [$id] );
 		}
@@ -114,6 +119,8 @@ sub get_relation_tag_booking : Private {
     my ( $self, $c, $id , $id_module) = @_;
     my $booking = $c->model('DB::TBooking')->find( { id => $id } );
     my @message;
+   
+    
 
     if ( !$booking ) {
 		#TODO: message: Resource no trobat.
@@ -141,50 +148,56 @@ sub get_booking : Private {
 
     my $booking_aux = $c->model('DB::TBooking')->find( { id => $id } );
     my $booking;
+    my @message;
     if ($booking_aux) {
         given ( $booking_aux->frequency ) {
             when ('daily') {
                 $booking = {
-                    id              => $booking_aux->id,
-                        info        => $booking_aux->info,
-                        id_resource => $booking_aux->id_resource->id,
-                        id_event    => $booking_aux->id_event->id,
-                        dtstart     => $booking_aux->dtstart->iso8601(),
-                        dtend       => $booking_aux->dtend->iso8601(),
-                        duration    => $booking_aux->duration,
-                        until       => $booking_aux->until->iso8601(),
-                        frequency   => $booking_aux->frequency,
-                        interval    => $booking_aux->interval,
-                        byminute    => $booking_aux->by_minute,
-                        byhour      => $booking_aux->by_hour,
-                        tags        => $booking_aux->tag_list,
+			id           => $booking_aux->id,
+                        info         => $booking_aux->info,
+                        id_resource  => $booking_aux->id_resource->id,
+                        id_event     => $booking_aux->id_event->id,
+                        dtstart      => $booking_aux->dtstart->iso8601(),
+                        dtend        => $booking_aux->dtend->iso8601(),
+                        duration     => $booking_aux->duration,
+                        until        => $booking_aux->until->iso8601(),
+                        frequency    => $booking_aux->frequency,
+                        interval     => $booking_aux->interval,
+                        by_minute    => $booking_aux->by_minute,
+                        by_hour      => $booking_aux->by_hour,
+			by_day 	     => $booking_aux->by_day,
+			by_month     => $booking_aux->by_month,
+			by_day_month => $booking_aux->by_day_month,
+			
                 };
 
             }
 
             when ('weekly') {
                 $booking = {
-                    id              => $booking_aux->id,
-                        info        => $booking_aux->info,
-                        id_resource => $booking_aux->id_resource->id,
-                        id_event    => $booking_aux->id_event->id,
-                        dtstart     => $booking_aux->dtstart->iso8601(),
-                        dtend       => $booking_aux->dtend->iso8601(),
-                        duration    => $booking_aux->duration,
-                        until       => $booking_aux->until->iso8601(),
-                        frequency   => $booking_aux->frequency,
-                        interval    => $booking_aux->interval,
-                        byminute    => $booking_aux->by_minute,
-                        byhour      => $booking_aux->by_hour,
-                        byday       => $booking_aux->by_day,
-                        tags        => $booking_aux->tag_list,                        
+			id              => $booking_aux->id,
+                        info        	=> $booking_aux->info,
+                        id_resource 	=> $booking_aux->id_resource->id,
+                        id_event    	=> $booking_aux->id_event->id,
+                        dtstart     	=> $booking_aux->dtstart->iso8601(),
+                        dtend       	=> $booking_aux->dtend->iso8601(),
+                        duration    	=> $booking_aux->duration,
+                        until       	=> $booking_aux->until->iso8601(),
+                        frequency   	=> $booking_aux->frequency,
+                        interval    	=> $booking_aux->interval,
+                        by_minute    	=> $booking_aux->by_minute,
+                        by_hour      	=> $booking_aux->by_hour,
+                        by_day       	=> $booking_aux->by_day,
+			by_month     => $booking_aux->by_month,
+			by_day_month => $booking_aux->by_day_month,
+			
                 };
 
             }
 
             when ('monthly') {
                 $booking = {
-                    id              => $booking_aux->id,
+			id              => $booking_aux->id,
                         info        => $booking_aux->info,
                         id_resource => $booking_aux->id_resource->id,
                         id_event    => $booking_aux->id_event->id,
@@ -194,17 +207,17 @@ sub get_booking : Private {
                         until       => $booking_aux->until->iso8601(),
                         frequency   => $booking_aux->frequency,
                         interval    => $booking_aux->interval,
-                        byminute    => $booking_aux->by_minute,
-                        byhour      => $booking_aux->by_hour,
-                        bymonth     => $booking_aux->by_month,
-                        bymonthday  => $booking_aux->by_day_month,
-                        tags        => $booking_aux->tag_list,
+                        by_minute    => $booking_aux->by_minute,
+                        by_hour      => $booking_aux->by_hour,
+			by_day 	     => $booking_aux->by_day,
+                        by_month     => $booking_aux->by_month,
+                        by_day_month  => $booking_aux->by_day_month,
 		};
             }
 
             default {
                 $booking = {
-                    id              => $booking_aux->id,
+			id          => $booking_aux->id,
                         info        => $booking_aux->info,
                         id_resource => $booking_aux->id_resource->id,
                         id_event    => $booking_aux->id_event->id,
@@ -214,11 +227,11 @@ sub get_booking : Private {
                         until       => $booking_aux->until->iso8601(),
                         frequency   => $booking_aux->frequency,
                         interval    => $booking_aux->interval,
-                        byminute    => $booking_aux->by_minute,
-                        byhour      => $booking_aux->by_hour,
-                        bymonth     => $booking_aux->by_month,
-                        bymonthday  => $booking_aux->by_day_month,
-                        tags        => $booking_aux->tag_list,
+                        by_minute    => $booking_aux->by_minute,
+                        by_hour      => $booking_aux->by_hour,
+			by_day 	     => $booking_aux->by_day,
+                        by_month     => $booking_aux->by_month,
+                        by_day_month  => $booking_aux->by_day_month,
                 };
             }
         };
@@ -230,6 +243,9 @@ sub get_booking : Private {
 
     }
     else {
+	
+	#TODO: Booking no Trobat.
+	$c->stash->{content} = \@message;
         $c->stash->{template} = 'old_not_found.tt';
         $c->response->status(404);
     }
@@ -579,7 +595,9 @@ sub default_POST {
     my @message;
        
     if ( $c->stash->{booking_ok} == 1 ) {
-	 
+	 $c->log->debug("Value of ovelap is: ".($c->stash->{overlap}));
+	$c->log->debug("Value of empty is: ".($c->stash->{empty}));
+	$c->log->debug("Value of too long is: ".($c->stash->{too_long}));
         if (   $c->stash->{overlap} == 1
             or $c->stash->{empty} == 1
             or $c->stash->{too_long} == 1 )
@@ -592,7 +610,6 @@ sub default_POST {
                 #TODO: message: Booking amb resource ocupat
                 $c->response->status(409);
             }
-
             $c->stash->{content} = \@message;
             $c->stash->{error}
                 = "Error: Overlap with another booking or bad parameters";
@@ -642,7 +659,7 @@ Same functionality than default_POST but updating an existing booking.
 sub default_PUT {
     my ( $self, $c, $res, $id, $module, $id_module ) = @_;
     if ($id) {
-		if(($module eq 'tag') && ($id_module)){
+		if((defined $module) && ($module eq 'tag') && ($id_module)){
 		    $c->forward( 'put_relation_tag_booking', [$id, $id_module]);
 		}else{
 		    $c->forward( 'put_booking', [$id] );
@@ -651,9 +668,11 @@ sub default_PUT {
 }
 
 sub put_booking : Private {
-    my ( $self, $c, $res, $id ) = @_;
+    my ( $self, $c, $id) = @_;
     my $req = $c->request;
-
+    my $booking = $c->model('DB::TBooking')->find( { id => $id } );
+    if (defined($booking)){
+    
     my $info        = $req->parameters->{info};
     my $id_resource = $req->parameters->{id_resource};
     my $id_event    = $req->parameters->{id_event};
@@ -684,7 +703,7 @@ sub put_booking : Private {
     my $by_month     = $req->parameters->{by_month}     || $dtstart->month;
     my $by_day_month = $req->parameters->{by_day_month} || "";
 
-    my $booking = $c->model('DB::TBooking')->find( { id => $id } );
+    
     $c->stash->{id_event}    = $id_event;
     $c->stash->{id_resource} = $id_resource;
 
@@ -692,8 +711,8 @@ sub put_booking : Private {
     $c->visit( '/check/check_booking', [] );
 
     my $jbooking;
-
-    given ($freq) {
+    
+	given ($freq) {
 
 #Duration is saved in minuntes in the DB in order to make it easier to deal with it when the server
 #builds the JSON objects
@@ -710,7 +729,10 @@ sub put_booking : Private {
             $booking->until($until);
             $booking->by_minute($by_minute);
             $booking->by_hour($by_hour);
-
+	    $booking->by_day($by_day);
+	    $booking->by_month($by_month);
+	    $booking->by_day_month($by_day_month);
+	    
             $jbooking = {
                 id          => $booking->id,
                 info        => $booking->info,
@@ -724,6 +746,9 @@ sub put_booking : Private {
                 duration    => $booking->duration,
                 by_minute   => $booking->by_minute,
                 by_hour     => $booking->by_hour,
+		by_day	    => $booking->by_day,
+		by_month    => $booking->by_month,
+		by_day_month =>$booking->by_day_month,
             };
         }
 
@@ -740,6 +765,8 @@ sub put_booking : Private {
             $booking->by_minute($by_minute);
             $booking->by_hour($by_hour);
             $booking->by_day($by_day);
+	    $booking->by_month($by_month);
+	    $booking->by_day_month($by_day_month);
 
             $jbooking = {
                 id          => $booking->id,
@@ -755,6 +782,8 @@ sub put_booking : Private {
                 by_minute   => $booking->by_minute,
                 by_hour     => $booking->by_hour,
                 by_day      => $booking->by_day,
+		by_month    => $booking->by_month,
+		by_day_month =>$booking->by_day_month,
             };
 
         }
@@ -771,6 +800,7 @@ sub put_booking : Private {
             $booking->until($until);
             $booking->by_minute($by_minute);
             $booking->by_hour($by_hour);
+	    $booking->by_day($by_day);
             $booking->by_month($by_month);
             $booking->by_day_month($by_day_month);
 
@@ -787,6 +817,7 @@ sub put_booking : Private {
                 duration     => $booking->duration,
                 by_minute    => $booking->by_minute,
                 by_hour      => $booking->by_hour,
+		 by_day       => $booking->by_day,
                 by_month     => $booking->by_month,
                 by_day_month => $booking->by_day_month,
             };
@@ -835,7 +866,7 @@ sub put_booking : Private {
     $c->stash->{new_booking} = $booking;
     $c->stash->{PUT}         = 1;
     $c->visit( '/check/check_overlap', [] );
-
+    my @message; 
 
     
     if ( $c->stash->{booking_ok} == 1 ) {
@@ -844,33 +875,44 @@ sub put_booking : Private {
             or $c->stash->{empty} == 1
             or $c->stash->{too_long} == 1 )
         {
-            my @message
-                = { message => "Error: Bad request. Check parameters", };
-            $c->stash->{content} = \@message;
-            $c->response->status(409);
-            $c->stash->{error}    = "Error: Bad request. Check parameters";
-            $c->stash->{template} = 'booking/get_list.tt';
+	    if ( $c->stash->{empty} == 1 ) {
+		$c->stash->{content} = \@message;
+		$c->response->status(400);
+		$c->stash->{error}    = "Error: Bad request. Check parameters";
+		$c->stash->{template} = 'booking/get_list.tt';
+	    }
+	    else {
+		#TODO: Recurs o event ocupat
+		$c->stash->{content} = \@message;
+                $c->response->status(409);
+	    }
         }
         else {
             $booking->update;
 	    
-            $c->stash->{content} = $jbooking;
+            $c->stash->{content} = \@message;
             $c->stash->{booking} = $jbooking;
-            $c->response->status(201);
+            $c->response->status(200);
             $c->stash->{template} = 'booking/get_booking.tt';
 
         }
     }
     else {
-        my @message
-            = { message => "Error: Check if the event or the resource exist",
-            };
+       
         $c->stash->{content} = \@message;
-        $c->response->status(400);
+        $c->response->status(404);
         $c->stash->{error}
             = "Error: Check if the event or the resource exist";
         $c->stash->{template} = 'booking/get_list.tt';
 
+    }
+    }
+    else{
+	my @message;
+	
+	$c->stash->{content} = \@message;
+	$c->stash->{template} = 'old_not_found.tt';
+        $c->response->status(404);
     }
 }
 

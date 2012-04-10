@@ -340,8 +340,8 @@ my @objs = 	(		{
 								"by_minute":"2",
 								"by_hour": "2",
 								"by_day":"we,fr",
-								"by_month": null,
-								"by_day_month": null
+								"by_month": "-2",
+								"by_day_month": "-2"
 							}, {
 								"id":"4",
 								"info":"BOOKING 4 INFORMATION",

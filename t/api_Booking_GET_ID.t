@@ -87,7 +87,7 @@ my @objs = 	(		{
 								"by_minute":"0",
 								"by_hour":"9",
 								"by_day": null,
-								"by_month": null,
+								"by_month":  null,
 								"by_day_month": null
 				   			}',
 					status => 200

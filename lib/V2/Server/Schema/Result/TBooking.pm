@@ -198,46 +198,51 @@ sub hash_booking {
     given ( $self->frequency ) {
         when ('daily') {
             @booking = {
-                id              => $self->id,
-                    info        => $self->info,
-                    id_resource => $self->id_resource->id,
-                    id_event    => $self->id_event->id,
-                    dtstart     => $self->dtstart->iso8601(),
-                    dtend       => $self->dtend->iso8601(),
-                    duration    => $self->duration,
-                    until       => $self->until->iso8601(),
-                    frequency   => $self->frequency,
-                    interval    => $self->interval,
-                    byminute    => $self->by_minute,
-                    byhour      => $self->by_hour,
-                    exrule_list => $self->exrule_list
+		    id              	=> $self->id,
+                    info        	=> $self->info,
+                    id_resource 	=> $self->id_resource->id,
+                    id_event    	=> $self->id_event->id,
+                    dtstart     	=> $self->dtstart->iso8601(),
+                    dtend       	=> $self->dtend->iso8601(),
+                    duration    	=> $self->duration,
+                    until       	=> $self->until->iso8601(),
+                    frequency   	=> $self->frequency,
+                    interval    	=> $self->interval,
+                    by_minute    	=> $self->by_minute,
+                    by_hour      	=> $self->by_hour,
+		    by_day      	=> $self->by_day,
+		    by_month  	   	=> $self->by_month,
+		    by_day_month   	=> $self->by_day_month,
+                    #exrule_list => $self->exrule_list
             };
 
         }
 
         when ('weekly') {
             @booking = {
-                id              => $self->id,
-                    info        => $self->info,
-                    id_resource => $self->id_resource->id,
-                    id_event    => $self->id_event->id,
-                    dtstart     => $self->dtstart->iso8601(),
-                    dtend       => $self->dtend->iso8601(),
-                    duration    => $self->duration,
-                    until       => $self->until->iso8601(),
-                    frequency   => $self->frequency,
-                    interval    => $self->interval,
-                    byminute    => $self->by_minute,
-                    byhour      => $self->by_hour,
-                    byday       => $self->by_day,
-                    exrule_list => $self->exrule_list
+		    id        		=> $self->id,
+                    info        	=> $self->info,
+                    id_resource 	=> $self->id_resource->id,
+                    id_event    	=> $self->id_event->id,
+                    dtstart     	=> $self->dtstart->iso8601(),
+                    dtend       	=> $self->dtend->iso8601(),
+                    duration    	=> $self->duration,
+                    until       	=> $self->until->iso8601(),
+                    frequency   	=> $self->frequency,
+                    interval    	=> $self->interval,
+                    by_minute    	=> $self->by_minute,
+                    by_hour      	=> $self->by_hour,
+                    by_day       	=> $self->by_day,
+		    by_month  	   	=> $self->by_month,
+		    by_day_month   	=> $self->by_day_month,
+                    #exrule_list => $self->exrule_list
             };
 
         }
 
         when ('monthly') {
             @booking = {
-                id              => $self->id,
+		    id              => $self->id,
                     info        => $self->info,
                     id_resource => $self->id_resource->id,
                     id_event    => $self->id_event->id,
@@ -247,17 +252,18 @@ sub hash_booking {
                     until       => $self->until->iso8601(),
                     frequency   => $self->frequency,
                     interval    => $self->interval,
-                    byminute    => $self->by_minute,
-                    byhour      => $self->by_hour,
-                    bymonth     => $self->by_month,
-                    bymonthday  => $self->by_day_month,
-                    exrule_list => $self->exrule_list
+                    by_minute    => $self->by_minute,
+                    by_hour      => $self->by_hour,
+		    by_day       => $self->by_day,
+                    by_month     => $self->by_month,
+                    by_day_month  => $self->by_day_month,
+                    #exrule_list => $self->exrule_list
             };
         }
 
         default {
             @booking = {
-                id              => $self->id,
+		    id              => $self->id,
                     info        => $self->info,
                     id_resource => $self->id_resource->id,
                     id_event    => $self->id_event->id,
@@ -267,11 +273,12 @@ sub hash_booking {
                     until       => $self->until->iso8601(),
                     frequency   => $self->frequency,
                     interval    => $self->interval,
-                    byminute    => $self->by_minute,
-                    byhour      => $self->by_hour,
-                    bymonth     => $self->by_month,
-                    bymonthday  => $self->by_day_month,
-                    exrule_list => $self->exrule_list
+                    by_minute    => $self->by_minute,
+                    by_hour      => $self->by_hour,
+		    by_day       => $self->by_day,
+                    by_month     => $self->by_month,
+                    by_day_month  => $self->by_day_month,
+                    #exrule_list => $self->exrule_list
             };
         }
     };

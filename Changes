@@ -1,5 +1,12 @@
 Històric de revisions del projecte smeagol.
 
+2.09   Fri Apr 13 00:58:31 CEST 2012
+       - verificació de l'api mitjançant tests
+       - instal·lació comprovada
+       - missatges d'error més simples
+       - munts d'errors corregits
+       - canvis de les versions 2.07 i 2.08, no publicades
+
 2.06   Thu Jul 21 14:01:45 CEST 2011
        - afegir tags als bookings
        - afegir el camp info als bookings

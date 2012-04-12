@@ -8,6 +8,7 @@ COPYING
 doc/api/Tag.csv
 doc/db/create.sql
 doc/db/insert.sql
+doc/db/methods_back-up.txt
 doc/diagrams/arquitectura-88.dia
 doc/diagrams/arquitectura-88.png
 doc/examples/booking.ics
@@ -62,7 +63,6 @@ lib/V2/Server/Model/DB.pm
 lib/V2/Server/Obj/Resource.pm
 lib/V2/Server/Obj/Tag.pm
 lib/V2/Server/Schema.pm
-lib/V2/Server/Schema/Result/methods_back-up.txt
 lib/V2/Server/Schema/Result/TBooking.pm
 lib/V2/Server/Schema/Result/TEvent.pm
 lib/V2/Server/Schema/Result/TException.pm

@@ -425,7 +425,20 @@ my @objs = 	(		{
 				   			}]',
 					status => 200
 				},
-
+				{   # Prova de l'iCal
+					uri => '/booking?event=1&ical=1',
+					op => 'GET',
+					input => '',
+					output => '',
+					status => 200
+				},
+				{   # Prova de l'iCal
+					uri => '/booking?resource=1&ical=1',
+					op => 'GET',
+					input => '',
+					output => '',
+					status => 200
+				},
 			);
 
 foreach my $obj (@objs){

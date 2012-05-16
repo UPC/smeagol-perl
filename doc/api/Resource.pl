@@ -187,11 +187,11 @@
             description => 'DESCRIPTION_ UPDATED',
         },
         output     => {
-            status  => '409 Conflict',
+            status  => '200 OK',
             headers => { Location => '' },
             data     =>'[]',
         },
-    },   
+    },  
     {    # Actualitzar resource amb descripcio incorrecta
         num        => 14,
         desc    => 'Actualitza un resource amb descripcio incorrecta',

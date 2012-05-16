@@ -79,6 +79,9 @@ sub get_relation_tag_resource : Private {
 sub get_resource : Private {
     my ( $self, $c, $id ) = @_;
     my $resource = $c->model('DB::TResource')->find( { id => $id } );
+    
+    
+	
 	my @message;
 
     if ( !$resource ) {
@@ -219,14 +222,18 @@ sub put_resource : Private {
 
     if ($resource) {
         $c->visit( '/check/check_resource', [ $info, $descr ] );
-        my @resource_exist
+	
+    if (($resource->description) ne ($descr)){
+	
+    my @resource_exist
             = $c->model('DB::TResource')->search( { description => $descr } );
-
-        if ( @resource_exist > 0 ) {
+    
+        
+	if ( @resource_exist > 0 ) {
             $c->stash->{resource_ok} = 0;
             $c->stash->{conflict}    = 1;
         }
-
+    }
 # If all is correct $c->stash->{event_ok} should be 1, otherwise it will be 0.
         if ( $c->stash->{resource_ok} ) {
             $resource->description($descr);

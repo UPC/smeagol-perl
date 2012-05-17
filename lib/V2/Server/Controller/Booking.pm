@@ -781,7 +781,7 @@ sub ical : Private {
     my @byday;
     my @bymonth;
     my @bymonthday;
-    my @exrule_list;
+    #my @exrule_list;
 
     foreach (@genda) {
         my $vevent = Data::ICal::Entry::Event->new();
@@ -810,13 +810,16 @@ sub ical : Private {
 
         given ($f_aux) {
             when ('daily') {
+		if(defined($rrule)){
                 $rrule
                     = 'FREQ=DAILY;INTERVAL='
                     . uc($i_aux)
                     . ';UNTIL='
                     . uc( $until->ical );
+		}
             }
             when ('weekly') {
+		if(defined($rrule)){
                 $rrule
                     = 'FREQ=WEEKLY;INTERVAL='
                     . uc($i_aux)
@@ -824,8 +827,10 @@ sub ical : Private {
                     . uc($by_day_aux)
                     . ';UNTIL='
                     . uc( $until->ical );
+		}
             }
             when ('monthly') {
+		if(defined($rrule)){
                 $rrule
                     = 'FREQ=MONTHLY;INTERVAL='
                     . uc($i_aux)
@@ -833,8 +838,10 @@ sub ical : Private {
                     . $by_day_month_aux
                     . ';UNTIL='
                     . uc( $until->ical );
+		}
             }
             when ('yearly') {
+		if(defined($rrule)){
                 $rrule
                     = 'FREQ=YEARLY;INTERVAL='
                     . uc($i_aux)
@@ -844,15 +851,16 @@ sub ical : Private {
                     . $by_day_month_aux
                     . ';UNTIL='
                     . uc( $until->ical );
+		}
             }
         }
 
-        my @exrule_list = @{ $_->{exrule_list} };
+        #my @exrule_list = @{ $_->{exrule_list} };
 
-        for ( my $i = 0; $i < @exrule_list; $i++ ) {
-            $vevent->add_properties( exrule => $exrule_list[$i]->{exrule} );
+        #for ( my $i = 0; $i < @exrule_list; $i++ ) {
+       #     $vevent->add_properties( exrule => $exrule_list[$i]->{exrule} );
 
-        }
+       # }
 
         $vevent->add_properties(
             uid     => $_->{id},
@@ -955,13 +963,16 @@ sub ical_event : Private {
 
         given ($f_aux) {
             when ('daily') {
+		if(defined($rrule)){
                 $rrule
                     = 'FREQ=DAILY;INTERVAL='
                     . uc($i_aux)
                     . ';UNTIL='
                     . uc( $until->ical );
+		}
             }
             when ('weekly') {
+		if(defined($rrule)){
                 $rrule
                     = 'FREQ=WEEKLY;INTERVAL='
                     . uc($i_aux)
@@ -969,8 +980,10 @@ sub ical_event : Private {
                     . uc($by_day_aux)
                     . ';UNTIL='
                     . uc( $until->ical );
+		}
             }
             when ('monthly') {
+		if(defined($rrule)){
                 $rrule
                     = 'FREQ=MONTHLY;INTERVAL='
                     . uc($i_aux)
@@ -978,9 +991,11 @@ sub ical_event : Private {
                     . $by_day_month_aux
                     . ';UNTIL='
                     . uc( $until->ical );
+		}
             }
             when ('yearly') {
-                $rrule
+                if(defined($rrule)){
+		$rrule
                     = 'FREQ=YEARLY;INTERVAL='
                     . uc($i_aux)
                     . ';BYMONTH='
@@ -989,15 +1004,16 @@ sub ical_event : Private {
                     . $by_day_month_aux
                     . ';UNTIL='
                     . uc( $until->ical );
+		}
             }
         }
 
-        my @exrule_list = @{ $_->{exrule_list} };
+      #  my @exrule_list = @{ $_->{exrule_list} };
 
-        for ( my $i = 0; $i < @exrule_list; $i++ ) {
-            $vevent->add_properties( exrule => $exrule_list[$i]->{exrule} );
+      #for ( my $i = 0; $i < @exrule_list; $i++ ) {
+           # $vevent->add_properties( exrule => $exrule_list[$i]->{exrule} );
 
-        }
+        #}
 
         $vevent->add_properties(
             uid     => $_->{id},

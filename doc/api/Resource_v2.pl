@@ -165,7 +165,7 @@
             info        => 'resource info (modif) again',
         }
     },
-    {   title => 'NoModificaRecurs', # prova de PUT idempotent
+    {   title => 'NoModificaRecurs',    # prova de PUT idempotent
         op    => 'PUT',
         id    => \&get_generated_id,
         input => {

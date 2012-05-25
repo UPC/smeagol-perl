@@ -3,7 +3,6 @@ package V2::Server::Controller::Resource;
 use Moose;
 use namespace::autoclean;
 
-
 use Encode qw(encode decode);
 my $enc     = 'utf-8';
 my $VERSION = $V2::Server::VERSION;
@@ -38,53 +37,62 @@ sub default : Path : ActionClass('REST') {
 
 sub default_GET {
     my ( $self, $c, $id, $module, $id_module ) = @_;
-	my @message;
+    my @message;
 
     if ($id) {
-		if((defined $module) && ($module eq 'tag')){
-			if($id_module){
-		    	$c->detach( 'get_relation_tag_resource', [$id, $id_module]);
-			}else{
-				$c->response->location($c->uri_for('/tag')."/?resource=".$id);
-				#TODO: message: redireccio a la llista
-				$c->stash->{content}  = \@message;
-				$c->response->status(301);
-			}
-		}else {
-	    	$c->detach( 'get_resource', [$id] );
-		}
+        if ( ( defined $module ) && ( $module eq 'tag' ) ) {
+            if ($id_module) {
+                $c->detach( 'get_relation_tag_resource',
+                    [ $id, $id_module ] );
+            }
+            else {
+                $c->response->location(
+                    $c->uri_for('/tag') . "/?resource=" . $id );
+
+                #TODO: message: redireccio a la llista
+                $c->stash->{content} = \@message;
+                $c->response->status(301);
+            }
+        }
+        else {
+            $c->detach( 'get_resource', [$id] );
+        }
     }
     else {
-	$c->detach( 'resource_list', [] );
+        $c->detach( 'resource_list', [] );
     }
 }
 
 sub get_relation_tag_resource : Private {
-    my ( $self, $c, $id , $id_module) = @_;
+    my ( $self, $c, $id, $id_module ) = @_;
     my $resource = $c->model('DB::TResource')->find( { id => $id } );
     my @message;
 
     if ( !$resource ) {
-		#TODO: message: Resource no trobat.
-        $c->stash->{content}  = \@message;
-        
+
+        #TODO: message: Resource no trobat.
+        $c->stash->{content} = \@message;
+
         $c->stash->{template} = 'old_not_found.tt';
         $c->response->status(404);
     }
     else {
-        $c->detach( '/tag/get_tag_from_object', [ $id, $c->namespace, $id_module ] );
+        $c->detach( '/tag/get_tag_from_object',
+            [ $id, $c->namespace, $id_module ] );
     }
 }
 
 sub get_resource : Private {
     my ( $self, $c, $id ) = @_;
     my $resource = $c->model('DB::TResource')->find( { id => $id } );
-	my @message;
+
+    my @message;
 
     if ( !$resource ) {
-		#TODO: message: Resource no trobat.
-        $c->stash->{content}  = \@message;
-        
+
+        #TODO: message: Resource no trobat.
+        $c->stash->{content} = \@message;
+
         $c->stash->{template} = 'old_not_found.tt';
         $c->response->status(404);
     }
@@ -125,11 +133,11 @@ sub default_POST {
 
     my $descr = $req->parameters->{description};
     my $info  = $req->parameters->{info};
-    
-    if((defined $module) && ($module eq 'tag')){
-		$c->detach( 'post_relation_tag_resource');
-	}
-      
+
+    if ( ( defined $module ) && ( $module eq 'tag' ) ) {
+        $c->detach('post_relation_tag_resource');
+    }
+
     $c->visit( '/check/check_resource', [ $info, $descr ] );
 
 # If all is correct $c->stash->{event_ok} should be 1, otherwise it will be 0.
@@ -143,7 +151,7 @@ sub default_POST {
     }
 
     if ( $c->stash->{resource_ok} ) {
-	  
+
         my $new_resource = $c->model('DB::TResource')->find_or_new();
 
         $new_resource->description($descr);
@@ -157,10 +165,10 @@ sub default_POST {
             info        => decode( $enc, $new_resource->info ),
         };
 
-		#TODO: message: Resource creat amb exit.
+        #TODO: message: Resource creat amb exit.
         $c->stash->{resource} = $resource;
         $c->stash->{content}  = \@message;
-		$c->response->status(201);
+        $c->response->status(201);
         $c->response->content_type('text/html');
         $c->response->header(
             'Location' => $c->uri_for( $c->action, $new_resource->id ) );
@@ -168,8 +176,9 @@ sub default_POST {
     }
     else {
         if ( $c->stash->{conflict} ) {
+
             #TODO: message: Descripcio ja en us
-			$c->stash->{content} = \@message;
+            $c->stash->{content} = \@message;
             $c->response->status(409);
             $c->stash->{error}
                 = "Error: A resource with the same description already exist";
@@ -186,12 +195,13 @@ sub default_POST {
         }
     }
 }
+
 sub post_relation_tag_resource : Private {
-    my ( $self, $c) = @_;
+    my ( $self, $c ) = @_;
     my @message;
-   
-	#TODO: message: operacio no permesa  
-	$c->stash->{content} = \@message; 
+
+    #TODO: message: operacio no permesa
+    $c->stash->{content} = \@message;
     $c->response->status(405);
 }
 
@@ -199,11 +209,12 @@ sub default_PUT {
     my ( $self, $c, $id, $module, $id_module ) = @_;
 
     if ($id) {
-		if((defined $module) && ($module eq 'tag') && ($id_module)){
-		    $c->forward( 'put_relation_tag_resource', [$id, $id_module]);
-		}else{
-		    $c->forward( 'put_resource', [$id] );
-		}
+        if ( ( defined $module ) && ( $module eq 'tag' ) && ($id_module) ) {
+            $c->forward( 'put_relation_tag_resource', [ $id, $id_module ] );
+        }
+        else {
+            $c->forward( 'put_resource', [$id] );
+        }
     }
 }
 
@@ -213,18 +224,22 @@ sub put_resource : Private {
     my @message;
 
     my $descr = $req->parameters->{description};
-    my $info     = $req->parameters->{info};
+    my $info  = $req->parameters->{info};
 
     my $resource = $c->model('DB::TResource')->find( { id => $id } );
 
     if ($resource) {
         $c->visit( '/check/check_resource', [ $info, $descr ] );
-        my @resource_exist
-            = $c->model('DB::TResource')->search( { description => $descr } );
 
-        if ( @resource_exist > 0 ) {
-            $c->stash->{resource_ok} = 0;
-            $c->stash->{conflict}    = 1;
+        if ( ( $resource->description ) ne ($descr) ) {
+
+            my @resource_exist = $c->model('DB::TResource')
+                ->search( { description => $descr } );
+
+            if ( @resource_exist > 0 ) {
+                $c->stash->{resource_ok} = 0;
+                $c->stash->{conflict}    = 1;
+            }
         }
 
 # If all is correct $c->stash->{event_ok} should be 1, otherwise it will be 0.
@@ -239,13 +254,14 @@ sub put_resource : Private {
                 info        => decode( $enc, $resource->info ),
             };
 
-			#TODO: message: Resource actualitzat amb èxit.
+            #TODO: message: Resource actualitzat amb èxit.
             $c->stash->{resource} = \@resource;
             $c->stash->{content}  = \@message;
             $c->response->status(200);
         }
         else {
             if ( $c->stash->{conflict} ) {
+
                 #TODO: message: Descripcio ja en us
                 $c->stash->{content} = \@message;
                 $c->response->status(409);
@@ -255,7 +271,8 @@ sub put_resource : Private {
                 $c->stash->{template} = 'resource/get_list.tt';
             }
             else {
-				#TODO: message: Descripcio o info incorrectes
+
+                #TODO: message: Descripcio o info incorrectes
                 $c->stash->{content} = \@message;
                 $c->response->status(400);
                 $c->stash->{error}
@@ -266,8 +283,9 @@ sub put_resource : Private {
         }
     }
     else {
-       	#TODO: message: Resource no trobat.
-        $c->stash->{content} = \@message;
+
+        #TODO: message: Resource no trobat.
+        $c->stash->{content}  = \@message;
         $c->stash->{template} = 'old_not_found.tt';
         $c->response->content_type('text/html');
         $c->response->status(404);
@@ -276,63 +294,72 @@ sub put_resource : Private {
 }
 
 sub put_relation_tag_resource : Private {
-    my ( $self, $c, $id_resource , $id_module) = @_;
+    my ( $self, $c, $id_resource, $id_module ) = @_;
     my $resource = $c->model('DB::TResource')->find( { id => $id_resource } );
     my @message;
 
     if ( !$resource ) {
-		#TODO: message: Resource no trobat.
-        $c->stash->{content}  = \@message;
-        
+
+        #TODO: message: Resource no trobat.
+        $c->stash->{content} = \@message;
+
         $c->stash->{template} = 'old_not_found.tt';
         $c->response->status(404);
     }
     else {
-        $c->detach( '/tag/put_tag_object', [ $id_resource, $c->namespace, $id_module ] );
+        $c->detach( '/tag/put_tag_object',
+            [ $id_resource, $c->namespace, $id_module ] );
     }
 }
 
 sub default_DELETE {
-    my ( $self, $c, $id, $module, $id_module) = @_;
- 
+    my ( $self, $c, $id, $module, $id_module ) = @_;
+
     my $req = $c->request;
-    
-if ($id) {
-    if((defined $module) && ($module eq 'tag') && ($id_module)){
-        $c->detach( 'delete_relation_tag_resource', [$id, $id_module]);
-    }
-    else {
-        my $resource_aux = $c->model('DB::TResource')->find( { id => $id } );
-        my @message;
-        if ($resource_aux) {
-	    $resource_aux->delete;
-	    #TODO: message: Resource esborrat amb èxit.
-	    $c->stash->{content}  = \@message;
+
+    if ($id) {
+        if ( ( defined $module ) && ( $module eq 'tag' ) && ($id_module) ) {
+            $c->detach( 'delete_relation_tag_resource', [ $id, $id_module ] );
         }
-        else {  
-	    #TODO: message: Resource no trobat.
-	    $c->stash->{content}  = \@message;
-	    $c->stash->{template} = 'old_not_found.tt';
-	    $c->response->status(404);
+        else {
+            my $resource_aux
+                = $c->model('DB::TResource')->find( { id => $id } );
+            my @message;
+            if ($resource_aux) {
+                $resource_aux->delete;
+
+                #TODO: message: Resource esborrat amb èxit.
+                $c->stash->{content} = \@message;
+            }
+            else {
+
+                #TODO: message: Resource no trobat.
+                $c->stash->{content}  = \@message;
+                $c->stash->{template} = 'old_not_found.tt';
+                $c->response->status(404);
+            }
         }
     }
-}
 }
 
 sub delete_relation_tag_resource : Private {
-    my ( $self, $c, $id , $id_module) = @_;
+    my ( $self, $c, $id, $id_module ) = @_;
     my $resource = $c->model('DB::TResource')->find( { id => $id } );
     my @message;
 
     if ( !$resource ) {
-		#TODO: message: Resource no trobat.
-        $c->stash->{content}  = \@message;
-        
+
+        #TODO: message: Resource no trobat.
+        $c->stash->{content} = \@message;
+
         $c->stash->{template} = 'old_not_found.tt';
         $c->response->status(404);
     }
     else {
-        $c->detach( '/tag/delete_tag_from_object', [ $id, $c->namespace, $id_module ] );
+        $c->detach(
+            '/tag/delete_tag_from_object',
+            [ $id, $c->namespace, $id_module ]
+        );
     }
 }
 

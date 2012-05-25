@@ -146,6 +146,44 @@
             info        => 'resource info (modif)',
         }
     },
+    {   title => 'ModificaRecursMateixaDescripcio',
+        op    => 'PUT',
+        id    => \&get_generated_id,
+        input => {
+            description => 'aula (modif)',
+            info        => 'resource info (modif) again',
+        },
+        status => sub { shift->code == HTTP_OK },
+    },
+    {   title  => 'ConsultaRecursModificatMateixaDescripcio',
+        op     => 'GET',
+        id     => \&get_generated_id,
+        status => sub { shift->code == HTTP_OK },
+        output => {
+            id          => \&get_generated_id,
+            description => 'aula (modif)',
+            info        => 'resource info (modif) again',
+        }
+    },
+    {   title => 'NoModificaRecurs',    # prova de PUT idempotent
+        op    => 'PUT',
+        id    => \&get_generated_id,
+        input => {
+            description => 'aula (modif)',
+            info        => 'resource info (modif) again',
+        },
+        status => sub { shift->code == HTTP_OK },
+    },
+    {   title  => 'ConsultaRecursNoModificat',
+        op     => 'GET',
+        id     => \&get_generated_id,
+        status => sub { shift->code == HTTP_OK },
+        output => {
+            id          => \&get_generated_id,
+            description => 'aula (modif)',
+            info        => 'resource info (modif) again',
+        }
+    },
     {   title  => 'EsborraRecursInexistent',
         op     => 'DELETE',
         id     => 12345,

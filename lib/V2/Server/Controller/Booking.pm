@@ -6,6 +6,7 @@ use namespace::autoclean;
 use DateTime;
 use DateTime::Duration;
 use DateTime::Span;
+
 #Voodoo modules
 use Date::ICal;
 use Data::ICal;
@@ -36,7 +37,6 @@ Catalyst::REST::Request is created (which overwrites the original $c->request).
 
 sub begin : Private {
     my ( $self, $c ) = @_;
-
 
     $c->stash->{id_resource} = $c->request->query_parameters->{resource};
     $c->stash->{id_event}    = $c->request->query_parameters->{event};
@@ -82,22 +82,25 @@ A resource's agenda: /booking?resource=id GET which redirects to bookings_resour
 
 sub default_GET {
     my ( $self, $c, $res, $id, $module, $id_module ) = @_;
-	my @message;
-
+    my @message;
 
     if ($id) {
-		if((defined $module) && ($module eq 'tag')){
-			if($id_module){
-		    	$c->detach( 'get_relation_tag_booking', [$id, $id_module]);
-			}else{
-				$c->response->location($c->uri_for('/tag')."/?booking=".$id);
-				#TODO: message: redireccio a la llista
-				$c->stash->{content}  = \@message;
-				$c->response->status(301); 
-			}
-		}else {
-			$c->detach( 'get_booking', [$id] );
-		}
+        if ( ( defined $module ) && ( $module eq 'tag' ) ) {
+            if ($id_module) {
+                $c->detach( 'get_relation_tag_booking', [ $id, $id_module ] );
+            }
+            else {
+                $c->response->location(
+                    $c->uri_for('/tag') . "/?booking=" . $id );
+
+                #TODO: message: redireccio a la llista
+                $c->stash->{content} = \@message;
+                $c->response->status(301);
+            }
+        }
+        else {
+            $c->detach( 'get_booking', [$id] );
+        }
     }
     else {
         if ( $c->stash->{id_resource} ) {
@@ -116,24 +119,25 @@ sub default_GET {
 }
 
 sub get_relation_tag_booking : Private {
-    my ( $self, $c, $id , $id_module) = @_;
+    my ( $self, $c, $id, $id_module ) = @_;
     my $booking = $c->model('DB::TBooking')->find( { id => $id } );
     my @message;
-   
-    
 
     if ( !$booking ) {
-		#TODO: message: Resource no trobat.
-        $c->stash->{content}  = \@message;
-        
+
+        #TODO: message: Resource no trobat.
+        $c->stash->{content} = \@message;
+
         $c->stash->{template} = 'old_not_found.tt';
         $c->response->status(404);
     }
     else {
 
-        $c->detach( '/tag/get_tag_from_object', [ $id, $c->namespace, $id_module ] );
+        $c->detach( '/tag/get_tag_from_object',
+            [ $id, $c->namespace, $id_module ] );
     }
 }
+
 =head2 get_booking
 
 This function is not accessible through the url: /booking/get_booking/id but /booking/id hence the
@@ -150,26 +154,24 @@ sub get_booking : Private {
     my $booking;
     my @message;
     if ($booking_aux) {
-           
-    $booking = {
-	id          			=> $booking_aux->id,
-        info        			=> $booking_aux->info,
-        id_resource 		=> $booking_aux->id_resource->id,
-        id_event    		=> $booking_aux->id_event->id,
-        dtstart     		=> $booking_aux->dtstart->iso8601(),
-        dtend       		=> $booking_aux->dtend->iso8601(),
-        duration    		=> $booking_aux->duration,
-        until       			=> $booking_aux->until->iso8601(),
-        frequency   		=> $booking_aux->frequency,
-        interval    		=> $booking_aux->interval,
-        by_minute  		=> $booking_aux->by_minute,
-        by_hour     		=> $booking_aux->by_hour,
-	by_day 	     		=> $booking_aux->by_day,
-        by_month     		=> $booking_aux->by_month,
-        by_day_month  	=> $booking_aux->by_day_month,
-    };
-            
-        
+
+        $booking = {
+            id           => $booking_aux->id,
+            info         => $booking_aux->info,
+            id_resource  => $booking_aux->id_resource->id,
+            id_event     => $booking_aux->id_event->id,
+            dtstart      => $booking_aux->dtstart->iso8601(),
+            dtend        => $booking_aux->dtend->iso8601(),
+            duration     => $booking_aux->duration,
+            until        => $booking_aux->until->iso8601(),
+            frequency    => $booking_aux->frequency,
+            interval     => $booking_aux->interval,
+            by_minute    => $booking_aux->by_minute,
+            by_hour      => $booking_aux->by_hour,
+            by_day       => $booking_aux->by_day,
+            by_month     => $booking_aux->by_month,
+            by_day_month => $booking_aux->by_day_month,
+        };
 
         $c->stash->{content} = $booking;
         $c->stash->{booking} = $booking;
@@ -178,9 +180,9 @@ sub get_booking : Private {
 
     }
     else {
-	
-	#TODO: Booking no Trobat.
-	$c->stash->{content} = \@message;
+
+        #TODO: Booking no Trobat.
+        $c->stash->{content}  = \@message;
         $c->stash->{template} = 'old_not_found.tt';
         $c->response->status(404);
     }
@@ -333,9 +335,9 @@ sub default_POST {
     my ( $self, $c, $res, $id, $module, $id_module ) = @_;
     my $req = $c->request;
 
-	if((defined $module) && ($module eq 'tag')){
-		$c->detach( 'post_relation_tag_booking');
-	}
+    if ( ( defined $module ) && ( $module eq 'tag' ) ) {
+        $c->detach('post_relation_tag_booking');
+    }
 
     my $info        = $req->parameters->{info};
     my $id_resource = $req->parameters->{id_resource};
@@ -359,7 +361,7 @@ sub default_POST {
             day   => $ex_day
         );
     }
-    
+
 #dtstart and dtend are parsed in case that some needed parameters to build the recurrence of the
 #booking aren't provided
     $dtstart  = ParseDate($dtstart);
@@ -367,43 +369,42 @@ sub default_POST {
     $duration = $dtend - $dtstart;
 
     my $freq     = $req->parameters->{frequency} || "daily";
-    my $interval = $req->parameters->{interval} || 1;
-    my $until    = $req->parameters->{until} || $req->parameters->{dtend};
+    my $interval = $req->parameters->{interval}  || 1;
+    my $until    = $req->parameters->{until}     || $req->parameters->{dtend};
 
     my $by_minute = $req->parameters->{by_minute} || $dtstart->minute;
     my $by_hour   = $req->parameters->{by_hour}   || $dtstart->hour;
 
     my $by_day = $req->parameters->{by_day} || undef;
 
-    my $by_month     = $req->parameters->{by_month} || undef;       #$dtstart->month;
-    my $by_day_month =$req->parameters->{by_day_month} || undef;
+    my $by_month = $req->parameters->{by_month} || undef;    #$dtstart->month;
+    my $by_day_month = $req->parameters->{by_day_month} || undef;
 
     my $new_booking = $c->model('DB::TBooking')->find_or_new();
-    
-    
+
     $c->stash->{id_event}    = $id_event;
     $c->stash->{id_resource} = $id_resource;
 
     #Do the resource and the event exist?
     $c->visit( '/check/check_booking', [] );
-     
+
     #Creat the Booking...
     $new_booking->info($info);
     $new_booking->id_resource($id_resource);
-   $new_booking->id_event($id_event);
-   $new_booking->dtstart($dtstart);
-   $new_booking->dtend($dtend);
-   $new_booking->duration( $duration->in_units("minutes") );
-   $new_booking->frequency($freq);
-   $new_booking->interval($interval);
-   $new_booking->until($until);
-   $new_booking->by_minute($by_minute);
-   $new_booking->by_hour($by_hour);
-   $new_booking->by_day($by_day);
-   $new_booking->by_month($by_month);
-   $new_booking->by_day_month($by_day_month);
+    $new_booking->id_event($id_event);
+    $new_booking->dtstart($dtstart);
+    $new_booking->dtend($dtend);
+    $new_booking->duration( $duration->in_units("minutes") );
+    $new_booking->frequency($freq);
+    $new_booking->interval($interval);
+    $new_booking->until($until);
+    $new_booking->by_minute($by_minute);
+    $new_booking->by_hour($by_hour);
+    $new_booking->by_day($by_day);
+    $new_booking->by_month($by_month);
+    $new_booking->by_day_month($by_day_month);
 
-   my $booking = {
+    my $booking = {
         id           => $new_booking->id,
         info         => $new_booking->info,
         id_resource  => $new_booking->id_resource->id,
@@ -421,8 +422,6 @@ sub default_POST {
         by_day_month => $new_booking->by_day_month,
     };
 
-           
-
     $c->stash->{new_booking} = $new_booking;
     if ( $c->request->parameters->{exception} ) {
         $c->stash->{new_exception} = $exception;
@@ -430,18 +429,20 @@ sub default_POST {
 
     $c->forward( '/check/check_overlap', [] );
     my @message;
-       
+
     if ( $c->stash->{booking_ok} == 1 ) {
-	 
+
         if (   $c->stash->{overlap} == 1
             or $c->stash->{empty} == 1
             or $c->stash->{too_long} == 1 )
         {
             if ( $c->stash->{empty} == 1 ) {
+
                 #TODO: message: parametres estan malament
                 $c->response->status(400);
             }
             else {
+
                 #TODO: message: Booking amb resource ocupat
                 $c->response->status(409);
             }
@@ -452,21 +453,23 @@ sub default_POST {
         }
         else {
 
-	     $new_booking->insert;
-	   
-	    #TODO: booking creat correctament
+            $new_booking->insert;
+
+            #TODO: booking creat correctament
             $c->stash->{content} = \@message;
             $c->stash->{booking} = $booking;
             $c->response->status(201);
-            $c->response->location($req->uri->as_string."/". $new_booking->id);
+            $c->response->location(
+                $req->uri->as_string . "/" . $new_booking->id );
+
             #$c->stash->{template} = 'booking/get_booking.tt';
             #$c->forward( 'get_booking', [ $new_booking->id ] );
-	    
 
         }
     }
     else {
-		#TODO: message: parametres estan malament   
+
+        #TODO: message: parametres estan malament
         $c->stash->{content} = \@message;
         $c->response->status(400);
         $c->stash->{error}
@@ -477,11 +480,11 @@ sub default_POST {
 }
 
 sub post_relation_tag_booking : Private {
-    my ( $self, $c) = @_;
+    my ( $self, $c ) = @_;
     my @message;
-     
-	#TODO: operacio no permesa.
-	$c->stash->{content} = \@message; 
+
+    #TODO: operacio no permesa.
+    $c->stash->{content} = \@message;
     $c->response->status(405);
 }
 
@@ -494,166 +497,167 @@ Same functionality than default_POST but updating an existing booking.
 sub default_PUT {
     my ( $self, $c, $res, $id, $module, $id_module ) = @_;
     if ($id) {
-		if((defined $module) && ($module eq 'tag') && ($id_module)){
-		    $c->forward( 'put_relation_tag_booking', [$id, $id_module]);
-		}else{
-		    $c->forward( 'put_booking', [$id] );
-		}
+        if ( ( defined $module ) && ( $module eq 'tag' ) && ($id_module) ) {
+            $c->forward( 'put_relation_tag_booking', [ $id, $id_module ] );
+        }
+        else {
+            $c->forward( 'put_booking', [$id] );
+        }
     }
 }
 
 sub put_booking : Private {
-    my ( $self, $c, $id) = @_;
+    my ( $self, $c, $id ) = @_;
     my $req = $c->request;
     my $booking = $c->model('DB::TBooking')->find( { id => $id } );
-    if (defined($booking)){
-    
-    my $info        = $req->parameters->{info};
-    my $id_resource = $req->parameters->{id_resource};
-    my $id_event    = $req->parameters->{id_event};
+    if ( defined($booking) ) {
 
-    my $dtstart = $req->parameters->{dtstart};
-    my $dtend   = $req->parameters->{dtend};
-    my $duration;
+        my $info        = $req->parameters->{info};
+        my $id_resource = $req->parameters->{id_resource};
+        my $id_event    = $req->parameters->{id_event};
+
+        my $dtstart = $req->parameters->{dtstart};
+        my $dtend   = $req->parameters->{dtend};
+        my $duration;
 
 #dtstart and dtend are parsed in case that some needed parameters to build the recurrence of the
 #booking aren't provided
-    $dtstart  = ParseDate($dtstart);
-    $dtend    = ParseDate($dtend);
-    $duration = $dtend - $dtstart;
+        $dtstart  = ParseDate($dtstart);
+        $dtend    = ParseDate($dtend);
+        $duration = $dtend - $dtstart;
 
-    my $freq     = $req->parameters->{frequency} || "daily";
-    my $interval = $req->parameters->{interval}  || 1;
-    my $until    = $req->parameters->{until}     || $req->parameters->{dtend};
+        my $freq     = $req->parameters->{frequency} || "daily";
+        my $interval = $req->parameters->{interval}  || 1;
+        my $until = $req->parameters->{until} || $req->parameters->{dtend};
 
-    my $by_minute = $req->parameters->{by_minute} || $dtstart->minute;
-    my $by_hour   = $req->parameters->{by_hour}   || $dtstart->hour;
+        my $by_minute = $req->parameters->{by_minute} || $dtstart->minute;
+        my $by_hour   = $req->parameters->{by_hour}   || $dtstart->hour;
 
 #by_day may not be provided, so in order to build a proper ICal object, an array containing
 #English day abbreviations is needed.
-    my @day_abbr = ( 'mo', 'tu', 'we', 'th', 'fr', 'sa', 'su' );
+        my @day_abbr = ( 'mo', 'tu', 'we', 'th', 'fr', 'sa', 'su' );
 
-    my $by_day = $req->parameters->{by_day}
-        || @day_abbr[ $dtstart->day_of_week - 1 ];
-    my $by_month     = $req->parameters->{by_month}     || $dtstart->month;
-    my $by_day_month = $req->parameters->{by_day_month} || undef;
+        my $by_day = $req->parameters->{by_day}
+            || @day_abbr[ $dtstart->day_of_week - 1 ];
+        my $by_month = $req->parameters->{by_month} || $dtstart->month;
+        my $by_day_month = $req->parameters->{by_day_month} || undef;
 
-    
-    $c->stash->{id_event}    = $id_event;
-    $c->stash->{id_resource} = $id_resource;
+        $c->stash->{id_event}    = $id_event;
+        $c->stash->{id_resource} = $id_resource;
 
-    #Do the resource and the event exist?
-    $c->visit( '/check/check_booking', [] );
-
+        #Do the resource and the event exist?
+        $c->visit( '/check/check_booking', [] );
 
 #Duration is saved in minuntes in the DB in order to make it easier to deal with it when the server
 #builds the JSON objects
 #Don't mess with the duration, the result can be weird.
-        
-       
-    $booking->info($info);
-    $booking->id_resource($id_resource);
-    $booking->id_event($id_event);
-    $booking->dtstart($dtstart);
-    $booking->dtend($dtend);
-    $booking->duration( $duration->in_units("minutes") );
-    $booking->frequency($freq);
-    $booking->interval($interval);
-    $booking->until($until);
-    $booking->by_minute($by_minute);
-    $booking->by_hour($by_hour);
-    $booking->by_day($by_day);
-    $booking->by_month($by_month);
-    $booking->by_day_month($by_day_month);
 
-    my $jbooking = {
-         id           => $booking->id,
-        info         => $booking->info,
-        id_resource  => $booking->id_resource->id,
-        id_event     => $booking->id_event->id,
-        dtstart      => $booking->dtstart->iso8601(),
-        dtend        => $booking->dtend->iso8601(),
-        until        => $booking->until->iso8601(),
-        frequency    => $booking->frequency,
-        interval     => $booking->interval,
-        duration     => $booking->duration,
-        by_minute    => $booking->by_minute,
-        by_hour      => $booking->by_hour,
-        by_day       => $booking->by_day,
-        by_month     => $booking->by_month,
-        by_day_month => $booking->by_day_month,
-     };   
+        $booking->info($info);
+        $booking->id_resource($id_resource);
+        $booking->id_event($id_event);
+        $booking->dtstart($dtstart);
+        $booking->dtend($dtend);
+        $booking->duration( $duration->in_units("minutes") );
+        $booking->frequency($freq);
+        $booking->interval($interval);
+        $booking->until($until);
+        $booking->by_minute($by_minute);
+        $booking->by_hour($by_hour);
+        $booking->by_day($by_day);
+        $booking->by_month($by_month);
+        $booking->by_day_month($by_day_month);
+
+        my $jbooking = {
+            id           => $booking->id,
+            info         => $booking->info,
+            id_resource  => $booking->id_resource->id,
+            id_event     => $booking->id_event->id,
+            dtstart      => $booking->dtstart->iso8601(),
+            dtend        => $booking->dtend->iso8601(),
+            until        => $booking->until->iso8601(),
+            frequency    => $booking->frequency,
+            interval     => $booking->interval,
+            duration     => $booking->duration,
+            by_minute    => $booking->by_minute,
+            by_hour      => $booking->by_hour,
+            by_day       => $booking->by_day,
+            by_month     => $booking->by_month,
+            by_day_month => $booking->by_day_month,
+        };
 
 #we are reusing /check/check_overlap that's why $booking is saved in $c->stash->{new_booking}
 #For the same reason we put to true $c->stash->{PUT} so we'll be able to amply the convenient
 #restrictions to the search query (see check module for details)
-    $c->stash->{new_booking} = $booking;
-    $c->stash->{PUT}         = 1;
-    $c->visit( '/check/check_overlap', [] );
-    my @message; 
+        $c->stash->{new_booking} = $booking;
+        $c->stash->{PUT}         = 1;
+        $c->visit( '/check/check_overlap', [] );
+        my @message;
 
-    
-    if ( $c->stash->{booking_ok} == 1 ) {
+        if ( $c->stash->{booking_ok} == 1 ) {
 
-        if (   $c->stash->{overlap} == 1
-            or $c->stash->{empty} == 1
-            or $c->stash->{too_long} == 1 )
-        {
-	    if ( $c->stash->{empty} == 1 ) {
-		$c->stash->{content} = \@message;
-		$c->response->status(400);
-		$c->stash->{error}    = "Error: Bad request. Check parameters";
-		$c->stash->{template} = 'booking/get_list.tt';
-	    }
-	    else {
-		#TODO: Recurs o event ocupat
-		$c->stash->{content} = \@message;
-                $c->response->status(409);
-	    }
+            if (   $c->stash->{overlap} == 1
+                or $c->stash->{empty} == 1
+                or $c->stash->{too_long} == 1 )
+            {
+                if ( $c->stash->{empty} == 1 ) {
+                    $c->stash->{content} = \@message;
+                    $c->response->status(400);
+                    $c->stash->{error}
+                        = "Error: Bad request. Check parameters";
+                    $c->stash->{template} = 'booking/get_list.tt';
+                }
+                else {
+
+                    #TODO: Recurs o event ocupat
+                    $c->stash->{content} = \@message;
+                    $c->response->status(409);
+                }
+            }
+            else {
+                $booking->update;
+
+                $c->stash->{content} = \@message;
+                $c->stash->{booking} = $jbooking;
+                $c->response->status(200);
+                $c->stash->{template} = 'booking/get_booking.tt';
+
+            }
         }
         else {
-            $booking->update;
-	    
+
             $c->stash->{content} = \@message;
-            $c->stash->{booking} = $jbooking;
-            $c->response->status(200);
-            $c->stash->{template} = 'booking/get_booking.tt';
+            $c->response->status(404);
+            $c->stash->{error}
+                = "Error: Check if the event or the resource exist";
+            $c->stash->{template} = 'booking/get_list.tt';
 
         }
     }
     else {
-       
-        $c->stash->{content} = \@message;
-        $c->response->status(404);
-        $c->stash->{error}
-            = "Error: Check if the event or the resource exist";
-        $c->stash->{template} = 'booking/get_list.tt';
+        my @message;
 
-    }
-    }
-    else{
-	my @message;
-	
-	$c->stash->{content} = \@message;
-	$c->stash->{template} = 'old_not_found.tt';
+        $c->stash->{content}  = \@message;
+        $c->stash->{template} = 'old_not_found.tt';
         $c->response->status(404);
     }
 }
 
 sub put_relation_tag_booking : Private {
-    my ( $self, $c, $id_booking , $id_module) = @_;
+    my ( $self, $c, $id_booking, $id_module ) = @_;
     my $booking = $c->model('DB::TBooking')->find( { id => $id_booking } );
     my @message;
 
     if ( !$booking ) {
-		#TODO: message: Booking no trobat.
-        $c->stash->{content}  = \@message;
-        
+
+        #TODO: message: Booking no trobat.
+        $c->stash->{content} = \@message;
+
         $c->stash->{template} = 'old_not_found.tt';
         $c->response->status(404);
     }
     else {
-        $c->detach( '/tag/put_tag_object', [ $id_booking, $c->namespace, $id_module ] );
+        $c->detach( '/tag/put_tag_object',
+            [ $id_booking, $c->namespace, $id_module ] );
     }
 }
 
@@ -662,47 +666,54 @@ sub put_relation_tag_booking : Private {
 =cut
 
 sub default_DELETE {
-    my ( $self, $c, $res, $id, $module, $id_module) = @_;
-    
+    my ( $self, $c, $res, $id, $module, $id_module ) = @_;
+
     my $req = $c->request;
-    
-if ($id) {
-    if((defined $module) && ($module eq 'tag') && ($id_module)){
-        $c->detach( 'delete_relation_tag_booking', [$id, $id_module]);
-    }
-    else {
-        my $booking_aux = $c->model('DB::TBooking')->find( { id => $id } );
-        my @message;
-        if ($booking_aux) {
-	    $booking_aux->delete;
-	    #TODO: message: Resource esborrat amb èxit.
-	    $c->stash->{content}  = \@message;
-		$c->response->status(200);
+
+    if ($id) {
+        if ( ( defined $module ) && ( $module eq 'tag' ) && ($id_module) ) {
+            $c->detach( 'delete_relation_tag_booking', [ $id, $id_module ] );
         }
-        else {  
-	    #TODO: message: Resource no trobat.
-	    $c->stash->{content}  = \@message;
-	    $c->stash->{template} = 'old_not_found.tt';
-	    $c->response->status(404);
+        else {
+            my $booking_aux
+                = $c->model('DB::TBooking')->find( { id => $id } );
+            my @message;
+            if ($booking_aux) {
+                $booking_aux->delete;
+
+                #TODO: message: Resource esborrat amb èxit.
+                $c->stash->{content} = \@message;
+                $c->response->status(200);
+            }
+            else {
+
+                #TODO: message: Resource no trobat.
+                $c->stash->{content}  = \@message;
+                $c->stash->{template} = 'old_not_found.tt';
+                $c->response->status(404);
+            }
         }
     }
-}
 }
 
 sub delete_relation_tag_booking : Private {
-    my ( $self, $c, $id , $id_module) = @_;
+    my ( $self, $c, $id, $id_module ) = @_;
     my $booking = $c->model('DB::TBooking')->find( { id => $id } );
     my @message;
 
     if ( !$booking ) {
-		#TODO: message: Resource no trobat.
-        $c->stash->{content}  = \@message;
-        
+
+        #TODO: message: Resource no trobat.
+        $c->stash->{content} = \@message;
+
         $c->stash->{template} = 'old_not_found.tt';
         $c->response->status(404);
     }
     else {
-        $c->detach( '/tag/delete_tag_from_object', [ $id, $c->namespace, $id_module ] );
+        $c->detach(
+            '/tag/delete_tag_from_object',
+            [ $id, $c->namespace, $id_module ]
+        );
     }
 }
 
@@ -781,7 +792,8 @@ sub ical : Private {
     my @byday;
     my @bymonth;
     my @bymonthday;
-    my @exrule_list;
+
+    #my @exrule_list;
 
     foreach (@genda) {
         my $vevent = Data::ICal::Entry::Event->new();
@@ -810,49 +822,57 @@ sub ical : Private {
 
         given ($f_aux) {
             when ('daily') {
-                $rrule
-                    = 'FREQ=DAILY;INTERVAL='
-                    . uc($i_aux)
-                    . ';UNTIL='
-                    . uc( $until->ical );
+                if ( defined($rrule) ) {
+                    $rrule
+                        = 'FREQ=DAILY;INTERVAL='
+                        . uc($i_aux)
+                        . ';UNTIL='
+                        . uc( $until->ical );
+                }
             }
             when ('weekly') {
-                $rrule
-                    = 'FREQ=WEEKLY;INTERVAL='
-                    . uc($i_aux)
-                    . '.;BYDAY='
-                    . uc($by_day_aux)
-                    . ';UNTIL='
-                    . uc( $until->ical );
+                if ( defined($rrule) ) {
+                    $rrule
+                        = 'FREQ=WEEKLY;INTERVAL='
+                        . uc($i_aux)
+                        . '.;BYDAY='
+                        . uc($by_day_aux)
+                        . ';UNTIL='
+                        . uc( $until->ical );
+                }
             }
             when ('monthly') {
-                $rrule
-                    = 'FREQ=MONTHLY;INTERVAL='
-                    . uc($i_aux)
-                    . ';BYMONTHDAY='
-                    . $by_day_month_aux
-                    . ';UNTIL='
-                    . uc( $until->ical );
+                if ( defined($rrule) ) {
+                    $rrule
+                        = 'FREQ=MONTHLY;INTERVAL='
+                        . uc($i_aux)
+                        . ';BYMONTHDAY='
+                        . $by_day_month_aux
+                        . ';UNTIL='
+                        . uc( $until->ical );
+                }
             }
             when ('yearly') {
-                $rrule
-                    = 'FREQ=YEARLY;INTERVAL='
-                    . uc($i_aux)
-                    . ';BYMONTH='
-                    . $by_month_aux
-                    . ';BYMONTHDAY='
-                    . $by_day_month_aux
-                    . ';UNTIL='
-                    . uc( $until->ical );
+                if ( defined($rrule) ) {
+                    $rrule
+                        = 'FREQ=YEARLY;INTERVAL='
+                        . uc($i_aux)
+                        . ';BYMONTH='
+                        . $by_month_aux
+                        . ';BYMONTHDAY='
+                        . $by_day_month_aux
+                        . ';UNTIL='
+                        . uc( $until->ical );
+                }
             }
         }
 
-        my @exrule_list = @{ $_->{exrule_list} };
+        #my @exrule_list = @{ $_->{exrule_list} };
 
-        for ( my $i = 0; $i < @exrule_list; $i++ ) {
-            $vevent->add_properties( exrule => $exrule_list[$i]->{exrule} );
+        #for ( my $i = 0; $i < @exrule_list; $i++ ) {
+        #     $vevent->add_properties( exrule => $exrule_list[$i]->{exrule} );
 
-        }
+        # }
 
         $vevent->add_properties(
             uid     => $_->{id},
@@ -955,49 +975,57 @@ sub ical_event : Private {
 
         given ($f_aux) {
             when ('daily') {
-                $rrule
-                    = 'FREQ=DAILY;INTERVAL='
-                    . uc($i_aux)
-                    . ';UNTIL='
-                    . uc( $until->ical );
+                if ( defined($rrule) ) {
+                    $rrule
+                        = 'FREQ=DAILY;INTERVAL='
+                        . uc($i_aux)
+                        . ';UNTIL='
+                        . uc( $until->ical );
+                }
             }
             when ('weekly') {
-                $rrule
-                    = 'FREQ=WEEKLY;INTERVAL='
-                    . uc($i_aux)
-                    . '.;BYDAY='
-                    . uc($by_day_aux)
-                    . ';UNTIL='
-                    . uc( $until->ical );
+                if ( defined($rrule) ) {
+                    $rrule
+                        = 'FREQ=WEEKLY;INTERVAL='
+                        . uc($i_aux)
+                        . '.;BYDAY='
+                        . uc($by_day_aux)
+                        . ';UNTIL='
+                        . uc( $until->ical );
+                }
             }
             when ('monthly') {
-                $rrule
-                    = 'FREQ=MONTHLY;INTERVAL='
-                    . uc($i_aux)
-                    . ';BYMONTHDAY='
-                    . $by_day_month_aux
-                    . ';UNTIL='
-                    . uc( $until->ical );
+                if ( defined($rrule) ) {
+                    $rrule
+                        = 'FREQ=MONTHLY;INTERVAL='
+                        . uc($i_aux)
+                        . ';BYMONTHDAY='
+                        . $by_day_month_aux
+                        . ';UNTIL='
+                        . uc( $until->ical );
+                }
             }
             when ('yearly') {
-                $rrule
-                    = 'FREQ=YEARLY;INTERVAL='
-                    . uc($i_aux)
-                    . ';BYMONTH='
-                    . $by_month_aux
-                    . ';BYMONTHDAY='
-                    . $by_day_month_aux
-                    . ';UNTIL='
-                    . uc( $until->ical );
+                if ( defined($rrule) ) {
+                    $rrule
+                        = 'FREQ=YEARLY;INTERVAL='
+                        . uc($i_aux)
+                        . ';BYMONTH='
+                        . $by_month_aux
+                        . ';BYMONTHDAY='
+                        . $by_day_month_aux
+                        . ';UNTIL='
+                        . uc( $until->ical );
+                }
             }
         }
 
-        my @exrule_list = @{ $_->{exrule_list} };
+        #  my @exrule_list = @{ $_->{exrule_list} };
 
-        for ( my $i = 0; $i < @exrule_list; $i++ ) {
-            $vevent->add_properties( exrule => $exrule_list[$i]->{exrule} );
+        #for ( my $i = 0; $i < @exrule_list; $i++ ) {
+        # $vevent->add_properties( exrule => $exrule_list[$i]->{exrule} );
 
-        }
+        #}
 
         $vevent->add_properties(
             uid     => $_->{id},

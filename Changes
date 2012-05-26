@@ -1,5 +1,10 @@
 Històric de revisions del projecte smeagol.
 
+2.10   Fri May 25 17:07:03 CEST 2012
+       - resolts els problemes del PUT amb els recursos
+       - la vista en format iCal torna a funcionar
+       - verificat l'ús de les dates sense zona horària
+
 2.09   Fri Apr 13 00:58:31 CEST 2012
        - verificació de l'api mitjançant tests
        - instal·lació comprovada

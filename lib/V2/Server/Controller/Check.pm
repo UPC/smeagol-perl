@@ -29,15 +29,20 @@ sub check_name : Local {
 
 }
 
+#
+# FIXME: Caldria refactoritzar les funcions 
+#        check_desc, check_desc_tag i check_desc_resource
+#
 sub check_desc : Local {
     my ( $self, $c, $desc ) = @_;
 
+    # FIXME: La API no diu enlloc que es faci aquesta conversió!!!!
     if (defined $desc) {
         $desc =~ s/\t//g;     #All tabs substitued by a space
         $desc =~ s/\n/ /g;    #All new lines substitued by a space
     }
     
-    if ( length($desc) < 128 ) {
+    if ( length($desc) >= 1 && length($desc) <= 128 ) {
         $c->stash->{desc_ok} = 1;
     }
     else {

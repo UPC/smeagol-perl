@@ -366,5 +366,23 @@
             data     =>'[{"info":"EVENT 2 INFORMATION","description":"DESCRIPTION","starts":"2011-02-16T04:00:00","ends":"2011-02-16T05:00:00"}, {"info":"EVENT 4 INFORMATION","description":"DESCRIPTION_","starts":"2011-02-16T04:00:00","ends":"2011-02-16T05:00:00"}, {"info":"EVENT 5 INFORMATION","description":"DESCRIPTION_","starts":"2011-02-16T04:00:00","ends":"2011-02-16T05:00:00"}]',
         },
     },
+    {
+        num     => 25,
+        desc    => 'Crea un nou event amb descripció de longitud màxima',
+        call    => 'TestCreateEvent',
+        op      => 'POST',
+        uri     => '/event' ,
+        input => {
+            info        => 'EVENT 1 INFORMATION',
+            description => 'a' x 128,
+            starts      => '2011-02-16T04:00:00',
+            ends        => '2011-02-16T05:00:00',
+        },
+        output => {
+            status  => '201 Created',
+            headers => { Location => qr{/event/\d+} },
+            data    => '[]',
+        },
+    },
 ] 
 

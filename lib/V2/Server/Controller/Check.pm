@@ -42,7 +42,7 @@ sub check_desc : Local {
         $desc =~ s/\n/ /g;    #All new lines substitued by a space
     }
 
-    if ( length($desc) >= 1 && length($desc) <= 128 ) {
+    if ( length($desc) <= 128 ) {
         $c->stash->{desc_ok} = 1;
     }
     else {

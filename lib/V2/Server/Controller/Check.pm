@@ -29,15 +29,20 @@ sub check_name : Local {
 
 }
 
+#
+# FIXME: Caldria refactoritzar les funcions
+#        check_desc, check_desc_tag i check_desc_resource
+#
 sub check_desc : Local {
     my ( $self, $c, $desc ) = @_;
 
-    if (defined $desc) {
+    # FIXME: La API no diu enlloc que es faci aquesta conversió!!!!
+    if ( defined $desc ) {
         $desc =~ s/\t//g;     #All tabs substitued by a space
         $desc =~ s/\n/ /g;    #All new lines substitued by a space
     }
-    
-    if ( length($desc) < 128 ) {
+
+    if ( length($desc) >= 1 && length($desc) <= 128 ) {
         $c->stash->{desc_ok} = 1;
     }
     else {
@@ -60,6 +65,7 @@ sub check_desc_resource : Local {
     my ( $self, $c, $desc ) = @_;
 
     if ( length($desc) >= 1 && length($desc) <= 128 ) {
+
         # trim $desc to check if it consists only of blank (\s) chars
         for ($desc) {
             s/^\s+//;
@@ -69,7 +75,7 @@ sub check_desc_resource : Local {
     }
     else {
         $c->stash->{desc_ok} = 0;
-    }    
+    }
 }
 
 sub check_info : Local {
@@ -88,7 +94,7 @@ sub check_info : Local {
 sub check_date : Local {
     my ( $self, $c, $date, $atrib ) = @_;
 
-    if ( $date =~ /\G(\d+-\d+-\d+T\d+:\d+:\d+)/ && length($date) == 19) {
+    if ( $date =~ /\G(\d+-\d+-\d+T\d+:\d+:\d+)/ && length($date) == 19 ) {
         $c->stash->{$atrib} = 1;
     }
     else {
@@ -105,7 +111,6 @@ sub check_booking : Local {
     my ( $self, $c ) = @_;
     my $id_resource = $c->stash->{id_resource};
     my $id_event    = $c->stash->{id_event};
-
 
     my $resource = $c->model('DB::TResource')->find( { id => $id_resource } );
     my $event = $c->model('DB::TEvent')->find( { id => $id_event } );
@@ -130,10 +135,14 @@ sub check_event : Local {
 
     $c->visit( 'check_info', [$info] );
     $c->visit( 'check_desc', [$description] );
-    $c->visit( 'check_date', [$starts, 'starts_ok'] );
-    $c->visit( 'check_date', [$ends, 'ends_ok'] );
-     
-    if ( $c->stash->{info_ok} && $c->stash->{desc_ok} && $c->stash->{starts_ok} && $c->stash->{ends_ok}) {
+    $c->visit( 'check_date', [ $starts, 'starts_ok' ] );
+    $c->visit( 'check_date', [ $ends, 'ends_ok' ] );
+
+    if (   $c->stash->{info_ok}
+        && $c->stash->{desc_ok}
+        && $c->stash->{starts_ok}
+        && $c->stash->{ends_ok} )
+    {
         $c->stash->{event_ok} = 1;
     }
     else {
@@ -148,7 +157,7 @@ Function used to verify that resource parameters are within the proper range
 sub check_resource : Local {
     my ( $self, $c, $info, $description ) = @_;
 
-    $c->visit( 'check_info', [$info] );
+    $c->visit( 'check_info',          [$info] );
     $c->visit( 'check_desc_resource', [$description] );
 
     if ( $c->stash->{info_ok} && $c->stash->{desc_ok} ) {

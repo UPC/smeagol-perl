@@ -3,9 +3,9 @@ use Module::Install::Catalyst;
 
 name 'V2-Server';
 
-all_from 'lib/Smeagol.pm';
+all_from 'lib/V2/Server.pm';
 
-license 'agpl';
+license 'agpl_3';
 
 requires 'DateTime'                  => 0;
 requires 'DateTime::Span'            => 0;
@@ -47,27 +47,11 @@ test_requires 'utf8::all'           => 0;
 
 catalyst;
 
-# don't install old v1 scripts from bin
-#install_script glob 'bin/*';
-
 # install new v2 scripts
 install_script glob 'script/*';
 
-# don't install old share
-#install_share;
-
-# share, t and inc are also added
-no_index directory => qw( doc dtd );
+# do not include in CPAN index
+no_index directory => qw( doc );
 
 auto_install;
 WriteAll;
-
-# FIXME: symlink may not exist on this platform but it is used
-#        as a work-around until File::ShareDir support is added
-#        (ticket:34)
-my $dtd = "dtd";
-( unlink $dtd or die "cannot remove $dtd: $!" )
-    if -e $dtd;
-
-symlink "share/$dtd", $dtd
-    or die "cannot symlink $dtd: $!";

@@ -155,6 +155,7 @@ sub hash_exception {
         minute => $self->until->minute,
     );
 
+    no warnings 'experimental::smartmatch';
     given ( $self->frequency ) {
         when ('daily') {
 
@@ -265,6 +266,7 @@ sub exrule {
         minute => $self->until->minute,
     );
 
+    no warnings 'experimental::smartmatch';
     given ( $self->frequency ) {
         when ('daily') {
             $exrule

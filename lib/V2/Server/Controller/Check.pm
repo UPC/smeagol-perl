@@ -340,6 +340,7 @@ sub build_recur : Private {
         @bymonthday = split( ',', $set->by_day_month );
     }
 
+    no warnings 'experimental::smartmatch';
     given ( $set->frequency ) {
         when ('daily') {
             $recur = DateTime::Event::ICal->recur(

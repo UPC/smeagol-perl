@@ -103,6 +103,7 @@ sub get_exception : Local {
 
     my $exception;
     if ($exception_aux) {
+        no warnings 'experimental::smartmatch';
         given ( $exception_aux->frequency ) {
             when ('daily') {
                 $exception = {
@@ -216,6 +217,7 @@ sub default_POST {
 
     my $exception;
 
+    no warnings 'experimental::smartmatch';
     given ($freq) {
 
 #Duration is saved in minuntes in the DB in order to make it easier to deal with it when the server
@@ -415,6 +417,7 @@ sub default_PUT {
 
     my $exception;
 
+    no warnings 'experimental::smartmatch';
     given ($freq) {
 
 #Duration is saved in minuntes in the DB in order to make it easier to deal with it when the server

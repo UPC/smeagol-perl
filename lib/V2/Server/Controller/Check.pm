@@ -235,11 +235,15 @@ sub check_overlap : Local {
     my $overlap;
     my @booking_aux;
     if ( $c->stash->{PUT} ) {
-        @booking_aux
-            = $c->model('DB::TBooking')
+        my $result_set = $c->model('DB::TBooking');
+        # DateTime objects must be properly formatted in search.
+        # See "Formatting DateTime objects in queries" section
+        # in DBIx::Class::Manual::Cookbook docs.
+        my $dtf = $result_set->result_source->schema->storage->datetime_parser;
+        @booking_aux = $result_set
             ->search( { id_resource => $new_booking->id_resource->id } )
             ->search( { id          => { '!=' => $new_booking->id } } )
-            ->search( { until       => { '>' => $new_booking->dtstart } } );
+            ->search( { until       => { '>'  => $dtf->format_datetime( $new_booking->dtstart ) } } );
 
     }
     else {

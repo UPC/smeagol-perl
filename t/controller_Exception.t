@@ -21,9 +21,6 @@ ok( my $response = request GET '/exception',
 
 is( $response->headers->{status}, '200', 'Response status is 200: OK' );
 
-diag '###################################';
-diag '##Requesting exceptions one by one###';
-diag '###################################';
 ok( my $exception_aux = $j->jsonToObj( $response->content ) );
 
 my @exception = @{$exception_aux};
@@ -34,10 +31,6 @@ foreach (@exception) {
     ok( $response = request GET '/exception/' . $id, [] );
     is( $response->headers->{status}, '200', 'Response status is 200: OK' );
 }
-diag '\n';
-diag '########################################';
-diag '##Creating Exception with no recurrence###';
-diag '########################################';
 
 my $dt1 = DateTime->now->truncate( to => 'minute' );
 my $dtstart = $dt1->clone->add( days => 0, hours => 0 );
@@ -52,7 +45,7 @@ ok( my $response_post = request POST '/exception',
     ],
     HTTP::Headers->new( Accept => 'application/json' )
 );
-diag $response_post->content;
+
 is( $response_post->headers->{status},
     '201', 'Response status is 201: Created' );
 
@@ -67,11 +60,6 @@ ok( my $response_DELETE = request($request_DELETE), 'Delete request' );
 is( $response_DELETE->headers->{status}, '200',
     'Response status is 200: OK' );
 
-diag '\n';
-diag '###########################################';
-diag '##Creating Exception with daily recurrence###';
-diag '###########################################';
-
 ok( $response_post = request POST '/exception',
     [   id_booking => "1",
         dtstart    => $dtstart,
@@ -83,19 +71,12 @@ ok( $response_post = request POST '/exception',
     HTTP::Headers->new( Accept => 'application/json' )
 );
 
-diag "Exception with daily recurrence: " . $response_post->content;
-
 ok( $exception_aux = $j->jsonToObj( $response_post->content ) );
 $request_DELETE = DELETE( 'exception/' . $exception_aux->{id} );
 $request_DELETE->header( Accept => 'application/json' );
 ok( $response_DELETE = request($request_DELETE), 'Delete request' );
 is( $response_DELETE->headers->{status}, '200',
     'Response status is 200: OK' );
-
-diag '\n';
-diag '############################################';
-diag '##Creating Exception with weekly recurrence###';
-diag '############################################';
 
 ok( $response_post = request POST '/exception',
     [   id_booking => "1",
@@ -109,18 +90,12 @@ ok( $response_post = request POST '/exception',
     HTTP::Headers->new( Accept => 'application/json' )
 );
 
-diag "Exception with weekly recurrence: " . $response_post->content;
 ok( $exception_aux = $j->jsonToObj( $response_post->content ) );
 $request_DELETE = DELETE( 'exception/' . $exception_aux->{id} );
 $request_DELETE->header( Accept => 'application/json' );
 ok( $response_DELETE = request($request_DELETE), 'Delete request' );
 is( $response_DELETE->headers->{status}, '200',
     'Response status is 200: OK' );
-
-diag '\n';
-diag '############################################';
-diag '##Creating Exception with monthly recurrence##';
-diag '############################################';
 
 ok( $response_post = request POST '/exception',
     [   id_booking   => "1",
@@ -134,7 +109,6 @@ ok( $response_post = request POST '/exception',
     HTTP::Headers->new( Accept => 'application/json' )
 );
 
-diag "Exception with monthly recurrence: " . $response_post->content;
 ok( $exception_aux = $j->jsonToObj( $response_post->content ) );
 $request_DELETE = DELETE( 'exception/' . $exception_aux->{id} );
 $request_DELETE->header( Accept => 'application/json' );
@@ -142,6 +116,5 @@ ok( $response_DELETE = request($request_DELETE), 'Delete request' );
 is( $response_DELETE->headers->{status}, '200',
     'Response status is 200: OK' );
 
-diag '';
 done_testing();
 

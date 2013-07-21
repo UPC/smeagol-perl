@@ -18,11 +18,6 @@ my $j = JSON::Any->new;
 ok( my $response = request GET '/booking',
     HTTP::Headers->new( Accept => 'application/json' ) );
 
-diag "Llista de bookings: " . $response->content;
-
-diag '###################################';
-diag '##Requesting bookings one by one###';
-diag '###################################';
 ok( my $booking_aux = $j->jsonToObj( $response->content ) );
 
 my @booking = @{$booking_aux};
@@ -31,13 +26,7 @@ my $id;
 foreach (@booking) {
     $id = $_->{id};
     ok( $response = request GET '/booking/' . $id, [] );
-    diag 'Booking ' . $id . ' ' . $response->content;
-    diag '###################################';
 }
-diag '\n';
-diag '########################################';
-diag '##Creating Booking with no recurrence###';
-diag '########################################';
 
 my $dt1 = DateTime->now->truncate( to => 'minute' );
 my $dtstart = $dt1->clone->add( days => 0, hours => 0 );
@@ -56,8 +45,6 @@ ok( my $response_post = request POST '/booking',
     HTTP::Headers->new( Accept => 'application/json' )
 );
 
-diag "Nou booking sense recurrència: " . $response_post->content;
-
 ok( $booking_aux = $j->jsonToObj( $response_post->content ) );
 
 ok( $booking_aux->{id_event}    eq 1,              "ID event correct" );
@@ -72,11 +59,6 @@ ok( my $response_DELETE = request($request_DELETE), 'Delete request' );
 is( $response_DELETE->headers->{status}, '200',
     'Response status is 200: OK' );
 
-diag '\n';
-diag '###########################################';
-diag '##Creating Booking with daily recurrence###';
-diag '###########################################';
-
 ok( $response_post = request POST '/booking',
     [   id_event    => "1",
         id_resource => "1",
@@ -90,8 +72,6 @@ ok( $response_post = request POST '/booking',
     ],
     HTTP::Headers->new( Accept => 'application/json' )
 );
-
-diag "Booking with daily recurrence: " . $response_post->content;
 
 ok( $booking_aux = $j->jsonToObj( $response_post->content ) );
 
@@ -111,11 +91,6 @@ ok( $response_DELETE = request($request_DELETE), 'Delete request' );
 is( $response_DELETE->headers->{status}, '200',
     'Response status is 200: OK' );
 
-diag '\n';
-diag '############################################';
-diag '##Creating Booking with weekly recurrence###';
-diag '############################################';
-
 ok( $response_post = request POST '/booking',
     [   id_event    => "1",
         id_resource => "1",
@@ -130,8 +105,6 @@ ok( $response_post = request POST '/booking',
     ],
     HTTP::Headers->new( Accept => 'application/json' )
 );
-
-diag "Booking with weekly recurrence: " . $response_post->content;
 
 ok( $booking_aux = $j->jsonToObj( $response_post->content ) );
 
@@ -151,11 +124,6 @@ ok( $response_DELETE = request($request_DELETE), 'Delete request' );
 is( $response_DELETE->headers->{status}, '200',
     'Response status is 200: OK' );
 
-diag '\n';
-diag '############################################';
-diag '##Creating Booking with monthly recurrence##';
-diag '############################################';
-
 ok( $response_post = request POST '/booking',
     [   id_event     => "1",
         id_resource  => "1",
@@ -170,8 +138,6 @@ ok( $response_post = request POST '/booking',
     ],
     HTTP::Headers->new( Accept => 'application/json' )
 );
-
-diag "Booking with monthly recurrence: " . $response_post->content;
 
 ok( $booking_aux = $j->jsonToObj( $response_post->content ) );
 
@@ -191,11 +157,6 @@ ok( $response_DELETE = request($request_DELETE), 'Delete request' );
 is( $response_DELETE->headers->{status}, '200',
     'Response status is 200: OK' );
 
-diag '\n';
-diag '#################################################################';
-diag '##Creating Booking with daily recurrence + 1 simple exception ###';
-diag '#################################################################';
-
 my $exception = $dtend->clone->add( days => 1 )->ymd;
 
 ok( $response_post = request POST '/booking',
@@ -212,9 +173,6 @@ ok( $response_post = request POST '/booking',
     ],
     HTTP::Headers->new( Accept => 'application/json' )
 );
-
-diag "Booking with daily recurrence + simple exception: "
-    . $response_post->content;
 
 ok( $booking_aux = $j->jsonToObj( $response_post->content ) );
 

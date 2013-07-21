@@ -16,13 +16,7 @@ my $j = JSON::Any->new;
 ok( my $response = request GET '/event',
     HTTP::Headers->new( Accept => 'application/json' ) );
 
-diag "Llista d'events: " . $response->content;
-
 ok( request('/event')->is_success, 'Request should succeed' );
-
-diag '###################################';
-diag '##Requesting events one by one##';
-diag '###################################';
 
 my $event_aux = $j->jsonToObj( $response->content );
 
@@ -39,9 +33,6 @@ foreach (@event) {
 Create new event
 =cut
 
-diag '#########Creating event#########';
-diag '###################################';
-
 ok( my $response_post = request POST '/event',
     [   starts      => '2010-02-16T04:00:00',
         description => ':-P',
@@ -50,7 +41,6 @@ ok( my $response_post = request POST '/event',
         tags        => ''
     ]
 );
-diag "Resposta: " . $response_post->content;
 is( $response_post->headers->{status},
     '201', 'Response status is 201: Created' );
 
@@ -61,12 +51,6 @@ my $eid = $event_aux->{id};
 Editing the last created event
 =cut
 
-diag '##########Editing event#########';
-diag '###################################';
-
-diag "Editing event " . $eid;
-
-#diag "ID: ".$id;
 ok( my $response_put
         = request PUT '/event/' 
         . $eid
@@ -78,14 +62,7 @@ ok( my $response_put
         tags        => 'edited event,trololo'
     ]
 );
-diag $response_put->content;
 
-diag '##########Editing nont existing event#########';
-diag '##############################################';
-
-diag "Editing event which doesn't exist";
-
-#diag "ID: ".$id;
 ok( my $response_put
         = request PUT '/event/' 
         . '100'
@@ -97,12 +74,9 @@ ok( my $response_put
         tags        => 'edited event,trololo'
     ]
 );
-diag $response_put->content;
+
 is( $response_put->headers->{status}, '404',
     'Response status is 404: Not found' );
-
-diag '#########Deleting event#########';
-diag '###################################';
 
 my $request_DELETE = DELETE( 'event/' . $eid );
 $request_DELETE->header( Accept => 'application/json' );

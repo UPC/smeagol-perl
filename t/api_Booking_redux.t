@@ -39,60 +39,43 @@ my %book1 = (
     id_event     => $ev_id,
     frequency    => 'daily',
     interval     => 1,
-#    by_minute    => '',
-#    until        => '',
-#    by_hour      => '',
-#    by_day       => '',
-#    by_month     => '',
-#    by_day_month => '',
-#    exception    => '',
-
-
-    # FIXME (bug #355)
-    #
-    # Cal passar obligatòriament els tags '''com string'''.
-    # smeagol/branches/tiquet_330_booking/lib/V2/Server/Controller/Booking.pm#L356
-    #
-    tags => [],
 );
 
-my %expected;
 my $id  = $b->POST( args => [ %book1 ] );
 my $out = $b->GET( id => $id );
-delete $out->{'duration'};
-delete $out->{'until'};
-
-%expected = %book1;
-$expected{'id'} = $id;
-$expected{'byminute'} = '0';
-$expected{'byhour'} = '0';
-is_deeply( $out, \%expected, "create booking1" );
+like_booking( $out, \%book1, $id, "create booking1" );
 
 @bookings = $b->GET();
-
 is_deeply( \@bookings, [ $id ], 'list of 1 booking' );
 
 $book1{'info'} = 'edited-info';
 $b->PUT( id => $id, args => [ %book1 ] );
-
 @bookings = $b->GET();
-
 is_deeply( \@bookings, [ $id ], 'still list of 1 booking' );
 
 $out = $b->GET( id => $id );
-delete $out->{'duration'};
-delete $out->{'until'};
-
-%expected = %book1;
-$expected{'id'} = $id;
-$expected{'byminute'} = '0';
-$expected{'byhour'} = '0';
-is_deeply( $out, \%expected, "edit booking1" );
+like_booking( $out, \%book1, $id, "edit booking1" );
 
 $b->DELETE( id => $id );
-
 @bookings = $b->GET();
-
 is_deeply( \@bookings, [], 'delete gets empty list back' );
 
 done_testing();
+
+#
+# The resulting booking has more attributes than the original,
+# so we only compare the result of the original attributes.
+# Thus, we do not depend on DateTime internals regarding
+# the attributes we did not define explicitly.
+#
+sub like_booking {
+    my ( $out, $exp, $id, $msg ) = @_;
+
+    my %out = %$out;
+    my %expected = %$exp;
+    $expected{'id'} = $id;
+
+    my %got;
+    @got{ keys %expected } = @out{ keys %expected };
+    is_deeply( \%got, \%expected, "edit booking1" );
+}

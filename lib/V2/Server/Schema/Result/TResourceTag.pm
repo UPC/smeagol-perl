@@ -25,13 +25,11 @@ __PACKAGE__->table("t_resource_tag");
   data_type: 'integer'
   is_auto_increment: 1
   is_foreign_key: 1
-  is_nullable: 1
 
 =head2 tag_id
 
   data_type: 'text'
   is_foreign_key: 1
-  is_nullable: 1
   size: 64
 
 =cut
@@ -41,12 +39,10 @@ __PACKAGE__->add_columns(
     {   data_type         => "integer",
         is_auto_increment => 1,
         is_foreign_key    => 1,
-        is_nullable       => 1,
     },
     "tag_id",
     {   data_type      => "text",
         is_foreign_key => 1,
-        is_nullable    => 1,
         size           => 64
     },
 );

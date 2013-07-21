@@ -25,7 +25,6 @@ __PACKAGE__->table("t_booking");
 
   data_type: 'integer'
   is_auto_increment: 1
-  is_nullable: 1
 
 =head2 id_resource
 
@@ -98,7 +97,7 @@ __PACKAGE__->table("t_booking");
 
 __PACKAGE__->add_columns(
     "id",
-    { data_type => "integer", is_auto_increment => 1, is_nullable => 1 },
+    { data_type => "integer", is_auto_increment => 1 },
     "info",
     { data_type => "text", is_nullable => 1, size => 256 },
     "id_resource",

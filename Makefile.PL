@@ -44,6 +44,7 @@ test_requires 'Data::Dumper::Simple' => 0;
 test_requires 'JSON'                => 0;
 test_requires 'List::Compare'       => 0;
 test_requires 'utf8::all'           => 0;
+test_requires 'Text::CSV'           => 0;
 
 catalyst;
 

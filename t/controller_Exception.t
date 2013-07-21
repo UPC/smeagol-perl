@@ -15,9 +15,7 @@ BEGIN { use_ok 'V2::Server::Controller::Exception' }
 my $j = JSON::Any->new;
 
 #Request list of exceptions
-ok( my $response = request GET '/exception',
-    HTTP::Headers->new( Accept => 'application/json' )
-);
+ok( my $response = request GET '/exception' );
 
 is( $response->headers->{status}, '200', 'Response status is 200: OK' );
 
@@ -36,14 +34,33 @@ my $dt1 = DateTime->now->truncate( to => 'minute' );
 my $dtstart = $dt1->clone->add( days => 0, hours => 0 );
 my $dtend   = $dt1->clone->add( days => 0, hours => 2 );
 
-ok( my $response_post = request POST '/exception',
+my $response_post = request POST '/resource', [
+    description => 'DESC',
+    info        => 'INFO',
+];
+ok( $response_post->is_success, 'New resource' );
+$response_post = request POST '/event', [
+    description => 'DESC',
+    info        => 'INFO',
+    starts      => $dtstart,
+    ends        => $dtend,
+];
+ok( $response_post->is_success, 'New event' );
+$response_post = request POST '/booking', [
+    id_resource => 1,
+    id_event    => 1,
+    dtstart     => $dtstart,
+    dtend       => $dtend,
+];
+ok( $response_post->is_success, 'New booking' );
+
+ok( $response_post = request POST '/exception',
     [   id_booking => "1",
         dtstart    => $dtstart,
         dtend      => $dtend,
         freq       => 'daily',
         interval   => 1
     ],
-    HTTP::Headers->new( Accept => 'application/json' )
 );
 
 is( $response_post->headers->{status},
@@ -68,7 +85,6 @@ ok( $response_post = request POST '/exception',
         interval   => 1,
         until      => $dtend->clone->add( days => 10 ),
     ],
-    HTTP::Headers->new( Accept => 'application/json' )
 );
 
 ok( $exception_aux = $j->jsonToObj( $response_post->content ) );
@@ -87,7 +103,6 @@ ok( $response_post = request POST '/exception',
         until      => $dtend->clone->add( months => 4 ),
         by_day     => substr( lc( $dtstart->day_abbr ), 0, 2 ) . ","
     ],
-    HTTP::Headers->new( Accept => 'application/json' )
 );
 
 ok( $exception_aux = $j->jsonToObj( $response_post->content ) );
@@ -106,7 +121,6 @@ ok( $response_post = request POST '/exception',
         until        => $dtend->clone->add( months => 4 ),
         by_day_month => $dtstart->day
     ],
-    HTTP::Headers->new( Accept => 'application/json' )
 );
 
 ok( $exception_aux = $j->jsonToObj( $response_post->content ) );

@@ -13,10 +13,9 @@ BEGIN { use_ok 'V2::Server::Controller::Event' }
 my $j = JSON::Any->new;
 
 #List of events ok?
-ok( my $response = request GET '/event',
-    HTTP::Headers->new( Accept => 'application/json' ) );
+ok( my $response = request GET '/event' );
 
-ok( request('/event')->is_success, 'Request should succeed' );
+ok( $response->is_success, 'Request should succeed' );
 
 my $event_aux = $j->jsonToObj( $response->content );
 
@@ -44,8 +43,15 @@ ok( my $response_post = request POST '/event',
 is( $response_post->headers->{status},
     '201', 'Response status is 201: Created' );
 
-$event_aux = $j->from_json( $response_post->content );
-my $eid = $event_aux->{id};
+ok( $response = request GET '/event' );
+ok( $response->is_success, 'Request should succeed' );
+$event_aux = $j->jsonToObj( $response->content );
+@event = @{$event_aux};
+foreach (@event) {
+    $id = $_->{"id"};
+    ok( $response = request GET '/event/' . $id, [] );
+    is( $response->headers->{status}, '200', 'Response status is 200: OK' );
+}
 
 =head1
 Editing the last created event
@@ -53,7 +59,7 @@ Editing the last created event
 
 ok( my $response_put
         = request PUT '/event/' 
-        . $eid
+        . $id
         . "?starts=2010-02-16T06:00:00&description=:-X&ends=2010-02-16T08:00:00&info='Estem de proves'&tags=edited event,trololo",
     [   starts      => '2010-02-16T06:00:00',
         description => ':-X',
@@ -63,7 +69,7 @@ ok( my $response_put
     ]
 );
 
-ok( my $response_put
+ok( $response_put
         = request PUT '/event/' 
         . '100'
         . "?starts=2010-02-16T06:00:00&description=:-X&ends=2010-02-16T08:00:00&info='Estem de proves'&tags=edited event,trololo",
@@ -78,7 +84,7 @@ ok( my $response_put
 is( $response_put->headers->{status}, '404',
     'Response status is 404: Not found' );
 
-my $request_DELETE = DELETE( 'event/' . $eid );
+my $request_DELETE = DELETE( 'event/' . $id );
 $request_DELETE->header( Accept => 'application/json' );
 ok( my $response_DELETE = request($request_DELETE), 'Delete request' );
 is( $response_DELETE->headers->{status}, '200',

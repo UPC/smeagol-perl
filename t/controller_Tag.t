@@ -14,10 +14,8 @@ my $j = JSON::Any->new;
 
 #Request list of bookings
 
-ok( my $response = request GET '/tag',
-    HTTP::Headers->new( Accept => 'application/json' ) );
-
-ok( request('/tag')->is_success, 'Request should succeed' );
+ok( my $response = request GET '/tag' );
+ok( $response->is_success, 'Request should succeed' );
 
 ok( my $tag_aux = $j->jsonToObj( $response->content ) );
 
@@ -34,7 +32,6 @@ ok( my $response_post = request POST '/tag',
         description =>
             'Testing porpouses. It can be deleted with no consequences'
     ],
-    HTTP::Headers->new( Accept => 'application/json' )
 );
 
 ok( $tag_aux = $j->jsonToObj( $response_post->content ) );
@@ -57,7 +54,6 @@ ok( $response_post = request POST '/tag',
         description =>
             'Testing porpouses. It can be deleted with no consequences'
     ],
-    HTTP::Headers->new( Accept => 'application/json' )
 );
 
 ok( $tag_aux = $j->jsonToObj( $response_post->content ) );
@@ -67,7 +63,6 @@ ok( $response_post = request POST '/tag',
         description =>
             'Testing porpouses. It can be deleted with no consequences. Testing porpouses. It can be deleted with no consequences. Testing porpouses. It can be deleted with no consequences. Testing porpouses. It can be deleted with no consequences. Testing porpouses. It can be deleted with no consequences. Testing porpouses. It can be deleted with no consequences. Testing porpouses. It can be deleted with no consequences'
     ],
-    HTTP::Headers->new( Accept => 'application/json' )
 );
 
 ok( $tag_aux = $j->jsonToObj( $response_post->content ) );
@@ -75,7 +70,6 @@ ok( $tag_aux = $j->jsonToObj( $response_post->content ) );
 ok( $response_post = request POST '/tag',
     [   id => 'no_desc_tag',
         ],
-    HTTP::Headers->new( Accept => 'application/json' )
 );
 
 is( $response_post->headers->{status}, '201',

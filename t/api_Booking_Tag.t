@@ -39,8 +39,6 @@ sub get_generated_id {
 sub set_generated_id {
     my ( $type, $id ) = @_;
 
-    #diag("Guardo $id per a $type");
-
     $OBJECT_IDS{$type} = $id;
 }
 
@@ -90,8 +88,6 @@ sub run_test {
     my %args = prepare_args($test);
 
     my $uri = build_uri( uri => $test->{'uri'}, id => $test->{'id'} );
-
-    #diag( $test->{'op'} . ' ' . $uri );
 
     my $r = V2::Test->new( uri => $uri );
 

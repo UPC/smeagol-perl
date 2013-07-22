@@ -25,14 +25,6 @@ my %ev1 = (
     # FIXME: les dates s'arrodoneixen al minut
     #ends => '2011-12-08T23:59:59',
     ends => '2011-12-08T23:59:00',
-
-    # FIXME (bug #355)
-    #
-    # Cal passar sempre la llista de tags i bookings.
-    # smeagol/branches/tiquet_330_booking/lib/V2/Server/Schema/Result/TEvent.pm#L112
-    #
-    tags     => [],
-    bookings => [],
 );
 
 my $id  = $e->POST( args => [ %ev1 ] );

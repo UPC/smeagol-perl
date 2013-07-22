@@ -24,7 +24,6 @@ __PACKAGE__->table("t_event");
 
   data_type: 'integer'
   is_auto_increment: 1
-  is_nullable: 1
 
 =head2 info
 
@@ -52,7 +51,7 @@ __PACKAGE__->table("t_event");
 
 __PACKAGE__->add_columns(
     "id",
-    { data_type => "integer", is_auto_increment => 1, is_nullable => 1 },
+    { data_type => "integer", is_auto_increment => 1 },
     "info",
     { data_type => "text", is_nullable => 1, size => 256 },
     "description",

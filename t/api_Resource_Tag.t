@@ -70,8 +70,6 @@ sub run_test {
 
     my $uri = build_uri( uri => $test->{'uri'}, id => $test->{'id'} );
 
-    #diag( $test->{'op'} . ' ' . $uri );
-
     my $r = V2::Test->new( uri => $uri );
 
     # V2::Test doesn't expect a 'uri' key in tests

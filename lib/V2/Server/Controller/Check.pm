@@ -64,7 +64,7 @@ sub check_desc_tag : Local {
 sub check_desc_resource : Local {
     my ( $self, $c, $desc ) = @_;
 
-    if ( length($desc) >= 1 && length($desc) <= 128 ) {
+    if ( defined $desc && length($desc) >= 1 && length($desc) <= 128 ) {
 
         # trim $desc to check if it consists only of blank (\s) chars
         for ($desc) {
@@ -81,7 +81,7 @@ sub check_desc_resource : Local {
 sub check_info : Local {
     my ( $self, $c, $info ) = @_;
 
-    if ( length($info) <= 256 ) {
+    if ( defined $info && length($info) <= 256 ) {
         $c->stash->{info_ok} = 1;
     }
     else {
@@ -235,11 +235,15 @@ sub check_overlap : Local {
     my $overlap;
     my @booking_aux;
     if ( $c->stash->{PUT} ) {
-        @booking_aux
-            = $c->model('DB::TBooking')
+        my $result_set = $c->model('DB::TBooking');
+        # DateTime objects must be properly formatted in search.
+        # See "Formatting DateTime objects in queries" section
+        # in DBIx::Class::Manual::Cookbook docs.
+        my $dtf = $result_set->result_source->schema->storage->datetime_parser;
+        @booking_aux = $result_set
             ->search( { id_resource => $new_booking->id_resource->id } )
             ->search( { id          => { '!=' => $new_booking->id } } )
-            ->search( { until       => { '>' => $new_booking->dtstart } } );
+            ->search( { until       => { '>'  => $dtf->format_datetime( $new_booking->dtstart ) } } );
 
     }
     else {
@@ -340,6 +344,7 @@ sub build_recur : Private {
         @bymonthday = split( ',', $set->by_day_month );
     }
 
+    no warnings 'experimental::smartmatch';
     given ( $set->frequency ) {
         when ('daily') {
             $recur = DateTime::Event::ICal->recur(

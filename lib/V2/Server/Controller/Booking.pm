@@ -820,6 +820,7 @@ sub ical : Private {
             minute => $u_aux->minute,
         );
 
+        no warnings 'experimental::smartmatch';
         given ($f_aux) {
             when ('daily') {
                 if ( defined($rrule) ) {
@@ -973,6 +974,7 @@ sub ical_event : Private {
             minute => $u_aux->minute,
         );
 
+        no warnings 'experimental::smartmatch';
         given ($f_aux) {
             when ('daily') {
                 if ( defined($rrule) ) {

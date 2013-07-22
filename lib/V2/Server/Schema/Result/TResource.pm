@@ -24,7 +24,6 @@ __PACKAGE__->table("t_resource");
 
   data_type: 'integer'
   is_auto_increment: 1
-  is_nullable: 1
 
 =head2 description
 
@@ -42,7 +41,7 @@ __PACKAGE__->table("t_resource");
 
 __PACKAGE__->add_columns(
     "id",
-    { data_type => "integer", is_auto_increment => 1, is_nullable => 1 },
+    { data_type => "integer", is_auto_increment => 1 },
     "description",
     { data_type => "text", is_nullable => 1, size => 128 },
     "info",

@@ -7,6 +7,7 @@ use URI::Escape;
  
 use Test::More;
 use Text::CSV;
+use JSON::Any;
 
 use lib 't/lib';
 use HTTP::Request::Common::Bug65843 qw( GET POST PUT DELETE );
@@ -19,13 +20,13 @@ BEGIN {
 opendir my $dirh, 'doc/api/'
     or die "Cannot open the directory doc/api/";
 
-my @thefiles= readdir $dirh;
+# read dir entries in alphabetical order
+my @thefiles= sort readdir($dirh);
 closedir $dirh;
 
 foreach my $f (@thefiles){
     unless ( ($f eq ".") || ($f eq "..") || ($f eq ".svn") || ($f !~ m/Tag.csv$/))
 {
-print "Begin test $f \n";
 my $tag_csv = "doc/api/$f";
 
 
@@ -73,5 +74,8 @@ sub test_smeagol_tag {
         like( $r->headers->as_string(), qr/$headers/, "$prefix.headers" );
     };
 
-    is  ( $r->decoded_content(), $output, "$prefix.output" );
+    my $expected = JSON::Any->decode( $output             );
+    my $got      = JSON::Any->decode( $r->decoded_content );
+
+    is_deeply( $got, $expected, "$prefix.output" );
 }

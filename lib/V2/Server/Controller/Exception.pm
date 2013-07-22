@@ -38,7 +38,6 @@ sub begin : Private {
     $c->stash->{id_booking} = $c->request->query_parameters->{booking};
     $c->stash->{id_event}   = $c->request->query_parameters->{event};
     $c->stash->{ical}       = $c->request->query_parameters->{ical};
-    $c->log->debug( Dumper( $c->request->query_parameters ) );
     $c->stash->{format} = $c->request->headers->{"accept"}
         || 'application/json';
 }
@@ -83,8 +82,6 @@ sub exception_list : Local {
 
     foreach (@exception_aux) {
         @exception = $_->hash_exception;
-        $c->log->debug( "Duration booking #" . $_->id . ": " . $_->duration );
-        $c->log->debug( "hash_booking: " . Dumper(@exception) );
         push( @exceptions, @exception );
     }
 
@@ -384,8 +381,6 @@ sub default_POST {
 sub default_PUT {
     my ( $self, $c, $res, $id ) = @_;
     my $req = $c->request;
-    $c->log->debug( 'Mètode: ' . $req->method );
-    $c->log->debug("El PUT funciona");
 
     my $id_booking = $req->parameters->{id_booking};
 
@@ -395,9 +390,7 @@ sub default_PUT {
 
 #dtstart and dtend are parsed in case that some needed parameters to build the recurrence of the
 #booking aren't provided
-    $c->log->debug("Ara parsejarem dtsart");
     $dtstart = ParseDate($dtstart);
-    $c->log->debug("Ara parsejarem dtend");
     $dtend    = ParseDate($dtend);
     $duration = $dtend - $dtstart;
 
@@ -576,9 +569,6 @@ sub default_PUT {
 sub default_DELETE {
     my ( $self, $c, $res, $id ) = @_;
     my $req = $c->request;
-
-    $c->log->debug( 'Mètode: ' . $req->method );
-    $c->log->debug("El DELETE funciona");
 
     my $exception_aux = $c->model('DB::TException')->find( { id => $id } );
 

@@ -23,7 +23,6 @@ __PACKAGE__->table("t_tag");
 =head2 id
 
   data_type: 'text'
-  is_nullable: 1
   size: 64
 
 =head2 description
@@ -35,7 +34,7 @@ __PACKAGE__->table("t_tag");
 =cut
 
 __PACKAGE__->add_columns(
-    "id",          { data_type => "text", is_nullable => 1, size => 64 },
+    "id",          { data_type => "text", size => 64 },
     "description", { data_type => "text", is_nullable => 1, size => 256 },
 );
 __PACKAGE__->set_primary_key("id");

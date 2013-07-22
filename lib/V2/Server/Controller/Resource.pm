@@ -231,7 +231,7 @@ sub put_resource : Private {
     if ($resource) {
         $c->visit( '/check/check_resource', [ $info, $descr ] );
 
-        if ( ( $resource->description ) ne ($descr) ) {
+        if ( defined $descr && $resource->description ne $descr ) {
 
             my @resource_exist = $c->model('DB::TResource')
                 ->search( { description => $descr } );

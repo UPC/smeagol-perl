@@ -24,7 +24,6 @@ __PACKAGE__->table("t_tag_booking");
 
   data_type: 'text'
   is_foreign_key: 1
-  is_nullable: 1
   size: 64
 
 =head2 id_event
@@ -32,7 +31,6 @@ __PACKAGE__->table("t_tag_booking");
   data_type: 'integer'
   is_auto_increment: 1
   is_foreign_key: 1
-  is_nullable: 1
 
 =cut
 
@@ -40,14 +38,12 @@ __PACKAGE__->add_columns(
     "id_tag",
     {   data_type      => "text",
         is_foreign_key => 1,
-        is_nullable    => 1,
         size           => 64
     },
     "id_booking",
     {   data_type         => "integer",
         is_auto_increment => 1,
         is_foreign_key    => 1,
-        is_nullable       => 1,
     },
 );
 __PACKAGE__->set_primary_key( "id_tag", "id_booking" );

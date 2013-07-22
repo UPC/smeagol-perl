@@ -25,7 +25,6 @@ __PACKAGE__->table("t_exception");
 
   data_type: 'integer'
   is_auto_increment: 1
-  is_nullable: 1
 
 =head2 id_booking
 
@@ -92,7 +91,7 @@ __PACKAGE__->table("t_exception");
 
 __PACKAGE__->add_columns(
     "id",
-    { data_type => "integer", is_auto_increment => 1, is_nullable => 1 },
+    { data_type => "integer", is_auto_increment => 1 },
     "id_booking",
     { data_type => "integer", is_foreign_key => 1, is_nullable => 1 },
     "dtstart",
@@ -155,6 +154,7 @@ sub hash_exception {
         minute => $self->until->minute,
     );
 
+    no warnings 'experimental::smartmatch';
     given ( $self->frequency ) {
         when ('daily') {
 
@@ -265,6 +265,7 @@ sub exrule {
         minute => $self->until->minute,
     );
 
+    no warnings 'experimental::smartmatch';
     given ( $self->frequency ) {
         when ('daily') {
             $exrule

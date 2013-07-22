@@ -64,7 +64,7 @@ sub check_desc_tag : Local {
 sub check_desc_resource : Local {
     my ( $self, $c, $desc ) = @_;
 
-    if ( length($desc) >= 1 && length($desc) <= 128 ) {
+    if ( defined $desc && length($desc) >= 1 && length($desc) <= 128 ) {
 
         # trim $desc to check if it consists only of blank (\s) chars
         for ($desc) {
@@ -81,7 +81,7 @@ sub check_desc_resource : Local {
 sub check_info : Local {
     my ( $self, $c, $info ) = @_;
 
-    if ( length($info) <= 256 ) {
+    if ( defined $info && length($info) <= 256 ) {
         $c->stash->{info_ok} = 1;
     }
     else {

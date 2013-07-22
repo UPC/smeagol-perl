@@ -2,6 +2,7 @@ AUTHORS
 BUGS
 Changes
 COPYING
+doc/api/01_Tag.csv
 doc/api/02_Tag.csv
 doc/api/Booking_Tag.pl
 doc/api/Event.pl
@@ -9,7 +10,6 @@ doc/api/Event_Tag.pl
 doc/api/Resource.pl
 doc/api/Resource_Tag.pl
 doc/api/Resource_v2.pl
-doc/api/Tag.csv
 doc/api/test_Resource.pl
 doc/db/create.sql
 doc/db/insert.sql

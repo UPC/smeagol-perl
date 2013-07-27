@@ -145,7 +145,6 @@ use Date::ICal;
 
 sub hash_exception {
     my ($self) = @_;
-    my @exception;
     my $until = Date::ICal->new(
         year   => $self->until->year,
         month  => $self->until->month,
@@ -154,100 +153,44 @@ sub hash_exception {
         minute => $self->until->minute,
     );
 
-    no warnings 'experimental::smartmatch';
-    given ( $self->frequency ) {
-        when ('daily') {
+    my @exception = (
+        id         => $self->id,
+        id_booking => $self->id_booking->id,
+        dtstart    => $self->dtstart->iso8601(),
+        dtend      => $self->dtend->iso8601(),
+        duration   => $self->duration,
+        until      => $self->until->iso8601(),
+        frequency  => $self->frequency,
+        interval   => $self->interval,
+        byminute   => $self->by_minute,
+        byhour     => $self->by_hour,
+    );
 
-            @exception = {
-                id             => $self->id,
-                    id_booking => $self->id_booking->id,
-                    dtstart    => $self->dtstart->iso8601(),
-                    dtend      => $self->dtend->iso8601(),
-                    duration   => $self->duration,
-                    until      => $self->until->iso8601(),
-                    frequency  => $self->frequency,
-                    interval   => $self->interval,
-                    byminute   => $self->by_minute,
-                    byhour     => $self->by_hour,
-                    exrule     => 'FREQ=DAILY;INTERVAL='
-                    . uc( $self->interval )
-                    . ';UNTIL='
-                    . uc( $until->ical )
-            };
+    my %dispatch = (
+        daily => [
+            exrule => $self->exrule,
+        ],
 
-        }
+        weekly => [
+            byday  => $self->by_day,
+            exrule => $self->exrule,
+        ],
 
-        when ('weekly') {
-            @exception = {
-                id             => $self->id,
-                    id_booking => $self->id_booking->id,
-                    dtstart    => $self->dtstart->iso8601(),
-                    dtend      => $self->dtend->iso8601(),
-                    duration   => $self->duration,
-                    until      => $self->until->iso8601(),
-                    frequency  => $self->frequency,
-                    interval   => $self->interval,
-                    byminute   => $self->by_minute,
-                    byhour     => $self->by_hour,
-                    byday      => $self->by_day,
-                    exrule     => 'FREQ=WEEKLY;INTERVAL='
-                    . uc( $self->interval )
-                    . '.;BYDAY='
-                    . uc( $self->by_day )
-                    . ';UNTIL='
-                    . uc( $until->ical )
-            };
+        monthly => [
+            bymonth    => $self->by_month,
+            bymonthday => $self->by_day_month,
+            exrule     => $self->exrule,
+        ],
 
-        }
+        yearly => [
+            bymonth    => $self->by_month,
+            bymonthday => $self->by_day_month,
+            exrule     => $self->exrule,
+        ],
+    );
 
-        when ('monthly') {
-            @exception = {
-                id             => $self->id,
-                    id_booking => $self->id_booking->id,
-                    dtstart    => $self->dtstart->iso8601(),
-                    dtend      => $self->dtend->iso8601(),
-                    duration   => $self->duration,
-                    until      => $self->until->iso8601(),
-                    frequency  => $self->frequency,
-                    interval   => $self->interval,
-                    byminute   => $self->by_minute,
-                    byhour     => $self->by_hour,
-                    bymonth    => $self->by_month,
-                    bymonthday => $self->by_day_month,
-                    exrule     => 'FREQ=MONTHLY;INTERVAL='
-                    . uc( $self->interval )
-                    . ';BYMONTHDAY='
-                    . $self->by_day_month
-                    . ';UNTIL='
-                    . uc( $until->ical )
-            };
-        }
-
-        default {
-            @exception = {
-                id             => $self->id,
-                    id_booking => $self->id_booking->id,
-                    dtstart    => $self->dtstart->iso8601(),
-                    dtend      => $self->dtend->iso8601(),
-                    duration   => $self->duration,
-                    until      => $self->until->iso8601(),
-                    frequency  => $self->frequency,
-                    interval   => $self->interval,
-                    byminute   => $self->by_minute,
-                    byhour     => $self->by_hour,
-                    bymonth    => $self->by_month,
-                    bymonthday => $self->by_day_month,
-                    exrule     => 'FREQ=YEARLY;INTERVAL='
-                    . uc( $self->interval )
-                    . ';BYMONTH='
-                    . $self->by_month
-                    . ';BYMONTHDAY='
-                    . $self->by_day_month
-                    . ';UNTIL='
-                    . uc( $until->ical )
-            };
-        }
-    };
+    my $freq = exists $dispatch{ $self->frequency } ? $self->frequency : 'yearly';
+    push @exception, @{ $dispatch{$freq} };
 
     return @exception;
 }
@@ -255,8 +198,6 @@ sub hash_exception {
 sub exrule {
     my ($self) = @_;
 
-    my $exrule;
-
     my $until = Date::ICal->new(
         year   => $self->until->year,
         month  => $self->until->month,
@@ -265,50 +206,39 @@ sub exrule {
         minute => $self->until->minute,
     );
 
-    no warnings 'experimental::smartmatch';
-    given ( $self->frequency ) {
-        when ('daily') {
-            $exrule
-                = 'FREQ=DAILY;INTERVAL='
+    my %dispatch = (
+        daily => 'FREQ=DAILY;INTERVAL='
                 . uc( $self->interval )
                 . ';UNTIL='
-                . uc( $until->ical );
-        }
+                . uc( $until->ical ),
 
-        when ('weekly') {
-            $exrule
-                = 'FREQ=WEEKLY;INTERVAL='
+        weekly => 'FREQ=WEEKLY;INTERVAL='
                 . uc( $self->interval )
                 . '.;BYDAY='
                 . uc( $self->by_day )
                 . ';UNTIL='
-                . uc( $until->ical );
-        }
+                . uc( $until->ical ),
 
-        when ('monthly') {
-            $exrule
-                = 'FREQ=MONTHLY;INTERVAL='
+        monthly => 'FREQ=MONTHLY;INTERVAL='
                 . uc( $self->interval )
                 . ';BYMONTHDAY='
                 . $self->by_day_month
                 . ';UNTIL='
-                . uc( $until->ical );
-        }
+                . uc( $until->ical ),
 
-        default {
-            $exrule
-                = 'FREQ=YEARLY;INTERVAL='
+        yearly => 'FREQ=YEARLY;INTERVAL='
                 . uc( $self->interval )
                 . ';BYMONTH='
                 . $self->by_month
                 . ';BYMONTHDAY='
                 . $self->by_day_month
                 . ';UNTIL='
-                . uc( $until->ical );
-        }
-    };
+                . uc( $until->ical ),
+    );
 
-    return $exrule;
+    my $freq = exists $dispatch { $self->frequency } ? $self->frequency : 'yearly';
+
+    return $dispatch{$freq};
 }
 
 # You can replace this text with custom content, and it will be preserved on regeneration

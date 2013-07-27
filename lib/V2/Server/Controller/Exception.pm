@@ -98,80 +98,41 @@ sub get_exception : Local {
 
     my $exception_aux = $c->model('DB::TException')->find( { id => $id } );
 
-    my $exception;
     if ($exception_aux) {
-        no warnings 'experimental::smartmatch';
-        given ( $exception_aux->frequency ) {
-            when ('daily') {
-                $exception = {
-                    id             => $exception_aux->id,
-                        id_booking => $exception_aux->id_booking->id,
-                        dtstart    => $exception_aux->dtstart->iso8601(),
-                        dtend      => $exception_aux->dtend->iso8601(),
-                        duration   => $exception_aux->duration,
-                        until      => $exception_aux->until->iso8601(),
-                        frequency  => $exception_aux->frequency,
-                        interval   => $exception_aux->interval,
-                        byminute   => $exception_aux->by_minute,
-                        byhour     => $exception_aux->by_hour,
-                };
+        my @exception = (
+            id         => $exception_aux->id,
+            id_booking => $exception_aux->id_booking->id,
+            dtstart    => $exception_aux->dtstart->iso8601(),
+            dtend      => $exception_aux->dtend->iso8601(),
+            duration   => $exception_aux->duration,
+            until      => $exception_aux->until->iso8601(),
+            frequency  => $exception_aux->frequency,
+            interval   => $exception_aux->interval,
+            byminute   => $exception_aux->by_minute,
+            byhour     => $exception_aux->by_hour,
+        );
 
-            }
+        my %dispatch = (
+            daily => [
+            ],
+            weekly => [
+                byday => $exception_aux->by_day,
+            ],
+            monthly => [
+                bymonth    => $exception_aux->by_month,
+                bymonthday => $exception_aux->by_day_month
+            ],
+            yearly => [
+                bymonth    => $exception_aux->by_month,
+                bymonthday => $exception_aux->by_day_month
+            ],
+        );
 
-            when ('weekly') {
-                $exception = {
-                    id             => $exception_aux->id,
-                        id_booking => $exception_aux->id_booking->id,
-                        dtstart    => $exception_aux->dtstart->iso8601(),
-                        dtend      => $exception_aux->dtend->iso8601(),
-                        duration   => $exception_aux->duration,
-                        until      => $exception_aux->until->iso8601(),
-                        frequency  => $exception_aux->frequency,
-                        interval   => $exception_aux->interval,
-                        byminute   => $exception_aux->by_minute,
-                        byhour     => $exception_aux->by_hour,
-                        byday      => $exception_aux->by_day,
-                };
+        my $freq = exists $dispatch{ $exception_aux->frequency } ? $exception_aux->frequency : 'yearly';
+        push @exception, @{ $dispatch{$freq} };
 
-            }
-
-            when ('monthly') {
-                $exception = {
-                    id             => $exception_aux->id,
-                        id_booking => $exception_aux->id_booking->id,
-                        dtstart    => $exception_aux->dtstart->iso8601(),
-                        dtend      => $exception_aux->dtend->iso8601(),
-                        duration   => $exception_aux->duration,
-                        until      => $exception_aux->until->iso8601(),
-                        frequency  => $exception_aux->frequency,
-                        interval   => $exception_aux->interval,
-                        byminute   => $exception_aux->by_minute,
-                        byhour     => $exception_aux->by_hour,
-                        bymonth    => $exception_aux->by_month,
-                        bymonthday => $exception_aux->by_day_month
-                };
-            }
-
-            default {
-                $exception = {
-                    id             => $exception_aux->id,
-                        id_booking => $exception_aux->id_booking->id,
-                        dtstart    => $exception_aux->dtstart->iso8601(),
-                        dtend      => $exception_aux->dtend->iso8601(),
-                        duration   => $exception_aux->duration,
-                        until      => $exception_aux->until->iso8601(),
-                        frequency  => $exception_aux->frequency,
-                        interval   => $exception_aux->interval,
-                        byminute   => $exception_aux->by_minute,
-                        byhour     => $exception_aux->by_hour,
-                        bymonth    => $exception_aux->by_month,
-                        bymonthday => $exception_aux->by_day_month
-                };
-            }
-        };
-
-        $c->stash->{content}   = $exception;
-        $c->stash->{exception} = $exception;
+        $c->stash->{content}   = { @exception };
+        $c->stash->{exception} = { @exception };
         $c->response->status(200);
         $c->stash->{template} = 'exception/get_exception.tt';
 
@@ -198,7 +159,7 @@ sub default_POST {
     $dtend    = ParseDate($dtend);
     $duration = $dtend - $dtstart;
 
-    my $freq     = $req->parameters->{freq};
+    my $freq     = $req->parameters->{freq} || 'yearly';
     my $interval = $req->parameters->{interval} || 1;
     my $until    = $req->parameters->{until} || $req->parameters->{dtend};
 
@@ -212,128 +173,59 @@ sub default_POST {
 
     my $new_exception = $c->model('DB::TException')->find_or_new();
 
-    my $exception;
+    # Duration is saved in minuntes in the DB in order to make it easier
+    # to deal with it when the server builds the JSON objects.
+    # Don't mess with the duration, the result can be weird.
+    $new_exception->id_booking($id_booking);
+    $new_exception->dtstart($dtstart);
+    $new_exception->dtend($dtend);
+    $new_exception->duration( $duration->in_units("minutes") );
+    $new_exception->frequency($freq);
+    $new_exception->interval($interval);
+    $new_exception->until($until);
+    $new_exception->by_minute($by_minute);
+    $new_exception->by_hour($by_hour);
 
-    no warnings 'experimental::smartmatch';
-    given ($freq) {
+    if ( $freq eq 'weekly' || $freq eq 'yearly' ) {
+        $new_exception->by_day($by_day);
+    }
 
-#Duration is saved in minuntes in the DB in order to make it easier to deal with it when the server
-#builds the JSON objects
-#Don't mess with the duration, the result can be weird.
-        when ('daily') {
-            $new_exception->id_booking($id_booking);
-            $new_exception->dtstart($dtstart);
-            $new_exception->dtend($dtend);
-            $new_exception->duration( $duration->in_units("minutes") );
-            $new_exception->frequency($freq);
-            $new_exception->interval($interval);
-            $new_exception->until($until);
-            $new_exception->by_minute($by_minute);
-            $new_exception->by_hour($by_hour);
+    if ( $freq eq 'monthly' || $freq eq 'yearly' ) {
+        $new_exception->by_month($by_month);
+        $new_exception->by_day_month($by_day_month);
+    }
 
-            $exception = {
-                id         => $new_exception->id,
-                id_booking => $new_exception->id_booking->id,
-                dtstart    => $new_exception->dtstart->iso8601(),
-                dtend      => $new_exception->dtend->iso8601(),
-                until      => $new_exception->until->iso8601(),
-                frequency  => $new_exception->frequency,
-                interval   => $new_exception->interval,
-                duration   => $new_exception->duration,
-                by_minute  => $new_exception->by_minute,
-                by_hour    => $new_exception->by_hour,
-            };
-        }
+    my @exception = (
+        id         => $new_exception->id,
+        id_booking => $new_exception->id_booking->id,
+        dtstart    => $new_exception->dtstart->iso8601(),
+        dtend      => $new_exception->dtend->iso8601(),
+        until      => $new_exception->until->iso8601(),
+        frequency  => $new_exception->frequency,
+        interval   => $new_exception->interval,
+        duration   => $new_exception->duration,
+        by_minute  => $new_exception->by_minute,
+        by_hour    => $new_exception->by_hour,
+    );
 
-        when ('weekly') {
-            $new_exception->id_booking($id_booking);
-            $new_exception->dtend($dtend);
-            $new_exception->dtstart($dtstart);
-            $new_exception->duration( $duration->in_units("minutes") );
-            $new_exception->frequency($freq);
-            $new_exception->interval($interval);
-            $new_exception->until($until);
-            $new_exception->by_minute($by_minute);
-            $new_exception->by_hour($by_hour);
-            $new_exception->by_day($by_day);
+    my %dispatch = (
+        daily => [
+        ],
+        weekly => [
+            by_day => $new_exception->by_day,
+        ],
+        monthly => [
+            by_month     => $new_exception->by_month,
+            by_day_month => $new_exception->by_day_month,
+        ],
+        yearly => [
+            by_day       => $new_exception->by_day,
+            by_month     => $new_exception->by_month,
+            by_day_month => $new_exception->by_day_month,
+        ],
+    );
 
-            $exception = {
-                id         => $new_exception->id,
-                id_booking => $new_exception->id_booking->id,
-                dtstart    => $new_exception->dtstart->iso8601(),
-                dtend      => $new_exception->dtend->iso8601(),
-                until      => $new_exception->until->iso8601(),
-                frequency  => $new_exception->frequency,
-                interval   => $new_exception->interval,
-                duration   => $new_exception->duration,
-                by_minute  => $new_exception->by_minute,
-                by_hour    => $new_exception->by_hour,
-                by_day     => $new_exception->by_day,
-            };
-
-        }
-
-        when ('monthly') {
-            $new_exception->id_booking($id_booking);
-            $new_exception->dtstart($dtstart);
-            $new_exception->dtend($dtend);
-            $new_exception->duration( $duration->in_units("minutes") );
-            $new_exception->frequency($freq);
-            $new_exception->interval($interval);
-            $new_exception->until($until);
-            $new_exception->by_minute($by_minute);
-            $new_exception->by_hour($by_hour);
-            $new_exception->by_month($by_month);
-            $new_exception->by_day_month($by_day_month);
-
-            $exception = {
-                id           => $new_exception->id,
-                id_booking   => $new_exception->id_booking->id,
-                dtstart      => $new_exception->dtstart->iso8601(),
-                dtend        => $new_exception->dtend->iso8601(),
-                until        => $new_exception->until->iso8601(),
-                frequency    => $new_exception->frequency,
-                interval     => $new_exception->interval,
-                duration     => $new_exception->duration,
-                by_minute    => $new_exception->by_minute,
-                by_hour      => $new_exception->by_hour,
-                by_month     => $new_exception->by_month,
-                by_day_month => $new_exception->by_day_month
-            };
-        }
-
-        default {
-            $new_exception->id_booking($id_booking);
-            $new_exception->dtstart($dtstart);
-            $new_exception->dtend($dtend);
-            $new_exception->duration( $duration->in_units("minutes") );
-            $new_exception->frequency($freq);
-            $new_exception->interval($interval);
-            $new_exception->until($until);
-            $new_exception->by_minute($by_minute);
-            $new_exception->by_hour($by_hour);
-            $new_exception->by_day($by_day);
-            $new_exception->by_month($by_month);
-            $new_exception->by_day_month($by_day_month);
-
-            $exception = {
-                id           => $new_exception->id,
-                id_booking   => $new_exception->id_booking->id,
-                dtstart      => $new_exception->dtstart->iso8601(),
-                dtend        => $new_exception->dtend->iso8601(),
-                until        => $new_exception->until->iso8601(),
-                frequency    => $new_exception->frequency,
-                interval     => $new_exception->interval,
-                duration     => $new_exception->duration,
-                by_minute    => $new_exception->by_minute,
-                by_hour      => $new_exception->by_hour,
-                by_day       => $new_exception->by_day,
-                by_month     => $new_exception->by_month,
-                by_day_month => $new_exception->by_day_month
-            };
-
-        }
-    };
+    push @exception, @{ $dispatch{$freq} };
 
     $c->stash->{new_exception} = $new_exception;
 
@@ -360,9 +252,9 @@ sub default_POST {
         }
         else {
             $new_exception->insert;
-            $exception->{id}       = $new_exception->id;
-            $c->stash->{content}   = $exception;
-            $c->stash->{exception} = $exception;
+	    push @exception, id => $new_exception->id;
+            $c->stash->{content}   = { @exception };
+            $c->stash->{exception} = { @exception };
             $c->response->status(201);
             $c->stash->{template} = 'exception/get_exception.tt';
 
@@ -394,7 +286,7 @@ sub default_PUT {
     $dtend    = ParseDate($dtend);
     $duration = $dtend - $dtstart;
 
-    my $freq     = $req->parameters->{freq};
+    my $freq     = $req->parameters->{freq} || 'yearly';
     my $interval = $req->parameters->{interval} || 1;
     my $until    = $req->parameters->{until} || $req->parameters->{dtend};
 
@@ -408,128 +300,59 @@ sub default_PUT {
 
     my $exception_aux = $c->model('DB::TException')->find( { id => $id } );
 
-    my $exception;
+    # Duration is saved in minuntes in the DB in order to make it easier
+    # to deal with it when the server builds the JSON objects.
+    # Don't mess with the duration, the result can be weird.
+    $exception_aux->id_booking($id_booking);
+    $exception_aux->dtstart($dtstart);
+    $exception_aux->dtend($dtend);
+    $exception_aux->duration( $duration->in_units("minutes") );
+    $exception_aux->frequency($freq);
+    $exception_aux->interval($interval);
+    $exception_aux->until($until);
+    $exception_aux->by_minute($by_minute);
+    $exception_aux->by_hour($by_hour);
 
-    no warnings 'experimental::smartmatch';
-    given ($freq) {
+    if ( $freq eq 'weekly' || $freq eq 'yearly' ) {
+        $exception_aux->by_day($by_day);
+    }
 
-#Duration is saved in minuntes in the DB in order to make it easier to deal with it when the server
-#builds the JSON objects
-#Don't mess with the duration, the result can be weird.
-        when ('daily') {
-            $exception_aux->id_booking($id_booking);
-            $exception_aux->dtstart($dtstart);
-            $exception_aux->dtend($dtend);
-            $exception_aux->duration( $duration->in_units("minutes") );
-            $exception_aux->frequency($freq);
-            $exception_aux->interval($interval);
-            $exception_aux->until($until);
-            $exception_aux->by_minute($by_minute);
-            $exception_aux->by_hour($by_hour);
+    if ( $freq eq 'monthly' || $freq eq 'yearly' ) {
+        $exception_aux->by_month($by_month);
+        $exception_aux->by_day_month($by_day_month);
+    }
 
-            my $exception = {
-                id         => $exception_aux->id,
-                id_booking => $exception_aux->id_booking,
-                dtstart    => $exception_aux->dtstart->iso8601(),
-                dtend      => $exception_aux->dtend->iso8601(),
-                until      => $exception_aux->until->iso8601(),
-                frequency  => $exception_aux->frequency,
-                interval   => $exception_aux->interval,
-                duration   => $exception_aux->duration,
-                by_minute  => $exception_aux->by_minute,
-                by_hour    => $exception_aux->by_hour,
-            };
-        }
+    my @exception = (
+        id         => $exception_aux->id,
+        id_booking => $exception_aux->id_booking,
+        dtstart    => $exception_aux->dtstart->iso8601(),
+        dtend      => $exception_aux->dtend->iso8601(),
+        until      => $exception_aux->until->iso8601(),
+        frequency  => $exception_aux->frequency,
+        interval   => $exception_aux->interval,
+        duration   => $exception_aux->duration,
+        by_minute  => $exception_aux->by_minute,
+        by_hour    => $exception_aux->by_hour,
+    );
 
-        when ('weekly') {
-            $exception_aux->id_booking($id_booking);
-            $exception_aux->dtend($dtend);
-            $exception_aux->dtstart($dtstart);
-            $exception_aux->duration( $duration->in_units("minutes") );
-            $exception_aux->frequency($freq);
-            $exception_aux->interval($interval);
-            $exception_aux->until($until);
-            $exception_aux->by_minute($by_minute);
-            $exception_aux->by_hour($by_hour);
-            $exception_aux->by_day($by_day);
+    my %dispatch = (
+        daily => [
+        ],
+        weekly => [
+            by_day => $exception_aux->by_day,
+        ],
+        monthly => [
+            by_month     => $exception_aux->by_month,
+            by_day_month => $exception_aux->by_day_month,
+        ],
+        yearly => [
+            by_day       => $exception_aux->by_day,
+            by_month     => $exception_aux->by_month,
+            by_day_month => $exception_aux->by_day_month,
+        ],
+    );
 
-            my $exception = {
-                id         => $exception_aux->id,
-                id_booking => $exception_aux->id_booking,
-                dtstart    => $exception_aux->dtstart->iso8601(),
-                dtend      => $exception_aux->dtend->iso8601(),
-                until      => $exception_aux->until->iso8601(),
-                frequency  => $exception_aux->frequency,
-                interval   => $exception_aux->interval,
-                duration   => $exception_aux->duration,
-                by_minute  => $exception_aux->by_minute,
-                by_hour    => $exception_aux->by_hour,
-                by_day     => $exception_aux->by_day,
-            };
-
-        }
-
-        when ('monthly') {
-            $exception_aux->id_booking($id_booking);
-            $exception_aux->dtstart($dtstart);
-            $exception_aux->dtend($dtend);
-            $exception_aux->duration( $duration->in_units("minutes") );
-            $exception_aux->frequency($freq);
-            $exception_aux->interval($interval);
-            $exception_aux->until($until);
-            $exception_aux->by_minute($by_minute);
-            $exception_aux->by_hour($by_hour);
-            $exception_aux->by_month($by_month);
-            $exception_aux->by_day_month($by_day_month);
-
-            my $exception = {
-                id           => $exception_aux->id,
-                id_booking   => $exception_aux->id_booking,
-                dtstart      => $exception_aux->dtstart->iso8601(),
-                dtend        => $exception_aux->dtend->iso8601(),
-                until        => $exception_aux->until->iso8601(),
-                frequency    => $exception_aux->frequency,
-                interval     => $exception_aux->interval,
-                duration     => $exception_aux->duration,
-                by_minute    => $exception_aux->by_minute,
-                by_hour      => $exception_aux->by_hour,
-                by_month     => $exception_aux->by_month,
-                by_day_month => $exception_aux->by_day_month
-            };
-        }
-
-        default {
-            $exception_aux->id_booking($id_booking);
-            $exception_aux->dtstart($dtstart);
-            $exception_aux->dtend($dtend);
-            $exception_aux->duration( $duration->in_units("minutes") );
-            $exception_aux->frequency($freq);
-            $exception_aux->interval($interval);
-            $exception_aux->until($until);
-            $exception_aux->by_minute($by_minute);
-            $exception_aux->by_hour($by_hour);
-            $exception_aux->by_day($by_day);
-            $exception_aux->by_month($by_month);
-            $exception_aux->by_day_month($by_day_month);
-
-            my $exception = {
-                id           => $exception_aux->id,
-                id_booking   => $exception_aux->id_booking,
-                dtstart      => $exception_aux->dtstart->iso8601(),
-                dtend        => $exception_aux->dtend->iso8601(),
-                until        => $exception_aux->until->iso8601(),
-                frequency    => $exception_aux->frequency,
-                interval     => $exception_aux->interval,
-                duration     => $exception_aux->duration,
-                by_minute    => $exception_aux->by_minute,
-                by_hour      => $exception_aux->by_hour,
-                by_day       => $exception_aux->by_day,
-                by_month     => $exception_aux->by_month,
-                by_day_month => $exception_aux->by_day_month
-            };
-
-        }
-    };
+    push @exception, @{ $dispatch{$freq} };
 
     $c->stash->{new_exception} = $exception_aux;
 
@@ -549,8 +372,8 @@ sub default_PUT {
         else {
             $exception_aux->update;
 
-            $c->stash->{content} = $exception;
-            $c->stash->{booking} = $exception;
+            $c->stash->{content} = { @exception };
+            $c->stash->{booking} = { @exception };
             $c->response->status(201);
             $c->forward( 'get_exception', [ $exception_aux->id ] );
 

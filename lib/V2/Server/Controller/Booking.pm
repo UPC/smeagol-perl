@@ -820,54 +820,6 @@ sub ical : Private {
             minute => $u_aux->minute,
         );
 
-        no warnings 'experimental::smartmatch';
-        given ($f_aux) {
-            when ('daily') {
-                if ( defined($rrule) ) {
-                    $rrule
-                        = 'FREQ=DAILY;INTERVAL='
-                        . uc($i_aux)
-                        . ';UNTIL='
-                        . uc( $until->ical );
-                }
-            }
-            when ('weekly') {
-                if ( defined($rrule) ) {
-                    $rrule
-                        = 'FREQ=WEEKLY;INTERVAL='
-                        . uc($i_aux)
-                        . '.;BYDAY='
-                        . uc($by_day_aux)
-                        . ';UNTIL='
-                        . uc( $until->ical );
-                }
-            }
-            when ('monthly') {
-                if ( defined($rrule) ) {
-                    $rrule
-                        = 'FREQ=MONTHLY;INTERVAL='
-                        . uc($i_aux)
-                        . ';BYMONTHDAY='
-                        . $by_day_month_aux
-                        . ';UNTIL='
-                        . uc( $until->ical );
-                }
-            }
-            when ('yearly') {
-                if ( defined($rrule) ) {
-                    $rrule
-                        = 'FREQ=YEARLY;INTERVAL='
-                        . uc($i_aux)
-                        . ';BYMONTH='
-                        . $by_month_aux
-                        . ';BYMONTHDAY='
-                        . $by_day_month_aux
-                        . ';UNTIL='
-                        . uc( $until->ical );
-                }
-            }
-        }
-
         #my @exrule_list = @{ $_->{exrule_list} };
 
         #for ( my $i = 0; $i < @exrule_list; $i++ ) {
@@ -892,7 +844,7 @@ sub ical : Private {
                 hour   => $e_aux->hour,
                 minute => $e_aux->minute,
                 )->ical,
-            rrule => $rrule
+            rrule => _ical_dispatch( $_, $until ),
 
         );
         $calendar->add_entry($vevent);
@@ -974,54 +926,6 @@ sub ical_event : Private {
             minute => $u_aux->minute,
         );
 
-        no warnings 'experimental::smartmatch';
-        given ($f_aux) {
-            when ('daily') {
-                if ( defined($rrule) ) {
-                    $rrule
-                        = 'FREQ=DAILY;INTERVAL='
-                        . uc($i_aux)
-                        . ';UNTIL='
-                        . uc( $until->ical );
-                }
-            }
-            when ('weekly') {
-                if ( defined($rrule) ) {
-                    $rrule
-                        = 'FREQ=WEEKLY;INTERVAL='
-                        . uc($i_aux)
-                        . '.;BYDAY='
-                        . uc($by_day_aux)
-                        . ';UNTIL='
-                        . uc( $until->ical );
-                }
-            }
-            when ('monthly') {
-                if ( defined($rrule) ) {
-                    $rrule
-                        = 'FREQ=MONTHLY;INTERVAL='
-                        . uc($i_aux)
-                        . ';BYMONTHDAY='
-                        . $by_day_month_aux
-                        . ';UNTIL='
-                        . uc( $until->ical );
-                }
-            }
-            when ('yearly') {
-                if ( defined($rrule) ) {
-                    $rrule
-                        = 'FREQ=YEARLY;INTERVAL='
-                        . uc($i_aux)
-                        . ';BYMONTH='
-                        . $by_month_aux
-                        . ';BYMONTHDAY='
-                        . $by_day_month_aux
-                        . ';UNTIL='
-                        . uc( $until->ical );
-                }
-            }
-        }
-
         #  my @exrule_list = @{ $_->{exrule_list} };
 
         #for ( my $i = 0; $i < @exrule_list; $i++ ) {
@@ -1034,7 +938,7 @@ sub ical_event : Private {
             summary => "Booking #" . $_->{id},
             dtstart => uc($s_aux),
             dtend   => uc($e_aux),
-            rrule   => $rrule
+            rrule   => _ical_dispatch( $_, $until ),
 
         );
         $calendar->add_entry($vevent);
@@ -1056,6 +960,42 @@ sub ical_event : Private {
 
     $c->res->output($calendar_ics);
 
+}
+
+sub _ical_dispatch {
+    my ( $item, $until ) = @_;
+
+    return 'FREQ=DAILY;INTERVAL='
+           . uc( $item->{interval} )
+           . ';UNTIL='
+           . uc( $until->ical )
+        if $item->{frequency} eq 'daily';
+
+    return 'FREQ=WEEKLY;INTERVAL='
+           . uc( $item->{interval} )
+           . '.;BYDAY='
+           . uc( $item->{byday} )
+           . ';UNTIL='
+           . uc( $until->ical )
+        if $item->{frequency} eq 'weekly';
+
+    return 'FREQ=MONTHLY;INTERVAL='
+           . uc( $item->{interval} )
+           . ';BYMONTHDAY='
+           . $item->{bydaymonth}
+           . ';UNTIL='
+           . uc( $until->ical )
+        if $item->{frequency} eq 'monthly';
+
+    return 'FREQ=YEARLY;INTERVAL='
+           . uc( $item->{interval} )
+           . ';BYMONTH='
+           . $item->{bymonth}
+           . ';BYMONTHDAY='
+           . $item->{bydaymonth}
+           . ';UNTIL='
+           . uc( $until->ical )
+        if $item->{frequency} eq 'yearly';
 }
 
 =head1 AUTHOR

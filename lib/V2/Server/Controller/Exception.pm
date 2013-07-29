@@ -8,7 +8,7 @@ use DateTime;
 use DateTime::Duration;
 use DateTime::Span;
 
-#Voodoo modules
+# Voodoo modules
 use Date::ICal;
 use Data::ICal;
 use Data::ICal::Entry::Event;
@@ -25,12 +25,12 @@ Catalyst Controller.
 
 =head1 METHODS
 
-=cut
-
 =head2 begin
+
 Begin is the first function executed when a request directed to /booking is made.
 Some parameters must be saved in the stash, otherwise they are lost once the object
 Catalyst::REST::Request is created (which overwrites the original $c->request).
+
 =cut
 
 sub begin : Private {
@@ -38,13 +38,14 @@ sub begin : Private {
     $c->stash->{id_booking} = $c->request->query_parameters->{booking};
     $c->stash->{id_event}   = $c->request->query_parameters->{event};
     $c->stash->{ical}       = $c->request->query_parameters->{ical};
-    $c->stash->{format} = $c->request->headers->{"accept"}
-        || 'application/json';
+    $c->stash->{format}     = $c->request->headers->{"accept"} || 'application/json';
 }
 
 =head2 default
+
 /booking is mapped to this function.
 It redirects to default_GET, default_POST, etc depending on the http method used.
+
 =cut
 
 sub default : Local : ActionClass('REST') {
@@ -68,7 +69,6 @@ sub default_GET {
             else {
                 $c->detach( 'exception_list', [] );
             }
-
         }
     }
 }
@@ -76,71 +76,33 @@ sub default_GET {
 sub exception_list : Local {
     my ( $self, $c ) = @_;
 
-    my @exception_aux = $c->model('DB::TException')->all;
-    my @exception;
-    my @exceptions;
+    my @found_exceptions    = $c->model('DB::TException')->all;
+    my @exception_list      = map { $_->as_hash } @found_exceptions;
+    $c->stash->{content}    = \@exception_list;
+    $c->stash->{exceptions} = \@exception_list;
 
-    foreach (@exception_aux) {
-        @exception = $_->hash_exception;
-        push( @exceptions, @exception );
-    }
+    my @found_bookings      = $c->model('DB::TBooking')->all;
+    $c->stash->{bookings}   = \@found_bookings;
+    $c->stash->{template}   = 'exception/get_list.tt';
 
-    $c->stash->{content}    = \@exceptions;
-    $c->stash->{exceptions} = \@exceptions;
-    my @bookings = $c->model('DB::TBooking')->all;
-    $c->stash->{bookings} = \@bookings;
     $c->response->status(200);
-    $c->stash->{template} = 'exception/get_list.tt';
 }
 
 sub get_exception : Local {
     my ( $self, $c, $id ) = @_;
 
-    my $exception_aux = $c->model('DB::TException')->find( { id => $id } );
-
-    if ($exception_aux) {
-        my @exception = (
-            id         => $exception_aux->id,
-            id_booking => $exception_aux->id_booking->id,
-            dtstart    => $exception_aux->dtstart->iso8601(),
-            dtend      => $exception_aux->dtend->iso8601(),
-            duration   => $exception_aux->duration,
-            until      => $exception_aux->until->iso8601(),
-            frequency  => $exception_aux->frequency,
-            interval   => $exception_aux->interval,
-            byminute   => $exception_aux->by_minute,
-            byhour     => $exception_aux->by_hour,
-        );
-
-        my %dispatch = (
-            daily => [
-            ],
-            weekly => [
-                byday => $exception_aux->by_day,
-            ],
-            monthly => [
-                bymonth    => $exception_aux->by_month,
-                bymonthday => $exception_aux->by_day_month
-            ],
-            yearly => [
-                bymonth    => $exception_aux->by_month,
-                bymonthday => $exception_aux->by_day_month
-            ],
-        );
-
-        my $freq = exists $dispatch{ $exception_aux->frequency } ? $exception_aux->frequency : 'yearly';
-        push @exception, @{ $dispatch{$freq} };
-
-        $c->stash->{content}   = { @exception };
-        $c->stash->{exception} = { @exception };
-        $c->response->status(200);
-        $c->stash->{template} = 'exception/get_exception.tt';
-
-    }
-    else {
+    my $found_exception = $c->model('DB::TException')->find( { id => $id } );
+    if ( ! $found_exception ) {
         $c->stash->{template} = 'old_not_found.tt';
         $c->response->status(404);
+        return;
     }
+
+    my $exception          = $found_exception->as_hash;
+    $c->stash->{content}   = $exception;
+    $c->stash->{exception} = $exception;
+    $c->stash->{template}  = 'exception/get_exception.tt';
+    $c->response->status(200);
 }
 
 sub default_POST {
@@ -153,22 +115,19 @@ sub default_POST {
     my $dtend   = $req->parameters->{dtend};
     my $duration;
 
-#dtstart and dtend are parsed in case that some needed parameters to build the recurrence of the
-#booking aren't provided
+    # dtstart and dtend are parsed in case that some needed parameters
+    # to build the recurrence of the booking aren't provided
     $dtstart  = ParseDate($dtstart);
     $dtend    = ParseDate($dtend);
     $duration = $dtend - $dtstart;
 
-    my $freq     = $req->parameters->{freq} || 'yearly';
-    my $interval = $req->parameters->{interval} || 1;
-    my $until    = $req->parameters->{until} || $req->parameters->{dtend};
-
-    my $by_minute = $req->parameters->{by_minute} || $dtstart->minute;
-    my $by_hour   = $req->parameters->{by_hour}   || $dtstart->hour;
-
-    my $by_day = $req->parameters->{by_day};
-
-    my $by_month     = $req->parameters->{by_month};       #$dtstart->month;
+    my $freq         = $req->parameters->{freq}      || 'yearly';
+    my $interval     = $req->parameters->{interval}  || 1;
+    my $until        = $req->parameters->{until}     || $req->parameters->{dtend};
+    my $by_minute    = $req->parameters->{by_minute} || $dtstart->minute;
+    my $by_hour      = $req->parameters->{by_hour}   || $dtstart->hour;
+    my $by_day       = $req->parameters->{by_day};
+    my $by_month     = $req->parameters->{by_month};       # $dtstart->month;
     my $by_day_month = $req->parameters->{by_day_month};
 
     my $new_exception = $c->model('DB::TException')->find_or_new();
@@ -195,42 +154,11 @@ sub default_POST {
         $new_exception->by_day_month($by_day_month);
     }
 
-    my @exception = (
-        id         => $new_exception->id,
-        id_booking => $new_exception->id_booking->id,
-        dtstart    => $new_exception->dtstart->iso8601(),
-        dtend      => $new_exception->dtend->iso8601(),
-        until      => $new_exception->until->iso8601(),
-        frequency  => $new_exception->frequency,
-        interval   => $new_exception->interval,
-        duration   => $new_exception->duration,
-        by_minute  => $new_exception->by_minute,
-        by_hour    => $new_exception->by_hour,
-    );
-
-    my %dispatch = (
-        daily => [
-        ],
-        weekly => [
-            by_day => $new_exception->by_day,
-        ],
-        monthly => [
-            by_month     => $new_exception->by_month,
-            by_day_month => $new_exception->by_day_month,
-        ],
-        yearly => [
-            by_day       => $new_exception->by_day,
-            by_month     => $new_exception->by_month,
-            by_day_month => $new_exception->by_day_month,
-        ],
-    );
-
-    push @exception, @{ $dispatch{$freq} };
+    my $exception = $new_exception->as_hash;
 
     $c->stash->{new_exception} = $new_exception;
 
     $c->visit( '/check/check_exception', [] );
-    my @message;
     my $boo = $c->model('DB::TBooking')
         ->find( { id => $new_exception->id_booking->id } );
 
@@ -244,29 +172,25 @@ sub default_POST {
     if ( $c->stash->{boo_ok} == 1 ) {
 
         if ( $c->stash->{empty} == 1 ) {
-            @message = { message => "Bad Request", };
-            $c->response->status(400);
-            $c->stash->{content}  = \@message;
+            $c->stash->{content}  = [ { message => "Bad Request" } ];
             $c->stash->{error}    = "Error: Bad parameters";
             $c->stash->{template} = 'exception/get_list.tt';
+            $c->response->status(400);
         }
         else {
             $new_exception->insert;
-	    push @exception, id => $new_exception->id;
-            $c->stash->{content}   = { @exception };
-            $c->stash->{exception} = { @exception };
+            $exception->{id}       = $new_exception->id;
+            $c->stash->{content}   = $exception;
+            $c->stash->{exception} = $exception;
+            $c->stash->{template}  = 'exception/get_exception.tt';
             $c->response->status(201);
-            $c->stash->{template} = 'exception/get_exception.tt';
-
         }
     }
     else {
-        my @message = { message => "Error: Check if the booking exist", };
-        $c->stash->{content} = \@message;
-        $c->response->status(400);
+        $c->stash->{content}  = [ { message => "Error: Check if the booking exist" } ];
         $c->stash->{error}    = "Error: Check if the booking exist";
         $c->stash->{template} = 'exception/get_list.tt';
-
+        $c->response->status(400);
     }
 }
 
@@ -275,117 +199,77 @@ sub default_PUT {
     my $req = $c->request;
 
     my $id_booking = $req->parameters->{id_booking};
+    my $dtstart    = $req->parameters->{dtstart};
+    my $dtend      = $req->parameters->{dtend};
 
-    my $dtstart = $req->parameters->{dtstart};
-    my $dtend   = $req->parameters->{dtend};
-    my $duration;
+    # dtstart and dtend are parsed in case that some needed parameters
+    # to build the recurrence of the booking aren't provided
+    $dtstart     = ParseDate($dtstart);
+    $dtend       = ParseDate($dtend);
+    my $duration = $dtend - $dtstart;
 
-#dtstart and dtend are parsed in case that some needed parameters to build the recurrence of the
-#booking aren't provided
-    $dtstart = ParseDate($dtstart);
-    $dtend    = ParseDate($dtend);
-    $duration = $dtend - $dtstart;
-
-    my $freq     = $req->parameters->{freq} || 'yearly';
-    my $interval = $req->parameters->{interval} || 1;
-    my $until    = $req->parameters->{until} || $req->parameters->{dtend};
-
-    my $by_minute = $req->parameters->{by_minute} || $dtstart->minute;
-    my $by_hour   = $req->parameters->{by_hour}   || $dtstart->hour;
-
-    my $by_day = $req->parameters->{by_day};
-
-    my $by_month     = $req->parameters->{by_month};       #$dtstart->month;
+    my $freq         = $req->parameters->{freq}      || 'yearly';
+    my $interval     = $req->parameters->{interval}  || 1;
+    my $until        = $req->parameters->{until}     || $req->parameters->{dtend};
+    my $by_minute    = $req->parameters->{by_minute} || $dtstart->minute;
+    my $by_hour      = $req->parameters->{by_hour}   || $dtstart->hour;
+    my $by_day       = $req->parameters->{by_day};
+    my $by_month     = $req->parameters->{by_month};       # $dtstart->month;
     my $by_day_month = $req->parameters->{by_day_month};
 
-    my $exception_aux = $c->model('DB::TException')->find( { id => $id } );
+    my $found_exception = $c->model('DB::TException')->find( { id => $id } );
 
     # Duration is saved in minuntes in the DB in order to make it easier
     # to deal with it when the server builds the JSON objects.
     # Don't mess with the duration, the result can be weird.
-    $exception_aux->id_booking($id_booking);
-    $exception_aux->dtstart($dtstart);
-    $exception_aux->dtend($dtend);
-    $exception_aux->duration( $duration->in_units("minutes") );
-    $exception_aux->frequency($freq);
-    $exception_aux->interval($interval);
-    $exception_aux->until($until);
-    $exception_aux->by_minute($by_minute);
-    $exception_aux->by_hour($by_hour);
+    $found_exception->id_booking($id_booking);
+    $found_exception->dtstart($dtstart);
+    $found_exception->dtend($dtend);
+    $found_exception->duration( $duration->in_units("minutes") );
+    $found_exception->frequency($freq);
+    $found_exception->interval($interval);
+    $found_exception->until($until);
+    $found_exception->by_minute($by_minute);
+    $found_exception->by_hour($by_hour);
 
     if ( $freq eq 'weekly' || $freq eq 'yearly' ) {
-        $exception_aux->by_day($by_day);
+        $found_exception->by_day($by_day);
     }
 
     if ( $freq eq 'monthly' || $freq eq 'yearly' ) {
-        $exception_aux->by_month($by_month);
-        $exception_aux->by_day_month($by_day_month);
+        $found_exception->by_month($by_month);
+        $found_exception->by_day_month($by_day_month);
     }
 
-    my @exception = (
-        id         => $exception_aux->id,
-        id_booking => $exception_aux->id_booking,
-        dtstart    => $exception_aux->dtstart->iso8601(),
-        dtend      => $exception_aux->dtend->iso8601(),
-        until      => $exception_aux->until->iso8601(),
-        frequency  => $exception_aux->frequency,
-        interval   => $exception_aux->interval,
-        duration   => $exception_aux->duration,
-        by_minute  => $exception_aux->by_minute,
-        by_hour    => $exception_aux->by_hour,
-    );
+    my $exception = $found_exception->as_hash;
 
-    my %dispatch = (
-        daily => [
-        ],
-        weekly => [
-            by_day => $exception_aux->by_day,
-        ],
-        monthly => [
-            by_month     => $exception_aux->by_month,
-            by_day_month => $exception_aux->by_day_month,
-        ],
-        yearly => [
-            by_day       => $exception_aux->by_day,
-            by_month     => $exception_aux->by_month,
-            by_day_month => $exception_aux->by_day_month,
-        ],
-    );
-
-    push @exception, @{ $dispatch{$freq} };
-
-    $c->stash->{new_exception} = $exception_aux;
+    $c->stash->{new_exception} = $found_exception;
 
     $c->visit( '/check/check_exception', [] );
-    my @message;
     if ( $c->model('DB::TBooking')
-        ->find( { id => $exception_aux->id_booking } ) )
+        ->find( { id => $found_exception->id_booking } ) )
     {
 
         if ( $c->stash->{empty} == 1 ) {
-            @message = { message => "Bad Request", };
-            $c->response->status(400);
-            $c->stash->{content}  = \@message;
+            $c->stash->{content}  = [ { message => "Bad Request" } ];
             $c->stash->{error}    = "Error: Bad parameters";
             $c->stash->{template} = 'exception/get_list.tt';
+            $c->response->status(400);
         }
         else {
-            $exception_aux->update;
+            $found_exception->update;
 
-            $c->stash->{content} = { @exception };
-            $c->stash->{booking} = { @exception };
+            $c->stash->{content} = $exception;
+            $c->stash->{booking} = $exception;
             $c->response->status(201);
-            $c->forward( 'get_exception', [ $exception_aux->id ] );
-
+            $c->forward( 'get_exception', [ $found_exception->id ] );
         }
     }
     else {
-        my @message = { message => "Error: Check if the booking exist", };
-        $c->stash->{content} = \@message;
-        $c->response->status(400);
+        $c->stash->{content}  = [ { message => "Error: Check if the booking exist" } ];
         $c->stash->{error}    = "Error: Check if the booking exist";
         $c->stash->{template} = 'exception/get_list.tt';
-
+        $c->response->status(400);
     }
 }
 
@@ -393,21 +277,16 @@ sub default_DELETE {
     my ( $self, $c, $res, $id ) = @_;
     my $req = $c->request;
 
-    my $exception_aux = $c->model('DB::TException')->find( { id => $id } );
+    my $found_exception = $c->model('DB::TException')->find( { id => $id } );
 
-    if ($exception_aux) {
-        $exception_aux->delete;
-        my @message = { message => "Exception succesfully deleted" };
-        $c->stash->{content}  = \@message;
+    if ($found_exception) {
+        $found_exception->delete;
+        $c->stash->{content}  = [ { message => "Exception succesfully deleted" } ];
         $c->stash->{template} = 'exception/delete_ok.tt';
         $c->response->status(200);
     }
     else {
-        my @message
-            = { message =>
-                "We have not found the exception. Maybe it's already deleted"
-            };
-        $c->stash->{content}  = \@message;
+        $c->stash->{content}  = [ { message => "We have not found the exception. Maybe it's already deleted" } ];
         $c->stash->{template} = 'not_found.tt';
         $c->response->status(404);
     }

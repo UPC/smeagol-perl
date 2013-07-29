@@ -143,7 +143,7 @@ use DateTime::Duration;
 use DateTime::Span;
 use Date::ICal;
 
-sub hash_exception {
+sub as_hash {
     my ($self) = @_;
     my $until = Date::ICal->new(
         year   => $self->until->year,
@@ -168,31 +168,28 @@ sub hash_exception {
 
     my %dispatch = (
         daily => [
-            exrule => $self->exrule,
         ],
 
         weekly => [
             byday  => $self->by_day,
-            exrule => $self->exrule,
         ],
 
         monthly => [
             bymonth    => $self->by_month,
             bymonthday => $self->by_day_month,
-            exrule     => $self->exrule,
         ],
 
         yearly => [
+            byday      => $self->by_day,
             bymonth    => $self->by_month,
             bymonthday => $self->by_day_month,
-            exrule     => $self->exrule,
         ],
     );
 
     my $freq = exists $dispatch{ $self->frequency } ? $self->frequency : 'yearly';
-    push @exception, @{ $dispatch{$freq} };
+    push @exception, @{ $dispatch{$freq} }, exrule => $self->exrule;
 
-    return @exception;
+    return { @exception };
 }
 
 sub exrule {
@@ -207,38 +204,45 @@ sub exrule {
     );
 
     my %dispatch = (
-        daily => 'FREQ=DAILY;INTERVAL='
+        daily => sub {
+            'FREQ=DAILY;INTERVAL='
                 . uc( $self->interval )
                 . ';UNTIL='
-                . uc( $until->ical ),
-
-        weekly => 'FREQ=WEEKLY;INTERVAL='
+                . uc( $until->ical )
+        },
+        weekly => sub {
+            'FREQ=WEEKLY;INTERVAL='
                 . uc( $self->interval )
-                . '.;BYDAY='
+                . ';BYDAY='
                 . uc( $self->by_day )
                 . ';UNTIL='
-                . uc( $until->ical ),
-
-        monthly => 'FREQ=MONTHLY;INTERVAL='
+                . uc( $until->ical )
+        },
+        monthly => sub {
+            'FREQ=MONTHLY;INTERVAL='
                 . uc( $self->interval )
                 . ';BYMONTHDAY='
                 . $self->by_day_month
                 . ';UNTIL='
-                . uc( $until->ical ),
-
-        yearly => 'FREQ=YEARLY;INTERVAL='
+                . uc( $until->ical )
+        },
+        yearly => sub {
+            'FREQ=YEARLY;INTERVAL='
                 . uc( $self->interval )
+                . ';BYDAY='
+                . uc( $self->by_day )
                 . ';BYMONTH='
                 . $self->by_month
                 . ';BYMONTHDAY='
                 . $self->by_day_month
                 . ';UNTIL='
-                . uc( $until->ical ),
+                . uc( $until->ical )
+        },
     );
 
     my $freq = exists $dispatch { $self->frequency } ? $self->frequency : 'yearly';
 
-    return $dispatch{$freq};
+    return $dispatch{$freq}->();
 }
 
 # You can replace this text with custom content, and it will be preserved on regeneration

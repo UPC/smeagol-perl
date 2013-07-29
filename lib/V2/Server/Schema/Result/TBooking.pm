@@ -190,61 +190,46 @@ use DateTime;
 use DateTime::Duration;
 use DateTime::Span;
 
-sub hash_booking {
+sub as_hash {
     my ($self) = @_;
-    my @booking;
 
-    @booking = {
-	id              		=> $self->id,
-        info        			=> $self->info,
-        id_resource 		=> $self->id_resource->id,
-        id_event    		=> $self->id_event->id,
-        dtstart     		=> $self->dtstart->iso8601(),
-        dtend       		=> $self->dtend->iso8601(),
-        duration    		=> $self->duration,
-        until      			=> $self->until->iso8601(),
-        frequency   		=> $self->frequency,
-        interval    		=> $self->interval,
-        by_minute   		=> $self->by_minute,
-        by_hour      		=> $self->by_hour,
-	by_day       		=> $self->by_day,
-        by_month   		=> $self->by_month,
-        by_day_month  	=> $self->by_day_month,
-        #exrule_list => $self->exrule_list
+    my $booking = {
+        id           => $self->id,
+        info         => $self->info,
+        id_resource  => $self->id_resource->id,
+        id_event     => $self->id_event->id,
+        dtstart      => $self->dtstart->iso8601(),
+        dtend        => $self->dtend->iso8601(),
+        duration     => $self->duration,
+        until        => $self->until->iso8601(),
+        frequency    => $self->frequency,
+        interval     => $self->interval,
+        by_minute    => $self->by_minute,
+        by_hour      => $self->by_hour,
+        by_day       => $self->by_day,
+        by_month     => $self->by_month,
+        by_day_month => $self->by_day_month,
+        # exrule_list => $self->exrule_list
     };
 
-    return @booking;
+    return $booking;
 }
 
 sub tag_list {
      my ($self) = @_;
      
-     my @tags;
-     my $tag;
+     my @tags = map { { id => $_->id_tag->id } } $self->tag_bookings;
      
-     foreach my $tag ( $self->tag_bookings ) {
-	  $tag = { id => $tag->id_tag->id };
-	  push( @tags, $tag );
-     }
-     
-         return ( \@tags );
+     return \@tags;
 }
 
 
 sub exrule_list {
     my ($self) = @_;
 
-    my @exception;
-    my @exceptions;
+    my @exceptions = map { { exrule => $_->exrule } } $self->t_exceptions;
 
-    foreach my $exception ( $self->t_exceptions ) {
-        @exception = { exrule => $exception->exrule };
-
-        push( @exceptions, @exception );
-    }
-
-    return ( \@exceptions );
+    return \@exceptions;
 }
 
-# You can replace this text with custom content, and it will be preserved on regeneration
 1;

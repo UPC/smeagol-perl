@@ -333,7 +333,6 @@ sub build_recur : Private {
 
     my $set = $c->stash->{set};
 
-    my $recur;
     my @byday;
     my @bymonth;
     my @bymonthday;
@@ -344,63 +343,40 @@ sub build_recur : Private {
         @bymonthday = split( ',', $set->by_day_month );
     }
 
-    no warnings 'experimental::smartmatch';
-    given ( $set->frequency ) {
-        when ('daily') {
-            $recur = DateTime::Event::ICal->recur(
-                dtstart  => $set->dtstart,
-                until    => $set->until,
-                freq     => 'daily',
-                interval => $set->interval,
-                byminute => $set->by_minute,
-                byhour   => $set->by_hour,
-            );
-        }
+    my @recur =  (
+        dtstart  => $set->dtstart,
+        until    => $set->until,
+        interval => $set->interval,
+        byminute => $set->by_minute,
+        byhour   => $set->by_hour,
+    );
 
-        when ('weekly') {
-            @byday = split( ',', $set->by_day );
-            $recur = DateTime::Event::ICal->recur(
-                dtstart  => $set->dtstart,
-                until    => $set->until,
+    my %dispatch = (
+        daily => [
+            freq => 'daily',
+        ],
+
+        weekly => [
                 freq     => 'weekly',
-                interval => $set->interval,
-                byminute => $set->by_minute,
-                byhour   => $set->by_hour,
                 byday    => \@byday,
-            );
-        }
+        ],
 
-        when ('monthly') {
-            @bymonthday = split( ',', $set->by_day_month );
-
-            $recur = DateTime::Event::ICal->recur(
-                dtstart    => $set->dtstart,
-                until      => $set->until,
+        monthly => [
                 freq       => 'monthly',
-                interval   => $set->interval,
-                byminute   => $set->by_minute,
-                byhour     => $set->by_hour,
-                bymonthday => \@bymonthday
-            );
-        }
+                bymonthday => \@bymonthday,
+        ],
 
-        default {
-            @bymonth    = split( ',', $set->by_month );
-            @bymonthday = split( ',', $set->by_day_month );
-
-            $recur = DateTime::Event::ICal->recur(
-                dtstart    => $set->dtstart,
-                until      => $set->until,
+        yearly => [
                 freq       => 'yearly',
-                interval   => $set->interval,
-                byminute   => $set->by_minute,
-                byhour     => $set->by_hour,
                 bymonth    => \@bymonth,
-                bymonthday => \@bymonthday
-            );
-        }
-    };
+                bymonthday => \@bymonthday,
+        ],
+    );
 
+    my $freq = exists $dispatch{ $set->frequency } ? $set->frequency : 'yearly';
+    push @recur, @{ $dispatch{$freq} };
+
+    my $recur = DateTime::Event::ICal->recur(@recur);
     return $recur;
 }
 

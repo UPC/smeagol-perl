@@ -20,8 +20,14 @@ use Catalyst qw/
 
 extends 'Catalyst';
 
+our $NAME    = 'Smeagol Server';
 our $VERSION = '2.10';
 $VERSION = eval $VERSION;
+
+our $DETAILS = {
+    application => $NAME,
+    version     => $VERSION,
+};
 
 # Configure the application.
 #

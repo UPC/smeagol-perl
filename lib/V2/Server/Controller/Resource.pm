@@ -5,7 +5,6 @@ use namespace::autoclean;
 
 use Encode qw(encode decode);
 my $enc     = 'utf-8';
-my $VERSION = $V2::Server::VERSION;
 BEGIN { extends 'Catalyst::Controller::REST' }
 
 =head1 NAME
@@ -367,7 +366,7 @@ sub end : Private {
     my ( $self, $c ) = @_;
 
     if ( $c->stash->{format} ne "application/json" ) {
-        $c->stash->{VERSION} = $VERSION;
+        $c->stash->{VERSION} = $V2::Server::VERSION;
         $c->forward( $c->view('HTML') );
     }
     else {

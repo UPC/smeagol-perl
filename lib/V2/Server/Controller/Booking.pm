@@ -14,7 +14,6 @@ use Data::ICal::Entry::Event;
 
 use JSON::Any;
 
-my $VERSION = $V2::Server::VERSION;
 BEGIN { extends 'Catalyst::Controller::REST' }
 
 =head1 NAME
@@ -664,7 +663,7 @@ sub end : Private {
     }
     else {
         $c->res->content_type("text/html");
-        $c->stash->{VERSION} = $VERSION;
+        $c->stash->{VERSION} = $V2::Server::VERSION;
         $c->forward( $c->view('HTML') );
     }
 }
@@ -679,8 +678,8 @@ sub ical : Private {
     my $filename = "agenda_resource_" . $c->stash->{id_resource} . ".ics";
     my $calendar = Data::ICal->new();
 
-    $calendar->add_property( prodid => "//UPC//Smeagol Server//EN" );
-    $calendar->add_property( version => "2.0" );
+    $calendar->add_property( prodid => "//UPC//$V2::Server::NAME//EN" );
+    $calendar->add_property( version => $V2::Server::VERSION );
 
     my @found_bookings = $c->model('DB::TBooking')->search( { id_resource => $c->stash->{id_resource} } );
     my @booking_list   = map { $_->as_hash } @found_bookings;
@@ -753,8 +752,8 @@ sub ical_event : Private {
     my $filename = "agenda_event_" . $c->stash->{id_event} . ".ics";
     my $calendar = Data::ICal->new();
 
-    $calendar->add_property( prodid => "//UPC//Smeagol Server//EN" );
-    $calendar->add_property( version => "2.0" );
+    $calendar->add_property( prodid => "//UPC//$V2::Server::NAME//EN" );
+    $calendar->add_property( version => $V2::Server::VERSION );
 
     my @found_bookings = $c->model('DB::TBooking')->search( { id_event => $c->stash->{id_event} } );
     my @booking_list   = map { $_->as_hash } @found_bookings;

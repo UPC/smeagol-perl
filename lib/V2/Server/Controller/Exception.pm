@@ -247,7 +247,7 @@ sub default_PUT {
 
     $c->visit( '/check/check_exception', [] );
     if ( $c->model('DB::TBooking')
-        ->find( { id => $found_exception->id_booking } ) )
+        ->find( { id => $found_exception->id_booking->id } ) )
     {
 
         if ( $c->stash->{empty} == 1 ) {

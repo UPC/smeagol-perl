@@ -47,10 +47,8 @@ lib/V2/Server/Controller/Check.pm
 lib/V2/Server/Controller/Event.pm
 lib/V2/Server/Controller/Exception.pm
 lib/V2/Server/Controller/Resource.pm
-lib/V2/Server/Controller/ResourceTag.pm
 lib/V2/Server/Controller/Root.pm
 lib/V2/Server/Controller/Tag.pm
-lib/V2/Server/Controller/TagEvent.pm
 lib/V2/Server/Model/DB.pm
 lib/V2/Server/Obj/Resource.pm
 lib/V2/Server/Obj/Tag.pm
@@ -147,6 +145,7 @@ t/controller_Booking.t
 t/controller_Event.t
 t/controller_Exception.t
 t/controller_Resource.t
+t/controller_Root.t
 t/controller_Tag.t
 t/lib/HTTP/Request/Common/Bug65843.pm
 t/model_DB.t

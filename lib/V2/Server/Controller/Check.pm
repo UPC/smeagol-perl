@@ -12,26 +12,16 @@ use DateTime::Event::ICal;
 
 BEGIN { extends 'Catalyst::Controller::REST' }
 
-=head2 check_name check_desc check_info
-This function are used to verify that the parameter name has a lenght within 
-the correct length range.
+=head2 check_desc check_info
+
+This function are used to verify that the parameter name has a length
+within the correct length range.
+
 =cut
-
-sub check_name : Local {
-    my ( $self, $c, $name ) = @_;
-
-    if ( length($name) < 64 && length($name) > 3 ) {
-        $c->stash->{name_ok} = 1;
-    }
-    else {
-        $c->stash->{name_ok} = 0;
-    }
-
-}
 
 #
 # FIXME: Caldria refactoritzar les funcions
-#        check_desc, check_desc_tag i check_desc_resource
+#        check_desc i check_desc_resource
 #
 sub check_desc : Local {
     my ( $self, $c, $desc ) = @_;
@@ -43,17 +33,6 @@ sub check_desc : Local {
     }
 
     if ( length($desc) <= 128 ) {
-        $c->stash->{desc_ok} = 1;
-    }
-    else {
-        $c->stash->{desc_ok} = 0;
-    }
-}
-
-sub check_desc_tag : Local {
-    my ( $self, $c, $desc ) = @_;
-
-    if ( length($desc) < 256 ) {
         $c->stash->{desc_ok} = 1;
     }
     else {

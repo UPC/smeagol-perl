@@ -3,10 +3,12 @@ use warnings;
 
 use Test::More;
 use Data::Dumper;
-use HTTP::Request::Common qw/GET POST PUT DELETE/;
 use JSON::Any;
 use DateTime;
 use DateTime::Duration;
+
+use lib 't/lib';
+use HTTP::Request::Common::Bug65843 qw/GET POST PUT DELETE/;
 
 BEGIN { require 't/TestingDB.pl' }
 BEGIN { use_ok 'Catalyst::Test', 'V2::Server' }
@@ -124,6 +126,20 @@ ok( $response_post = request POST '/exception',
 );
 
 ok( $exception_aux = $j->jsonToObj( $response_post->content ) );
+ok( $response = request GET '/exception/' . $exception_aux->{id}, [] );
+is( $response->headers->{status}, '200', 'Response status is 200: OK' );
+
+ok( my $response_put = request PUT '/exception/' . $exception_aux->{id}, [
+    id_booking   => 1,
+    dtstart      => $dtstart,
+    dtend        => $dtend,
+    freq         => 'monthly',
+    interval     => 1,
+    until        => $dtend->clone->add( months => 5 ),
+    by_day_month => $dtstart->day
+]);
+is( $response->headers->{status}, '200', 'Response status is 200: OK' );
+
 $request_DELETE = DELETE( 'exception/' . $exception_aux->{id} );
 $request_DELETE->header( Accept => 'application/json' );
 ok( $response_DELETE = request($request_DELETE), 'Delete request' );

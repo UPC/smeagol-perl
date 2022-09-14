@@ -90,7 +90,6 @@ root/static/images/vcss-blue.gif
 root/static/js/ajax_activity.js
 root/static/js/complete.js
 root/static/js/delete.js
-root/static/js/jquery.min.js
 root/static/js/sort.js
 root/static/js/update.js
 root/templates/bad_request.tt
